@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 
 import data.DAXBlock;
 import data.DAXFile;
@@ -40,10 +41,8 @@ public class Extract {
 		File outDir = new File(f.getParentFile(), "RAW");
 		outDir.mkdirs();
 
-		for (DAXBlock<DAXByteBuffer> b : df) {
-			int id = b.getId() & 0xFF;
-
-			ByteBuffer buf = b.getObject().getData();
+		for (Integer id : df.getIds()) {
+			ByteBuffer buf = df.getById(id).getData();
 			buf.rewind();
 
 			File outFile = new File(outDir, f.getName() + "." + id);

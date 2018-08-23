@@ -5,21 +5,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Spliterator;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import data.content.DAXContent;
 
-public class DAXFile<T extends DAXContent> implements Iterable<DAXBlock<T>> {
-	private List<DAXBlock<T>> objects;
+public class DAXFile<T extends DAXContent> {
+	private Map<Integer, DAXBlock<T>> objects;
 
-	public DAXFile(List<DAXBlock<T>> objects) {
+	public DAXFile(Map<Integer, DAXBlock<T>> objects) {
 		this.objects = objects;
 	}
 
@@ -38,11 +34,11 @@ public class DAXFile<T extends DAXContent> implements Iterable<DAXBlock<T>> {
 		short byteCount = file.getShort(0);
 		int headerCount = byteCount / 9;
 
-		List<DAXBlock<T>> objects = new ArrayList<>();
+		Map<Integer, DAXBlock<T>> objects = new LinkedHashMap<>();
 
 		for (int i = 0; i < headerCount; i++) {
 			int headerStart = 2 + (i * 9);
-			byte id = file.get(headerStart);
+			int id = file.get(headerStart) & 0xFF;
 			int offset = file.getInt(headerStart + 1);
 			int sizeRaw = file.getShort(headerStart + 5) & 0xFFFF;
 			int sizeCmp = file.getShort(headerStart + 7) & 0xFFFF;
@@ -56,81 +52,20 @@ public class DAXFile<T extends DAXContent> implements Iterable<DAXBlock<T>> {
 
 			try {
 				T object = clazz.getConstructor(ByteBuffer.class).newInstance(data);
-				objects.add(new DAXBlock<T>(id, object));
+				objects.put(id, new DAXBlock<T>(id, object));
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				e.printStackTrace(System.err);
 			}
 		}
-		return new DAXFile<>(objects);
+		return new DAXFile<>(Collections.unmodifiableMap(objects));
 	}
 
-	public boolean contains(Object o) {
-		return objects.contains(o);
+	public T getById(int id) {
+		return objects.get(id).getObject();
 	}
 
-	public boolean containsAll(Collection<?> c) {
-		return objects.containsAll(c);
+	public Set<Integer> getIds() {
+		return objects.keySet();
 	}
-
-	public void forEach(Consumer<? super DAXBlock<T>> action) {
-		objects.forEach(action);
-	}
-
-	public DAXBlock<T> get(int index) {
-		return objects.get(index);
-	}
-
-	public int indexOf(Object o) {
-		return objects.indexOf(o);
-	}
-
-	public boolean isEmpty() {
-		return objects.isEmpty();
-	}
-
-	public Iterator<DAXBlock<T>> iterator() {
-		return objects.iterator();
-	}
-
-	public int lastIndexOf(Object o) {
-		return objects.lastIndexOf(o);
-	}
-
-	public ListIterator<DAXBlock<T>> listIterator() {
-		return objects.listIterator();
-	}
-
-	public ListIterator<DAXBlock<T>> listIterator(int index) {
-		return objects.listIterator(index);
-	}
-
-	public Stream<DAXBlock<T>> parallelStream() {
-		return objects.parallelStream();
-	}
-
-	public int size() {
-		return objects.size();
-	}
-
-	public Spliterator<DAXBlock<T>> spliterator() {
-		return objects.spliterator();
-	}
-
-	public Stream<DAXBlock<T>> stream() {
-		return objects.stream();
-	}
-
-	public List<DAXBlock<T>> subList(int fromIndex, int toIndex) {
-		return objects.subList(fromIndex, toIndex);
-	}
-
-	public Object[] toArray() {
-		return objects.toArray();
-	}
-
-	public <T> T[] toArray(T[] a) {
-		return objects.toArray(a);
-	}
-
 }
