@@ -2,9 +2,13 @@ package engine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import data.content.EclProgram;
 import engine.opcodes.EclArgument;
@@ -15,7 +19,11 @@ public class VirtualMachine {
 
 	private final Map<EclOpCode, Consumer<EclArgument[]>> IMPL = new EnumMap<>(EclOpCode.class);
 
-	private boolean stopped = true;
+	private ByteBuffer mem;
+	private Deque<Integer> gosubStack;
+	private int compareResult;
+
+	private boolean stopped;
 
 	private int eclCodeBaseAddress;
 	private ByteBuffer eclCode;
@@ -26,6 +34,10 @@ public class VirtualMachine {
 	private EclInstruction onInit;
 
 	public VirtualMachine() {
+		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
+		gosubStack = new ConcurrentLinkedDeque<>();
+		compareResult = 0;
+		stopped = true;
 		initImpl();
 	}
 
@@ -54,37 +66,37 @@ public class VirtualMachine {
 
 	public void startAddress1() {
 		stopped = false;
-		exec(onEvent1);
+		exec(onEvent1, true);
 		runVM();
 	}
 
 	public void startSearchLocation() {
 		stopped = false;
-		exec(onEnter);
+		exec(onEnter, true);
 		runVM();
 	}
 
 	public void startPreCampCheck() {
 		stopped = false;
-		exec(onRest);
+		exec(onRest, true);
 		runVM();
 	}
 
 	public void startCampInterrupted() {
 		stopped = false;
-		exec(onRestInterruption);
+		exec(onRestInterruption, true);
 		runVM();
 	}
 
 	public void startInitial() {
 		stopped = false;
-		exec(onInit);
+		exec(onInit, true);
 		runVM();
 	}
 
 	private void runVM() {
 		while (!stopped) {
-			exec(EclInstruction.parseNext(eclCode));
+			exec(EclInstruction.parseNext(eclCode), true);
 		}
 	}
 
@@ -92,9 +104,38 @@ public class VirtualMachine {
 		stopped = true;
 	}
 
-	private void exec(EclInstruction in) {
-		System.out.println(in.toString());
-		IMPL.get(in.getOpCode()).accept(in.getArguments());
+	private void exec(EclInstruction in, boolean execute) {
+		System.out.println(Integer.toHexString(eclCodeBaseAddress + in.getPosition()).toUpperCase() + ":"
+				+ in.toString() + (execute ? "" : " (SKIPPED)"));
+		if (execute) {
+			IMPL.get(in.getOpCode()).accept(in.getArguments());
+		}
+	}
+
+	private int readMemInt(EclArgument a) {
+		if (!a.isMemAddress()) {
+			return 0;
+		}
+		return a.isShortValue() ? mem.getShort(a.valueAsInt()) : mem.get(a.valueAsInt());
+	}
+
+	private void writeMemInt(EclArgument a, int value) {
+		if (!a.isMemAddress()) {
+			return;
+		}
+		if (a.isShortValue()) {
+			mem.putShort(a.valueAsInt(), (short) value);
+		} else {
+			mem.put(a.valueAsInt(), (byte) value);
+		}
+	}
+
+	private String readMemString(EclArgument a) {
+		return "";
+	}
+
+	private void writeMemString(EclArgument a, String value) {
+
 	}
 
 	private void initImpl() {
@@ -106,11 +147,19 @@ public class VirtualMachine {
 			eclCode.position(args[0].valueAsInt() - eclCodeBaseAddress);
 		});
 		IMPL.put(EclOpCode.GOSUB, args -> {
-			eclCode.mark();
+			gosubStack.push(eclCode.position());
 			eclCode.position(args[0].valueAsInt() - eclCodeBaseAddress);
 		});
 		IMPL.put(EclOpCode.COMPARE, args -> {
-
+			if (args[0].isStringValue() && args[1].isStringValue()) {
+				String s1 = args[0].isMemAddress() ? readMemString(args[0]) : args[0].valueAsString();
+				String s2 = args[1].isMemAddress() ? readMemString(args[1]) : args[1].valueAsString();
+				compareResult = s2.compareTo(s1);
+			} else if (args[0].isNumberValue() && args[1].isNumberValue()) {
+				int i1 = args[0].isMemAddress() ? readMemInt(args[0]) : args[0].valueAsInt();
+				int i2 = args[1].isMemAddress() ? readMemInt(args[1]) : args[1].valueAsInt();
+				compareResult = i2 - i1;
+			}
 		});
 		IMPL.put(EclOpCode.ADD, args -> {
 
@@ -158,7 +207,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.RETURN, args -> {
-			eclCode.reset();
+			eclCode.position(gosubStack.pop());
 		});
 		IMPL.put(EclOpCode.COMPARE_AND, args -> {
 
@@ -167,22 +216,28 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.IF_EQUALS, args -> {
-
+			EclInstruction inst = EclInstruction.parseNext(eclCode);
+			exec(inst, compareResult == 0);
 		});
 		IMPL.put(EclOpCode.IF_NOT_EQUALS, args -> {
-
+			EclInstruction inst = EclInstruction.parseNext(eclCode);
+			exec(inst, compareResult != 0);
 		});
 		IMPL.put(EclOpCode.IF_LESS, args -> {
-
+			EclInstruction inst = EclInstruction.parseNext(eclCode);
+			exec(inst, compareResult < 0);
 		});
 		IMPL.put(EclOpCode.IF_GREATER, args -> {
-
+			EclInstruction inst = EclInstruction.parseNext(eclCode);
+			exec(inst, compareResult > 0);
 		});
 		IMPL.put(EclOpCode.IF_LESS_EQUALS, args -> {
-
+			EclInstruction inst = EclInstruction.parseNext(eclCode);
+			exec(inst, compareResult <= 0);
 		});
 		IMPL.put(EclOpCode.IF_GREATER_EQUALS, args -> {
-
+			EclInstruction inst = EclInstruction.parseNext(eclCode);
+			exec(inst, compareResult >= 0);
 		});
 		IMPL.put(EclOpCode.CLEAR_MON, args -> {
 
@@ -212,7 +267,12 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.ON_GOTO, args -> {
-
+			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
+			for (int i = 0; i < args[1].valueAsInt(); i++) {
+				dynArgs[i] = EclArgument.parseNext(eclCode);
+			}
+			System.out.println(String.join(", ",
+					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 		});
 		IMPL.put(EclOpCode.ON_GOSUB, args -> {
 
@@ -293,6 +353,21 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.DESTROY_ITEM, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_42, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_43, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_46, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_47, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_4C, args -> {
 
 		});
 	}

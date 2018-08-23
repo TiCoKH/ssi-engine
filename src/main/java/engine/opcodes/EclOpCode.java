@@ -38,11 +38,11 @@ public enum EclOpCode {
 	PARTY_SURPRISE(0x22, 2, "PARTY SURPRISE"), //
 	SURPRISE(0x23, 4, "SURPRISE"), //
 	COMBAT(0x24, 0, "COMBAT"), //
-	ON_GOTO(0x25, 0, "ON GOTO"), //
-	ON_GOSUB(0x26, 0, "ON GOSUB"), //
+	ON_GOTO(0x25, 2, "ON GOTO"), //
+	ON_GOSUB(0x26, 2, "ON GOSUB"), //
 	TREASURE(0x27, 8, "TREASURE"), //
 	ROB(0x28, 3, "ROB"), //
-	MENU_ENCOUNTER(0x29, 14, "ENCOUNTER MENU"), //
+	MENU_ENCOUNTER(0x29, 0, "ENCOUNTER MENU"), // TODO: Game specific
 	TABLE_GET(0x2A, 3, "GETTABLE"), //
 	MENU_HORIZONTAL(0x2B, 0, "HORIZONTAL MENU"), //
 	PARLAY(0x2C, 6, "PARLAY"), //
@@ -65,7 +65,12 @@ public enum EclOpCode {
 	CLEAR_BOX(0x3D, 0, "CLEAR BOX"), //
 	DUMP(0x3E, 0, "DUMP"), //
 	FIND_SPECIAL(0x3F, 1, "FIND SPECIAL"), //
-	DESTROY_ITEM(0x40, 1, "DESTROY ITEMS");
+	DESTROY_ITEM(0x40, 1, "DESTROY ITEMS"), //
+	UNKNOWN_42(0x42, 1, "42"), //
+	UNKNOWN_43(0x43, 1, "43"), //
+	UNKNOWN_46(0x46, 2, "46"), //
+	UNKNOWN_47(0x47, 0, "47"), //
+	UNKNOWN_4C(0x4C, 2, "4C");
 
 	private int id;
 	private int argCount;

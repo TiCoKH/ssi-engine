@@ -18,8 +18,17 @@ public class VirtualMachineTest {
 		FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ);
 		DAXFile<EclProgram> ecls = DAXFile.createFrom(c, EclProgram.class);
 		VirtualMachine vm = new VirtualMachine();
-		vm.newEcl(ecls.get(0).getObject());
+		vm.newEcl(ecls.getById(16));
+		System.out.println("Initial:");
 		vm.startInitial();
+		System.out.println("Address:");
+		vm.startAddress1();
+		System.out.println("Search:");
+		vm.startSearchLocation();
+		System.out.println("PreCamp:");
+		vm.startPreCampCheck();
+		System.out.println("CampInterrupt:");
+		vm.startCampInterrupted();
 	}
 
 }

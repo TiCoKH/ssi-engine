@@ -24,7 +24,7 @@ public class VGAImage extends DAXImageContent {
 		Color[] color = DAXPalette.createGamePalette(data, 10, colorCount, colorBase);
 
 		for (int i = 0; i < imageCount; i++, imageOffset += imageSize) {
-			BufferedImage image= new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
 					int c = data.get(imageOffset + (y * width) + x) & 0xFF;
