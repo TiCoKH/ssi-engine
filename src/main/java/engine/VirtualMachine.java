@@ -112,6 +112,14 @@ public class VirtualMachine {
 		}
 	}
 
+	private void goTo(EclArgument a) {
+		if (a.isMemAddress()) {
+			eclCode.position(a.valueAsInt() - eclCodeBaseAddress);
+		} else {
+			System.err.println("GOTO " + a.toString());
+		}
+	}
+
 	private int readMemInt(EclArgument a) {
 		if (!a.isMemAddress()) {
 			return 0;
@@ -138,46 +146,56 @@ public class VirtualMachine {
 
 	}
 
+	private int intValue(EclArgument a) {
+		if (!a.isNumberValue()) {
+			return 0;
+		}
+		return a.isMemAddress() ? readMemInt(a) : a.valueAsInt();
+	}
+
+	private String stringValue(EclArgument a) {
+		if (!a.isStringValue()) {
+			return "";
+		}
+		return a.isMemAddress() ? readMemString(a) : a.valueAsString();
+	}
+
 	private void initImpl() {
 		IMPL.clear();
 		IMPL.put(EclOpCode.EXIT, args -> {
 			stopVM();
 		});
 		IMPL.put(EclOpCode.GOTO, args -> {
-			eclCode.position(args[0].valueAsInt() - eclCodeBaseAddress);
+			goTo(args[0]);
 		});
 		IMPL.put(EclOpCode.GOSUB, args -> {
 			gosubStack.push(eclCode.position());
-			eclCode.position(args[0].valueAsInt() - eclCodeBaseAddress);
+			goTo(args[0]);
 		});
 		IMPL.put(EclOpCode.COMPARE, args -> {
 			if (args[0].isStringValue() && args[1].isStringValue()) {
-				String s1 = args[0].isMemAddress() ? readMemString(args[0]) : args[0].valueAsString();
-				String s2 = args[1].isMemAddress() ? readMemString(args[1]) : args[1].valueAsString();
-				compareResult = s2.compareTo(s1);
+				compareResult = stringValue(args[1]).compareTo(stringValue(args[0]));
 			} else if (args[0].isNumberValue() && args[1].isNumberValue()) {
-				int i1 = args[0].isMemAddress() ? readMemInt(args[0]) : args[0].valueAsInt();
-				int i2 = args[1].isMemAddress() ? readMemInt(args[1]) : args[1].valueAsInt();
-				compareResult = i2 - i1;
+				compareResult = intValue(args[1]) - intValue(args[0]);
 			}
 		});
 		IMPL.put(EclOpCode.ADD, args -> {
-
+			writeMemInt(args[2], intValue(args[0]) + intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.SUBTRACT, args -> {
-
+			writeMemInt(args[2], intValue(args[1]) - intValue(args[0]));
 		});
 		IMPL.put(EclOpCode.DIVIDE, args -> {
-
+			writeMemInt(args[2], intValue(args[0]) / intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.MULTIPLY, args -> {
-
+			writeMemInt(args[2], intValue(args[0]) * intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.RANDOM, args -> {
 
 		});
-		IMPL.put(EclOpCode.SAVE, args -> {
-
+		IMPL.put(EclOpCode.WRITE_MEM, args -> {
+			writeMemInt(args[1], intValue(args[0]));
 		});
 		IMPL.put(EclOpCode.LOAD_CHAR, args -> {
 
@@ -210,7 +228,7 @@ public class VirtualMachine {
 			eclCode.position(gosubStack.pop());
 		});
 		IMPL.put(EclOpCode.COMPARE_AND, args -> {
-
+			compareResult = (intValue(args[0]) == intValue(args[1]) && intValue(args[2]) == intValue(args[3])) ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.MENU_VERTICAL, args -> {
 
@@ -267,15 +285,31 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.ON_GOTO, args -> {
-			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
-			for (int i = 0; i < args[1].valueAsInt(); i++) {
+			EclArgument[] dynArgs = new EclArgument[intValue(args[1])];
+			for (int i = 0; i < dynArgs.length; i++) {
 				dynArgs[i] = EclArgument.parseNext(eclCode);
 			}
 			System.out.println(String.join(", ",
 					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			if (intValue(args[0]) >= intValue(args[1]) || intValue(args[0]) < 0) {
+				System.err.println("ON GOTO value=" + intValue(args[0]));
+				return;
+			}
+			goTo(dynArgs[intValue(args[0])]);
 		});
 		IMPL.put(EclOpCode.ON_GOSUB, args -> {
-
+			EclArgument[] dynArgs = new EclArgument[intValue(args[1])];
+			for (int i = 0; i < dynArgs.length; i++) {
+				dynArgs[i] = EclArgument.parseNext(eclCode);
+			}
+			System.out.println(String.join(", ",
+					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			if (intValue(args[0]) >= intValue(args[1]) || intValue(args[0]) < 0) {
+				System.err.println("ON GOSUB value=" + intValue(args[0]));
+				return;
+			}
+			gosubStack.push(eclCode.position());
+			goTo(dynArgs[intValue(args[0])]);
 		});
 		IMPL.put(EclOpCode.TREASURE, args -> {
 
@@ -290,7 +324,12 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, args -> {
-
+			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
+			for (int i = 0; i < args[1].valueAsInt(); i++) {
+				dynArgs[i] = EclArgument.parseNext(eclCode);
+			}
+			System.out.println(String.join(", ",
+					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 		});
 		IMPL.put(EclOpCode.PARLAY, args -> {
 
@@ -308,7 +347,12 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.SPRITE_OFF, args -> {
-
+			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
+			for (int i = 0; i < args[1].valueAsInt(); i++) {
+				dynArgs[i] = EclArgument.parseNext(eclCode);
+			}
+			System.out.println(String.join(", ",
+					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, args -> {
 

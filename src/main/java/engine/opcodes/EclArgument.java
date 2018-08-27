@@ -21,6 +21,7 @@ public class EclArgument {
 		case 1:
 		case 2:
 		case 3:
+		case 5:
 		case 0x81: // string from memory address
 		{
 			int value = eclBlock.getShort() & 0xFFFF;

@@ -10,7 +10,7 @@ public enum EclOpCode {
 	DIVIDE(0x06, 3, "DIVIDE"), //
 	MULTIPLY(0x07, 3, "MULTIPLY"), //
 	RANDOM(0x08, 2, "RANDOM"), //
-	SAVE(0x09, 2, "SAVE"), //
+	WRITE_MEM(0x09, 2, "WRITE MEMORY"), //
 	LOAD_CHAR(0x0A, 1, "LOAD CHARACTER"), //
 	LOAD_MON(0x0B, 3, "LOAD MONSTER"), //
 	SETUP_MON(0x0C, 3, "SETUP MONSTER"), //
@@ -35,7 +35,7 @@ public enum EclOpCode {
 	UNKNOWN_1F(0x1F, 2, "notsure 0x1f"), //
 	NEW_ECL(0x20, 1, "NEWECL"), //
 	LOAD_FILES(0x21, 3, "LOAD FILES"), //
-	PARTY_SURPRISE(0x22, 2, "PARTY SURPRISE"), //
+	PARTY_SURPRISE(0x22, 3, "PARTY SURPRISE"), // TODO: Game specific
 	SURPRISE(0x23, 4, "SURPRISE"), //
 	COMBAT(0x24, 0, "COMBAT"), //
 	ON_GOTO(0x25, 2, "ON GOTO"), //
@@ -44,13 +44,13 @@ public enum EclOpCode {
 	ROB(0x28, 3, "ROB"), //
 	MENU_ENCOUNTER(0x29, 0, "ENCOUNTER MENU"), // TODO: Game specific
 	TABLE_GET(0x2A, 3, "GETTABLE"), //
-	MENU_HORIZONTAL(0x2B, 0, "HORIZONTAL MENU"), //
-	PARLAY(0x2C, 6, "PARLAY"), //
+	MENU_HORIZONTAL(0x2B, 2, "HORIZONTAL MENU"), //
+	PARLAY(0x2C, 0, "PARLAY"), // TODO: Game specific
 	CALL(0x2D, 1, "CALL"), //
 	DAMAGE(0x2E, 5, "DAMAGE"), //
 	AND(0x2F, 3, "AND"), //
 	OR(0x30, 3, "OR"), //
-	SPRITE_OFF(0x31, 0, "SPRITE OFF"), //
+	SPRITE_OFF(0x31, 2, "SPRITE OFF"), // TODO: Game specific
 	FIND_ITEM(0x32, 1, "FIND ITEM"), //
 	PRINT_RETURN(0x33, 0, "PRINT RETURN"), //
 	CLOCK(0x34, 2, "ECL CLOCK"), //
@@ -66,7 +66,7 @@ public enum EclOpCode {
 	DUMP(0x3E, 0, "DUMP"), //
 	FIND_SPECIAL(0x3F, 1, "FIND SPECIAL"), //
 	DESTROY_ITEM(0x40, 1, "DESTROY ITEMS"), //
-	UNKNOWN_42(0x42, 1, "42"), //
+	UNKNOWN_42(0x42, 0, "42"), //
 	UNKNOWN_43(0x43, 1, "43"), //
 	UNKNOWN_46(0x46, 2, "46"), //
 	UNKNOWN_47(0x47, 0, "47"), //
