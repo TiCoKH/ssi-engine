@@ -12,14 +12,14 @@ import java.util.Set;
 
 import data.content.DAXContent;
 
-public class DAXFile<T extends DAXContent> {
-	private Map<Integer, DAXBlock<T>> objects;
+public class DAXFile {
+	private Map<Integer, DAXBlock> blocks;
 
-	public DAXFile(Map<Integer, DAXBlock<T>> objects) {
-		this.objects = objects;
+	private DAXFile(Map<Integer, DAXBlock> blocks) {
+		this.blocks = blocks;
 	}
 
-	public static <T extends DAXContent> DAXFile<T> createFrom(FileChannel c, Class<T> clazz) throws IOException {
+	public static DAXFile createFrom(FileChannel c) throws IOException {
 		if (!c.isOpen()) {
 			return null;
 		}
@@ -34,7 +34,7 @@ public class DAXFile<T extends DAXContent> {
 		short byteCount = file.getShort(0);
 		int headerCount = byteCount / 9;
 
-		Map<Integer, DAXBlock<T>> objects = new LinkedHashMap<>();
+		Map<Integer, DAXBlock> blocks = new LinkedHashMap<>();
 
 		for (int i = 0; i < headerCount; i++) {
 			int headerStart = 2 + (i * 9);
@@ -48,24 +48,29 @@ public class DAXFile<T extends DAXContent> {
 			cmp.order(ByteOrder.LITTLE_ENDIAN);
 			cmp.limit(sizeCmp);
 
-			ByteBuffer data = DAXBlock.uncompress(cmp, sizeRaw);
+			blocks.put(id, new DAXBlock(id, cmp, sizeRaw));
+		}
+		return new DAXFile(Collections.unmodifiableMap(blocks));
+	}
 
+	public <T extends DAXContent> T getById(int id, Class<T> clazz) {
+		DAXBlock b = blocks.get(id);
+		if (b != null) {
 			try {
-				T object = clazz.getConstructor(ByteBuffer.class).newInstance(data);
-				objects.put(id, new DAXBlock<T>(id, object));
+				return clazz.getConstructor(ByteBuffer.class).newInstance(b.getUncompressed());
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				e.printStackTrace(System.err);
 			}
 		}
-		return new DAXFile<>(Collections.unmodifiableMap(objects));
+		return null;
 	}
 
-	public T getById(int id) {
-		return objects.get(id).getObject();
+	public DAXBlock getById(int id) {
+		return blocks.get(id);
 	}
 
 	public Set<Integer> getIds() {
-		return objects.keySet();
+		return blocks.keySet();
 	}
 }

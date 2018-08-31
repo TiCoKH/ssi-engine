@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
-import java.util.Map;
 
-import data.DAXBlock;
 import data.DAXFile;
-import data.content.DAXByteBuffer;
 
 public class Extract {
 
@@ -36,13 +33,13 @@ public class Extract {
 
 	private static void writeFile(File f) throws IOException {
 		FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ);
-		DAXFile<DAXByteBuffer> df = DAXFile.createFrom(c, DAXByteBuffer.class);
+		DAXFile df = DAXFile.createFrom(c);
 
 		File outDir = new File(f.getParentFile(), "RAW");
 		outDir.mkdirs();
 
 		for (Integer id : df.getIds()) {
-			ByteBuffer buf = df.getById(id).getData();
+			ByteBuffer buf = df.getById(id).getUncompressed();
 			buf.rewind();
 
 			File outFile = new File(outDir, f.getName() + "." + id);

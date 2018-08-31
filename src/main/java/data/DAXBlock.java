@@ -4,23 +4,31 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.nio.ByteBuffer;
 
-import data.content.DAXContent;
-
-public class DAXBlock<T extends DAXContent> {
+public class DAXBlock {
 	private int id;
-	private T object;
+	private ByteBuffer data;
+	private int sizeRaw;
 
-	public DAXBlock(int id, T object) {
+	public DAXBlock(int id, ByteBuffer data, int sizeRaw) {
 		this.id = id;
-		this.object = object;
+		this.data = data;
+		this.sizeRaw = sizeRaw;
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public T getObject() {
-		return object;
+	public ByteBuffer getData() {
+		return data;
+	}
+
+	public ByteBuffer getUncompressed() {
+		return uncompress(data, sizeRaw);
+	}
+
+	public int getSizeRaw() {
+		return sizeRaw;
 	}
 
 	public static ByteBuffer uncompress(ByteBuffer compressed, int sizeRaw) {
