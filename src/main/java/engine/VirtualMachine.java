@@ -19,7 +19,7 @@ public class VirtualMachine {
 
 	private final Map<EclOpCode, Consumer<EclArgument[]>> IMPL = new EnumMap<>(EclOpCode.class);
 
-	private ByteBuffer mem;
+	private VirtualMemory mem;
 	private Deque<Integer> gosubStack;
 	private int compareResult;
 
@@ -34,7 +34,7 @@ public class VirtualMachine {
 	private EclInstruction onInit;
 
 	public VirtualMachine() {
-		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
+		mem = new VirtualMemory();
 		gosubStack = new ConcurrentLinkedDeque<>();
 		compareResult = 0;
 		stopped = true;
@@ -120,44 +120,18 @@ public class VirtualMachine {
 		}
 	}
 
-	private int readMemInt(EclArgument a) {
-		if (!a.isMemAddress()) {
-			return 0;
-		}
-		return a.isShortValue() ? mem.getShort(a.valueAsInt()) : mem.get(a.valueAsInt());
-	}
-
-	private void writeMemInt(EclArgument a, int value) {
-		if (!a.isMemAddress()) {
-			return;
-		}
-		if (a.isShortValue()) {
-			mem.putShort(a.valueAsInt(), (short) value);
-		} else {
-			mem.put(a.valueAsInt(), (byte) value);
-		}
-	}
-
-	private String readMemString(EclArgument a) {
-		return "";
-	}
-
-	private void writeMemString(EclArgument a, String value) {
-
-	}
-
 	private int intValue(EclArgument a) {
 		if (!a.isNumberValue()) {
 			return 0;
 		}
-		return a.isMemAddress() ? readMemInt(a) : a.valueAsInt();
+		return a.isMemAddress() ? mem.readMemInt(a) : a.valueAsInt();
 	}
 
 	private String stringValue(EclArgument a) {
 		if (!a.isStringValue()) {
 			return "";
 		}
-		return a.isMemAddress() ? readMemString(a) : a.valueAsString();
+		return a.isMemAddress() ? mem.readMemString(a) : a.valueAsString();
 	}
 
 	private void initImpl() {
@@ -180,22 +154,22 @@ public class VirtualMachine {
 			}
 		});
 		IMPL.put(EclOpCode.ADD, args -> {
-			writeMemInt(args[2], intValue(args[0]) + intValue(args[1]));
+			mem.writeMemInt(args[2], intValue(args[0]) + intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.SUBTRACT, args -> {
-			writeMemInt(args[2], intValue(args[1]) - intValue(args[0]));
+			mem.writeMemInt(args[2], intValue(args[1]) - intValue(args[0]));
 		});
 		IMPL.put(EclOpCode.DIVIDE, args -> {
-			writeMemInt(args[2], intValue(args[0]) / intValue(args[1]));
+			mem.writeMemInt(args[2], intValue(args[0]) / intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.MULTIPLY, args -> {
-			writeMemInt(args[2], intValue(args[0]) * intValue(args[1]));
+			mem.writeMemInt(args[2], intValue(args[0]) * intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.RANDOM, args -> {
 
 		});
 		IMPL.put(EclOpCode.WRITE_MEM, args -> {
-			writeMemInt(args[1], intValue(args[0]));
+			mem.writeMemInt(args[1], intValue(args[0]));
 		});
 		IMPL.put(EclOpCode.LOAD_CHAR, args -> {
 
