@@ -45,7 +45,22 @@ public class DAXPalette {
 
 		Color[] result = new Color[256];
 		for (int i = 0; i < staticColors.length; i++) {
-			result[i * 0x10] = staticColors[i];
+			result[0x00 + i] = staticColors[i];
+			result[0x10 + i] = staticColors[i];
+			result[0x20 + i] = staticColors[i];
+			result[0x30 + i] = staticColors[i];
+			result[0x40 + i] = staticColors[i];
+			result[0x50 + i] = staticColors[i];
+			result[0x60 + i] = staticColors[i];
+			result[0x70 + i] = staticColors[i];
+			result[0x80 + i] = staticColors[i];
+			result[0x90 + i] = staticColors[i];
+			result[0xA0 + i] = staticColors[i];
+			result[0xB0 + i] = staticColors[i];
+			result[0xC0 + i] = staticColors[i];
+			result[0xD0 + i] = staticColors[i];
+			result[0xE0 + i] = staticColors[i];
+			result[0xF0 + i] = staticColors[i];
 		}
 		for (int i = 0; i < colorCount; i++) {
 			int r = 4 * (data.get(dataOffset + 3 * i + 0) & 0xFF);
