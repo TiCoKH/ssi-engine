@@ -34,7 +34,7 @@ public class DungeonMap extends DAXContent {
 				walls[0] = (data.get(WALLS_NE_START + stride + x) & 0xF0) >> 4;
 				walls[1] = (data.get(WALLS_NE_START + stride + x) & 0x0F);
 				walls[2] = (data.get(WALLS_SW_START + stride + x) & 0xF0) >> 4;
-				walls[3] = (data.get(WALLS_NE_START + stride + x) & 0x0F);
+				walls[3] = (data.get(WALLS_SW_START + stride + x) & 0x0F);
 				walls[4] = (data.get(WALLS_X2_START + stride + x) & 0xFF);
 				walls[5] = (data.get(WALLS_X3_START + stride + x) & 0xC0) >> 6;
 				walls[6] = (data.get(WALLS_X3_START + stride + x) & 0x30) >> 4;
