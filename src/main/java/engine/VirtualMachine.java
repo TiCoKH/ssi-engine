@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class VirtualMachine {
 	private VirtualMemory mem;
 	private Deque<Integer> gosubStack;
 	private int compareResult;
+	private Random rnd;
 
 	private boolean stopped;
 
@@ -37,6 +39,7 @@ public class VirtualMachine {
 		mem = new VirtualMemory();
 		gosubStack = new ConcurrentLinkedDeque<>();
 		compareResult = 0;
+		rnd = new Random();
 		stopped = true;
 		initImpl();
 	}
@@ -105,8 +108,8 @@ public class VirtualMachine {
 	}
 
 	private void exec(EclInstruction in, boolean execute) {
-		System.out.println(Integer.toHexString(eclCodeBaseAddress + in.getPosition()).toUpperCase() + ":"
-				+ in.toString() + (execute ? "" : " (SKIPPED)"));
+		System.out
+			.println(Integer.toHexString(eclCodeBaseAddress + in.getPosition()).toUpperCase() + ":" + in.toString() + (execute ? "" : " (SKIPPED)"));
 		if (execute) {
 			IMPL.get(in.getOpCode()).accept(in.getArguments());
 		}
@@ -166,7 +169,7 @@ public class VirtualMachine {
 			mem.writeMemInt(args[2], intValue(args[0]) * intValue(args[1]));
 		});
 		IMPL.put(EclOpCode.RANDOM, args -> {
-
+			mem.writeMemInt(args[1], rnd.nextInt(intValue(args[0]) + 1));
 		});
 		IMPL.put(EclOpCode.WRITE_MEM, args -> {
 			mem.writeMemInt(args[1], intValue(args[0]));
@@ -263,8 +266,7 @@ public class VirtualMachine {
 			for (int i = 0; i < dynArgs.length; i++) {
 				dynArgs[i] = EclArgument.parseNext(eclCode);
 			}
-			System.out.println(String.join(", ",
-					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 			if (intValue(args[0]) >= intValue(args[1]) || intValue(args[0]) < 0) {
 				System.err.println("ON GOTO value=" + intValue(args[0]));
 				return;
@@ -276,8 +278,7 @@ public class VirtualMachine {
 			for (int i = 0; i < dynArgs.length; i++) {
 				dynArgs[i] = EclArgument.parseNext(eclCode);
 			}
-			System.out.println(String.join(", ",
-					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 			if (intValue(args[0]) >= intValue(args[1]) || intValue(args[0]) < 0) {
 				System.err.println("ON GOSUB value=" + intValue(args[0]));
 				return;
@@ -302,8 +303,7 @@ public class VirtualMachine {
 			for (int i = 0; i < args[1].valueAsInt(); i++) {
 				dynArgs[i] = EclArgument.parseNext(eclCode);
 			}
-			System.out.println(String.join(", ",
-					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 		});
 		IMPL.put(EclOpCode.PARLAY, args -> {
 
@@ -325,8 +325,7 @@ public class VirtualMachine {
 			for (int i = 0; i < args[1].valueAsInt(); i++) {
 				dynArgs[i] = EclArgument.parseNext(eclCode);
 			}
-			System.out.println(String.join(", ",
-					Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, args -> {
 
@@ -377,6 +376,9 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.UNKNOWN_43, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_45, args -> {
 
 		});
 		IMPL.put(EclOpCode.UNKNOWN_46, args -> {

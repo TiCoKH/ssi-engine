@@ -13,7 +13,7 @@ public enum EclOpCode {
 	WRITE_MEM(0x09, 2, "WRITE MEMORY"), //
 	LOAD_CHAR(0x0A, 1, "LOAD CHARACTER"), //
 	LOAD_MON(0x0B, 3, "LOAD MONSTER"), //
-	SETUP_MON(0x0C, 3, "SETUP MONSTER"), //
+	SETUP_MON(0x0C, 4, "SETUP MONSTER"), // TODO: Game specific
 	APPROACH(0x0D, 0, "APPROACH"), //
 	PICTURE(0x0E, 1, "PICTURE"), //
 	INPUT_NUMBER(0x0F, 2, "INPUT NUMBER"), //
@@ -68,6 +68,7 @@ public enum EclOpCode {
 	DESTROY_ITEM(0x40, 1, "DESTROY ITEMS"), //
 	UNKNOWN_42(0x42, 0, "42"), //
 	UNKNOWN_43(0x43, 1, "43"), //
+	UNKNOWN_45(0x45, 2, "45"), //
 	UNKNOWN_46(0x46, 2, "46"), //
 	UNKNOWN_47(0x47, 0, "47"), //
 	UNKNOWN_4C(0x4C, 2, "4C");
