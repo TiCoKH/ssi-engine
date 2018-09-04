@@ -8,8 +8,6 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.Test;
 
-import data.content.DAXByteBuffer;
-
 public class DAXFileTest {
 
 	@Test
@@ -32,6 +30,6 @@ public class DAXFileTest {
 
 	private void testFile(Path p) throws IOException {
 		FileChannel c = FileChannel.open(p, StandardOpenOption.READ);
-		DAXFile<DAXByteBuffer> df = DAXFile.createFrom(c, DAXByteBuffer.class);
+		DAXFile df = DAXFile.createFrom(c);
 	}
 }

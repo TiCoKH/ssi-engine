@@ -16,9 +16,9 @@ public class VirtualMachineTest {
 	public void test() throws IOException {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/ECL1.DAX");
 		FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ);
-		DAXFile<EclProgram> ecls = DAXFile.createFrom(c, EclProgram.class);
+		DAXFile ecls = DAXFile.createFrom(c);
 		VirtualMachine vm = new VirtualMachine();
-		vm.newEcl(ecls.getById(16));
+		vm.newEcl(ecls.getById(16, EclProgram.class));
 		System.out.println("Initial:");
 		vm.startInitial();
 		System.out.println("Address:");
