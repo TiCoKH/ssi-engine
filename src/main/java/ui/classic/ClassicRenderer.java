@@ -1,5 +1,7 @@
 package ui.classic;
 
+import static ui.BorderSymbols.EM;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -16,6 +18,7 @@ import data.DAXFile;
 import data.content.DAXImageContent;
 import data.content.MonocromeSymbols;
 import data.content.VGAImage;
+import ui.BorderSymbols;
 import ui.Borders;
 
 public class ClassicRenderer extends JPanel {
@@ -46,14 +49,14 @@ public class ClassicRenderer extends JPanel {
 		g2d.setBackground(Color.BLACK);
 		g2d.clearRect(0, 0, 640, 400);
 
-		int[][] b = Borders.SCREEN.getSymbols();
-		for (int y = 0; y < 25; y++) {
-			int[] row = b[y];
+		BorderSymbols[][] b = Borders.GAME.getSymbols();
+		for (int y = 0; y < 24; y++) {
+			BorderSymbols[] row = b[y];
 			for (int x = 0; x < 40; x++) {
-				if (x >= row.length || row[x] == -1) {
+				if (x >= row.length || row[x] == EM) {
 					continue;
 				}
-				BufferedImage s = borders.get(row[x]);
+				BufferedImage s = borders.get(row[x].getIndex());
 
 				g2d.drawImage(s.getScaledInstance(s.getWidth() * 2, s.getHeight() * 2, 0), 16 * x, 16 * y, null);
 			}
