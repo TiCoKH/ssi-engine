@@ -17,7 +17,7 @@ public class VirtualMachineTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/ECL1.DAX");
 		FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ);
 		DAXFile ecls = DAXFile.createFrom(c);
-		VirtualMachine vm = new VirtualMachine();
+		VirtualMachine vm = new VirtualMachine(null);
 		vm.newEcl(ecls.getById(16, EclProgram.class));
 		System.out.println("Initial:");
 		vm.startInitial();

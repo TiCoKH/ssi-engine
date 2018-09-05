@@ -21,6 +21,8 @@ public class VirtualMachine {
 
 	private final Map<EclOpCode, Consumer<EclArgument[]>> IMPL = new EnumMap<>(EclOpCode.class);
 
+	private EngineCallback engine;
+
 	private VirtualMemory mem;
 	private Deque<Integer> gosubStack;
 	private int compareResult;
@@ -36,13 +38,19 @@ public class VirtualMachine {
 	private EclInstruction onRestInterruption;
 	private EclInstruction onInit;
 
-	public VirtualMachine() {
+	public VirtualMachine(EngineCallback engine) {
+		this.engine = engine;
+
 		mem = new VirtualMemory();
 		gosubStack = new ConcurrentLinkedDeque<>();
 		compareResult = 0;
 		rnd = new Random();
 		stopped = true;
 		initImpl();
+	}
+
+	VirtualMemory getMem() {
+		return mem;
 	}
 
 	public void newEcl(EclProgram ecl) {
