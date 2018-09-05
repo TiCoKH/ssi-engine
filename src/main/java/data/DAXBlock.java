@@ -36,6 +36,7 @@ public class DAXBlock {
 
 		int in = 0;
 		int out = 0;
+		compressed.rewind();
 		while (in < compressed.limit()) {
 			byte next = compressed.get(in++);
 			int count = Math.abs(next);
