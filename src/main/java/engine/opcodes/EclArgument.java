@@ -1,6 +1,8 @@
 package engine.opcodes;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EclArgument {
 	private int type;
@@ -14,30 +16,30 @@ public class EclArgument {
 	public static EclArgument parseNext(ByteBuffer eclBlock) {
 		int type = eclBlock.get() & 0xFF;
 		switch (type) {
-		case 0: {
-			int value = eclBlock.get() & 0xFF;
-			return new EclArgument(type, value);
-		}
-		case 1:
-		case 2:
-		case 3:
-		case 5:
-		case 0x81: // string from memory address
-		{
-			int value = eclBlock.getShort() & 0xFFFF;
-			return new EclArgument(type, value);
-		}
-		case 0x80: {
-			// compressed string
-			int strLen = eclBlock.get() & 0xFF;
-			byte[] cmpString = new byte[strLen];
-			eclBlock.get(cmpString);
-			String value = decompressString(cmpString);
-			return new EclArgument(type, value);
-		}
-		default: {
-			throw new IllegalArgumentException("Unknown type: " + type);
-		}
+			case 0: {
+				int value = eclBlock.get() & 0xFF;
+				return new EclArgument(type, value);
+			}
+			case 1:
+			case 2:
+			case 3:
+			case 5:
+			case 0x81: // string from memory address
+			{
+				int value = eclBlock.getShort() & 0xFFFF;
+				return new EclArgument(type, value);
+			}
+			case 0x80: {
+				// compressed string
+				int strLen = eclBlock.get() & 0xFF;
+				byte[] cmpString = new byte[strLen];
+				eclBlock.get(cmpString);
+				EclString value = decompressString(cmpString);
+				return new EclArgument(type, value);
+			}
+			default: {
+				throw new IllegalArgumentException("Unknown type: " + type);
+			}
 		}
 	}
 
@@ -48,43 +50,39 @@ public class EclArgument {
 	 * @param data
 	 * @return
 	 */
-	private static String decompressString(byte[] data) {
-		StringBuilder sb = new StringBuilder();
+	private static EclString decompressString(byte[] data) {
 		int state = 1;
 		int lastByte = 0;
 
+		List<Byte> chars = new ArrayList<>();
 		for (byte b : data) {
 			int ubyte = b & 0xFF;
-			int charVal = 0;
-			switch (state) {
-			case 1:
-				charVal = (ubyte >> 2) & 0x3F;
+			byte charVal = 0;
+
+			if (state == 1) {
+				charVal = (byte) ((ubyte >> 2) & 0x3F);
 				state = 2;
-				break;
-			case 2:
-				charVal = ((lastByte << 4) | (ubyte >> 4)) & 0x3F;
+			} else if (state == 2) {
+				charVal = (byte) (((lastByte << 4) | (ubyte >> 4)) & 0x3F);
 				state = 3;
-				break;
-			case 3:
-				charVal = ((lastByte << 2) | (ubyte >> 6)) & 0x3F;
+			} else if (state == 3) {
+				charVal = (byte) (((lastByte << 2) | (ubyte >> 6)) & 0x3F);
 				if (charVal != 0) {
-					sb.append(inflateChar(charVal));
+					chars.add(charVal);
 				}
-				charVal = ubyte & 0x3F;
+				charVal = (byte) (ubyte & 0x3F);
 				state = 1;
-				break;
 			}
+
 			if (charVal != 0) {
-				sb.append(inflateChar(charVal));
+				chars.add(charVal);
 			}
 			lastByte = ubyte;
 		}
 
-		return sb.toString();
-	}
-
-	private static char inflateChar(int c) {
-		return (char) (c > 0x1F ? c : c + 0x40);
+		ByteBuffer string = ByteBuffer.allocate(chars.size());
+		chars.stream().forEachOrdered(string::put);
+		return new EclString(string);
 	}
 
 	public int getType() {
@@ -115,8 +113,8 @@ public class EclArgument {
 		return (Integer) value;
 	}
 
-	public String valueAsString() {
-		return (String) value;
+	public EclString valueAsString() {
+		return (EclString) value;
 	}
 
 	@Override

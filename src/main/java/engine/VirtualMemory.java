@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import engine.opcodes.EclArgument;
+import engine.opcodes.EclString;
 
 public class VirtualMemory {
 	private ByteBuffer mem;
@@ -30,11 +31,11 @@ public class VirtualMemory {
 		}
 	}
 
-	public String readMemString(EclArgument a) {
-		return "";
+	public EclString readMemString(EclArgument a) {
+		return null;
 	}
 
-	public void writeMemString(EclArgument a, String value) {
+	public void writeMemString(EclArgument a, EclString value) {
 
 	}
 

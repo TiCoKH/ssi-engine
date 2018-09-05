@@ -15,6 +15,7 @@ import data.content.EclProgram;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
+import engine.opcodes.EclString;
 
 public class VirtualMachine {
 
@@ -130,9 +131,9 @@ public class VirtualMachine {
 		return a.isMemAddress() ? mem.readMemInt(a) : a.valueAsInt();
 	}
 
-	private String stringValue(EclArgument a) {
+	private EclString stringValue(EclArgument a) {
 		if (!a.isStringValue()) {
-			return "";
+			return null;
 		}
 		return a.isMemAddress() ? mem.readMemString(a) : a.valueAsString();
 	}
@@ -151,7 +152,7 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.COMPARE, args -> {
 			if (args[0].isStringValue() && args[1].isStringValue()) {
-				compareResult = stringValue(args[1]).compareTo(stringValue(args[0]));
+				compareResult = stringValue(args[1]).toString().compareTo(stringValue(args[0]).toString());
 			} else if (args[0].isNumberValue() && args[1].isNumberValue()) {
 				compareResult = intValue(args[1]) - intValue(args[0]);
 			}
