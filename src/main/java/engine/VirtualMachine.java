@@ -196,7 +196,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PICTURE, args -> {
-
+			engine.showPicture(intValue(args[0]));
 		});
 		IMPL.put(EclOpCode.INPUT_NUMBER, args -> {
 
@@ -205,10 +205,10 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PRINT, args -> {
-
+			engine.showText(stringValue(args[0]));
 		});
 		IMPL.put(EclOpCode.PRINT_CLEAR, args -> {
-
+			engine.showText(stringValue(args[0]));
 		});
 		IMPL.put(EclOpCode.RETURN, args -> {
 			eclCode.position(gosubStack.pop());
@@ -361,7 +361,12 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.DELAY, args -> {
-
+			try {
+				Thread.sleep(900);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		});
 		IMPL.put(EclOpCode.SPELL, args -> {
 
