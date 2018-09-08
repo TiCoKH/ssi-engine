@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>ssi.goldbox</groupId>
+	<artifactId>engine</artifactId>
+
+	<description>An engine for the SSI gold box game series.</description>
+	<version>SNAPSHOT</version>
+	<inceptionYear>2018</inceptionYear>
+	<issueManagement>
+		<system>Gitlab</system>
+		<url>https://gitlab.com/farmboy0/ssi-engine/issues</url>
+	</issueManagement>
+	<scm>
+		<url>https://gitlab.com/farmboy0/ssi-engine.git</url>
+		<tag>ad&amp;d engine game goldbox ssi</tag>
+	</scm>
+	<ciManagement>
+		<system>Gitlab</system>
+		<url>https://gitlab.com/farmboy0/ssi-engine/pipelines</url>
+	</ciManagement>
+	<name>SSI Engine</name>
+	<url>https://gitlab.com/farmboy0/ssi-engine</url>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>ui.AppFrame</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
