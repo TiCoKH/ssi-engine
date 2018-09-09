@@ -1,28 +1,18 @@
 package engine;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.Map;
+import static data.content.DAXContentType.BIGPIC;
+import static data.content.DAXContentType.PIC;
 
-import data.DAXFile;
-import data.content.DAXContent;
+import java.io.IOException;
+
 import data.content.DAXImageContent;
 import data.content.EclProgram;
-import data.content.MonocromeSymbols;
-import data.content.VGADependentImages;
-import data.content.VGAImage;
 import engine.opcodes.EclString;
 import ui.Borders;
 import ui.classic.ClassicRenderer;
 
 public class Engine implements EngineCallback, RendererCallback {
-	private String gameDir;
-
-	private Map<String, DAXFile> files;
-
+	private EngineResources res;
 	private ClassicRenderer renderer;
 
 	private VirtualMachine vm;
@@ -34,13 +24,9 @@ public class Engine implements EngineCallback, RendererCallback {
 	private Thread gameThread;
 
 	public Engine(String gameDir) throws IOException {
-		this.gameDir = gameDir;
+		res = new EngineResources(gameDir);
 
-		files = new HashMap<>();
-
-		MonocromeSymbols font = readDAXFile("8X8D1.DAX", 201, MonocromeSymbols.class);
-		DAXImageContent borders = readDAXFile("BORDERS.DAX", 0, VGAImage.class);
-		renderer = new ClassicRenderer(this, font, borders);
+		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders());
 		renderer.setNoPicture(Borders.SCREEN);
 
 		vm = new VirtualMachine(this);
@@ -66,7 +52,7 @@ public class Engine implements EngineCallback, RendererCallback {
 
 		vmThread = new Thread(() -> {
 			try {
-				EclProgram demo = readDAXFile("ECL1.DAX", 18, EclProgram.class);
+				EclProgram demo = res.load("ECL1.DAX", 18, EclProgram.class);
 				vm.newEcl(demo);
 				vm.startInitial();
 				running = false;
@@ -88,14 +74,12 @@ public class Engine implements EngineCallback, RendererCallback {
 			return;
 		}
 		try {
-			DAXImageContent smallPic = findImageResource(id, VGADependentImages.class, "PIC1.DAX", "PIC2.DAX", "PIC3.DAX", "PIC4.DAX", "PIC5.DAX",
-				"PIC6.DAX", "PIC7.DAX", "PIC8.DAX", "PIC9.DAX");
+			DAXImageContent smallPic = res.findImage(id, PIC);
 			if (smallPic != null) {
 				renderer.setSmallPicture(smallPic, 0);
 				return;
 			}
-			DAXImageContent bigPic = findImageResource(id, VGAImage.class, "BIGPIC1.DAX", "BIGPIC2.DAX", "BIGPIC3.DAX", "BIGPIC4.DAX", "BIGPIC5.DAX",
-				"BIGPIC6.DAX");
+			DAXImageContent bigPic = res.findImage(id, BIGPIC);
 			if (bigPic != null) {
 				renderer.setBigPicture(bigPic, 0);
 				return;
@@ -122,26 +106,5 @@ public class Engine implements EngineCallback, RendererCallback {
 		synchronized (vm) {
 			vm.notify();
 		}
-	}
-
-	private <T extends DAXImageContent> DAXImageContent findImageResource(int id, Class<T> clazz, String... filenames) throws IOException {
-		for (int i = 0; i < filenames.length; i++) {
-			DAXImageContent dic = readDAXFile(filenames[i], id, clazz);
-			if (dic != null) {
-				return dic;
-			}
-		}
-		return null;
-	}
-
-	private <T extends DAXContent> T readDAXFile(String name, int blockId, Class<T> clazz) throws IOException {
-		DAXFile f = files.get(name);
-		if (f == null) {
-			try (FileChannel c = FileChannel.open(new File(gameDir, name).toPath(), StandardOpenOption.READ)) {
-				f = DAXFile.createFrom(c);
-				files.put(name, f);
-			}
-		}
-		return f.getById(blockId, clazz);
 	}
 }
