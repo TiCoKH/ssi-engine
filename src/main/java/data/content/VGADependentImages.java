@@ -22,9 +22,9 @@ public class VGADependentImages extends DAXImageContent {
 
 		Color[] color = DAXPalette.createGamePalette(data, 11, colorCount, colorBase);
 
-		byte[] addColorData = new byte[colorCount >> 1];
+		byte[] egaColorMapping = new byte[colorCount >> 1];
 		data.position(11 + 3 * colorCount);
-		data.get(addColorData);
+		data.get(egaColorMapping);
 
 		data.position(data.position() + 4); // unkown
 		int baseImage = data.get() & 0xFF;
@@ -48,6 +48,15 @@ public class VGADependentImages extends DAXImageContent {
 			}
 			images.add(image);
 		}
+	}
+
+	private int mapToEGAColor(byte[] egaColorMapping, int colorBase, int colorCount, int vgaIndex) {
+		if (vgaIndex < colorBase || vgaIndex > colorBase + colorCount) {
+			return vgaIndex & 0x0F;
+		}
+		int mappingIndex = (vgaIndex - colorBase) >> 1;
+		boolean lowBits = ((vgaIndex - colorBase) & 0x1) > 0;
+		return lowBits ? (egaColorMapping[mappingIndex] & 0x0F) : (egaColorMapping[mappingIndex] & 0xF0) >> 4;
 	}
 
 	public static ByteBuffer uncompress(ByteBuffer compressed, int sizeRaw) {
