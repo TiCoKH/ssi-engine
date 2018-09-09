@@ -18,7 +18,7 @@ import engine.opcodes.EclString;
 import ui.Borders;
 import ui.classic.ClassicRenderer;
 
-public class Engine implements EngineCallback {
+public class Engine implements EngineCallback, RendererCallback {
 	private String gameDir;
 
 	private Map<String, DAXFile> files;
@@ -40,7 +40,7 @@ public class Engine implements EngineCallback {
 
 		MonocromeSymbols font = readDAXFile("8X8D1.DAX", 201, MonocromeSymbols.class);
 		DAXImageContent borders = readDAXFile("BORDERS.DAX", 0, VGAImage.class);
-		renderer = new ClassicRenderer(font, borders);
+		renderer = new ClassicRenderer(this, font, borders);
 		renderer.setNoPicture(Borders.SCREEN);
 
 		vm = new VirtualMachine(this);
@@ -83,6 +83,10 @@ public class Engine implements EngineCallback {
 
 	@Override
 	public void showPicture(int id) {
+		if (id == 255 || id == -1) {
+			renderer.setNoPicture(Borders.GAME);
+			return;
+		}
 		try {
 			DAXImageContent smallPic = findImageResource(id, VGADependentImages.class, "PIC1.DAX", "PIC2.DAX", "PIC3.DAX", "PIC4.DAX", "PIC5.DAX",
 				"PIC6.DAX", "PIC7.DAX", "PIC8.DAX", "PIC9.DAX");
@@ -104,7 +108,20 @@ public class Engine implements EngineCallback {
 
 	@Override
 	public void showText(EclString str) {
-		renderer.setText(str);
+		synchronized (vm) {
+			renderer.setText(str);
+			try {
+				vm.wait();
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	@Override
+	public void textDisplayFinished() {
+		synchronized (vm) {
+			vm.notify();
+		}
 	}
 
 	private <T extends DAXImageContent> DAXImageContent findImageResource(int id, Class<T> clazz, String... filenames) throws IOException {

@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import data.content.DAXImageContent;
 import data.content.MonocromeSymbols;
+import engine.RendererCallback;
 import engine.opcodes.EclString;
 import ui.BorderSymbols;
 import ui.Borders;
@@ -20,6 +21,8 @@ public class ClassicRenderer extends JPanel {
 	private static final int TEXT_START_X = 1;
 	private static final int TEXT_START_Y = 17;
 	private static final int TEXT_LINE_WIDTH = 38;
+
+	private RendererCallback renderCB;
 
 	private MonocromeSymbols font;
 	private DAXImageContent borderSymbols;
@@ -32,8 +35,10 @@ public class ClassicRenderer extends JPanel {
 
 	private EclString text;
 	private int textPos;
+	private boolean textIsRendering;
 
-	public ClassicRenderer(MonocromeSymbols font, DAXImageContent borderSymbols) {
+	public ClassicRenderer(RendererCallback renderCB, MonocromeSymbols font, DAXImageContent borderSymbols) {
+		this.renderCB = renderCB;
 		this.font = font;
 		this.borderSymbols = borderSymbols;
 
@@ -43,6 +48,9 @@ public class ClassicRenderer extends JPanel {
 		this.pic = null;
 		this.picIndex = -1;
 
+		this.text = null;
+		this.textPos = 0;
+		this.textIsRendering = false;
 		initRenderer();
 	}
 
@@ -68,11 +76,19 @@ public class ClassicRenderer extends JPanel {
 	public void setText(EclString text) {
 		this.text = text;
 		this.textPos = 0;
+		this.textIsRendering = true;
 	}
 
 	public void increaseText() {
-		if (this.text != null && this.textPos < this.text.getLength()) {
-			this.textPos++;
+		if (this.text != null) {
+			if (this.textPos == this.text.getLength()) {
+				if (this.textIsRendering) {
+					this.textIsRendering = false;
+					this.renderCB.textDisplayFinished();
+				}
+			} else {
+				this.textPos++;
+			}
 		}
 	}
 
