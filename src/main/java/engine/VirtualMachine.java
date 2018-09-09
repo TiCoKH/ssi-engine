@@ -401,8 +401,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.UNKNOWN_47, args -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_4C, args -> {
-
+		IMPL.put(EclOpCode.PICTURE2, args -> {
+			engine.showPicture(intValue(args[1]));
 		});
 	}
 }

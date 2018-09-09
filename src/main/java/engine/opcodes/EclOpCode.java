@@ -71,7 +71,7 @@ public enum EclOpCode {
 	UNKNOWN_45(0x45, 2, "45"), //
 	UNKNOWN_46(0x46, 2, "46"), //
 	UNKNOWN_47(0x47, 0, "47"), //
-	UNKNOWN_4C(0x4C, 2, "4C");
+	PICTURE2(0x4C, 2, "PICTURE2");
 
 	private int id;
 	private int argCount;
