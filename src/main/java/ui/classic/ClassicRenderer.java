@@ -42,7 +42,7 @@ public class ClassicRenderer extends JPanel {
 		this.font = font;
 		this.borderSymbols = borderSymbols;
 
-		this.zoom = 2;
+		this.zoom = 4;
 		this.layout = null;
 		this.picType = null;
 		this.pic = null;
@@ -94,7 +94,7 @@ public class ClassicRenderer extends JPanel {
 
 	private void initRenderer() {
 		setDoubleBuffered(true);
-		setPreferredSize(new Dimension(640, 400));
+		setPreferredSize(new Dimension(320 * zoom, 200 * zoom));
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ClassicRenderer extends JPanel {
 
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setBackground(Color.BLACK);
-		g2d.clearRect(0, 0, 640, 400);
+		g2d.clearRect(0, 0, 320 * zoom, 200 * zoom);
 
 		if (layout != null) {
 			renderBorders(g2d);
