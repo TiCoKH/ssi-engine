@@ -6,6 +6,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 public class DAXFileTest {
@@ -13,6 +14,7 @@ public class DAXFileTest {
 	@Test
 	public void test() throws IOException {
 		File d = new File("/mnt/daten/SSI");
+		Assume.assumeTrue(d.exists());
 		testDir(d);
 	}
 
