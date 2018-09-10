@@ -27,13 +27,13 @@ import data.content.VGAImage;
 public class EngineResources {
 	private static final Map<DAXContentType, String[]> fileMap = new EnumMap<>(DAXContentType.class);
 	static {
-		fileMap.put(_8X8D, new String[] { "8X8D0", "8X8D1", "8X8D2", "8X8D3", "8X8D4", "8X8D5", "8X8D6" });
-		fileMap.put(BACK, new String[] { "BACK1", "BACK2", "BACK3", "BACK4", "BACK5", "BACK6" });
+		fileMap.put(_8X8D, new String[] { "8X8D0.DAX", "8X8D1.DAX", "8X8D2.DAX", "8X8D3.DAX", "8X8D4.DAX", "8X8D5.DAX", "8X8D6.DAX" });
+		fileMap.put(BACK, new String[] { "BACK1.DAX", "BACK2.DAX", "BACK3.DAX", "BACK4.DAX", "BACK5.DAX", "BACK6.DAX" });
 		fileMap.put(BIGPIC, new String[] { "BIGPIC1.DAX", "BIGPIC2.DAX", "BIGPIC3.DAX", "BIGPIC4.DAX", "BIGPIC5.DAX", "BIGPIC6.DAX" });
-		fileMap.put(ECL, new String[] { "ECL1", "ECL2", "ECL3", "ECL4", "ECL5", "ECL6" });
-		fileMap.put(GEO, new String[] { "GEO1", "GEO2", "GEO3", "GEO4", "GEO5", "GEO6" });
+		fileMap.put(ECL, new String[] { "ECL1.DAX", "ECL2.DAX", "ECL3.DAX", "ECL4.DAX", "ECL5.DAX", "ECL6.DAX" });
+		fileMap.put(GEO, new String[] { "GEO1.DAX", "GEO2.DAX", "GEO3.DAX", "GEO4.DAX", "GEO5.DAX", "GEO6.DAX" });
 		fileMap.put(PIC, new String[] { "PIC1.DAX", "PIC2.DAX", "PIC3.DAX", "PIC4.DAX", "PIC5.DAX", "PIC6.DAX", "PIC7.DAX", "PIC8.DAX", "PIC9.DAX" });
-		fileMap.put(WALLDEF, new String[] { "WALLDEF1", "WALLDEF2", "WALLDEF3", "WALLDEF4", "WALLDEF5", "WALLDEF6" });
+		fileMap.put(WALLDEF, new String[] { "WALLDEF1.DAX", "WALLDEF2.DAX", "WALLDEF3.DAX", "WALLDEF4.DAX", "WALLDEF5.DAX", "WALLDEF6.DAX" });
 	}
 	private static final Map<DAXContentType, Class<? extends DAXImageContent>> imageTypes = new EnumMap<>(DAXContentType.class);
 	static {
