@@ -1,7 +1,9 @@
 package data.content;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 
 public class VGAImage extends DAXImageContent {
@@ -21,17 +23,17 @@ public class VGAImage extends DAXImageContent {
 		int imageSize = width * height;
 		int imageOffset = data.capacity() - (imageCount * imageSize);
 
-		Color[] color = DAXPalette.createGamePalette(data, 10, colorCount, colorBase);
+		IndexColorModel cm = DAXPalette.createGameColorModel(data, 10, colorCount, colorBase);
 
+		data.position(imageOffset);
 		for (int i = 0; i < imageCount; i++, imageOffset += imageSize) {
-			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					int c = data.get(imageOffset + (y * width) + x) & 0xFF;
-					image.setRGB(x, y, color[c].getRGB());
-				}
-			}
-			images.add(image);
+			byte[] imageData = new byte[imageSize];
+			data.get(imageData);
+
+			DataBufferByte db = new DataBufferByte(imageData, imageSize);
+			WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 }, null);
+
+			images.add(new BufferedImage(cm, r, false, null));
 		}
 	}
 }

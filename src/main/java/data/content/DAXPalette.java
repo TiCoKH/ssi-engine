@@ -1,6 +1,7 @@
 package data.content;
 
 import java.awt.Color;
+import java.awt.image.IndexColorModel;
 import java.nio.ByteBuffer;
 
 public class DAXPalette {
@@ -24,50 +25,36 @@ public class DAXPalette {
 	private static final Color COLOR_YELLOW_BRIGHT = new Color(0xFFFF55);
 	private static final Color COLOR_WHITE = new Color(0xFFFFFF);
 
-	private static final Color[] COLOR_GAME_STATIC = { COLOR_BLACK, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED,
-			COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT,
-			COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
+	private static final Color[] COLOR_GAME_STATIC = { COLOR_BLACK, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 
-	private static final Color[] COLOR_COMBAT_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN,
-			COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_BLACK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT,
-			COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
+	private static final Color[] COLOR_COMBAT_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_BLACK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 
-	public static Color[] createGamePalette(ByteBuffer data, int dataOffset, int colorCount, int colorStart) {
-		return createPalette(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC);
+	public static IndexColorModel createGameColorModel(ByteBuffer data, int dataOffset, int colorCount, int colorStart) {
+		return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC);
 	}
 
-	public static Color[] createCombatPalette(ByteBuffer data, int dataOffset, int colorCount, int colorStart) {
-		return createPalette(data, dataOffset, colorCount, colorStart, COLOR_COMBAT_STATIC);
+	public static IndexColorModel createCombatColorModel(ByteBuffer data, int dataOffset, int colorCount, int colorStart) {
+		return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_COMBAT_STATIC);
 	}
 
-	private static Color[] createPalette(ByteBuffer data, int dataOffset, int colorCount, int colorStart,
-			Color[] staticColors) {
+	private static IndexColorModel createColorModel(ByteBuffer data, int dataOffset, int colorCount, int colorStart, Color[] staticColors) {
+		byte[] r = new byte[256];
+		byte[] g = new byte[256];
+		byte[] b = new byte[256];
 
-		Color[] result = new Color[256];
 		for (int i = 0; i < staticColors.length; i++) {
-			result[0x00 + i] = staticColors[i];
-			result[0x10 + i] = staticColors[i];
-			result[0x20 + i] = staticColors[i];
-			result[0x30 + i] = staticColors[i];
-			result[0x40 + i] = staticColors[i];
-			result[0x50 + i] = staticColors[i];
-			result[0x60 + i] = staticColors[i];
-			result[0x70 + i] = staticColors[i];
-			result[0x80 + i] = staticColors[i];
-			result[0x90 + i] = staticColors[i];
-			result[0xA0 + i] = staticColors[i];
-			result[0xB0 + i] = staticColors[i];
-			result[0xC0 + i] = staticColors[i];
-			result[0xD0 + i] = staticColors[i];
-			result[0xE0 + i] = staticColors[i];
-			result[0xF0 + i] = staticColors[i];
+			for (int h = 0; h < 0xFF; h += 0x10) {
+				r[h + i] = (byte) staticColors[i].getRed();
+				g[h + i] = (byte) staticColors[i].getGreen();
+				b[h + i] = (byte) staticColors[i].getBlue();
+			}
 		}
+
 		for (int i = 0; i < colorCount; i++) {
-			int r = 4 * (data.get(dataOffset + 3 * i + 0) & 0xFF);
-			int g = 4 * (data.get(dataOffset + 3 * i + 1) & 0xFF);
-			int b = 4 * (data.get(dataOffset + 3 * i + 2) & 0xFF);
-			result[colorStart + i] = new Color((r << 16) | (g << 8) | b);
+			r[colorStart + i] = (byte) (data.get(dataOffset + 3 * i + 0) << 2);
+			g[colorStart + i] = (byte) (data.get(dataOffset + 3 * i + 1) << 2);
+			b[colorStart + i] = (byte) (data.get(dataOffset + 3 * i + 2) << 2);
 		}
-		return result;
+		return new IndexColorModel(8, 256, r, g, b);
 	}
 }

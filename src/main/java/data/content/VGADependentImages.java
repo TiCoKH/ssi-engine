@@ -2,8 +2,10 @@ package data.content;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 
 public class VGADependentImages extends DAXImageContent {
@@ -20,7 +22,7 @@ public class VGADependentImages extends DAXImageContent {
 
 		int imageSize = width * height;
 
-		Color[] color = DAXPalette.createGamePalette(data, 11, colorCount, colorBase);
+		IndexColorModel cm = DAXPalette.createGameColorModel(data, 11, colorCount, colorBase);
 
 		byte[] egaColorMapping = new byte[colorCount >> 1];
 		data.position(11 + 3 * colorCount);
@@ -31,22 +33,28 @@ public class VGADependentImages extends DAXImageContent {
 		data.position(data.position() + 1); // unkown
 		data.position(data.position() + 3 * imageCount); // image packed sizes + 1 byte value
 
-		ByteBuffer imageData = uncompress(data.slice().order(LITTLE_ENDIAN), imageCount * imageSize);
+		ByteBuffer allImageData = uncompress(data.slice().order(LITTLE_ENDIAN), imageCount * imageSize);
 
+		// Read Base image first
+		byte[] baseImageData = new byte[imageSize];
+		allImageData.position(baseImage * imageSize);
+		allImageData.get(baseImageData);
+
+		allImageData.rewind();
 		for (int i = 0; i < imageCount; i++) {
-			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					int c = imageData.get((imageSize * i) + (y * width) + x) & 0xFF;
-					if (i == baseImage) {
-						image.setRGB(x, y, color[c].getRGB());
-					} else {
-						int cBase = imageData.get((imageSize * baseImage) + (y * width) + x) & 0xFF;
-						image.setRGB(x, y, color[c ^ cBase].getRGB());
-					}
+			byte[] imageData = new byte[imageSize];
+			allImageData.get(imageData);
+
+			if (i != baseImage) {
+				for (int j = 0; j < imageData.length; j++) {
+					imageData[j] = (byte) (imageData[j] ^ baseImageData[j]);
 				}
 			}
-			images.add(image);
+
+			DataBufferByte db = new DataBufferByte(imageData, imageSize);
+			WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 }, null);
+
+			images.add(new BufferedImage(cm, r, false, null));
 		}
 	}
 
