@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class DAXImageContent extends DAXContent {
+	private static final DAXImageContentConverter CONVERTER = new DAXImageContentConverter();;
+
 	protected final List<BufferedImage> images = new ArrayList<>();
 
 	public boolean contains(Object arg0) {
@@ -81,4 +84,11 @@ public abstract class DAXImageContent extends DAXContent {
 		return images.toArray(arg0);
 	}
 
+	public List<BufferedImage> toList() {
+		return new ArrayList<>(images);
+	}
+
+	public List<BufferedImage> withWallSymbolColor() {
+		return images.stream().map(CONVERTER::asWallSymbol).collect(Collectors.toList());
+	}
 }

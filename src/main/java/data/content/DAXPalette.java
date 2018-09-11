@@ -3,10 +3,11 @@ package data.content;
 import java.awt.Color;
 import java.awt.image.IndexColorModel;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class DAXPalette {
-	private static final Color COLOR_TRANSPARENT = new Color(0x67F79F);
-	private static final Color COLOR_GREY = new Color(0x525252);
+	public static final Color COLOR_TRANSPARENT = new Color(0x67F79F);
+	public static final Color COLOR_GREY = new Color(0x525252);
 
 	private static final Color COLOR_BLACK = new Color(0x000000);
 	private static final Color COLOR_BLUE = new Color(0x0000AA);
@@ -56,5 +57,16 @@ public class DAXPalette {
 			b[colorStart + i] = (byte) (data.get(dataOffset + 3 * i + 2) << 2);
 		}
 		return new IndexColorModel(8, 256, r, g, b);
+	}
+
+	public static IndexColorModel transformToWallPalette(IndexColorModel cm) {
+		byte[] r = new byte[256];
+		byte[] g = new byte[256];
+		byte[] b = new byte[256];
+		cm.getReds(r);
+		cm.getGreens(g);
+		cm.getBlues(b);
+
+		return new IndexColorModel(8, 256, r, g, b, Arrays.asList(COLOR_GAME_STATIC).indexOf(COLOR_MAGENTA_BRIGHT));
 	}
 }
