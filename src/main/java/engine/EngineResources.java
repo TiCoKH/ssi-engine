@@ -59,6 +59,10 @@ public class EngineResources {
 		return load("BORDERS.DAX", 0, VGAImage.class);
 	}
 
+	public DAXImageContent getTitles(int id) throws IOException {
+		return load("TITLE.DAX", id, VGAImage.class);
+	}
+
 	public DAXImageContent findImage(int id, DAXContentType type) throws IOException {
 		return find(id, imageTypes.get(type), type);
 	}

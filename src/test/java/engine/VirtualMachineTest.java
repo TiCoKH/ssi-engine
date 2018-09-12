@@ -29,6 +29,14 @@ public class VirtualMachineTest {
 			@Override
 			public void showPicture(int id) {
 			}
+
+			@Override
+			public void loadArea(int id1, int id2, int id3) {
+			}
+
+			@Override
+			public void loadAreaDecoration(int id1, int id2, int id3) {
+			}
 		});
 		vm.newEcl(ecls.getById(16, EclProgram.class));
 		System.out.println("Initial:");

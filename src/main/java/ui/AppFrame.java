@@ -3,6 +3,8 @@ package ui;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -29,6 +31,21 @@ public class AppFrame {
 		this.frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.frame.setLocationByPlatform(true);
 		this.frame.add(engine.getRenderer());
+		this.frame.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				engine.setKeyEvent(e);
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+		});
 	}
 
 	private void show() {

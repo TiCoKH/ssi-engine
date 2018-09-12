@@ -259,7 +259,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.LOAD_FILES, args -> {
-
+			engine.loadArea(intValue(args[0]), intValue(args[1]), intValue(args[2]));
 		});
 		IMPL.put(EclOpCode.PARTY_SURPRISE, args -> {
 
@@ -352,7 +352,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.LOAD_PIECES, args -> {
-
+			engine.loadAreaDecoration(intValue(args[0]), intValue(args[1]), intValue(args[2]));
 		});
 		IMPL.put(EclOpCode.PROGRAM, args -> {
 
