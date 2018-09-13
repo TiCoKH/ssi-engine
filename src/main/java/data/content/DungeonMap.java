@@ -49,13 +49,13 @@ public class DungeonMap extends DAXContent {
 		}
 		switch (d) {
 			case NORTH:
-				return y > 1;
+				return y > 0;
 			case EAST:
-				return x < 14;
+				return x < 15;
 			case SOUTH:
-				return y < 14;
+				return y < 15;
 			case WEST:
-				return x > 1;
+				return x > 0;
 		}
 		return false;
 	}
