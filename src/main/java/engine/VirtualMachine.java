@@ -304,8 +304,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.MENU_ENCOUNTER, args -> {
 
 		});
-		IMPL.put(EclOpCode.TABLE_GET, args -> {
-
+		IMPL.put(EclOpCode.COPY_MEM, args -> {
+			mem.copyMemInt(args[0], intValue(args[1]), args[2]);
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, args -> {
 			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
@@ -345,8 +345,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.CLOCK, args -> {
 
 		});
-		IMPL.put(EclOpCode.TABLE_SET, args -> {
-
+		IMPL.put(EclOpCode.WRITE_MEM_BASE_OFF, args -> {
+			mem.writeMemInt(args[1], intValue(args[2]), intValue(args[0]));
 		});
 		IMPL.put(EclOpCode.ADD_NPC, args -> {
 

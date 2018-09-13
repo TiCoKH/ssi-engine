@@ -43,7 +43,7 @@ public enum EclOpCode {
 	TREASURE(0x27, 8, "TREASURE"), //
 	ROB(0x28, 3, "ROB"), //
 	MENU_ENCOUNTER(0x29, 0, "ENCOUNTER MENU"), // TODO: Game specific
-	TABLE_GET(0x2A, 3, "GETTABLE"), //
+	COPY_MEM(0x2A, 3, "COPY_MEM"), //
 	MENU_HORIZONTAL(0x2B, 2, "HORIZONTAL MENU"), //
 	PARLAY(0x2C, 0, "PARLAY"), // TODO: Game specific
 	CALL(0x2D, 1, "CALL"), //
@@ -54,7 +54,7 @@ public enum EclOpCode {
 	FIND_ITEM(0x32, 1, "FIND ITEM"), //
 	PRINT_RETURN(0x33, 0, "PRINT RETURN"), //
 	CLOCK(0x34, 2, "ECL CLOCK"), //
-	TABLE_SET(0x35, 3, "SAVE TABLE"), //
+	WRITE_MEM_BASE_OFF(0x35, 3, "WRITE_MEM_BASE_OFF"), //
 	ADD_NPC(0x36, 2, "ADD NPC"), //
 	LOAD_PIECES(0x37, 3, "LOAD PIECES"), //
 	PROGRAM(0x38, 1, "PROGRAM"), //

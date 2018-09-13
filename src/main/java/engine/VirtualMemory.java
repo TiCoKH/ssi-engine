@@ -49,6 +49,13 @@ public class VirtualMemory {
 		return a.isShortValue() ? mem.getShort(a.valueAsInt()) : mem.get(a.valueAsInt());
 	}
 
+	public int readMemInt(EclArgument base, int offset) {
+		if (!base.isMemAddress()) {
+			return 0;
+		}
+		return base.isShortValue() ? mem.getShort(base.valueAsInt() + offset) : mem.get(base.valueAsInt() + offset);
+	}
+
 	public void writeMemInt(EclArgument a, int value) {
 		if (!a.isMemAddress()) {
 			return;
@@ -57,6 +64,28 @@ public class VirtualMemory {
 			mem.putShort(a.valueAsInt(), (short) value);
 		} else {
 			mem.put(a.valueAsInt(), (byte) value);
+		}
+	}
+
+	public void writeMemInt(EclArgument base, int offset, int value) {
+		if (!base.isMemAddress()) {
+			return;
+		}
+		if (base.isShortValue()) {
+			mem.putShort(base.valueAsInt() + offset, (short) value);
+		} else {
+			mem.put(base.valueAsInt() + offset, (byte) value);
+		}
+	}
+
+	public void copyMemInt(EclArgument base, int offset, EclArgument target) {
+		if (!base.isMemAddress() || !target.isMemAddress()) {
+			return;
+		}
+		if (target.isShortValue()) {
+			mem.putShort(target.valueAsInt(), (short) readMemInt(base, offset));
+		} else {
+			mem.put(target.valueAsInt(), (byte) readMemInt(base, offset));
 		}
 	}
 
