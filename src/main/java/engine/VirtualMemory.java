@@ -8,40 +8,38 @@ import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
 public class VirtualMemory {
+	private static final int MEMLOC_MAP_POS_X = 0xC04B;
+	private static final int MEMLOC_MAP_POS_Y = 0xC04C;
+	private static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
+
 	private ByteBuffer mem;
-	private int currentMapX;
-	private int currentMapY;
-	private Direction currentMapOrient;
 
 	public VirtualMemory() {
 		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
-		currentMapX = 0;
-		currentMapY = 0;
-		currentMapOrient = null;
 	}
 
 	public int getCurrentMapX() {
-		return currentMapX;
+		return mem.get(MEMLOC_MAP_POS_X) & 0xFF;
 	}
 
 	public void setCurrentMapX(int currentMapX) {
-		this.currentMapX = currentMapX;
+		mem.put(MEMLOC_MAP_POS_X, (byte) currentMapX);
 	}
 
 	public int getCurrentMapY() {
-		return currentMapY;
+		return mem.get(MEMLOC_MAP_POS_Y) & 0xFF;
 	}
 
 	public void setCurrentMapY(int currentMapY) {
-		this.currentMapY = currentMapY;
+		mem.put(MEMLOC_MAP_POS_Y, (byte) currentMapY);
 	}
 
 	public Direction getCurrentMapOrient() {
-		return currentMapOrient;
+		return Direction.withId(mem.get(MEMLOC_MAP_ORIENTATION) & 0xFF);
 	}
 
 	public void setCurrentMapOrient(Direction currentMapOrient) {
-		this.currentMapOrient = currentMapOrient;
+		mem.put(MEMLOC_MAP_ORIENTATION, (byte) currentMapOrient.getId());
 	}
 
 	public int readMemInt(EclArgument a) {

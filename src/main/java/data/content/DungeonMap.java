@@ -93,11 +93,13 @@ public class DungeonMap extends DAXContent {
 	}
 
 	public enum Direction {
-		NORTH(0, -1), EAST(1, 0), SOUTH(0, 1), WEST(-1, 0);
+		NORTH(0, 0, -1), EAST(2, 1, 0), SOUTH(4, 0, 1), WEST(6, -1, 0);
+		private int id;
 		private int deltaX;
 		private int deltaY;
 
-		private Direction(int deltaX, int deltaY) {
+		private Direction(int id, int deltaX, int deltaY) {
+			this.id = id;
 			this.deltaX = deltaX;
 			this.deltaY = deltaY;
 		}
@@ -114,12 +116,20 @@ public class DungeonMap extends DAXContent {
 			return Direction.values()[(ordinal() + 3) % 4];
 		}
 
+		public int getId() {
+			return id;
+		}
+
 		public int getDeltaX() {
 			return deltaX;
 		}
 
 		public int getDeltaY() {
 			return deltaY;
+		}
+
+		public static Direction withId(int id) {
+			return Direction.values()[id >> 1];
 		}
 	}
 }
