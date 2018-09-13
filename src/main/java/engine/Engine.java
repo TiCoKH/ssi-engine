@@ -161,25 +161,25 @@ public class Engine implements EngineCallback, RendererCallback {
 			return;
 		}
 
-		Direction d = getCurrentMapOrient();
+		Direction d = memory.getCurrentMapOrient();
 		switch (keyEvent.getKeyCode()) {
 			case KeyEvent.VK_W:
-				if (currentMap.canMove(getCurrentMapX(), getCurrentMapY(), d)) {
-					memory.setCurrentMapX(getCurrentMapX() + d.getDeltaX());
-					memory.setCurrentMapY(getCurrentMapY() + d.getDeltaY());
+				if (currentMap.canMove(memory.getCurrentMapX(), memory.getCurrentMapY(), d)) {
+					memory.setCurrentMapX(memory.getCurrentMapX() + d.getDeltaX());
+					memory.setCurrentMapY(memory.getCurrentMapY() + d.getDeltaY());
 				}
 				break;
 			case KeyEvent.VK_S:
-				if (currentMap.canMove(getCurrentMapX(), getCurrentMapY(), d.getReverse())) {
-					memory.setCurrentMapX(getCurrentMapX() + d.getReverse().getDeltaX());
-					memory.setCurrentMapY(getCurrentMapY() + d.getReverse().getDeltaY());
+				if (currentMap.canMove(memory.getCurrentMapX(), memory.getCurrentMapY(), d.getReverse())) {
+					memory.setCurrentMapX(memory.getCurrentMapX() + d.getReverse().getDeltaX());
+					memory.setCurrentMapY(memory.getCurrentMapY() + d.getReverse().getDeltaY());
 				}
 				break;
 			case KeyEvent.VK_A:
-				memory.setCurrentMapOrient(getCurrentMapOrient().getLeft());
+				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getLeft());
 				break;
 			case KeyEvent.VK_D:
-				memory.setCurrentMapOrient(getCurrentMapOrient().getRight());
+				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getRight());
 				break;
 		}
 	}
@@ -260,30 +260,26 @@ public class Engine implements EngineCallback, RendererCallback {
 	}
 
 	@Override
-	public int getCurrentMapX() {
-		return memory.getCurrentMapX();
-	}
-
-	@Override
-	public int getCurrentMapY() {
-		return memory.getCurrentMapY();
-	}
-
-	@Override
-	public Direction getCurrentMapOrient() {
-		return memory.getCurrentMapOrient();
+	public EclString getPositionText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(memory.getCurrentMapX());
+		sb.append(",");
+		sb.append(memory.getCurrentMapY());
+		sb.append(" ");
+		sb.append(memory.getCurrentMapOrient().name().charAt(0));
+		return new EclString(sb.toString());
 	}
 
 	@Override
 	public int[][] getWallDisplay(WallDistance dis, WallPlacement plc) {
-		Direction d = getCurrentMapOrient();
+		Direction d = memory.getCurrentMapOrient();
 		int m = dis == WallDistance.FAR ? 2 : dis == WallDistance.MEDIUM ? 1 : 0;
 
-		int xPos = getCurrentMapX() + m * d.getDeltaX();
+		int xPos = memory.getCurrentMapX() + m * d.getDeltaX();
 		if (xPos < 0 || xPos > 15) {
 			return null;
 		}
-		int yPos = getCurrentMapY() + m * d.getDeltaY();
+		int yPos = memory.getCurrentMapY() + m * d.getDeltaY();
 		if (yPos < 0 || yPos > 15) {
 			return null;
 		}

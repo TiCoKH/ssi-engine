@@ -1,17 +1,13 @@
 package engine;
 
-import data.content.DungeonMap.Direction;
-import data.content.WallDef.WallPlacement;
 import data.content.WallDef.WallDistance;
+import data.content.WallDef.WallPlacement;
+import engine.opcodes.EclString;
 
 public interface RendererCallback {
 	void textDisplayFinished();
 
-	int getCurrentMapX();
-
-	int getCurrentMapY();
-
-	Direction getCurrentMapOrient();
+	EclString getPositionText();;
 
 	int[][] getWallDisplay(WallDistance dis, WallPlacement plc);
 }

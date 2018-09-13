@@ -156,6 +156,7 @@ public class ClassicRenderer extends JPanel {
 		} else if (backdrops != null && wallSymbols != null) {
 			renderBackdrop(g2d);
 			renderDungeon(g2d);
+			renderPosition(g2d);
 		}
 		if (text != null) {
 			renderText(g2d);
@@ -233,6 +234,16 @@ public class ClassicRenderer extends JPanel {
 				BufferedImage w = wallSymbols.get(row[x]);
 				g2d.drawImage(w.getScaledInstance(zoom(w.getWidth()), zoom(w.getHeight()), 0), xPos, yPos, null);
 			}
+		}
+	}
+
+	private void renderPosition(Graphics2D g2d) {
+		EclString posStr = renderCB.getPositionText();
+		for (int pos = 0; pos < posStr.getLength(); pos++) {
+			int x = zoom8(17 + pos);
+			int y = zoom8(15);
+			BufferedImage c = font.get(posStr.getChar(pos));
+			g2d.drawImage(c.getScaledInstance(zoom(c.getWidth()), zoom(c.getHeight()), 0), x, y, null);
 		}
 	}
 
