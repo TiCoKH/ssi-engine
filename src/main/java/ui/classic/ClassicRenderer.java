@@ -208,7 +208,7 @@ public class ClassicRenderer extends JPanel {
 
 	private void renderBackdrop(Graphics2D g2d) {
 		int x = zoom8(3);
-		BufferedImage bd = backdrops.get(0);
+		BufferedImage bd = backdrops.get(renderCB.getBackdropIndex());
 		g2d.drawImage(bd.getScaledInstance(zoom(bd.getWidth()), zoom(bd.getHeight()), 0), x, x, null);
 	}
 

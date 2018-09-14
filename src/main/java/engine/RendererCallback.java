@@ -9,5 +9,7 @@ public interface RendererCallback {
 
 	EclString getPositionText();;
 
+	int getBackdropIndex();
+
 	int[][] getWallDisplay(WallDistance dis, WallPlacement plc);
 }

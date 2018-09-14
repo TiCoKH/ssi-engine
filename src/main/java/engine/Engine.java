@@ -10,6 +10,7 @@ import static data.content.DAXContentType._8X8D;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,9 +215,11 @@ public class Engine implements EngineCallback, RendererCallback {
 		try {
 			currentWalls = res.find(id1, WallDef.class, WALLDEF);
 
-			List<BufferedImage> currentBackdrop = res.findImage(id1, BACK).toList();
+			List<BufferedImage> backdrops = new ArrayList<>();
+			backdrops.add(res.findImage(128 + id1, BACK).get(0));
+			backdrops.add(res.findImage(id1, BACK).get(0));
 			List<BufferedImage> currentWallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
-			renderer.setDungeonDisplay(currentBackdrop, currentWallSymbols);
+			renderer.setDungeonDisplay(backdrops, currentWallSymbols);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -272,6 +275,11 @@ public class Engine implements EngineCallback, RendererCallback {
 		sb.append(" ");
 		sb.append(memory.getCurrentMapOrient().name().charAt(0));
 		return new EclString(sb.toString());
+	}
+
+	@Override
+	public int getBackdropIndex() {
+		return (memory.getSquareInfo() & 0x80) >> 7;
 	}
 
 	@Override
