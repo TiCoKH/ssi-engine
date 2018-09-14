@@ -11,6 +11,8 @@ public class VirtualMemory {
 	private static final int MEMLOC_MAP_POS_X = 0xC04B;
 	private static final int MEMLOC_MAP_POS_Y = 0xC04C;
 	private static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
+	private static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
+	private static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
 
 	private ByteBuffer mem;
 
@@ -40,6 +42,22 @@ public class VirtualMemory {
 
 	public void setCurrentMapOrient(Direction currentMapOrient) {
 		mem.put(MEMLOC_MAP_ORIENTATION, (byte) currentMapOrient.getId());
+	}
+
+	public int getWallType() {
+		return mem.get(MEMLOC_MAP_WALL_TYPE) & 0xFF;
+	}
+
+	public void setWallType(int wallType) {
+		mem.put(MEMLOC_MAP_WALL_TYPE, (byte) wallType);
+	}
+
+	public int getSquareInfo() {
+		return mem.get(MEMLOC_MAP_SQUARE_INFO) & 0xFF;
+	}
+
+	public void setSquareInfo(int squareInfo) {
+		mem.put(MEMLOC_MAP_SQUARE_INFO, (byte) squareInfo);
 	}
 
 	public int readMemInt(EclArgument a) {
