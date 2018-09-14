@@ -162,23 +162,30 @@ public class Engine implements EngineCallback, RendererCallback {
 		}
 
 		Direction d = memory.getCurrentMapOrient();
+		int x = memory.getCurrentMapX();
+		int y = memory.getCurrentMapY();
 		switch (keyEvent.getKeyCode()) {
 			case KeyEvent.VK_W:
-				if (currentMap.canMove(memory.getCurrentMapX(), memory.getCurrentMapY(), d)) {
-					memory.setCurrentMapX(memory.getCurrentMapX() + d.getDeltaX());
-					memory.setCurrentMapY(memory.getCurrentMapY() + d.getDeltaY());
+				if (currentMap.canMove(x, y, d)) {
+					x += d.getDeltaX();
+					y += d.getDeltaY();
+					memory.setCurrentMapX(x);
+					memory.setCurrentMapY(y);
+					memory.setSquareInfo(currentMap.squareInfoAt(x, y));
 				}
 				break;
 			case KeyEvent.VK_S:
-				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getReverse());
+				d = d.getReverse();
 				break;
 			case KeyEvent.VK_A:
-				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getLeft());
+				d = d.getLeft();
 				break;
 			case KeyEvent.VK_D:
-				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getRight());
+				d = d.getRight();
 				break;
 		}
+		memory.setCurrentMapOrient(d);
+		memory.setWallType(currentMap.wallIndexAt(x, y, d));
 	}
 
 	public ClassicRenderer getRenderer() {
