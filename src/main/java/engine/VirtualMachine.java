@@ -324,10 +324,14 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.AND, args -> {
-
+			int result = intValue(args[0]) & intValue(args[1]);
+			mem.writeMemInt(args[2], result);
+			compareResult = result == 0 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.OR, args -> {
-
+			int result = intValue(args[0]) | intValue(args[1]);
+			mem.writeMemInt(args[2], result);
+			compareResult = result == 0 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.SPRITE_OFF, args -> {
 			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
