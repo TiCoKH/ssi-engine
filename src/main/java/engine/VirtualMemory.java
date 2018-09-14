@@ -8,6 +8,7 @@ import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
 public class VirtualMemory {
+	private static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
 	private static final int MEMLOC_MAP_POS_X = 0xC04B;
 	private static final int MEMLOC_MAP_POS_Y = 0xC04C;
 	private static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
@@ -18,6 +19,14 @@ public class VirtualMemory {
 
 	public VirtualMemory() {
 		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
+	}
+
+	public int getCombatResult() {
+		return mem.get(MEMLOC_COMBAT_RESULT) & 0xFF;
+	}
+
+	public void setCombatResult(int combatResult) {
+		mem.put(MEMLOC_COMBAT_RESULT, (byte) combatResult);
 	}
 
 	public int getCurrentMapX() {

@@ -268,7 +268,9 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.COMBAT, args -> {
-
+			// TODO: Implement combat
+			// For now set combat to success
+			mem.setCombatResult(0);
 		});
 		IMPL.put(EclOpCode.ON_GOTO, args -> {
 			EclArgument[] dynArgs = new EclArgument[intValue(args[1])];
