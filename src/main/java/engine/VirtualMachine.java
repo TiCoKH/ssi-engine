@@ -160,9 +160,9 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.COMPARE, args -> {
 			if (args[0].isStringValue() && args[1].isStringValue()) {
-				compareResult = stringValue(args[1]).toString().compareTo(stringValue(args[0]).toString());
+				compareResult = stringValue(args[0]).toString().compareTo(stringValue(args[1]).toString());
 			} else if (args[0].isNumberValue() && args[1].isNumberValue()) {
-				compareResult = intValue(args[1]) - intValue(args[0]);
+				compareResult = intValue(args[0]) - intValue(args[1]);
 			}
 		});
 		IMPL.put(EclOpCode.ADD, args -> {
