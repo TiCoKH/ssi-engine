@@ -66,7 +66,7 @@ public enum EclOpCode {
 	DUMP(0x3E, 0, "DUMP"), //
 	FIND_SPECIAL(0x3F, 1, "FIND SPECIAL"), //
 	DESTROY_ITEM(0x40, 1, "DESTROY ITEMS"), //
-	UNKNOWN_42(0x42, 0, "42"), //
+	STOP_EVENT(0x42, 0, "STOP_EVENT"), //
 	UNKNOWN_43(0x43, 1, "43"), //
 	UNKNOWN_45(0x45, 2, "45"), //
 	UNKNOWN_46(0x46, 2, "46"), //

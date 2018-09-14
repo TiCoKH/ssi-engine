@@ -390,8 +390,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.DESTROY_ITEM, args -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_42, args -> {
-
+		IMPL.put(EclOpCode.STOP_EVENT, args -> {
+			stopVM();
 		});
 		IMPL.put(EclOpCode.UNKNOWN_43, args -> {
 
