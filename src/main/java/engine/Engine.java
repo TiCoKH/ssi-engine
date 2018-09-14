@@ -170,10 +170,7 @@ public class Engine implements EngineCallback, RendererCallback {
 				}
 				break;
 			case KeyEvent.VK_S:
-				if (currentMap.canMove(memory.getCurrentMapX(), memory.getCurrentMapY(), d.getReverse())) {
-					memory.setCurrentMapX(memory.getCurrentMapX() + d.getReverse().getDeltaX());
-					memory.setCurrentMapY(memory.getCurrentMapY() + d.getReverse().getDeltaY());
-				}
+				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getReverse());
 				break;
 			case KeyEvent.VK_A:
 				memory.setCurrentMapOrient(memory.getCurrentMapOrient().getLeft());
