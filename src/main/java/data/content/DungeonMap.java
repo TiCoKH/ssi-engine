@@ -8,7 +8,7 @@ import java.util.Map;
 public class DungeonMap extends DAXContent {
 	private static final int WALLS_NE_START = 0x000;
 	private static final int WALLS_SW_START = 0x100;
-	private static final int BACKDROP_START = 0x200;
+	private static final int SQUARE_INFO_START = 0x200;
 	private static final int WALLS_FLAGS_START = 0x300;
 
 	private DungeonSquare[][] map;
@@ -31,13 +31,13 @@ public class DungeonMap extends DAXContent {
 				wallTypes.put(Direction.EAST, data.get(WALLS_NE_START + stride + x) & 0x0F);
 				wallTypes.put(Direction.SOUTH, (data.get(WALLS_SW_START + stride + x) & 0xF0) >> 4);
 				wallTypes.put(Direction.WEST, data.get(WALLS_SW_START + stride + x) & 0x0F);
-				int backdrop = data.get(BACKDROP_START + stride + x) & 0xFF;
+				int squareInfo = data.get(SQUARE_INFO_START + stride + x) & 0xFF;
 				Map<Direction, Integer> doorFlags = new EnumMap<>(Direction.class);
 				doorFlags.put(Direction.WEST, (data.get(WALLS_FLAGS_START + stride + x) & 0xC0) >> 6);
 				doorFlags.put(Direction.SOUTH, (data.get(WALLS_FLAGS_START + stride + x) & 0x30) >> 4);
 				doorFlags.put(Direction.EAST, (data.get(WALLS_FLAGS_START + stride + x) & 0x0C) >> 2);
 				doorFlags.put(Direction.NORTH, data.get(WALLS_FLAGS_START + stride + x) & 0x03);
-				map[x][y] = new DungeonSquare(wallTypes, backdrop, doorFlags);
+				map[x][y] = new DungeonSquare(wallTypes, squareInfo, doorFlags);
 			}
 		}
 	}
@@ -64,14 +64,18 @@ public class DungeonMap extends DAXContent {
 		return map[x][y].getWall(o);
 	}
 
+	public int squareInfoAt(int x, int y) {
+		return map[x][y].getSquareInfo();
+	}
+
 	private static class DungeonSquare {
 		private Map<Direction, Integer> wallTypes;
 		private Map<Direction, Integer> doorFlags;
-		private int backdrop;
+		private int squareInfo;
 
-		private DungeonSquare(Map<Direction, Integer> wallTypes, int backdrop, Map<Direction, Integer> doorFlags) {
+		private DungeonSquare(Map<Direction, Integer> wallTypes, int squareInfo, Map<Direction, Integer> doorFlags) {
 			this.wallTypes = wallTypes;
-			this.backdrop = backdrop;
+			this.squareInfo = squareInfo;
 			this.doorFlags = doorFlags;
 		}
 
@@ -79,8 +83,8 @@ public class DungeonMap extends DAXContent {
 			return wallTypes.get(d);
 		}
 
-		private int getBackdrop() {
-			return backdrop;
+		private int getSquareInfo() {
+			return squareInfo;
 		}
 
 		private boolean isDoor(Direction d) {
