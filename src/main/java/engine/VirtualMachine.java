@@ -32,7 +32,7 @@ public class VirtualMachine {
 
 	private int eclCodeBaseAddress;
 	private ByteBuffer eclCode;
-	private EclInstruction onEvent1;
+	private EclInstruction onEvent1; // Gets called on entering or exiting a NEW_ECL
 	private EclInstruction onEnter;
 	private EclInstruction onRest;
 	private EclInstruction onRestInterruption;
