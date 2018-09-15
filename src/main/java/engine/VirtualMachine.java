@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import data.content.EclProgram;
+import engine.EngineCallback.InputType;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
@@ -98,8 +99,10 @@ public class VirtualMachine {
 
 	private void startEvent(EclInstruction eventInst) {
 		stopped = false;
+		engine.setInputHandler(InputType.NONE, null, null);
 		exec(eventInst, true);
 		runVM();
+		engine.setInputHandler(InputType.MOVEMENT, null, InputAction.STANDARD_ACTIONS);
 	}
 
 	private void runVM() {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 import org.junit.Assume;
 import org.junit.Test;
@@ -22,6 +23,10 @@ public class VirtualMachineTest {
 		FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ);
 		DAXFile ecls = DAXFile.createFrom(c);
 		VirtualMachine vm = new VirtualMachine(new EngineCallback() {
+			@Override
+			public void setInputHandler(InputType inputType, String description, List<InputAction> action) {
+			}
+
 			@Override
 			public void showText(EclString str) {
 			}

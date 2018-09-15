@@ -7,7 +7,11 @@ import engine.opcodes.EclString;
 public interface RendererCallback {
 	void textDisplayFinished();
 
-	EclString getPositionText();;
+	void quit();
+
+	void handleInput(InputAction action);
+
+	EclString getPositionText();
 
 	int getBackdropIndex();
 

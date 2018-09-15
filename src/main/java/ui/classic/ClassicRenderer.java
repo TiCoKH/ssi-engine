@@ -6,21 +6,40 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import data.content.DAXImageContent;
 import data.content.MonocromeSymbols;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
+import engine.InputAction;
 import engine.RendererCallback;
 import engine.opcodes.EclString;
 import ui.BorderSymbols;
 import ui.Borders;
 
 public class ClassicRenderer extends JPanel {
+	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
+	static {
+		KEY_MAPPING = new HashMap<>();
+		KEY_MAPPING.put(InputAction.ACCEPT, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+		KEY_MAPPING.put(InputAction.MOVE_FORWARD, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
+		KEY_MAPPING.put(InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
+		KEY_MAPPING.put(InputAction.TURN_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
+		KEY_MAPPING.put(InputAction.TURN_AROUND, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+	}
+
 	private static final int TEXT_START_X = 1;
 	private static final int TEXT_START_Y = 17;
 	private static final int TEXT_LINE_WIDTH = 38;
@@ -51,6 +70,8 @@ public class ClassicRenderer extends JPanel {
 	private List<BufferedImage> backdrops;
 	private List<BufferedImage> wallSymbols;
 
+	private List<InputAction> menu;
+
 	public ClassicRenderer(RendererCallback renderCB, MonocromeSymbols font, DAXImageContent borderSymbols) {
 		this.renderCB = renderCB;
 		this.font = font;
@@ -72,7 +93,35 @@ public class ClassicRenderer extends JPanel {
 		this.backdrops = null;
 		this.wallSymbols = null;
 
+		this.menu = new ArrayList<>();
+
 		initRenderer();
+	}
+
+	public void setInputActions(String description, List<InputAction> newActions) {
+		this.menu.clear();
+		this.statusLine = description == null ? null : new EclString(description);
+
+		resetInput();
+
+		if (newActions == null) {
+			return;
+		}
+
+		if (newActions != InputAction.STANDARD_ACTIONS) {
+			this.menu.addAll(newActions);
+		}
+		newActions.stream().forEach(a -> {
+			KeyStroke k = KEY_MAPPING.containsKey(a) ? KEY_MAPPING.get(a) : KeyStroke.getKeyStroke(a.getName().toLowerCase().charAt(0));
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a.getName());
+			getActionMap().put(a.getName(), new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					renderCB.handleInput(a);
+				}
+			});
+		});
 	}
 
 	public void setStatusLine(EclString statusLine) {
@@ -131,6 +180,21 @@ public class ClassicRenderer extends JPanel {
 	private void initRenderer() {
 		setDoubleBuffered(true);
 		setPreferredSize(new Dimension(320 * zoom, 200 * zoom));
+		resetInput();
+	}
+
+	private void resetInput() {
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK), "quit");
+		getActionMap().clear();
+		getActionMap().put("quit", new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				renderCB.quit();
+				System.exit(0);
+			}
+		});
 	}
 
 	@Override
@@ -141,7 +205,7 @@ public class ClassicRenderer extends JPanel {
 		g2d.setBackground(Color.BLACK);
 		g2d.clearRect(0, 0, 320 * zoom, 200 * zoom);
 
-		if (statusLine != null) {
+		if (statusLine != null || !menu.isEmpty()) {
 			renderStatus(g2d);
 		}
 		if (title != null) {
@@ -164,11 +228,19 @@ public class ClassicRenderer extends JPanel {
 	}
 
 	private void renderStatus(Graphics2D g2d) {
-		for (int pos = 0; pos < statusLine.getLength(); pos++) {
-			int x = zoom8(pos);
-			int y = zoom8(24);
-			BufferedImage c = font.get(statusLine.getChar(pos));
-			g2d.drawImage(c.getScaledInstance(zoom(c.getWidth()), zoom(c.getHeight()), 0), x, y, null);
+		int pos = 0;
+		if (statusLine != null) {
+			for (; pos < statusLine.getLength(); pos++) {
+				renderChar(g2d, pos, 24, statusLine.getChar(pos));
+			}
+			pos++;
+		}
+		for (InputAction a : menu) {
+			EclString menuName = new EclString(a.getName());
+			for (int pos2 = 0; pos2 < menuName.getLength(); pos2++) {
+				renderChar(g2d, pos + pos2, 24, menuName.getChar(pos2));
+			}
+			pos += menuName.getLength() + 1;
 		}
 	}
 
@@ -199,10 +271,9 @@ public class ClassicRenderer extends JPanel {
 
 	private void renderText(Graphics2D g2d) {
 		for (int pos = 0; pos < textPos; pos++) {
-			int x = zoom8(TEXT_START_X + (pos % TEXT_LINE_WIDTH));
-			int y = zoom8(TEXT_START_Y + (pos / TEXT_LINE_WIDTH));
-			BufferedImage c = font.get(text.getChar(pos));
-			g2d.drawImage(c.getScaledInstance(zoom(c.getWidth()), zoom(c.getHeight()), 0), x, y, null);
+			int x = TEXT_START_X + (pos % TEXT_LINE_WIDTH);
+			int y = TEXT_START_Y + (pos / TEXT_LINE_WIDTH);
+			renderChar(g2d, x, y, text.getChar(pos));
 		}
 	}
 
@@ -240,11 +311,13 @@ public class ClassicRenderer extends JPanel {
 	private void renderPosition(Graphics2D g2d) {
 		EclString posStr = renderCB.getPositionText();
 		for (int pos = 0; pos < posStr.getLength(); pos++) {
-			int x = zoom8(17 + pos);
-			int y = zoom8(15);
-			BufferedImage c = font.get(posStr.getChar(pos));
-			g2d.drawImage(c.getScaledInstance(zoom(c.getWidth()), zoom(c.getHeight()), 0), x, y, null);
+			renderChar(g2d, 17 + pos, 15, posStr.getChar(pos));
 		}
+	}
+
+	private void renderChar(Graphics2D g2d, int x, int y, byte c) {
+		BufferedImage ci = font.get(c);
+		g2d.drawImage(ci.getScaledInstance(zoom(ci.getWidth()), zoom(ci.getHeight()), 0), zoom8(x), zoom8(y), null);
 	}
 
 	private int zoom(int pos) {

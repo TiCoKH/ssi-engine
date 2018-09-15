@@ -17,8 +17,18 @@ public class VirtualMemory {
 
 	private ByteBuffer mem;
 
+	private int menuChoice;
+
 	public VirtualMemory() {
 		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
+	}
+
+	public int getMenuChoice() {
+		return menuChoice;
+	}
+
+	public void setMenuChoice(int menuChoice) {
+		this.menuChoice = menuChoice;
 	}
 
 	public int getCombatResult() {
@@ -123,5 +133,4 @@ public class VirtualMemory {
 	public void writeMemString(EclArgument a, EclString value) {
 
 	}
-
 }

@@ -7,13 +7,11 @@ import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.WALLDEF;
 import static data.content.DAXContentType._8X8D;
 
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
 import data.content.DAXImageContent;
 import data.content.DungeonMap;
@@ -33,7 +31,6 @@ public class Engine implements EngineCallback, RendererCallback {
 	private VirtualMachine vm;
 	private VirtualMemory memory;
 
-	private boolean showingTitle;
 	private boolean running;
 
 	private Thread gameLoop;
@@ -42,8 +39,9 @@ public class Engine implements EngineCallback, RendererCallback {
 	private WallDef currentWalls;
 	private DungeonMap currentMap;
 
-	private KeyEvent keyEvent;
-	private Map<Integer, Runnable> shortcuts;
+	private Consumer<InputAction> inputHandler;
+	private List<InputAction> viableActions;
+	private InputAction nextAction;
 
 	public Engine(String gameDir) throws IOException {
 		res = new EngineResources(gameDir);
@@ -57,18 +55,17 @@ public class Engine implements EngineCallback, RendererCallback {
 		currentWalls = null;
 		currentMap = null;
 
-		keyEvent = null;
-		shortcuts = new HashMap<>();
-
-		showingTitle = false;
 		running = true;
+
+		this.viableActions = new ArrayList<>();
+		nextAction = null;
 
 		gameLoop = new Thread(() -> {
 			while (running) {
 				long start = System.currentTimeMillis();
-				if (keyEvent != null) {
-					handleInput();
-					keyEvent = null;
+				if (nextAction != null) {
+					inputHandler.accept(nextAction);
+					nextAction = null;
 				}
 				renderer.increaseText();
 				renderer.repaint();
@@ -87,35 +84,26 @@ public class Engine implements EngineCallback, RendererCallback {
 	}
 
 	private void initGameMenu() {
-		shortcuts.clear();
-		shortcuts.put(KeyEvent.VK_D, () -> {
+		currentThread = new Thread(() -> {
+			setInputHandler(InputType.MENU, "BUCK ROGERS V1.2", InputAction.MAINMENU_ACTIONS);
+			renderer.setTitleScreen(null);
+			renderer.setStatusLine(null);
+			int eclId = memory.getMenuChoice() == 0 ? 16 : 18;
 			try {
-				renderer.setTitleScreen(null);
-				renderer.setStatusLine(null);
-				EclProgram game = res.load("ECL1.DAX", 18, EclProgram.class);
-				vm.newEcl(game);
+				EclProgram ecl = res.load("ECL1.DAX", eclId, EclProgram.class);
+				vm.newEcl(ecl);
 				vm.startInitial();
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
 		});
-		shortcuts.put(KeyEvent.VK_G, () -> {
-			try {
-				renderer.setTitleScreen(null);
-				renderer.setStatusLine(null);
-				EclProgram demo = res.load("ECL1.DAX", 16, EclProgram.class);
-				vm.newEcl(demo);
-				vm.startInitial();
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
-		});
+		currentThread.start();
 	}
 
 	private void showTitles() {
 		currentThread = new Thread(() -> {
+			setInputHandler(InputType.TITLE, null, null); // TODO
 			synchronized (vm) {
-				showingTitle = true;
 				try {
 					BufferedImage title1 = res.getTitles(1).get(0);
 					renderer.setTitleScreen(title1);
@@ -128,73 +116,98 @@ public class Engine implements EngineCallback, RendererCallback {
 					vm.wait(5000L);
 					BufferedImage title4 = res.getTitles(4).get(0);
 					renderer.setTitleScreen(title4);
-					renderer.setStatusLine(new EclString("BUCK ROGERS V1.2 GAME DEMO"));
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 				} catch (InterruptedException e) {
 				}
-				showingTitle = false;
 				initGameMenu();
 			}
 		}, "Titles");
 		currentThread.start();
 	}
 
-	private void handleInput() {
-		// System.out.println(typedkey.paramString());
+	@Override
+	public void quit() {
+		running = false;
+	}
 
-		if (keyEvent.isControlDown() && keyEvent.getKeyCode() == KeyEvent.VK_Q) {
-			running = false;
-			System.exit(0);
-		}
-
-		if (showingTitle) {
-			synchronized (vm) {
-				vm.notify();
-			}
-			return;
-		}
-
-		if (shortcuts.containsKey(keyEvent.getKeyCode())) {
-			currentThread = new Thread(shortcuts.get(keyEvent.getKeyCode()), "Current Activity");
-			shortcuts.clear();
-			currentThread.start();
-			return;
-		}
-
-		Direction d = memory.getCurrentMapOrient();
-		int x = memory.getCurrentMapX();
-		int y = memory.getCurrentMapY();
-		switch (keyEvent.getKeyCode()) {
-			case KeyEvent.VK_W:
-				if (currentMap.canMove(x, y, d)) {
-					x += d.getDeltaX();
-					y += d.getDeltaY();
-					memory.setCurrentMapX(x);
-					memory.setCurrentMapY(y);
-					memory.setSquareInfo(currentMap.squareInfoAt(x, y));
-				}
-				break;
-			case KeyEvent.VK_S:
-				d = d.getReverse();
-				break;
-			case KeyEvent.VK_A:
-				d = d.getLeft();
-				break;
-			case KeyEvent.VK_D:
-				d = d.getRight();
-				break;
-		}
-		memory.setCurrentMapOrient(d);
-		memory.setWallType(currentMap.wallIndexAt(x, y, d));
+	@Override
+	public void handleInput(InputAction action) {
+		this.nextAction = action;
 	}
 
 	public ClassicRenderer getRenderer() {
 		return renderer;
 	}
 
-	public void setKeyEvent(KeyEvent e) {
-		this.keyEvent = e;
+	@Override
+	public void setInputHandler(InputType inputType, String description, List<InputAction> viable) {
+		this.viableActions.clear();
+		if (viable != null)
+			this.viableActions.addAll(viable);
+		renderer.setInputActions(description, viable);
+		switch (inputType) {
+			case NONE:
+				inputHandler = action -> {
+				};
+				break;
+			case TITLE:
+				inputHandler = action -> {
+					// Titles thread is current one
+					continueCurrentThread();
+				};
+				break;
+			case RETURN:
+				inputHandler = action -> {
+					setInputHandler(InputType.NONE, null, null);
+					// VM thread is the current one
+					continueCurrentThread();
+				};
+				pauseCurrentThread();
+				break;
+			case MENU:
+				inputHandler = action -> {
+					int index = viableActions.indexOf(action);
+					memory.setMenuChoice(index);
+					setInputHandler(InputType.NONE, null, null);
+					// either main menu or VM is current thread
+					continueCurrentThread();
+				};
+				pauseCurrentThread();
+				break;
+			case MOVEMENT:
+				inputHandler = action -> {
+					Direction d = memory.getCurrentMapOrient();
+					int x = memory.getCurrentMapX();
+					int y = memory.getCurrentMapY();
+					if (InputAction.MOVE_FORWARD == action) {
+						if (currentMap.canMove(x, y, d)) {
+							x += d.getDeltaX();
+							y += d.getDeltaY();
+							memory.setCurrentMapX(x);
+							memory.setCurrentMapY(y);
+							memory.setSquareInfo(currentMap.squareInfoAt(x, y));
+
+							currentThread = new Thread(() -> {
+								vm.startSearchLocation();
+							}, "VM");
+							currentThread.start();
+						}
+					} else if (InputAction.TURN_AROUND == action) {
+						d = d.getReverse();
+					} else if (InputAction.TURN_LEFT == action) {
+						d = d.getLeft();
+					} else if (InputAction.TURN_RIGHT == action) {
+						d = d.getRight();
+					}
+					memory.setCurrentMapOrient(d);
+					memory.setWallType(currentMap.wallIndexAt(x, y, d));
+				};
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	@Override
@@ -252,18 +265,15 @@ public class Engine implements EngineCallback, RendererCallback {
 	public void showText(EclString str) {
 		synchronized (vm) {
 			renderer.setText(str);
-			try {
-				vm.wait();
-			} catch (InterruptedException e) {
-			}
+			// pause VM untill all text is displayed
+			pauseCurrentThread();
 		}
 	}
 
 	@Override
 	public void textDisplayFinished() {
-		synchronized (vm) {
-			vm.notify();
-		}
+		// continue VM after all text is displayed
+		continueCurrentThread();
 	}
 
 	@Override
@@ -313,6 +323,21 @@ public class Engine implements EngineCallback, RendererCallback {
 			return null;
 		}
 		return currentWalls.getWallDisplay(wallIndex - 1, dis, plc);
+	}
+
+	private void pauseCurrentThread() {
+		synchronized (vm) {
+			try {
+				this.vm.wait();
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	private void continueCurrentThread() {
+		synchronized (vm) {
+			this.vm.notify();
+		}
 	}
 
 	private int clamp(int value, int min, int max) {
