@@ -77,32 +77,28 @@ public class VirtualMachine {
 	}
 
 	public void startAddress1() {
-		stopped = false;
-		exec(onEvent1, true);
-		runVM();
+		startEvent(onEvent1);
 	}
 
 	public void startSearchLocation() {
-		stopped = false;
-		exec(onEnter, true);
-		runVM();
+		startEvent(onEnter);
 	}
 
 	public void startPreCampCheck() {
-		stopped = false;
-		exec(onRest, true);
-		runVM();
+		startEvent(onRest);
 	}
 
 	public void startCampInterrupted() {
-		stopped = false;
-		exec(onRestInterruption, true);
-		runVM();
+		startEvent(onRestInterruption);
 	}
 
 	public void startInitial() {
+		startEvent(onInit);
+	}
+
+	private void startEvent(EclInstruction eventInst) {
 		stopped = false;
-		exec(onInit, true);
+		exec(eventInst, true);
 		runVM();
 	}
 
@@ -112,7 +108,7 @@ public class VirtualMachine {
 		}
 	}
 
-	private void stopVM() {
+	public void stopVM() {
 		stopped = true;
 	}
 
