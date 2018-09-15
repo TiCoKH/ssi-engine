@@ -42,7 +42,7 @@ public enum EclOpCode {
 	ON_GOSUB(0x26, 2, "ON GOSUB"), //
 	TREASURE(0x27, 8, "TREASURE"), //
 	ROB(0x28, 3, "ROB"), //
-	MENU_ENCOUNTER(0x29, 0, "ENCOUNTER MENU"), // TODO: Game specific
+	INPUT_RETURN(0x29, 0, "INPUT_RETURN"), // TODO: Game specific
 	COPY_MEM(0x2A, 3, "COPY_MEM"), //
 	MENU_HORIZONTAL(0x2B, 2, "HORIZONTAL MENU"), //
 	PARLAY(0x2C, 0, "PARLAY"), // TODO: Game specific

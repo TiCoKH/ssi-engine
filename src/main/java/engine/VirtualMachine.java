@@ -302,8 +302,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.ROB, args -> {
 
 		});
-		IMPL.put(EclOpCode.MENU_ENCOUNTER, args -> {
-
+		IMPL.put(EclOpCode.INPUT_RETURN, args -> {
+			engine.setInputHandler(InputType.RETURN, "PRESS BUTTON OR RETURN TO CONTINUE", InputAction.RETURN_ACTIONS);
 		});
 		IMPL.put(EclOpCode.COPY_MEM, args -> {
 			mem.copyMemInt(args[0], intValue(args[1]), args[2]);

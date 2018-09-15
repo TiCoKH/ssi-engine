@@ -108,7 +108,7 @@ public class ClassicRenderer extends JPanel {
 			return;
 		}
 
-		if (newActions != InputAction.STANDARD_ACTIONS) {
+		if (newActions != InputAction.STANDARD_ACTIONS && newActions != InputAction.RETURN_ACTIONS) {
 			this.menu.addAll(newActions);
 		}
 		newActions.stream().forEach(a -> {

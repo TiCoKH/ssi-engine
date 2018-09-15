@@ -16,6 +16,7 @@ public class InputAction {
 	public static final List<InputAction> STANDARD_ACTIONS = Collections
 		.unmodifiableList(Arrays.asList(new InputAction[] { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, TURN_AROUND }));
 	public static final List<InputAction> MAINMENU_ACTIONS = Collections.unmodifiableList(Arrays.asList(new InputAction[] { GAME, DEMO }));
+	public static final List<InputAction> RETURN_ACTIONS = Collections.unmodifiableList(Arrays.asList(new InputAction[] { ACCEPT }));
 
 	private final String name;
 
