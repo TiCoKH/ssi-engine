@@ -2,6 +2,8 @@ package engine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
 
 import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
@@ -14,6 +16,8 @@ public class VirtualMemory {
 	private static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
 	private static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
 	private static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
+
+	private static final Map<Integer, Integer> stringLengthMap = new HashMap<>();
 
 	private ByteBuffer mem;
 
@@ -127,10 +131,24 @@ public class VirtualMemory {
 	}
 
 	public EclString readMemString(EclArgument a) {
-		return null;
+		if (!a.isMemAddress()) {
+			return null;
+		}
+		int memPos = a.valueAsInt();
+		mem.position(memPos);
+		ByteBuffer buf = mem.slice().order(ByteOrder.LITTLE_ENDIAN);
+		buf.limit(stringLengthMap.get(memPos));
+		return new EclString(buf);
 	}
 
 	public void writeMemString(EclArgument a, EclString value) {
-
+		if (!a.isMemAddress()) {
+			return;
+		}
+		int memPos = a.valueAsInt();
+		stringLengthMap.put(memPos, value.getLength());
+		for (int i = 0; i < value.getLength(); i++) {
+			mem.put(memPos++, value.getChar(i));
+		}
 	}
 }

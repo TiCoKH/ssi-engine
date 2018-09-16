@@ -180,7 +180,12 @@ public class VirtualMachine {
 			mem.writeMemInt(args[1], rnd.nextInt(intValue(args[0]) + 1));
 		});
 		IMPL.put(EclOpCode.WRITE_MEM, args -> {
-			mem.writeMemInt(args[1], intValue(args[0]));
+			if (args[0].isNumberValue()) {
+				mem.writeMemInt(args[1], intValue(args[0]));
+			}
+			if (args[0].isStringValue()) {
+				mem.writeMemString(args[1], stringValue(args[0]));
+			}
 		});
 		IMPL.put(EclOpCode.LOAD_CHAR, args -> {
 

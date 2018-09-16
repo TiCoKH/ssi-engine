@@ -16,7 +16,7 @@ public class EclString {
 	}
 
 	public int getLength() {
-		return content.capacity();
+		return content.limit();
 	}
 
 	public byte getChar(int index) {
