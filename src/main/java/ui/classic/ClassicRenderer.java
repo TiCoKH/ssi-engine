@@ -229,9 +229,10 @@ public class ClassicRenderer extends JPanel {
 
 	private void renderStatus(Graphics2D g2d) {
 		int pos = 0;
-		if (statusLine != null) {
-			for (; pos < statusLine.getLength(); pos++) {
-				renderChar(g2d, pos, 24, statusLine.getChar(pos));
+		EclString status = statusLine;
+		if (status != null) {
+			for (; pos < status.getLength(); pos++) {
+				renderChar(g2d, pos, 24, status.getChar(pos));
 			}
 			pos++;
 		}
