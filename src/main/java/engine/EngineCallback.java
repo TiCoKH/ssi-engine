@@ -9,7 +9,9 @@ public interface EngineCallback {
 
 	void showPicture(int id);
 
-	void showText(EclString str);
+	void addText(EclString str, boolean clear);
+
+	void addNewline();
 
 	void loadArea(int id1, int id2, int id3);
 

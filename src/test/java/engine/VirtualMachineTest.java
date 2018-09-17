@@ -28,7 +28,11 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void showText(EclString str) {
+			public void addText(EclString str, boolean clear) {
+			}
+
+			@Override
+			public void addNewline() {
 			}
 
 			@Override

@@ -209,10 +209,10 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PRINT, args -> {
-			engine.showText(stringValue(args[0]));
+			engine.addText(stringValue(args[0]), false);
 		});
 		IMPL.put(EclOpCode.PRINT_CLEAR, args -> {
-			engine.showText(stringValue(args[0]));
+			engine.addText(stringValue(args[0]), true);
 		});
 		IMPL.put(EclOpCode.RETURN, args -> {
 			eclCode.position(gosubStack.pop());
@@ -350,7 +350,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PRINT_RETURN, args -> {
-
+			engine.addNewline();
 		});
 		IMPL.put(EclOpCode.CLOCK, args -> {
 

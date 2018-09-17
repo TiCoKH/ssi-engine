@@ -63,9 +63,9 @@ public class ClassicRenderer extends JPanel {
 	private DAXImageContent pic;
 	private int picIndex;
 
-	private EclString text;
+	private List<Byte> charList;
 	private int textPos;
-	private boolean textIsRendering;
+	private boolean textNeedsProgressing;
 
 	private List<BufferedImage> backdrops;
 	private List<BufferedImage> wallSymbols;
@@ -86,9 +86,9 @@ public class ClassicRenderer extends JPanel {
 		this.pic = null;
 		this.picIndex = -1;
 
-		this.text = null;
+		this.charList = null;
 		this.textPos = 0;
-		this.textIsRendering = false;
+		this.textNeedsProgressing = false;
 
 		this.backdrops = null;
 		this.wallSymbols = null;
@@ -158,21 +158,71 @@ public class ClassicRenderer extends JPanel {
 		this.picIndex = picIndex;
 	}
 
-	public void setText(EclString text) {
-		this.text = text;
+	public void clearText() {
+		this.textNeedsProgressing = false;
+		this.charList = null;
 		this.textPos = 0;
-		this.textIsRendering = true;
+	}
+
+	public void addText(EclString text) {
+		List<Byte> oldCharList = charList;
+		List<Byte> newCharList = new ArrayList<>();
+		if (oldCharList != null) {
+			newCharList.addAll(oldCharList);
+		}
+		int wordStart = 0;
+		int charCount = newCharList.size() % 38;
+		for (int i = 0; i < text.getLength(); i++) {
+			boolean endOfText = i + 1 == text.getLength();
+			if (text.getChar(i) == ' ' || endOfText) {
+				// Space is not part of the word, last char is.
+				int wordLength = (i - wordStart) + (endOfText ? 1 : 0);
+				if (charCount + wordLength > 38) {
+					for (int j = charCount; j < 38; j++) {
+						newCharList.add((byte) 0x20);
+					}
+					charCount = 0;
+				}
+				for (int j = wordStart; j < wordStart + wordLength; j++) {
+					newCharList.add(text.getChar(j));
+				}
+				wordStart = i + 1;
+				charCount += wordLength;
+				if (charCount < 38 && !endOfText) {
+					newCharList.add((byte) 0x20);
+					charCount++;
+				} else {
+					charCount = 0;
+				}
+			}
+		}
+		this.charList = newCharList;
+		this.textNeedsProgressing = true;
+	}
+
+	public void addLineBreak() {
+		List<Byte> oldCharList = charList;
+		if (oldCharList == null) {
+			return;
+		}
+		int charCount = oldCharList.size() % 38;
+		if (charCount != 0) {
+			List<Byte> newCharList = new ArrayList<>(oldCharList);
+			for (int i = charCount; i < 38; i++) {
+				newCharList.add((byte) 0x20);
+			}
+			this.charList = newCharList;
+			this.textNeedsProgressing = true;
+		}
 	}
 
 	public void increaseText() {
-		if (this.text != null) {
-			if (this.textPos == this.text.getLength()) {
-				if (this.textIsRendering) {
-					this.textIsRendering = false;
-					this.renderCB.textDisplayFinished();
-				}
+		if (textNeedsProgressing) {
+			if (textPos == charList.size()) {
+				textNeedsProgressing = false;
+				renderCB.textDisplayFinished();
 			} else {
-				this.textPos++;
+				textPos++;
 			}
 		}
 	}
@@ -222,9 +272,7 @@ public class ClassicRenderer extends JPanel {
 			renderDungeon(g2d);
 			renderPosition(g2d);
 		}
-		if (text != null) {
-			renderText(g2d);
-		}
+		renderText(g2d);
 	}
 
 	private void renderStatus(Graphics2D g2d) {
@@ -271,10 +319,14 @@ public class ClassicRenderer extends JPanel {
 	}
 
 	private void renderText(Graphics2D g2d) {
+		List<Byte> chars = charList;
+		if (chars == null) {
+			return;
+		}
 		for (int pos = 0; pos < textPos; pos++) {
 			int x = TEXT_START_X + (pos % TEXT_LINE_WIDTH);
 			int y = TEXT_START_Y + (pos / TEXT_LINE_WIDTH);
-			renderChar(g2d, x, y, text.getChar(pos));
+			renderChar(g2d, x, y, chars.get(pos));
 		}
 	}
 

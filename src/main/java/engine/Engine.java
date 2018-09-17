@@ -177,6 +177,8 @@ public class Engine implements EngineCallback, RendererCallback {
 				break;
 			case MOVEMENT:
 				inputHandler = action -> {
+					renderer.clearText();
+
 					Direction d = memory.getCurrentMapOrient();
 					int x = memory.getCurrentMapX();
 					int y = memory.getCurrentMapY();
@@ -262,10 +264,22 @@ public class Engine implements EngineCallback, RendererCallback {
 	}
 
 	@Override
-	public void showText(EclString str) {
+	public void addText(EclString str, boolean clear) {
 		synchronized (vm) {
-			renderer.setText(str);
-			// pause VM untill all text is displayed
+			if (clear) {
+				renderer.clearText();
+			}
+			renderer.addText(str);
+			// pause VM until all text is displayed
+			pauseCurrentThread();
+		}
+	}
+
+	@Override
+	public void addNewline() {
+		synchronized (vm) {
+			renderer.addLineBreak();
+			// pause VM until all text is displayed
 			pauseCurrentThread();
 		}
 	}
