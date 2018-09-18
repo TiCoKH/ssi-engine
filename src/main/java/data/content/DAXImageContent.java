@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class DAXImageContent extends DAXContent {
-	private static final DAXImageContentConverter CONVERTER = new DAXImageContentConverter();;
+	protected static final DAXImageContentConverter CONVERTER = new DAXImageContentConverter();;
 
 	protected final List<BufferedImage> images = new ArrayList<>();
 

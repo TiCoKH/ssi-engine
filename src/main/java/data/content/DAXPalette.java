@@ -69,4 +69,24 @@ public class DAXPalette {
 
 		return new IndexColorModel(8, 256, r, g, b, Arrays.asList(COLOR_GAME_STATIC).indexOf(COLOR_MAGENTA_BRIGHT));
 	}
+
+	public static IndexColorModel binaryInvertedPalette() {
+		return binaryPaletteWith(COLOR_WHITE, COLOR_BLACK);
+	}
+
+	public static IndexColorModel binaryPaletteWithGreenFG() {
+		return binaryPaletteWith(COLOR_BLACK, COLOR_GREEN_BRIGHT);
+	}
+
+	public static IndexColorModel binaryPaletteWithMagentaFG() {
+		return binaryPaletteWith(COLOR_BLACK, COLOR_MAGENTA_BRIGHT);
+	}
+
+	private static IndexColorModel binaryPaletteWith(Color bgColor, Color fgColor) {
+		byte[] r = new byte[] { (byte) bgColor.getRed(), (byte) fgColor.getRed() };
+		byte[] g = new byte[] { (byte) bgColor.getGreen(), (byte) fgColor.getGreen() };
+		byte[] b = new byte[] { (byte) bgColor.getBlue(), (byte) fgColor.getBlue() };
+
+		return new IndexColorModel(1, 2, r, g, b);
+	}
 }

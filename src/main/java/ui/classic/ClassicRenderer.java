@@ -49,7 +49,10 @@ public class ClassicRenderer extends JPanel {
 
 	private RendererCallback renderCB;
 
-	private MonocromeSymbols font;
+	private List<BufferedImage> bwFont;
+	private List<BufferedImage> invertedFont;
+	private List<BufferedImage> greenFont;
+	private List<BufferedImage> magentaFont;
 	private DAXImageContent borderSymbols;
 
 	private int zoom;
@@ -74,7 +77,10 @@ public class ClassicRenderer extends JPanel {
 
 	public ClassicRenderer(RendererCallback renderCB, MonocromeSymbols font, DAXImageContent borderSymbols) {
 		this.renderCB = renderCB;
-		this.font = font;
+		this.bwFont = font.toList();
+		this.invertedFont = font.withInvertedColors();
+		this.greenFont = font.withGreenFG();
+		this.magentaFont = font.withMagentaFG();
 		this.borderSymbols = borderSymbols;
 
 		this.zoom = 4;
@@ -280,14 +286,14 @@ public class ClassicRenderer extends JPanel {
 		EclString status = statusLine;
 		if (status != null) {
 			for (; pos < status.getLength(); pos++) {
-				renderChar(g2d, pos, 24, status.getChar(pos));
+				renderChar(g2d, pos, 24, status.getChar(pos), getActionMap().get(InputAction.ACCEPT.getName()) != null ? invertedFont : magentaFont);
 			}
 			pos++;
 		}
 		for (InputAction a : menu) {
 			EclString menuName = new EclString(a.getName());
 			for (int pos2 = 0; pos2 < menuName.getLength(); pos2++) {
-				renderChar(g2d, pos + pos2, 24, menuName.getChar(pos2));
+				renderChar(g2d, pos + pos2, 24, menuName.getChar(pos2), pos2 == 0 ? bwFont : greenFont);
 			}
 			pos += menuName.getLength() + 1;
 		}
@@ -326,7 +332,7 @@ public class ClassicRenderer extends JPanel {
 		for (int pos = 0; pos < textPos; pos++) {
 			int x = TEXT_START_X + (pos % TEXT_LINE_WIDTH);
 			int y = TEXT_START_Y + (pos / TEXT_LINE_WIDTH);
-			renderChar(g2d, x, y, chars.get(pos));
+			renderChar(g2d, x, y, chars.get(pos), greenFont);
 		}
 	}
 
@@ -364,11 +370,11 @@ public class ClassicRenderer extends JPanel {
 	private void renderPosition(Graphics2D g2d) {
 		EclString posStr = renderCB.getPositionText();
 		for (int pos = 0; pos < posStr.getLength(); pos++) {
-			renderChar(g2d, 17 + pos, 15, posStr.getChar(pos));
+			renderChar(g2d, 17 + pos, 15, posStr.getChar(pos), greenFont);
 		}
 	}
 
-	private void renderChar(Graphics2D g2d, int x, int y, byte c) {
+	private void renderChar(Graphics2D g2d, int x, int y, byte c, List<BufferedImage> font) {
 		BufferedImage ci = font.get(c);
 		g2d.drawImage(ci.getScaledInstance(zoom(ci.getWidth()), zoom(ci.getHeight()), 0), zoom8(x), zoom8(y), null);
 	}
