@@ -2,9 +2,11 @@ package engine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -314,11 +316,14 @@ public class VirtualMachine {
 			mem.copyMemInt(args[0], intValue(args[1]), args[2]);
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, args -> {
-			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
+			List<EclArgument> dynArgs = new ArrayList<>();
 			for (int i = 0; i < args[1].valueAsInt(); i++) {
-				dynArgs[i] = EclArgument.parseNext(eclCode);
+				dynArgs.add(EclArgument.parseNext(eclCode));
 			}
-			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			System.out.println(String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())));
+			engine.setInputHandler(InputType.MENU, null,
+				dynArgs.stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
+			mem.writeMemInt(args[0], mem.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.PARLAY, args -> {
 
@@ -339,12 +344,16 @@ public class VirtualMachine {
 			mem.writeMemInt(args[2], result);
 			compareResult = result == 0 ? 0 : 1;
 		});
-		IMPL.put(EclOpCode.SPRITE_OFF, args -> {
-			EclArgument[] dynArgs = new EclArgument[args[1].valueAsInt()];
+		IMPL.put(EclOpCode.SELECT_ACTION, args -> {
+			List<EclArgument> dynArgs = new ArrayList<>();
 			for (int i = 0; i < args[1].valueAsInt(); i++) {
-				dynArgs[i] = EclArgument.parseNext(eclCode);
+				dynArgs.add(EclArgument.parseNext(eclCode));
 			}
-			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
+			System.out.println(String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())));
+			engine.addText(new EclString("WHAT DO YOU DO?"), false);
+			engine.setInputHandler(InputType.MENU, null,
+				dynArgs.stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
+			mem.writeMemInt(args[0], mem.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, args -> {
 

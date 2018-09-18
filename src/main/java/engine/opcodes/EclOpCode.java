@@ -50,7 +50,7 @@ public enum EclOpCode {
 	DAMAGE(0x2E, 5, "DAMAGE"), //
 	AND(0x2F, 3, "AND"), //
 	OR(0x30, 3, "OR"), //
-	SPRITE_OFF(0x31, 2, "SPRITE OFF"), // TODO: Game specific
+	SELECT_ACTION(0x31, 2, "GAME_MENU"), // TODO: Game specific
 	FIND_ITEM(0x32, 1, "FIND ITEM"), //
 	PRINT_RETURN(0x33, 0, "PRINT RETURN"), //
 	CLOCK(0x34, 2, "ECL CLOCK"), //
