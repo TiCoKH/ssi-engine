@@ -1,4 +1,4 @@
-package ui;
+package ui.classic;
 
 import static ui.BorderSymbols.E3;
 import static ui.BorderSymbols.EM;
@@ -14,7 +14,9 @@ import static ui.BorderSymbols.UR;
 import static ui.BorderSymbols.VE;
 import static ui.BorderSymbols.W3;
 
-public enum Borders {
+import ui.BorderSymbols;
+
+public enum ClassicBorders {
 
 	SCREEN(new BorderSymbols[][] { //
 		{ UL, HO, OH, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, HO, OH, HO, UR }, // 0
@@ -97,7 +99,7 @@ public enum Borders {
 
 	private BorderSymbols[][] symbols;
 
-	private Borders(BorderSymbols[][] symbols) {
+	private ClassicBorders(BorderSymbols[][] symbols) {
 		this.symbols = symbols;
 	}
 

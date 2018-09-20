@@ -53,7 +53,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>ui.AppFrame</mainClass>
+							<mainClass>main.Goldbox</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

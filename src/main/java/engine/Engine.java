@@ -21,7 +21,7 @@ import data.content.WallDef;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
 import engine.opcodes.EclString;
-import ui.Borders;
+import ui.classic.ClassicBorders;
 import ui.classic.ClassicRenderer;
 
 public class Engine implements EngineCallback, RendererCallback {
@@ -50,7 +50,7 @@ public class Engine implements EngineCallback, RendererCallback {
 		shouldShowTitles = showTitles;
 
 		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders());
-		renderer.setNoPicture(Borders.SCREEN);
+		renderer.setNoPicture(ClassicBorders.SCREEN);
 
 		vm = new VirtualMachine(this);
 		memory = vm.getMem();
@@ -248,7 +248,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	@Override
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
-			renderer.setNoPicture(Borders.GAME);
+			renderer.setNoPicture(ClassicBorders.GAME);
 			return;
 		}
 		try {
@@ -262,7 +262,7 @@ public class Engine implements EngineCallback, RendererCallback {
 				renderer.setBigPicture(bigPic, 0);
 				return;
 			}
-			renderer.setNoPicture(Borders.GAME);
+			renderer.setNoPicture(ClassicBorders.GAME);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}

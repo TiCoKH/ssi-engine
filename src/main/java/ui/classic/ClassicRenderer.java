@@ -27,7 +27,6 @@ import engine.InputAction;
 import engine.RendererCallback;
 import engine.opcodes.EclString;
 import ui.BorderSymbols;
-import ui.Borders;
 
 public class ClassicRenderer extends JPanel {
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
@@ -61,7 +60,7 @@ public class ClassicRenderer extends JPanel {
 
 	private EclString statusLine;
 
-	private Borders layout;
+	private ClassicBorders layout;
 	private PictureType picType;
 	private DAXImageContent pic;
 	private int picIndex;
@@ -140,25 +139,25 @@ public class ClassicRenderer extends JPanel {
 	}
 
 	public void setDungeonDisplay(List<BufferedImage> backdrops, List<BufferedImage> wallSymbols) {
-		this.layout = Borders.GAME;
+		this.layout = ClassicBorders.GAME;
 		this.backdrops = backdrops;
 		this.wallSymbols = wallSymbols;
 	}
 
-	public void setNoPicture(Borders b) {
+	public void setNoPicture(ClassicBorders b) {
 		this.layout = b;
 		this.picType = null;
 	}
 
 	public void setBigPicture(DAXImageContent pic, int picIndex) {
-		this.layout = Borders.BIGPIC;
+		this.layout = ClassicBorders.BIGPIC;
 		this.picType = PictureType.BIG;
 		this.pic = pic;
 		this.picIndex = picIndex;
 	}
 
 	public void setSmallPicture(DAXImageContent pic, int picIndex) {
-		this.layout = Borders.GAME;
+		this.layout = ClassicBorders.GAME;
 		this.picType = PictureType.SMALL;
 		this.pic = pic;
 		this.picIndex = picIndex;
