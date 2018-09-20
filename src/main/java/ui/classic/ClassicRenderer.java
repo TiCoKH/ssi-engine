@@ -285,7 +285,8 @@ public class ClassicRenderer extends JPanel {
 		EclString status = statusLine;
 		if (status != null) {
 			for (; pos < status.getLength(); pos++) {
-				renderChar(g2d, pos, 24, status.getChar(pos), getActionMap().get(InputAction.ACCEPT.getName()) != null ? invertedFont : magentaFont);
+				renderChar(g2d, pos, 24, status.getChar(pos),
+					getActionMap().get(InputAction.ACCEPT.getName()) != null ? invertedFont : !menu.isEmpty() ? magentaFont : greenFont);
 			}
 			pos++;
 		}
