@@ -31,6 +31,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	private VirtualMachine vm;
 	private VirtualMemory memory;
 
+	private boolean shouldShowTitles;
 	private boolean running;
 
 	private Thread gameLoop;
@@ -43,8 +44,10 @@ public class Engine implements EngineCallback, RendererCallback {
 	private List<InputAction> viableActions;
 	private InputAction nextAction;
 
-	public Engine(String gameDir) throws IOException {
+	public Engine(String gameDir, boolean showTitles) throws IOException {
 		res = new EngineResources(gameDir);
+
+		shouldShowTitles = showTitles;
 
 		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders());
 		renderer.setNoPicture(Borders.SCREEN);
@@ -105,15 +108,17 @@ public class Engine implements EngineCallback, RendererCallback {
 			setInputHandler(InputType.TITLE, null, null); // TODO
 			synchronized (vm) {
 				try {
-					BufferedImage title1 = res.getTitles(1).get(0);
-					renderer.setTitleScreen(title1);
-					vm.wait(5000L);
-					BufferedImage title2 = res.getTitles(2).get(0);
-					renderer.setTitleScreen(title2);
-					vm.wait(5000L);
-					BufferedImage title3 = res.getTitles(3).get(0);
-					renderer.setTitleScreen(title3);
-					vm.wait(5000L);
+					if (shouldShowTitles) {
+						BufferedImage title1 = res.getTitles(1).get(0);
+						renderer.setTitleScreen(title1);
+						vm.wait(5000L);
+						BufferedImage title2 = res.getTitles(2).get(0);
+						renderer.setTitleScreen(title2);
+						vm.wait(5000L);
+						BufferedImage title3 = res.getTitles(3).get(0);
+						renderer.setTitleScreen(title3);
+						vm.wait(5000L);
+					}
 					BufferedImage title4 = res.getTitles(4).get(0);
 					renderer.setTitleScreen(title4);
 				} catch (IOException e) {

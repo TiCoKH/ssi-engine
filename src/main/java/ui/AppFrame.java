@@ -14,14 +14,14 @@ public class AppFrame {
 	private Engine engine;
 	private JFrame frame;
 
-	public AppFrame(String dir) throws IOException {
-		initEngine(dir);
+	public AppFrame(String dir, boolean showTitles) throws IOException {
+		initEngine(dir, showTitles);
 		initFrame();
 		show();
 	}
 
-	private void initEngine(String dir) throws IOException {
-		engine = new Engine(dir);
+	private void initEngine(String dir, boolean showTitles) throws IOException {
+		engine = new Engine(dir, showTitles);
 	}
 
 	private void initFrame() {
@@ -38,13 +38,13 @@ public class AppFrame {
 	}
 
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.err.println("Run with java AppFrame <directory>");
+		if (args.length != 1 && args.length != 2) {
+			System.err.println("Run with java AppFrame <directory> [-noShowTitle]");
 			System.exit(1);
 		}
 		EventQueue.invokeLater(() -> {
 			try {
-				new AppFrame(args[0]);
+				new AppFrame(args[0], args.length != 2);
 			} catch (IOException e) {
 				System.err.println("Failure to initialize engine. Quitting.");
 				e.printStackTrace(System.err);

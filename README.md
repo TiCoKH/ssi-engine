@@ -29,9 +29,10 @@ Running
 =======
 
 From the project directory run the following command:
-`java -jar ./target/engine-SNAPSHOT.jar <directory>`
+`java -jar ./target/engine-SNAPSHOT.jar <directory> [-noShowTitle]`
 where `<directory>` is the one in which the game data for
-Buck Rogers 1 resides.
+Buck Rogers 1 resides and noShowTitle argument makes the engine
+skip the screens before the title menu.
 
 Make sure all game data filenames are uppercase.
 
