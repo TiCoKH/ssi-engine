@@ -2,11 +2,8 @@ package engine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -22,7 +19,7 @@ import engine.opcodes.EclString;
 
 public class VirtualMachine {
 
-	private final Map<EclOpCode, Consumer<EclArgument[]>> IMPL = new EnumMap<>(EclOpCode.class);
+	private final Map<EclOpCode, Consumer<EclInstruction>> IMPL = new EnumMap<>(EclOpCode.class);
 
 	private EngineCallback engine;
 
@@ -121,7 +118,7 @@ public class VirtualMachine {
 		System.out
 			.println(Integer.toHexString(eclCodeBaseAddress + in.getPosition()).toUpperCase() + ":" + in.toString() + (execute ? "" : " (SKIPPED)"));
 		if (execute) {
-			IMPL.get(in.getOpCode()).accept(in.getArguments());
+			IMPL.get(in.getOpCode()).accept(in);
 		}
 	}
 
@@ -149,237 +146,223 @@ public class VirtualMachine {
 
 	private void initImpl() {
 		IMPL.clear();
-		IMPL.put(EclOpCode.EXIT, args -> {
+		IMPL.put(EclOpCode.EXIT, inst -> {
 			stopVM();
 		});
-		IMPL.put(EclOpCode.GOTO, args -> {
-			goTo(args[0]);
+		IMPL.put(EclOpCode.GOTO, inst -> {
+			goTo(inst.getArgument(0));
 		});
-		IMPL.put(EclOpCode.GOSUB, args -> {
+		IMPL.put(EclOpCode.GOSUB, inst -> {
 			gosubStack.push(eclCode.position());
-			goTo(args[0]);
+			goTo(inst.getArgument(0));
 		});
-		IMPL.put(EclOpCode.COMPARE, args -> {
-			if (args[0].isStringValue() && args[1].isStringValue()) {
-				compareResult = stringValue(args[0]).toString().compareTo(stringValue(args[1]).toString());
-			} else if (args[0].isNumberValue() && args[1].isNumberValue()) {
-				compareResult = intValue(args[0]) - intValue(args[1]);
+		IMPL.put(EclOpCode.COMPARE, inst -> {
+			if (inst.getArgument(0).isStringValue() && inst.getArgument(1).isStringValue()) {
+				compareResult = stringValue(inst.getArgument(0)).toString().compareTo(stringValue(inst.getArgument(1)).toString());
+			} else if (inst.getArgument(0).isNumberValue() && inst.getArgument(1).isNumberValue()) {
+				compareResult = intValue(inst.getArgument(0)) - intValue(inst.getArgument(1));
 			}
 		});
-		IMPL.put(EclOpCode.ADD, args -> {
-			mem.writeMemInt(args[2], intValue(args[0]) + intValue(args[1]));
+		IMPL.put(EclOpCode.ADD, inst -> {
+			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) + intValue(inst.getArgument(1)));
 		});
-		IMPL.put(EclOpCode.SUBTRACT, args -> {
-			mem.writeMemInt(args[2], intValue(args[1]) - intValue(args[0]));
+		IMPL.put(EclOpCode.SUBTRACT, inst -> {
+			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(1)) - intValue(inst.getArgument(0)));
 		});
-		IMPL.put(EclOpCode.DIVIDE, args -> {
-			mem.writeMemInt(args[2], intValue(args[0]) / intValue(args[1]));
+		IMPL.put(EclOpCode.DIVIDE, inst -> {
+			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) / intValue(inst.getArgument(1)));
 		});
-		IMPL.put(EclOpCode.MULTIPLY, args -> {
-			mem.writeMemInt(args[2], intValue(args[0]) * intValue(args[1]));
+		IMPL.put(EclOpCode.MULTIPLY, inst -> {
+			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) * intValue(inst.getArgument(1)));
 		});
-		IMPL.put(EclOpCode.RANDOM, args -> {
-			mem.writeMemInt(args[1], rnd.nextInt(intValue(args[0]) + 1));
+		IMPL.put(EclOpCode.RANDOM, inst -> {
+			mem.writeMemInt(inst.getArgument(1), rnd.nextInt(intValue(inst.getArgument(0)) + 1));
 		});
-		IMPL.put(EclOpCode.WRITE_MEM, args -> {
-			if (args[0].isNumberValue()) {
-				mem.writeMemInt(args[1], intValue(args[0]));
+		IMPL.put(EclOpCode.WRITE_MEM, inst -> {
+			if (inst.getArgument(0).isNumberValue()) {
+				mem.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(0)));
 			}
-			if (args[0].isStringValue()) {
-				mem.writeMemString(args[1], stringValue(args[0]));
+			if (inst.getArgument(0).isStringValue()) {
+				mem.writeMemString(inst.getArgument(1), stringValue(inst.getArgument(0)));
 			}
 		});
-		IMPL.put(EclOpCode.LOAD_CHAR, args -> {
+		IMPL.put(EclOpCode.LOAD_CHAR, inst -> {
 
 		});
-		IMPL.put(EclOpCode.LOAD_MON, args -> {
+		IMPL.put(EclOpCode.LOAD_MON, inst -> {
 
 		});
-		IMPL.put(EclOpCode.SETUP_MON, args -> {
+		IMPL.put(EclOpCode.SETUP_MON, inst -> {
 
 		});
-		IMPL.put(EclOpCode.APPROACH, args -> {
+		IMPL.put(EclOpCode.APPROACH, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PICTURE, args -> {
-			engine.showPicture(intValue(args[0]));
+		IMPL.put(EclOpCode.PICTURE, inst -> {
+			engine.showPicture(intValue(inst.getArgument(0)));
 		});
-		IMPL.put(EclOpCode.INPUT_NUMBER, args -> {
+		IMPL.put(EclOpCode.INPUT_NUMBER, inst -> {
 
 		});
-		IMPL.put(EclOpCode.INPUT_STRING, args -> {
+		IMPL.put(EclOpCode.INPUT_STRING, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PRINT, args -> {
-			engine.addText(stringValue(args[0]), false);
+		IMPL.put(EclOpCode.PRINT, inst -> {
+			engine.addText(stringValue(inst.getArgument(0)), false);
 		});
-		IMPL.put(EclOpCode.PRINT_CLEAR, args -> {
-			engine.addText(stringValue(args[0]), true);
+		IMPL.put(EclOpCode.PRINT_CLEAR, inst -> {
+			engine.addText(stringValue(inst.getArgument(0)), true);
 		});
-		IMPL.put(EclOpCode.RETURN, args -> {
+		IMPL.put(EclOpCode.RETURN, inst -> {
 			eclCode.position(gosubStack.pop());
 		});
-		IMPL.put(EclOpCode.COMPARE_AND, args -> {
-			compareResult = (intValue(args[0]) == intValue(args[1]) && intValue(args[2]) == intValue(args[3])) ? 0 : 1;
+		IMPL.put(EclOpCode.COMPARE_AND, inst -> {
+			boolean r1 = intValue(inst.getArgument(0)) == intValue(inst.getArgument(1));
+			boolean r2 = intValue(inst.getArgument(2)) == intValue(inst.getArgument(3));
+			compareResult = r1 && r2 ? 0 : 1;
 		});
-		IMPL.put(EclOpCode.MENU_VERTICAL, args -> {
+		IMPL.put(EclOpCode.MENU_VERTICAL, inst -> {
 
 		});
-		IMPL.put(EclOpCode.IF_EQUALS, args -> {
-			EclInstruction inst = EclInstruction.parseNext(eclCode);
-			exec(inst, compareResult == 0);
+		IMPL.put(EclOpCode.IF_EQUALS, inst -> {
+			EclInstruction next = EclInstruction.parseNext(eclCode);
+			exec(next, compareResult == 0);
 		});
-		IMPL.put(EclOpCode.IF_NOT_EQUALS, args -> {
-			EclInstruction inst = EclInstruction.parseNext(eclCode);
-			exec(inst, compareResult != 0);
+		IMPL.put(EclOpCode.IF_NOT_EQUALS, inst -> {
+			EclInstruction next = EclInstruction.parseNext(eclCode);
+			exec(next, compareResult != 0);
 		});
-		IMPL.put(EclOpCode.IF_LESS, args -> {
-			EclInstruction inst = EclInstruction.parseNext(eclCode);
-			exec(inst, compareResult < 0);
+		IMPL.put(EclOpCode.IF_LESS, inst -> {
+			EclInstruction next = EclInstruction.parseNext(eclCode);
+			exec(next, compareResult < 0);
 		});
-		IMPL.put(EclOpCode.IF_GREATER, args -> {
-			EclInstruction inst = EclInstruction.parseNext(eclCode);
-			exec(inst, compareResult > 0);
+		IMPL.put(EclOpCode.IF_GREATER, inst -> {
+			EclInstruction next = EclInstruction.parseNext(eclCode);
+			exec(next, compareResult > 0);
 		});
-		IMPL.put(EclOpCode.IF_LESS_EQUALS, args -> {
-			EclInstruction inst = EclInstruction.parseNext(eclCode);
-			exec(inst, compareResult <= 0);
+		IMPL.put(EclOpCode.IF_LESS_EQUALS, inst -> {
+			EclInstruction next = EclInstruction.parseNext(eclCode);
+			exec(next, compareResult <= 0);
 		});
-		IMPL.put(EclOpCode.IF_GREATER_EQUALS, args -> {
-			EclInstruction inst = EclInstruction.parseNext(eclCode);
-			exec(inst, compareResult >= 0);
+		IMPL.put(EclOpCode.IF_GREATER_EQUALS, inst -> {
+			EclInstruction next = EclInstruction.parseNext(eclCode);
+			exec(next, compareResult >= 0);
 		});
-		IMPL.put(EclOpCode.CLEAR_MON, args -> {
+		IMPL.put(EclOpCode.CLEAR_MON, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PARTY_STRENGTH, args -> {
+		IMPL.put(EclOpCode.PARTY_STRENGTH, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PARTY_CHECK, args -> {
+		IMPL.put(EclOpCode.PARTY_CHECK, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_1F, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_1F, inst -> {
 
 		});
-		IMPL.put(EclOpCode.NEW_ECL, args -> {
+		IMPL.put(EclOpCode.NEW_ECL, inst -> {
 
 		});
-		IMPL.put(EclOpCode.LOAD_FILES, args -> {
-			engine.loadArea(intValue(args[0]), intValue(args[1]), intValue(args[2]));
+		IMPL.put(EclOpCode.LOAD_FILES, inst -> {
+			engine.loadArea(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
-		IMPL.put(EclOpCode.PARTY_SURPRISE, args -> {
+		IMPL.put(EclOpCode.PARTY_SURPRISE, inst -> {
 
 		});
-		IMPL.put(EclOpCode.SURPRISE, args -> {
+		IMPL.put(EclOpCode.SURPRISE, inst -> {
 
 		});
-		IMPL.put(EclOpCode.COMBAT, args -> {
+		IMPL.put(EclOpCode.COMBAT, inst -> {
 			// TODO: Implement combat
 			// For now set combat to success
 			mem.setCombatResult(0);
 		});
-		IMPL.put(EclOpCode.ON_GOTO, args -> {
-			EclArgument[] dynArgs = new EclArgument[intValue(args[1])];
-			for (int i = 0; i < dynArgs.length; i++) {
-				dynArgs[i] = EclArgument.parseNext(eclCode);
-			}
-			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
-			if (intValue(args[0]) >= intValue(args[1]) || intValue(args[0]) < 0) {
-				System.err.println("ON GOTO value=" + intValue(args[0]));
+		IMPL.put(EclOpCode.ON_GOTO, inst -> {
+			printDynArgs(inst);
+			if (intValue(inst.getArgument(0)) >= intValue(inst.getArgument(1)) || intValue(inst.getArgument(0)) < 0) {
+				System.err.println("ON GOTO value=" + intValue(inst.getArgument(0)));
 				return;
 			}
-			goTo(dynArgs[intValue(args[0])]);
+			goTo(inst.getDynArgs().get(intValue(inst.getArgument(0))));
 		});
-		IMPL.put(EclOpCode.ON_GOSUB, args -> {
-			EclArgument[] dynArgs = new EclArgument[intValue(args[1])];
-			for (int i = 0; i < dynArgs.length; i++) {
-				dynArgs[i] = EclArgument.parseNext(eclCode);
-			}
-			System.out.println(String.join(", ", Arrays.asList(dynArgs).stream().map(EclArgument::toString).collect(Collectors.toList())));
-			if (intValue(args[0]) >= intValue(args[1]) || intValue(args[0]) < 0) {
-				System.err.println("ON GOSUB value=" + intValue(args[0]));
+		IMPL.put(EclOpCode.ON_GOSUB, inst -> {
+			printDynArgs(inst);
+			if (intValue(inst.getArgument(0)) >= intValue(inst.getArgument(1)) || intValue(inst.getArgument(0)) < 0) {
+				System.err.println("ON GOSUB value=" + intValue(inst.getArgument(0)));
 				return;
 			}
 			gosubStack.push(eclCode.position());
-			goTo(dynArgs[intValue(args[0])]);
+			goTo(inst.getDynArgs().get(intValue(inst.getArgument(0))));
 		});
-		IMPL.put(EclOpCode.TREASURE, args -> {
+		IMPL.put(EclOpCode.TREASURE, inst -> {
+			printDynArgs(inst);
+		});
+		IMPL.put(EclOpCode.ROB, inst -> {
 
 		});
-		IMPL.put(EclOpCode.ROB, args -> {
-
-		});
-		IMPL.put(EclOpCode.INPUT_RETURN, args -> {
+		IMPL.put(EclOpCode.INPUT_RETURN, inst -> {
 			engine.setInputHandler(InputType.RETURN, "PRESS BUTTON OR RETURN TO CONTINUE", InputAction.RETURN_ACTIONS);
 		});
-		IMPL.put(EclOpCode.COPY_MEM, args -> {
-			mem.copyMemInt(args[0], intValue(args[1]), args[2]);
+		IMPL.put(EclOpCode.COPY_MEM, inst -> {
+			mem.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
 		});
-		IMPL.put(EclOpCode.MENU_HORIZONTAL, args -> {
-			List<EclArgument> dynArgs = new ArrayList<>();
-			for (int i = 0; i < args[1].valueAsInt(); i++) {
-				dynArgs.add(EclArgument.parseNext(eclCode));
-			}
-			System.out.println(String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())));
+		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
+			printDynArgs(inst);
 			engine.setInputHandler(InputType.MENU, null,
-				dynArgs.stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
-			mem.writeMemInt(args[0], mem.getMenuChoice());
+				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
+			mem.writeMemInt(inst.getArgument(0), mem.getMenuChoice());
 		});
-		IMPL.put(EclOpCode.PARLAY, args -> {
+		IMPL.put(EclOpCode.PARLAY, inst -> {
 
 		});
-		IMPL.put(EclOpCode.CALL, args -> {
+		IMPL.put(EclOpCode.CALL, inst -> {
 
 		});
-		IMPL.put(EclOpCode.DAMAGE, args -> {
+		IMPL.put(EclOpCode.DAMAGE, inst -> {
 
 		});
-		IMPL.put(EclOpCode.AND, args -> {
-			int result = intValue(args[0]) & intValue(args[1]);
-			mem.writeMemInt(args[2], result);
+		IMPL.put(EclOpCode.AND, inst -> {
+			int result = intValue(inst.getArgument(0)) & intValue(inst.getArgument(1));
+			mem.writeMemInt(inst.getArgument(2), result);
 			compareResult = result == 0 ? 0 : 1;
 		});
-		IMPL.put(EclOpCode.OR, args -> {
-			int result = intValue(args[0]) | intValue(args[1]);
-			mem.writeMemInt(args[2], result);
+		IMPL.put(EclOpCode.OR, inst -> {
+			int result = intValue(inst.getArgument(0)) | intValue(inst.getArgument(1));
+			mem.writeMemInt(inst.getArgument(2), result);
 			compareResult = result == 0 ? 0 : 1;
 		});
-		IMPL.put(EclOpCode.SELECT_ACTION, args -> {
-			List<EclArgument> dynArgs = new ArrayList<>();
-			for (int i = 0; i < args[1].valueAsInt(); i++) {
-				dynArgs.add(EclArgument.parseNext(eclCode));
-			}
-			System.out.println(String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())));
+		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
+			printDynArgs(inst);
 			engine.addText(new EclString("WHAT DO YOU DO?"), false);
 			engine.setInputHandler(InputType.MENU, null,
-				dynArgs.stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
-			mem.writeMemInt(args[0], mem.getMenuChoice());
+				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
+			mem.writeMemInt(inst.getArgument(0), mem.getMenuChoice());
 		});
-		IMPL.put(EclOpCode.FIND_ITEM, args -> {
+		IMPL.put(EclOpCode.FIND_ITEM, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PRINT_RETURN, args -> {
+		IMPL.put(EclOpCode.PRINT_RETURN, inst -> {
 			engine.addNewline();
 		});
-		IMPL.put(EclOpCode.CLOCK, args -> {
+		IMPL.put(EclOpCode.CLOCK, inst -> {
 
 		});
-		IMPL.put(EclOpCode.WRITE_MEM_BASE_OFF, args -> {
-			mem.writeMemInt(args[1], intValue(args[2]), intValue(args[0]));
+		IMPL.put(EclOpCode.WRITE_MEM_BASE_OFF, inst -> {
+			mem.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(2)), intValue(inst.getArgument(0)));
 		});
-		IMPL.put(EclOpCode.ADD_NPC, args -> {
+		IMPL.put(EclOpCode.ADD_NPC, inst -> {
 
 		});
-		IMPL.put(EclOpCode.LOAD_PIECES, args -> {
-			engine.loadAreaDecoration(intValue(args[0]), intValue(args[1]), intValue(args[2]));
+		IMPL.put(EclOpCode.LOAD_PIECES, inst -> {
+			engine.loadAreaDecoration(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
-		IMPL.put(EclOpCode.PROGRAM, args -> {
+		IMPL.put(EclOpCode.PROGRAM, inst -> {
 
 		});
-		IMPL.put(EclOpCode.WHO, args -> {
+		IMPL.put(EclOpCode.WHO, inst -> {
 
 		});
-		IMPL.put(EclOpCode.DELAY, args -> {
+		IMPL.put(EclOpCode.DELAY, inst -> {
 			try {
 				Thread.sleep(900);
 			} catch (InterruptedException e) {
@@ -387,59 +370,63 @@ public class VirtualMachine {
 				e.printStackTrace();
 			}
 		});
-		IMPL.put(EclOpCode.SPELL, args -> {
+		IMPL.put(EclOpCode.SPELL, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PROTECTION, args -> {
+		IMPL.put(EclOpCode.PROTECTION, inst -> {
 
 		});
-		IMPL.put(EclOpCode.CLEAR_BOX, args -> {
+		IMPL.put(EclOpCode.CLEAR_BOX, inst -> {
 
 		});
-		IMPL.put(EclOpCode.DUMP, args -> {
+		IMPL.put(EclOpCode.DUMP, inst -> {
 
 		});
-		IMPL.put(EclOpCode.FIND_SPECIAL, args -> {
+		IMPL.put(EclOpCode.FIND_SPECIAL, inst -> {
 
 		});
-		IMPL.put(EclOpCode.DESTROY_ITEM, args -> {
+		IMPL.put(EclOpCode.DESTROY_ITEM, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_41, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_41, inst -> {
 
 		});
-		IMPL.put(EclOpCode.STOP_MOVE, args -> {
+		IMPL.put(EclOpCode.STOP_MOVE, inst -> {
 			stopVM();
 		});
-		IMPL.put(EclOpCode.UNKNOWN_43, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_43, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_44, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_44, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_45, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_45, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_46, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_46, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_47, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_47, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_48, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_48, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_49, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_49, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_4A, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_4A, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_4B, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_4B, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PICTURE2, args -> {
-			engine.showPicture(intValue(args[1]));
+		IMPL.put(EclOpCode.PICTURE2, inst -> {
+			engine.showPicture(intValue(inst.getArgument(1)));
 		});
+	}
+
+	private void printDynArgs(EclInstruction inst) {
+		System.out.println(String.join(", ", inst.getDynArgs().stream().map(EclArgument::toString).collect(Collectors.toList())));
 	}
 }
