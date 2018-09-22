@@ -405,10 +405,16 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.DESTROY_ITEM, args -> {
 
 		});
-		IMPL.put(EclOpCode.STOP_EVENT, args -> {
+		IMPL.put(EclOpCode.UNKNOWN_41, args -> {
+
+		});
+		IMPL.put(EclOpCode.STOP_MOVE, args -> {
 			stopVM();
 		});
 		IMPL.put(EclOpCode.UNKNOWN_43, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_44, args -> {
 
 		});
 		IMPL.put(EclOpCode.UNKNOWN_45, args -> {
@@ -418,6 +424,18 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.UNKNOWN_47, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_48, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_49, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_4A, args -> {
+
+		});
+		IMPL.put(EclOpCode.UNKNOWN_4B, args -> {
 
 		});
 		IMPL.put(EclOpCode.PICTURE2, args -> {

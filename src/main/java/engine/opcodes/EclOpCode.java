@@ -32,15 +32,15 @@ public enum EclOpCode {
 	CLEAR_MON(0x1C, 0, "CLEARMONSTERS"), //
 	PARTY_STRENGTH(0x1D, 1, "PARTYSTRENGTH"), //
 	PARTY_CHECK(0x1E, 6, "CHECKPARTY"), //
-	UNKNOWN_1F(0x1F, 2, "notsure 0x1f"), //
+	UNKNOWN_1F(0x1F, 4, "1F"), //
 	NEW_ECL(0x20, 1, "NEWECL"), //
 	LOAD_FILES(0x21, 3, "LOAD FILES"), //
 	PARTY_SURPRISE(0x22, 3, "PARTY SURPRISE"), // TODO: Game specific
-	SURPRISE(0x23, 4, "SURPRISE"), //
+	SURPRISE(0x23, 3, "SURPRISE"), // TODO: Game specific
 	COMBAT(0x24, 0, "COMBAT"), //
 	ON_GOTO(0x25, 2, "ON GOTO"), //
 	ON_GOSUB(0x26, 2, "ON GOSUB"), //
-	TREASURE(0x27, 8, "TREASURE"), //
+	TREASURE(0x27, 2, "TREASURE"), // TODO: Game specific
 	ROB(0x28, 3, "ROB"), //
 	INPUT_RETURN(0x29, 0, "INPUT_RETURN"), // TODO: Game specific
 	COPY_MEM(0x2A, 3, "COPY_MEM"), //
@@ -64,13 +64,19 @@ public enum EclOpCode {
 	PROTECTION(0x3C, 1, "PROTECTION"), //
 	CLEAR_BOX(0x3D, 0, "CLEAR BOX"), //
 	DUMP(0x3E, 0, "DUMP"), //
-	FIND_SPECIAL(0x3F, 1, "FIND SPECIAL"), //
+	FIND_SPECIAL(0x3F, 2, "FIND SPECIAL"), //
 	DESTROY_ITEM(0x40, 1, "DESTROY ITEMS"), //
-	STOP_EVENT(0x42, 0, "STOP_EVENT"), //
+	UNKNOWN_41(0x41, 2, "41"), //
+	STOP_MOVE(0x42, 0, "STOP_MOVE"), //
 	UNKNOWN_43(0x43, 1, "43"), //
+	UNKNOWN_44(0x44, 0, "44"), //
 	UNKNOWN_45(0x45, 2, "45"), //
 	UNKNOWN_46(0x46, 2, "46"), //
 	UNKNOWN_47(0x47, 0, "47"), //
+	UNKNOWN_48(0x48, 1, "48"), //
+	UNKNOWN_49(0x49, 6, "49"), //
+	UNKNOWN_4A(0x4A, 0, "4A"), //
+	UNKNOWN_4B(0x4B, 1, "4B"), //
 	PICTURE2(0x4C, 2, "PICTURE2");
 
 	private int id;
