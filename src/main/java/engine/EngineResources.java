@@ -14,7 +14,9 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import data.DAXFile;
 import data.content.DAXContent;
@@ -67,6 +69,16 @@ public class EngineResources {
 		return find(id, imageTypes.get(type), type);
 	}
 
+	public Set<Integer> idsFor(DAXContentType type) throws IOException {
+		Set<Integer> result = new HashSet<>();
+		String[] filenames = fileMap.get(type);
+		for (int i = 0; i < filenames.length; i++) {
+			DAXFile f = load(filenames[i]);
+			result.addAll(f.getIds());
+		}
+		return result;
+	}
+
 	public <T extends DAXContent> T find(int id, Class<T> clazz, DAXContentType type) throws IOException {
 		String[] filenames = fileMap.get(type);
 		for (int i = 0; i < filenames.length; i++) {
@@ -79,6 +91,10 @@ public class EngineResources {
 	}
 
 	public <T extends DAXContent> T load(String name, int blockId, Class<T> clazz) throws IOException {
+		return load(name).getById(blockId, clazz);
+	}
+
+	private DAXFile load(String name) throws IOException {
 		DAXFile f = files.get(name);
 		if (f == null) {
 			try (FileChannel c = FileChannel.open(new File(gameDir, name).toPath(), StandardOpenOption.READ)) {
@@ -86,7 +102,6 @@ public class EngineResources {
 				files.put(name, f);
 			}
 		}
-		return f.getById(blockId, clazz);
+		return f;
 	}
-
 }
