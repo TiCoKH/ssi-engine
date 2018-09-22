@@ -14,6 +14,7 @@ public class EclArgument {
 	}
 
 	public static EclArgument parseNext(ByteBuffer eclBlock) {
+		int pos = eclBlock.position();
 		int type = eclBlock.get() & 0xFF;
 		switch (type) {
 			case 0: {
@@ -38,7 +39,7 @@ public class EclArgument {
 				return new EclArgument(type, value);
 			}
 			default: {
-				throw new IllegalArgumentException("Unknown type: " + type);
+				throw new IllegalArgumentException("Unknown type: " + type + " at " + Integer.toHexString(pos));
 			}
 		}
 	}

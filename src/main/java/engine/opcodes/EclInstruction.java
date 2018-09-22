@@ -12,7 +12,7 @@ public class EclInstruction {
 	private EclArgument[] arguments;
 
 	private static final Map<Integer, EclOpCode> OP_CODES = Arrays.asList(EclOpCode.values()).stream()
-			.collect(Collectors.toMap(EclOpCode::getId, Function.identity()));
+		.collect(Collectors.toMap(EclOpCode::getId, Function.identity()));
 
 	private EclInstruction(int position, EclOpCode opCode, EclArgument[] arguments) {
 		this.position = position;
@@ -25,7 +25,7 @@ public class EclInstruction {
 		int id = eclBlock.get() & 0xFF;
 		EclOpCode opCode = OP_CODES.get(id);
 		if (opCode == null) {
-			System.err.println("Unknown opcode " + Integer.toHexString(id));
+			System.err.println("Unknown opcode " + Integer.toHexString(id) + " at " + Integer.toHexString(pos));
 		}
 
 		EclArgument[] arguments = new EclArgument[opCode.getArgCount()];
@@ -57,8 +57,6 @@ public class EclInstruction {
 	@Override
 	public String toString() {
 		return opCode.getDescription() + "("
-				+ String.join(", ",
-						Arrays.asList(arguments).stream().map(EclArgument::toString).collect(Collectors.toList()))
-				+ ")";
+			+ String.join(", ", Arrays.asList(arguments).stream().map(EclArgument::toString).collect(Collectors.toList())) + ")";
 	}
 }
