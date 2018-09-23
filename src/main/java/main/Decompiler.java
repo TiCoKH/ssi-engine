@@ -19,6 +19,7 @@ import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
 import static engine.opcodes.EclOpCode.IF_NOT_EQUALS;
 import static engine.opcodes.EclOpCode.MENU_HORIZONTAL;
 import static engine.opcodes.EclOpCode.MULTIPLY;
+import static engine.opcodes.EclOpCode.NEW_ECL;
 import static engine.opcodes.EclOpCode.ON_GOSUB;
 import static engine.opcodes.EclOpCode.ON_GOTO;
 import static engine.opcodes.EclOpCode.OR;
@@ -54,7 +55,7 @@ import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
 
 public class Decompiler {
-	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE, GOTO, ON_GOTO, RETURN);
+	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE, GOTO, ON_GOTO, RETURN, NEW_ECL);
 	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR);
 	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
 		IF_NOT_EQUALS);
