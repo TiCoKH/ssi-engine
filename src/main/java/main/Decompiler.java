@@ -62,18 +62,11 @@ public class Decompiler {
 		for (Integer id : ids) {
 			EclProgram eclCode = res.find(id, EclProgram.class, ECL);
 			System.out.println(id);
-			File outFile = new File(gameDir + "/ECL/ECL." + id);
-			outFile.getParentFile().mkdirs();
-			out = new PrintStream(outFile);
-			try {
-				start(eclCode);
-			} finally {
-				out.close();
-			}
+			start(gameDir, id, eclCode);
 		}
 	}
 
-	private void start(EclProgram ecl) {
+	private void start(String gameDir, int id, EclProgram ecl) throws IOException {
 		ByteBuffer eclCode = ecl.getCode();
 		EclInstruction preMove = EclInstruction.parseNext(eclCode);
 		EclInstruction postMove = EclInstruction.parseNext(eclCode);
@@ -88,19 +81,22 @@ public class Decompiler {
 
 		base = address - 0x14;
 
-		disassemble(eclCode, onInit, "onInit");
-		out.println();
-		out.println();
-		disassemble(eclCode, preMove, "preMove");
-		out.println();
-		out.println();
-		disassemble(eclCode, postMove, "postMove");
-		out.println();
-		out.println();
-		disassemble(eclCode, onRest, "onRest");
-		out.println();
-		out.println();
-		disassemble(eclCode, onRestInterruption, "onRestInterrupt");
+		startSection(gameDir, id, eclCode, onInit, "onInit");
+		startSection(gameDir, id, eclCode, preMove, "preMove");
+		startSection(gameDir, id, eclCode, postMove, "postMove");
+		startSection(gameDir, id, eclCode, onRest, "onRest");
+		startSection(gameDir, id, eclCode, onRestInterruption, "onRestInterrupt");
+	}
+
+	private void startSection(String gameDir, int id, ByteBuffer eclCode, EclInstruction inst, String section) throws IOException {
+		File outFile = new File(gameDir + "/ECL/ECL." + id + "." + section);
+		outFile.getParentFile().mkdirs();
+		out = new PrintStream(outFile);
+		try {
+			disassemble(eclCode, inst, section);
+		} finally {
+			out.close();
+		}
 	}
 
 	private void disassemble(ByteBuffer eclCode, EclInstruction inst, String name) {
