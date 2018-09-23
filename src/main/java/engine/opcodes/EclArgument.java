@@ -8,7 +8,7 @@ public class EclArgument {
 	private int type;
 	private Object value;
 
-	private EclArgument(int type, Object value) {
+	public EclArgument(int type, Object value) {
 		this.type = type;
 		this.value = value;
 	}
