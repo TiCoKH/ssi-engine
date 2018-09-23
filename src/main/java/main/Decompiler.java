@@ -22,6 +22,7 @@ import static engine.opcodes.EclOpCode.ON_GOTO;
 import static engine.opcodes.EclOpCode.OR;
 import static engine.opcodes.EclOpCode.RANDOM;
 import static engine.opcodes.EclOpCode.RETURN;
+import static engine.opcodes.EclOpCode.SELECT_ACTION;
 import static engine.opcodes.EclOpCode.STOP_MOVE;
 import static engine.opcodes.EclOpCode.SUBTRACT;
 import static engine.opcodes.EclOpCode.WRITE_MEM;
@@ -348,11 +349,14 @@ public class Decompiler {
 	private void output(EclInstruction inst, List<EclArgument> dynArgs) {
 		outputInstStart(base + inst.getPosition());
 		if (inst.getOpCode() == ON_GOTO || inst.getOpCode() == ON_GOSUB) {
-			out.print("ON " + inst.getArgument(0) + (inst.getOpCode() == ON_GOTO ? " GOTO" : " GOSUB"));
+			out.print("ON " + inst.getArgument(0) + (inst.getOpCode() == ON_GOTO ? " GOTO " : " GOSUB "));
+			out.println("(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
+		} else if (inst.getOpCode() == EclOpCode.MENU_HORIZONTAL || inst.getOpCode() == SELECT_ACTION) {
+			out.print(inst.getArgument(0) + " = " + inst.getOpCode().getDescription());
+			out.println("(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
 		} else {
-			out.print(inst);
+			out.println(inst);
 		}
-		out.println(" (" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
 	}
 
 	public static void main(String[] args) throws IOException {
