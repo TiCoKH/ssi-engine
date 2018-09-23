@@ -3,6 +3,7 @@ package main;
 import static data.content.DAXContentType.ECL;
 import static engine.opcodes.EclOpCode.ADD;
 import static engine.opcodes.EclOpCode.AND;
+import static engine.opcodes.EclOpCode.CALL;
 import static engine.opcodes.EclOpCode.COMPARE;
 import static engine.opcodes.EclOpCode.COMPARE_AND;
 import static engine.opcodes.EclOpCode.COPY_MEM;
@@ -16,6 +17,7 @@ import static engine.opcodes.EclOpCode.IF_GREATER_EQUALS;
 import static engine.opcodes.EclOpCode.IF_LESS;
 import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
 import static engine.opcodes.EclOpCode.IF_NOT_EQUALS;
+import static engine.opcodes.EclOpCode.MENU_HORIZONTAL;
 import static engine.opcodes.EclOpCode.MULTIPLY;
 import static engine.opcodes.EclOpCode.ON_GOSUB;
 import static engine.opcodes.EclOpCode.ON_GOTO;
@@ -38,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,7 @@ import com.google.common.collect.ImmutableList;
 
 import data.content.EclProgram;
 import engine.EngineResources;
+import engine.VirtualMemory;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
@@ -57,6 +61,20 @@ public class Decompiler {
 	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
 		AND, OR, RANDOM);
 
+	private static final Map<Integer, String> KNOWN_ADRESSES = new HashMap<>();
+	static {
+		KNOWN_ADRESSES.put(0x7B90, "STRING1");
+		KNOWN_ADRESSES.put(0x7F79, "TEMP1");
+		KNOWN_ADRESSES.put(0x7F7A, "TEMP2");
+		KNOWN_ADRESSES.put(0x7F7B, "TEMP3");
+		KNOWN_ADRESSES.put(0x7F7C, "TEMP4");
+		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_COMBAT_RESULT, "COMBAT_RESULT");
+		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_ORIENTATION, "MAP_DIR");
+		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_POS_X, "MAP_X");
+		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_POS_Y, "MAP_Y");
+		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_SQUARE_INFO, "MAP_SQUARE");
+		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_WALL_TYPE, "MAP_WALL");
+	}
 	private int base;
 	private int indention = 0;
 
@@ -67,17 +85,20 @@ public class Decompiler {
 
 	private PrintStream out;
 
+	private int currentId;
+
 	public Decompiler(String gameDir) throws IOException {
 		EngineResources res = new EngineResources(gameDir);
-		Set<Integer> ids = res.idsFor(ECL);
+		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
 		for (Integer id : ids) {
+			currentId = id;
 			EclProgram eclCode = res.find(id, EclProgram.class, ECL);
 			System.out.println(id);
-			start(gameDir, id, eclCode);
+			start(gameDir, eclCode);
 		}
 	}
 
-	private void start(String gameDir, int id, EclProgram ecl) throws IOException {
+	private void start(String gameDir, EclProgram ecl) throws IOException {
 		ByteBuffer eclCode = ecl.getCode();
 		EclInstruction preMove = EclInstruction.parseNext(eclCode);
 		EclInstruction postMove = EclInstruction.parseNext(eclCode);
@@ -92,15 +113,15 @@ public class Decompiler {
 
 		base = address - 0x14;
 
-		startSection(gameDir, id, eclCode, onInit, "onInit");
-		startSection(gameDir, id, eclCode, preMove, "preMove");
-		startSection(gameDir, id, eclCode, postMove, "postMove");
-		startSection(gameDir, id, eclCode, onRest, "onRest");
-		startSection(gameDir, id, eclCode, onRestInterruption, "onRestInterrupt");
+		startSection(gameDir, eclCode, onInit, "onInit");
+		startSection(gameDir, eclCode, preMove, "preMove");
+		startSection(gameDir, eclCode, postMove, "postMove");
+		startSection(gameDir, eclCode, onRest, "onRest");
+		startSection(gameDir, eclCode, onRestInterruption, "onRestInterrupt");
 	}
 
-	private void startSection(String gameDir, int id, ByteBuffer eclCode, EclInstruction inst, String section) throws IOException {
-		File outFile = new File(gameDir + "/ECL/ECL." + id + "." + section);
+	private void startSection(String gameDir, ByteBuffer eclCode, EclInstruction inst, String section) throws IOException {
+		File outFile = new File(gameDir + "/ECL/ECL." + currentId + "." + section);
 		outFile.getParentFile().mkdirs();
 		out = new PrintStream(outFile);
 		try {
@@ -137,7 +158,9 @@ public class Decompiler {
 		while (gotoAddressList.containsValue(Boolean.FALSE)) {
 			Integer a = gotoAddressList.entrySet().stream().filter(e -> Boolean.FALSE.equals(e.getValue())).findFirst().get().getKey();
 			out.println();
+			indention += 1;
 			disassemble(eclCode, a, true);
+			indention -= 1;
 			gotoAddressList.put(a, Boolean.TRUE);
 		}
 	}
@@ -240,41 +263,50 @@ public class Decompiler {
 		outputInstStart(base + inst.getPosition());
 		if (OP_CODE_MATH.contains(inst.getOpCode()))
 			outputMath(inst);
-		else
+		else if (inst.getOpCode() != GOTO && inst.getOpCode() != GOSUB && inst.getOpCode() != CALL) {
+			out.print(inst.getOpCode().getDescription() + "(");
+			for (int i = 0; i < inst.getArguments().length; i++) {
+				if (i != 0)
+					out.print(", ");
+				out.print(argR(inst, i));
+			}
+			out.println(")");
+		} else {
 			out.println(inst);
+		}
 	}
 
 	private void outputMath(EclInstruction inst) {
 		switch (inst.getOpCode()) {
 			case WRITE_MEM:
-				out.println(inst.getArgument(1) + " = " + inst.getArgument(0));
+				out.println(argL(inst, 1) + " = " + argR(inst, 0));
 				break;
 			case WRITE_MEM_BASE_OFF:
-				out.println(inst.getArgument(1) + " + " + inst.getArgument(2) + " = " + inst.getArgument(0));
+				out.println(argL(inst, 1) + " + " + argR(inst, 2) + " = " + argR(inst, 0));
 				break;
 			case COPY_MEM:
-				out.println(inst.getArgument(2) + " = [" + inst.getArgument(0) + " + " + inst.getArgument(1) + "]");
+				out.println(argL(inst, 2) + " = [" + argL(inst, 0) + " + " + argR(inst, 1) + "]");
 				break;
 			case ADD:
-				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " + " + inst.getArgument(1));
+				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " + " + argR(inst, 1));
 				break;
 			case SUBTRACT:
-				out.println(inst.getArgument(2) + " = " + inst.getArgument(1) + " - " + inst.getArgument(0));
+				out.println(argL(inst, 2) + " = " + argR(inst, 1) + " - " + argR(inst, 0));
 				break;
 			case MULTIPLY:
-				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " * " + inst.getArgument(1));
+				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " * " + argR(inst, 1));
 				break;
 			case DIVIDE:
-				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " / " + inst.getArgument(1));
+				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " / " + argR(inst, 1));
 				break;
 			case AND:
-				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " & " + inst.getArgument(1));
+				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " & " + argR(inst, 1));
 				break;
 			case OR:
-				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " | " + inst.getArgument(1));
+				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " | " + argR(inst, 1));
 				break;
 			case RANDOM:
-				out.println(inst.getArgument(1) + " = RANDOM(" + inst.getArgument(0) + ")");
+				out.println(argL(inst, 1) + " = RANDOM(" + argR(inst, 0) + ")");
 				break;
 			default:
 				break;
@@ -309,33 +341,33 @@ public class Decompiler {
 		}
 		switch (compInst.getOpCode()) {
 			case COMPARE:
-				out.print(compInst.getArgument(0));
+				out.print(argR(compInst, 0));
 				out.print(" ");
 				out.print(operator);
 				out.print(" ");
-				out.print(compInst.getArgument(1));
+				out.print(argR(compInst, 1));
 				break;
 			case COMPARE_AND:
-				out.print(compInst.getArgument(0));
+				out.print(argR(compInst, 0));
 				out.print(" == ");
-				out.print(compInst.getArgument(1));
+				out.print(argR(compInst, 1));
 				out.print(" && ");
-				out.print(compInst.getArgument(2));
+				out.print(argR(compInst, 2));
 				out.print(" == ");
-				out.print(compInst.getArgument(3));
+				out.print(argR(compInst, 3));
 				break;
 			case AND:
-				out.print(compInst.getArgument(0));
+				out.print(argR(compInst, 0));
 				out.print(" & ");
-				out.print(compInst.getArgument(1));
+				out.print(argR(compInst, 1));
 				out.print(" ");
 				out.print(operator);
 				out.print(" 0");
 				break;
 			case OR:
-				out.print(compInst.getArgument(0));
+				out.print(argR(compInst, 0));
 				out.print(" | ");
-				out.print(compInst.getArgument(1));
+				out.print(argR(compInst, 1));
 				out.print(" ");
 				out.print(operator);
 				out.print(" 0");
@@ -349,14 +381,42 @@ public class Decompiler {
 	private void output(EclInstruction inst, List<EclArgument> dynArgs) {
 		outputInstStart(base + inst.getPosition());
 		if (inst.getOpCode() == ON_GOTO || inst.getOpCode() == ON_GOSUB) {
-			out.print("ON " + inst.getArgument(0) + (inst.getOpCode() == ON_GOTO ? " GOTO " : " GOSUB "));
-			out.println("(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
-		} else if (inst.getOpCode() == EclOpCode.MENU_HORIZONTAL || inst.getOpCode() == SELECT_ACTION) {
-			out.print(inst.getArgument(0) + " = " + inst.getOpCode().getDescription());
-			out.println("(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
+			out.print("ON " + argL(inst, 0) + (inst.getOpCode() == ON_GOTO ? " GOTO " : " GOSUB "));
+		} else if (inst.getOpCode() == MENU_HORIZONTAL || inst.getOpCode() == SELECT_ACTION) {
+			out.print(argL(inst, 0) + " = " + inst.getOpCode().getDescription());
 		} else {
-			out.println(inst);
+			out.print(inst.getOpCode().getDescription() + "(");
+			for (int i = 0; i < inst.getArguments().length; i++) {
+				if (i != 0)
+					out.print(", ");
+				out.print(argR(inst, i));
+			}
+			out.print(")");
 		}
+		out.println("(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
+	}
+
+	private String argL(EclInstruction inst, int argNr) {
+		EclArgument a = inst.getArgument(argNr);
+		if (!a.isMemAddress()) {
+			System.err.println("Value is not a memory address at " + Integer.toHexString(inst.getPosition() + base).toUpperCase());
+		}
+		if (!KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
+			KNOWN_ADRESSES.put(a.valueAsInt(), "var_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+		}
+		return KNOWN_ADRESSES.get(a.valueAsInt());
+	}
+
+	private String argR(EclInstruction inst, int argNr) {
+		EclArgument a = inst.getArgument(argNr);
+		if (a.isMemAddress()) {
+			if (KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
+				return KNOWN_ADRESSES.get(a.valueAsInt());
+			} else {
+				return "[" + a.toString() + "]";
+			}
+		}
+		return a.toString();
 	}
 
 	public static void main(String[] args) throws IOException {

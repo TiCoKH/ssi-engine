@@ -10,12 +10,12 @@ import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
 public class VirtualMemory {
-	private static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
-	private static final int MEMLOC_MAP_POS_X = 0xC04B;
-	private static final int MEMLOC_MAP_POS_Y = 0xC04C;
-	private static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
-	private static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
-	private static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
+	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
+	public static final int MEMLOC_MAP_POS_X = 0xC04B;
+	public static final int MEMLOC_MAP_POS_Y = 0xC04C;
+	public static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
+	public static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
+	public static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
 
 	private static final Map<Integer, Integer> stringLengthMap = new HashMap<>();
 
