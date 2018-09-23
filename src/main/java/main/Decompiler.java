@@ -1,9 +1,12 @@
 package main;
 
 import static data.content.DAXContentType.ECL;
+import static engine.opcodes.EclOpCode.ADD;
 import static engine.opcodes.EclOpCode.AND;
 import static engine.opcodes.EclOpCode.COMPARE;
 import static engine.opcodes.EclOpCode.COMPARE_AND;
+import static engine.opcodes.EclOpCode.COPY_MEM;
+import static engine.opcodes.EclOpCode.DIVIDE;
 import static engine.opcodes.EclOpCode.EXIT;
 import static engine.opcodes.EclOpCode.GOSUB;
 import static engine.opcodes.EclOpCode.GOTO;
@@ -13,11 +16,16 @@ import static engine.opcodes.EclOpCode.IF_GREATER_EQUALS;
 import static engine.opcodes.EclOpCode.IF_LESS;
 import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
 import static engine.opcodes.EclOpCode.IF_NOT_EQUALS;
+import static engine.opcodes.EclOpCode.MULTIPLY;
 import static engine.opcodes.EclOpCode.ON_GOSUB;
 import static engine.opcodes.EclOpCode.ON_GOTO;
 import static engine.opcodes.EclOpCode.OR;
+import static engine.opcodes.EclOpCode.RANDOM;
 import static engine.opcodes.EclOpCode.RETURN;
 import static engine.opcodes.EclOpCode.STOP_MOVE;
+import static engine.opcodes.EclOpCode.SUBTRACT;
+import static engine.opcodes.EclOpCode.WRITE_MEM;
+import static engine.opcodes.EclOpCode.WRITE_MEM_BASE_OFF;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +53,8 @@ public class Decompiler {
 	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR);
 	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
 		IF_NOT_EQUALS);
+	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
+		AND, OR, RANDOM);
 
 	private int base;
 	private int indention = 0;
@@ -152,7 +162,7 @@ public class Decompiler {
 	private void disassembleInst(ByteBuffer eclCode, EclInstruction inst, boolean withOutput) {
 		EclOpCode opCode = inst.getOpCode();
 
-		if (wasCompare && !OP_CODE_IF.contains(opCode) && withOutput) {
+		if (wasCompare && (!OP_CODE_IF.contains(opCode) || OP_CODE_MATH.contains(compare.getOpCode())) && withOutput) {
 			output(compare);
 		}
 		wasCompare = false;
@@ -182,7 +192,10 @@ public class Decompiler {
 
 			indention += 1;
 			EclInstruction compResultInst = EclInstruction.parseNext(eclCode);
-			disassembleInst(eclCode, compResultInst, withOutput);
+			if (OP_CODE_COMP.contains(compResultInst.getOpCode()) && withOutput)
+				output(compResultInst);
+			else
+				disassembleInst(eclCode, compResultInst, withOutput);
 			indention -= 1;
 		} else {
 			if (opCode == GOTO) {
@@ -224,7 +237,47 @@ public class Decompiler {
 
 	private void output(EclInstruction inst) {
 		outputInstStart(base + inst.getPosition());
-		out.println(inst);
+		if (OP_CODE_MATH.contains(inst.getOpCode()))
+			outputMath(inst);
+		else
+			out.println(inst);
+	}
+
+	private void outputMath(EclInstruction inst) {
+		switch (inst.getOpCode()) {
+			case WRITE_MEM:
+				out.println(inst.getArgument(1) + " = " + inst.getArgument(0));
+				break;
+			case WRITE_MEM_BASE_OFF:
+				out.println(inst.getArgument(1) + " + " + inst.getArgument(2) + " = " + inst.getArgument(0));
+				break;
+			case COPY_MEM:
+				out.println(inst.getArgument(2) + " = [" + inst.getArgument(0) + " + " + inst.getArgument(1) + "]");
+				break;
+			case ADD:
+				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " + " + inst.getArgument(1));
+				break;
+			case SUBTRACT:
+				out.println(inst.getArgument(2) + " = " + inst.getArgument(1) + " - " + inst.getArgument(0));
+				break;
+			case MULTIPLY:
+				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " * " + inst.getArgument(1));
+				break;
+			case DIVIDE:
+				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " / " + inst.getArgument(1));
+				break;
+			case AND:
+				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " & " + inst.getArgument(1));
+				break;
+			case OR:
+				out.println(inst.getArgument(2) + " = " + inst.getArgument(0) + " | " + inst.getArgument(1));
+				break;
+			case RANDOM:
+				out.println(inst.getArgument(1) + " = RANDOM(" + inst.getArgument(0) + ")");
+				break;
+			default:
+				break;
+		}
 	}
 
 	private void outputCompare(EclInstruction compInst, EclInstruction ifInst) {
@@ -276,8 +329,7 @@ public class Decompiler {
 				out.print(compInst.getArgument(1));
 				out.print(" ");
 				out.print(operator);
-				out.print(" ");
-				out.print(compInst.getArgument(2));
+				out.print(" 0");
 				break;
 			case OR:
 				out.print(compInst.getArgument(0));
@@ -285,8 +337,7 @@ public class Decompiler {
 				out.print(compInst.getArgument(1));
 				out.print(" ");
 				out.print(operator);
-				out.print(" ");
-				out.print(compInst.getArgument(2));
+				out.print(" 0");
 				break;
 			default:
 				throw new IllegalArgumentException("unkown compare statement " + compInst);
