@@ -263,7 +263,8 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.NEW_ECL, inst -> {
-
+			stopVM();
+			engine.loadEcl(intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.LOAD_FILES, inst -> {
 			engine.loadArea(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));

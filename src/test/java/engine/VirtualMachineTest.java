@@ -40,6 +40,10 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void loadEcl(int id) {
+			}
+
+			@Override
 			public void loadArea(int id1, int id2, int id3) {
 			}
 

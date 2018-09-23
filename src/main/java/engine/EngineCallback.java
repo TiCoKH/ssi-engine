@@ -13,6 +13,8 @@ public interface EngineCallback {
 
 	void addNewline();
 
+	void loadEcl(int id);
+
 	void loadArea(int id1, int id2, int id3);
 
 	void loadAreaDecoration(int id1, int id2, int id3);

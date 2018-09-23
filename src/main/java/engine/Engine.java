@@ -2,6 +2,7 @@ package engine;
 
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.BIGPIC;
+import static data.content.DAXContentType.ECL;
 import static data.content.DAXContentType.GEO;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.WALLDEF;
@@ -91,15 +92,8 @@ public class Engine implements EngineCallback, RendererCallback {
 			setInputHandler(InputType.MENU, "BUCK ROGERS V1.2", InputAction.MAINMENU_ACTIONS);
 			renderer.setTitleScreen(null);
 			renderer.setStatusLine(null);
-			int eclId = memory.getMenuChoice() == 0 ? 16 : 18;
-			try {
-				EclProgram ecl = res.load("ECL1.DAX", eclId, EclProgram.class);
-				vm.newEcl(ecl);
-				vm.startInitial();
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
-		});
+			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
+		}, "Title Menu");
 		currentThread.start();
 	}
 
@@ -215,6 +209,20 @@ public class Engine implements EngineCallback, RendererCallback {
 			default:
 				break;
 		}
+	}
+
+	@Override
+	public void loadEcl(int id) {
+		currentThread = new Thread(() -> {
+			try {
+				EclProgram ecl = res.find(id, EclProgram.class, ECL);
+				vm.newEcl(ecl);
+				vm.startInitial();
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
+			}
+		}, "VM");
+		currentThread.start();
 	}
 
 	@Override
