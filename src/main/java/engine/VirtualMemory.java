@@ -60,7 +60,7 @@ public class VirtualMemory {
 	}
 
 	public void setCurrentMapOrient(Direction currentMapOrient) {
-		mem.put(MEMLOC_MAP_ORIENTATION, (byte) currentMapOrient.getId());
+		mem.put(MEMLOC_MAP_ORIENTATION, (byte) currentMapOrient.ordinal());
 	}
 
 	public int getWallType() {
