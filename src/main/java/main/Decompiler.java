@@ -265,7 +265,7 @@ public class Decompiler {
 		if (OP_CODE_MATH.contains(inst.getOpCode()))
 			outputMath(inst);
 		else if (inst.getOpCode() != GOTO && inst.getOpCode() != GOSUB && inst.getOpCode() != CALL) {
-			out.print(inst.getOpCode().getDescription() + "(");
+			out.print(inst.getOpCode().name() + "(");
 			for (int i = 0; i < inst.getArguments().length; i++) {
 				if (i != 0)
 					out.print(", ");
@@ -384,9 +384,9 @@ public class Decompiler {
 		if (inst.getOpCode() == ON_GOTO || inst.getOpCode() == ON_GOSUB) {
 			out.print("ON " + argL(inst, 0) + (inst.getOpCode() == ON_GOTO ? " GOTO " : " GOSUB "));
 		} else if (inst.getOpCode() == MENU_HORIZONTAL || inst.getOpCode() == SELECT_ACTION) {
-			out.print(argL(inst, 0) + " = " + inst.getOpCode().getDescription());
+			out.print(argL(inst, 0) + " = " + inst.getOpCode().name());
 		} else {
-			out.print(inst.getOpCode().getDescription() + "(");
+			out.print(inst.getOpCode().name() + "(");
 			for (int i = 0; i < inst.getArguments().length; i++) {
 				if (i != 0)
 					out.print(", ");

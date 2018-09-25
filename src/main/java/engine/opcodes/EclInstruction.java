@@ -83,8 +83,7 @@ public class EclInstruction {
 
 	@Override
 	public String toString() {
-		return opCode.getDescription() + "("
-			+ String.join(", ", Arrays.asList(arguments).stream().map(EclArgument::toString).collect(Collectors.toList())) + ")"
-			+ (hasDynArgs() ? " (" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")" : "");
+		return opCode.name() + "(" + String.join(", ", Arrays.asList(arguments).stream().map(EclArgument::toString).collect(Collectors.toList()))
+			+ ")" + (hasDynArgs() ? " (" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")" : "");
 	}
 }
