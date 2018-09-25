@@ -387,8 +387,11 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.DUMP, inst -> {
 
 		});
-		IMPL.put(EclOpCode.FIND_SPECIAL, inst -> {
-
+		IMPL.put(EclOpCode.LOGBOOK_ENTRY, inst -> {
+			engine.addText(new EclString(" AND YOU RECORD "), false);
+			engine.addText(stringValue(inst.getArgument(0)), false);
+			engine.addText(new EclString(" AS LOGBOOK ENTRY " + intValue(inst.getArgument(1)) + "."), false);
+			engine.setInputHandler(InputType.RETURN, "PRESS BUTTON OR RETURN TO CONTINUE", InputAction.RETURN_ACTIONS);
 		});
 		IMPL.put(EclOpCode.DESTROY_ITEM, inst -> {
 
