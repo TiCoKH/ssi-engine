@@ -210,10 +210,18 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PRINT, inst -> {
-			engine.addText(stringValue(inst.getArgument(0)), false);
+			EclArgument a0 = inst.getArgument(0);
+			if (a0.isStringValue())
+				engine.addText(stringValue(a0), false);
+			else
+				engine.addText(new EclString(Integer.toString(intValue(a0))), false);
 		});
 		IMPL.put(EclOpCode.PRINT_CLEAR, inst -> {
-			engine.addText(stringValue(inst.getArgument(0)), true);
+			EclArgument a0 = inst.getArgument(0);
+			if (a0.isStringValue())
+				engine.addText(stringValue(a0), true);
+			else
+				engine.addText(new EclString(Integer.toString(intValue(a0))), true);
 		});
 		IMPL.put(EclOpCode.RETURN, inst -> {
 			eclCode.position(gosubStack.pop());
