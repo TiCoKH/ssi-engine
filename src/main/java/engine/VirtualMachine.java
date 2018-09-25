@@ -274,7 +274,7 @@ public class VirtualMachine {
 			stopVM();
 			engine.loadEcl(intValue(inst.getArgument(0)));
 		});
-		IMPL.put(EclOpCode.LOAD_FILES, inst -> {
+		IMPL.put(EclOpCode.LOAD_AREA_MAP, inst -> {
 			engine.loadArea(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
 		IMPL.put(EclOpCode.PARTY_SURPRISE, inst -> {
@@ -364,7 +364,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.ADD_NPC, inst -> {
 
 		});
-		IMPL.put(EclOpCode.LOAD_PIECES, inst -> {
+		IMPL.put(EclOpCode.LOAD_AREA_DECO, inst -> {
 			engine.loadAreaDecoration(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
 		IMPL.put(EclOpCode.PROGRAM, inst -> {

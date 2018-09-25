@@ -34,7 +34,7 @@ public enum EclOpCode {
 	PARTY_CHECK(0x1E, 6), //
 	UNKNOWN_1F(0x1F, 4), //
 	NEW_ECL(0x20, 1), //
-	LOAD_FILES(0x21, 3), //
+	LOAD_AREA_MAP(0x21, 3), //
 	PARTY_SURPRISE(0x22, 3), // TODO: Game specific
 	SURPRISE(0x23, 3), // TODO: Game specific
 	COMBAT(0x24, 0), //
@@ -56,7 +56,7 @@ public enum EclOpCode {
 	CLOCK(0x34, 2), //
 	WRITE_MEM_BASE_OFF(0x35, 3), //
 	ADD_NPC(0x36, 2), //
-	LOAD_PIECES(0x37, 3), //
+	LOAD_AREA_DECO(0x37, 3), //
 	PROGRAM(0x38, 1), //
 	WHO(0x39, 1), //
 	DELAY(0x3A, 0), //
