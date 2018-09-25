@@ -211,14 +211,12 @@ public class ClassicRenderer extends JPanel {
 			return;
 		}
 		int charCount = oldCharList.size() % 38;
-		if (charCount != 0) {
-			List<Byte> newCharList = new ArrayList<>(oldCharList);
-			for (int i = charCount; i < 38; i++) {
-				newCharList.add((byte) 0x20);
-			}
-			this.charList = newCharList;
-			this.textNeedsProgressing = true;
+		List<Byte> newCharList = new ArrayList<>(oldCharList);
+		for (int i = charCount; i < 38; i++) {
+			newCharList.add((byte) 0x20);
 		}
+		this.charList = newCharList;
+		this.textNeedsProgressing = true;
 	}
 
 	public void increaseText() {
