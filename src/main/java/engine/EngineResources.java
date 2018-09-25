@@ -29,7 +29,7 @@ import data.content.VGAImage;
 public class EngineResources {
 	private static final Map<DAXContentType, String[]> fileMap = new EnumMap<>(DAXContentType.class);
 	static {
-		fileMap.put(_8X8D, new String[] { "8X8D0.DAX", "8X8D1.DAX", "8X8D2.DAX", "8X8D3.DAX", "8X8D4.DAX", "8X8D5.DAX", "8X8D6.DAX" });
+		fileMap.put(_8X8D, new String[] { "8X8D1.DAX", "8X8D2.DAX", "8X8D3.DAX", "8X8D4.DAX", "8X8D5.DAX", "8X8D6.DAX" });
 		fileMap.put(BACK, new String[] { "BACK1.DAX", "BACK2.DAX", "BACK3.DAX", "BACK4.DAX", "BACK5.DAX", "BACK6.DAX" });
 		fileMap.put(BIGPIC, new String[] { "BIGPIC1.DAX", "BIGPIC2.DAX", "BIGPIC3.DAX", "BIGPIC4.DAX", "BIGPIC5.DAX", "BIGPIC6.DAX" });
 		fileMap.put(ECL, new String[] { "ECL1.DAX", "ECL2.DAX", "ECL3.DAX", "ECL4.DAX", "ECL5.DAX", "ECL6.DAX" });
@@ -59,6 +59,10 @@ public class EngineResources {
 
 	public DAXImageContent getBorders() throws IOException {
 		return load("BORDERS.DAX", 0, VGAImage.class);
+	}
+
+	public DAXImageContent getSpaceTiles() throws IOException {
+		return load("8X8D0.DAX", 1, VGAImage.class);
 	}
 
 	public DAXImageContent getTitles(int id) throws IOException {
