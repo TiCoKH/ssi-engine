@@ -62,6 +62,7 @@ public class Decompiler {
 		IF_NOT_EQUALS);
 	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
 		AND, OR, RANDOM, RANDOM0);
+	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);
 
 	private static final Map<Integer, String> KNOWN_ADRESSES = new HashMap<>();
 	static {
@@ -285,10 +286,10 @@ public class Decompiler {
 				out.println(argL(inst, 1) + " = " + argR(inst, 0));
 				break;
 			case WRITE_MEM_BASE_OFF:
-				out.println(argL(inst, 1) + " + " + argR(inst, 2) + " = " + argR(inst, 0));
+				out.println(inst.getArgument(1) + " + " + argR(inst, 2) + " = " + argR(inst, 0));
 				break;
 			case COPY_MEM:
-				out.println(argL(inst, 2) + " = [" + argL(inst, 0) + " + " + argR(inst, 1) + "]");
+				out.println(argL(inst, 2) + " = [" + inst.getArgument(0) + " + " + argR(inst, 1) + "]");
 				break;
 			case ADD:
 				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " + " + argR(inst, 1));
@@ -354,6 +355,7 @@ public class Decompiler {
 				out.print(argR(compInst, 1));
 				break;
 			case COMPARE_AND:
+				out.print("(");
 				out.print(argR(compInst, 0));
 				out.print(" == ");
 				out.print(argR(compInst, 1));
@@ -361,6 +363,9 @@ public class Decompiler {
 				out.print(argR(compInst, 2));
 				out.print(" == ");
 				out.print(argR(compInst, 3));
+				out.print(") ");
+				out.print(operator);
+				out.print(" TRUE");
 				break;
 			case AND:
 				out.print(argR(compInst, 0));
@@ -420,6 +425,11 @@ public class Decompiler {
 				return KNOWN_ADRESSES.get(a.valueAsInt());
 			} else {
 				return "[" + a.toString() + "]";
+			}
+		}
+		if (a.isNumberValue()) {
+			if (OP_CODE_HEX_ARGS.contains(inst.getOpCode())) {
+				return "0x" + Integer.toHexString(a.valueAsInt()).toUpperCase();
 			}
 		}
 		return a.toString();
