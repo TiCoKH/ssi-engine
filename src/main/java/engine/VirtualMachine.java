@@ -414,7 +414,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.STOP_MOVE, inst -> {
 			stopVM();
 		});
-		IMPL.put(EclOpCode.UNKNOWN_43, inst -> {
+		IMPL.put(EclOpCode.SOUND_EVENT, inst -> {
 
 		});
 		IMPL.put(EclOpCode.UNKNOWN_44, inst -> {

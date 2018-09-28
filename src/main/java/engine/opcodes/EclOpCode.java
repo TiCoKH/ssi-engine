@@ -68,7 +68,7 @@ public enum EclOpCode {
 	DESTROY_ITEM(0x40, 1), //
 	UNKNOWN_41(0x41, 2), //
 	STOP_MOVE(0x42, 0), //
-	UNKNOWN_43(0x43, 1), //
+	SOUND_EVENT(0x43, 1), //
 	UNKNOWN_44(0x44, 0), //
 	RANDOM0(0x45, 2), //
 	FOR_START(0x46, 2), //
