@@ -8,6 +8,7 @@ import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
 public class VirtualMemory {
+	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
 	public static final int MEMLOC_MAP_POS_X = 0xC04B;
 	public static final int MEMLOC_MAP_POS_Y = 0xC04C;
@@ -29,6 +30,14 @@ public class VirtualMemory {
 
 	public void setMenuChoice(int menuChoice) {
 		this.menuChoice = menuChoice;
+	}
+
+	public int getForLoopCount() {
+		return mem.get(MEMLOC_FOR_LOOP_COUNT) & 0xFF;
+	}
+
+	public void setForLoopCount(int loopCount) {
+		mem.put(MEMLOC_FOR_LOOP_COUNT, (byte) loopCount);
 	}
 
 	public int getCombatResult() {

@@ -6,10 +6,12 @@ import java.util.List;
 
 public class EclArgument {
 	private int type;
+	private int size;
 	private Object value;
 
-	public EclArgument(int type, Object value) {
+	public EclArgument(int type, int size, Object value) {
 		this.type = type;
+		this.size = size;
 		this.value = value;
 	}
 
@@ -19,7 +21,7 @@ public class EclArgument {
 		switch (type) {
 			case 0: {
 				int value = eclBlock.get() & 0xFF;
-				return new EclArgument(type, value);
+				return new EclArgument(type, 2, value);
 			}
 			case 1:
 			case 2:
@@ -28,7 +30,7 @@ public class EclArgument {
 			case 0x81: // string from memory address
 			{
 				int value = eclBlock.getShort() & 0xFFFF;
-				return new EclArgument(type, value);
+				return new EclArgument(type, 3, value);
 			}
 			case 0x80: {
 				// compressed string
@@ -36,7 +38,7 @@ public class EclArgument {
 				byte[] cmpString = new byte[strLen];
 				eclBlock.get(cmpString);
 				EclString value = decompressString(cmpString);
-				return new EclArgument(type, value);
+				return new EclArgument(type, 2 + strLen, value);
 			}
 			default: {
 				throw new IllegalArgumentException("Unknown type: " + type + " at " + Integer.toHexString(pos));
@@ -84,6 +86,10 @@ public class EclArgument {
 		ByteBuffer string = ByteBuffer.allocate(chars.size());
 		chars.stream().forEachOrdered(string::put);
 		return new EclString(string);
+	}
+
+	public int getSize() {
+		return size;
 	}
 
 	public int getType() {

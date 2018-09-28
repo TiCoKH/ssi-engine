@@ -70,9 +70,9 @@ public enum EclOpCode {
 	STOP_MOVE(0x42, 0), //
 	UNKNOWN_43(0x43, 1), //
 	UNKNOWN_44(0x44, 0), //
-	UNKNOWN_45(0x45, 2), //
-	UNKNOWN_46(0x46, 2), //
-	UNKNOWN_47(0x47, 0), //
+	RANDOM0(0x45, 2), //
+	FOR_START(0x46, 2), //
+	FOR_REPEAT(0x47, 0), //
 	UNKNOWN_48(0x48, 1), //
 	UNKNOWN_49(0x49, 6), //
 	UNKNOWN_4A(0x4A, 0), //

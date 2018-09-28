@@ -18,8 +18,8 @@ import engine.opcodes.EclOpCode;
 import engine.opcodes.EclString;
 
 public class VirtualMachine {
-	private static final EclArgument SELECTED_PLAYER_NAME = new EclArgument(1, 0x7C00);
-	private static final EclArgument SELECTED_PLAYER_STATUS = new EclArgument(1, 0x7D00);
+	private static final EclArgument SELECTED_PLAYER_NAME = new EclArgument(1, 3, 0x7C00);
+	private static final EclArgument SELECTED_PLAYER_STATUS = new EclArgument(1, 3, 0x7D00);
 
 	private final Map<EclOpCode, Consumer<EclInstruction>> IMPL = new EnumMap<>(EclOpCode.class);
 
@@ -29,6 +29,9 @@ public class VirtualMachine {
 	private Deque<Integer> gosubStack;
 	private int compareResult;
 	private Random rnd;
+
+	private int forLoopAddress;
+	private int forLoopMax;
 
 	private boolean stopped;
 
@@ -417,14 +420,22 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.UNKNOWN_44, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_45, inst -> {
-
+		IMPL.put(EclOpCode.RANDOM0, inst -> {
+			int rndVal = intValue(inst.getArgument(1));
+			if (rndVal > 0)
+				rndVal = rnd.nextInt(rndVal + 1);
+			mem.writeMemInt(inst.getArgument(0), rndVal);
 		});
-		IMPL.put(EclOpCode.UNKNOWN_46, inst -> {
-
+		IMPL.put(EclOpCode.FOR_START, inst -> {
+			mem.setForLoopCount(intValue(inst.getArgument(0)));
+			forLoopMax = intValue(inst.getArgument(1));
+			forLoopAddress = inst.getPosition() + inst.getSize();
 		});
-		IMPL.put(EclOpCode.UNKNOWN_47, inst -> {
-
+		IMPL.put(EclOpCode.FOR_REPEAT, inst -> {
+			mem.setForLoopCount(mem.getForLoopCount() + 1);
+			if (mem.getForLoopCount() <= forLoopMax) {
+				eclCode.position(forLoopAddress);
+			}
 		});
 		IMPL.put(EclOpCode.UNKNOWN_48, inst -> {
 

@@ -22,12 +22,14 @@ public class EclInstruction {
 	private static final List<EclOpCode> OP_CODE_DYNARGS = ImmutableList.of(ON_GOTO, ON_GOSUB, TREASURE, MENU_HORIZONTAL, SELECT_ACTION);
 
 	private int position;
+	private int size;
 	private EclOpCode opCode;
 	private EclArgument[] arguments;
 	private List<EclArgument> dynArgs;
 
-	private EclInstruction(int position, EclOpCode opCode, EclArgument[] arguments, List<EclArgument> dynArgs) {
+	private EclInstruction(int position, int size, EclOpCode opCode, EclArgument[] arguments, List<EclArgument> dynArgs) {
 		this.position = position;
+		this.size = size;
 		this.opCode = opCode;
 		this.arguments = arguments;
 		this.dynArgs = dynArgs;
@@ -41,17 +43,24 @@ public class EclInstruction {
 			System.err.println("Unknown opcode " + Integer.toHexString(id) + " at " + Integer.toHexString(pos));
 		}
 
+		int size = 1;
+
 		EclArgument[] arguments = new EclArgument[opCode.getArgCount()];
 		for (int i = 0; i < opCode.getArgCount(); i++) {
 			arguments[i] = EclArgument.parseNext(eclBlock);
+			size += arguments[i].getSize();
 		}
+
 		List<EclArgument> dynArgs = new ArrayList<>();
 		if (OP_CODE_DYNARGS.contains(opCode)) {
 			for (int i = 0; i < arguments[1].valueAsInt(); i++) {
-				dynArgs.add(EclArgument.parseNext(eclBlock));
+				EclArgument dynArg = EclArgument.parseNext(eclBlock);
+				dynArgs.add(dynArg);
+				size += dynArg.getSize();
 			}
 		}
-		return new EclInstruction(pos, opCode, arguments, dynArgs);
+
+		return new EclInstruction(pos, size, opCode, arguments, dynArgs);
 	}
 
 	public boolean hasDynArgs() {
@@ -72,6 +81,10 @@ public class EclInstruction {
 
 	public EclArgument[] getArguments() {
 		return arguments;
+	}
+
+	public int getSize() {
+		return size;
 	}
 
 	public EclArgument getArgument(int index) {

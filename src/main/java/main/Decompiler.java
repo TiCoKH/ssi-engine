@@ -24,6 +24,7 @@ import static engine.opcodes.EclOpCode.ON_GOSUB;
 import static engine.opcodes.EclOpCode.ON_GOTO;
 import static engine.opcodes.EclOpCode.OR;
 import static engine.opcodes.EclOpCode.RANDOM;
+import static engine.opcodes.EclOpCode.RANDOM0;
 import static engine.opcodes.EclOpCode.RETURN;
 import static engine.opcodes.EclOpCode.SELECT_ACTION;
 import static engine.opcodes.EclOpCode.STOP_MOVE;
@@ -60,10 +61,11 @@ public class Decompiler {
 	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
 		IF_NOT_EQUALS);
 	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
-		AND, OR, RANDOM);
+		AND, OR, RANDOM, RANDOM0);
 
 	private static final Map<Integer, String> KNOWN_ADRESSES = new HashMap<>();
 	static {
+		KNOWN_ADRESSES.put(0x4CF6, "FOR_COUNT");
 		KNOWN_ADRESSES.put(0x7B90, "STRING1");
 		KNOWN_ADRESSES.put(0x7F79, "TEMP1");
 		KNOWN_ADRESSES.put(0x7F7A, "TEMP2");
@@ -308,6 +310,9 @@ public class Decompiler {
 				break;
 			case RANDOM:
 				out.println(argL(inst, 1) + " = RANDOM(" + argR(inst, 0) + ")");
+				break;
+			case RANDOM0:
+				out.println(argL(inst, 0) + " = RANDOM0(" + argR(inst, 1) + ")");
 				break;
 			default:
 				break;
