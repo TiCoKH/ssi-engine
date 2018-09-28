@@ -45,7 +45,7 @@ public enum EclOpCode {
 	INPUT_RETURN(0x29, 0), // TODO: Game specific
 	COPY_MEM(0x2A, 3), //
 	MENU_HORIZONTAL(0x2B, 2), //
-	PARLAY(0x2C, 0), // TODO: Game specific
+	INPUT_YES_NO(0x2C, 0), // TODO: Game specific
 	CALL(0x2D, 1), //
 	DAMAGE(0x2E, 5), //
 	AND(0x2F, 3), //

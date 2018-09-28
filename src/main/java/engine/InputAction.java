@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class InputAction {
+	public static final InputAction YES = new InputAction("YES");
+	public static final InputAction NO = new InputAction("NO");
 	public static final InputAction GAME = new InputAction("GAME");
 	public static final InputAction DEMO = new InputAction("DEMO");
 	public static final InputAction ACCEPT = new InputAction("RETURN/ENTER");
@@ -17,6 +19,7 @@ public class InputAction {
 		.unmodifiableList(Arrays.asList(new InputAction[] { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, TURN_AROUND }));
 	public static final List<InputAction> MAINMENU_ACTIONS = Collections.unmodifiableList(Arrays.asList(new InputAction[] { GAME, DEMO }));
 	public static final List<InputAction> RETURN_ACTIONS = Collections.unmodifiableList(Arrays.asList(new InputAction[] { ACCEPT }));
+	public static final List<InputAction> YES_NO_ACTIONS = Collections.unmodifiableList(Arrays.asList(new InputAction[] { YES, NO }));
 
 	private final String name;
 

@@ -327,8 +327,9 @@ public class VirtualMachine {
 				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
 			mem.writeMemInt(inst.getArgument(0), mem.getMenuChoice());
 		});
-		IMPL.put(EclOpCode.PARLAY, inst -> {
-
+		IMPL.put(EclOpCode.INPUT_YES_NO, inst -> {
+			engine.setInputHandler(InputType.MENU, null, InputAction.YES_NO_ACTIONS);
+			compareResult = mem.getMenuChoice();
 		});
 		IMPL.put(EclOpCode.CALL, inst -> {
 
