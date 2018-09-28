@@ -64,6 +64,7 @@ public class VirtualMachine {
 		onRestInterruption = EclInstruction.parseNext(eclCode);
 		onInit = EclInstruction.parseNext(eclCode);
 		initCodeBase();
+		mem.writeProgram(eclCodeBaseAddress, eclCode);
 	}
 
 	private void initCodeBase() {

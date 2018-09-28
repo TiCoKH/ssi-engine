@@ -149,4 +149,10 @@ public class VirtualMemory {
 			mem.put(value.getChar(i));
 		}
 	}
+
+	public void writeProgram(int startAddress, ByteBuffer eclCode) {
+		eclCode.rewind();
+		mem.position(startAddress);
+		mem.put(eclCode);
+	}
 }
