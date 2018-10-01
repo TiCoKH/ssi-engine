@@ -25,7 +25,7 @@ public class VirtualMachine {
 
 	private EngineCallback engine;
 
-	private VirtualMemory mem;
+	private VirtualMemory memory;
 	private Deque<Integer> gosubStack;
 	private int compareResult;
 	private Random rnd;
@@ -46,7 +46,7 @@ public class VirtualMachine {
 	public VirtualMachine(EngineCallback engine) {
 		this.engine = engine;
 
-		mem = new VirtualMemory();
+		memory = new VirtualMemory();
 		gosubStack = new ConcurrentLinkedDeque<>();
 		compareResult = 0;
 		rnd = new Random();
@@ -54,8 +54,8 @@ public class VirtualMachine {
 		initImpl();
 	}
 
-	VirtualMemory getMem() {
-		return mem;
+	VirtualMemory getMemory() {
+		return memory;
 	}
 
 	public void newEcl(EclProgram ecl) {
@@ -67,7 +67,7 @@ public class VirtualMachine {
 		onRestInterruption = EclInstruction.parseNext(eclCode);
 		onInit = EclInstruction.parseNext(eclCode);
 		initCodeBase();
-		mem.writeProgram(eclCodeBaseAddress, eclCode);
+		memory.writeProgram(eclCodeBaseAddress, eclCode);
 	}
 
 	private void initCodeBase() {
@@ -140,14 +140,14 @@ public class VirtualMachine {
 		if (!a.isNumberValue()) {
 			return 0;
 		}
-		return a.isMemAddress() ? mem.readMemInt(a) : a.valueAsInt();
+		return a.isMemAddress() ? memory.readMemInt(a) : a.valueAsInt();
 	}
 
 	private EclString stringValue(EclArgument a) {
 		if (!a.isStringValue()) {
 			return null;
 		}
-		return a.isMemAddress() ? mem.readMemString(a) : a.valueAsString();
+		return a.isMemAddress() ? memory.readMemString(a) : a.valueAsString();
 	}
 
 	private void initImpl() {
@@ -170,26 +170,26 @@ public class VirtualMachine {
 			}
 		});
 		IMPL.put(EclOpCode.ADD, inst -> {
-			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) + intValue(inst.getArgument(1)));
+			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) + intValue(inst.getArgument(1)));
 		});
 		IMPL.put(EclOpCode.SUBTRACT, inst -> {
-			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(1)) - intValue(inst.getArgument(0)));
+			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(1)) - intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.DIVIDE, inst -> {
-			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) / intValue(inst.getArgument(1)));
+			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) / intValue(inst.getArgument(1)));
 		});
 		IMPL.put(EclOpCode.MULTIPLY, inst -> {
-			mem.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) * intValue(inst.getArgument(1)));
+			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) * intValue(inst.getArgument(1)));
 		});
 		IMPL.put(EclOpCode.RANDOM, inst -> {
-			mem.writeMemInt(inst.getArgument(1), rnd.nextInt(intValue(inst.getArgument(0)) + 1));
+			memory.writeMemInt(inst.getArgument(1), rnd.nextInt(intValue(inst.getArgument(0)) + 1));
 		});
 		IMPL.put(EclOpCode.WRITE_MEM, inst -> {
 			if (inst.getArgument(0).isNumberValue()) {
-				mem.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(0)));
+				memory.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(0)));
 			}
 			if (inst.getArgument(0).isStringValue()) {
-				mem.writeMemString(inst.getArgument(1), stringValue(inst.getArgument(0)));
+				memory.writeMemString(inst.getArgument(1), stringValue(inst.getArgument(0)));
 			}
 		});
 		IMPL.put(EclOpCode.LOAD_CHAR, inst -> {
@@ -290,7 +290,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.COMBAT, inst -> {
 			// TODO: Implement combat
 			// For now set combat to success
-			mem.setCombatResult(0);
+			memory.setCombatResult(0);
 		});
 		IMPL.put(EclOpCode.ON_GOTO, inst -> {
 			printDynArgs(inst);
@@ -319,17 +319,17 @@ public class VirtualMachine {
 			engine.setInputHandler(InputType.RETURN, "PRESS BUTTON OR RETURN TO CONTINUE", InputAction.RETURN_ACTIONS);
 		});
 		IMPL.put(EclOpCode.COPY_MEM, inst -> {
-			mem.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
+			memory.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
 			printDynArgs(inst);
 			engine.setInputHandler(InputType.MENU, null,
 				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
-			mem.writeMemInt(inst.getArgument(0), mem.getMenuChoice());
+			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.INPUT_YES_NO, inst -> {
 			engine.setInputHandler(InputType.MENU, null, InputAction.YES_NO_ACTIONS);
-			compareResult = mem.getMenuChoice();
+			compareResult = memory.getMenuChoice();
 		});
 		IMPL.put(EclOpCode.CALL, inst -> {
 
@@ -339,12 +339,12 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.AND, inst -> {
 			int result = intValue(inst.getArgument(0)) & intValue(inst.getArgument(1));
-			mem.writeMemInt(inst.getArgument(2), result);
+			memory.writeMemInt(inst.getArgument(2), result);
 			compareResult = result == 0 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.OR, inst -> {
 			int result = intValue(inst.getArgument(0)) | intValue(inst.getArgument(1));
-			mem.writeMemInt(inst.getArgument(2), result);
+			memory.writeMemInt(inst.getArgument(2), result);
 			compareResult = result == 0 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
@@ -352,7 +352,7 @@ public class VirtualMachine {
 			engine.addText(new EclString("WHAT DO YOU DO?"), false);
 			engine.setInputHandler(InputType.MENU, null,
 				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
-			mem.writeMemInt(inst.getArgument(0), mem.getMenuChoice());
+			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, inst -> {
 
@@ -364,7 +364,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.WRITE_MEM_BASE_OFF, inst -> {
-			mem.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(2)), intValue(inst.getArgument(0)));
+			memory.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(2)), intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.ADD_NPC, inst -> {
 
@@ -377,8 +377,8 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.WHO, inst -> {
 			// TODO Implement party management
-			mem.writeMemString(SELECTED_PLAYER_NAME, new EclString("THIS ONE"));
-			mem.writeMemInt(SELECTED_PLAYER_STATUS, 1);
+			memory.writeMemString(SELECTED_PLAYER_NAME, new EclString("THIS ONE"));
+			memory.writeMemInt(SELECTED_PLAYER_STATUS, 1);
 		});
 		IMPL.put(EclOpCode.DELAY, inst -> {
 			try {
@@ -425,16 +425,16 @@ public class VirtualMachine {
 			int rndVal = intValue(inst.getArgument(1));
 			if (rndVal > 0)
 				rndVal = rnd.nextInt(rndVal + 1);
-			mem.writeMemInt(inst.getArgument(0), rndVal);
+			memory.writeMemInt(inst.getArgument(0), rndVal);
 		});
 		IMPL.put(EclOpCode.FOR_START, inst -> {
-			mem.setForLoopCount(intValue(inst.getArgument(0)));
+			memory.setForLoopCount(intValue(inst.getArgument(0)));
 			forLoopMax = intValue(inst.getArgument(1));
 			forLoopAddress = inst.getPosition() + inst.getSize();
 		});
 		IMPL.put(EclOpCode.FOR_REPEAT, inst -> {
-			mem.setForLoopCount(mem.getForLoopCount() + 1);
-			if (mem.getForLoopCount() <= forLoopMax) {
+			memory.setForLoopCount(memory.getForLoopCount() + 1);
+			if (memory.getForLoopCount() <= forLoopMax) {
 				eclCode.position(forLoopAddress);
 			}
 		});

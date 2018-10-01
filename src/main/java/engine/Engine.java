@@ -54,7 +54,7 @@ public class Engine implements EngineCallback, RendererCallback {
 		renderer.setNoPicture(ClassicBorders.SCREEN);
 
 		vm = new VirtualMachine(this);
-		memory = vm.getMem();
+		memory = vm.getMemory();
 
 		currentWalls = null;
 		currentMap = null;
