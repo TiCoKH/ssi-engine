@@ -1,5 +1,9 @@
 package engine;
 
+import static engine.EngineCallback.InputType.CONTINUE;
+import static engine.InputAction.MENU_HANDLER;
+import static engine.InputAction.YES_NO_ACTIONS;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Deque;
@@ -11,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import data.content.EclProgram;
-import engine.EngineCallback.InputType;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
@@ -104,10 +107,8 @@ public class VirtualMachine {
 
 	private void startEvent(EclInstruction eventInst) {
 		stopped = false;
-		engine.setInputHandler(InputType.NONE, null, null);
 		exec(eventInst, true);
 		runVM();
-		engine.setInputHandler(InputType.MOVEMENT, null, InputAction.STANDARD_ACTIONS);
 	}
 
 	private void runVM() {
@@ -316,19 +317,20 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.INPUT_RETURN, inst -> {
-			engine.setInputHandler(InputType.RETURN, "PRESS BUTTON OR RETURN TO CONTINUE", InputAction.RETURN_ACTIONS);
+			engine.setInput(CONTINUE);
 		});
 		IMPL.put(EclOpCode.COPY_MEM, inst -> {
 			memory.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
 			printDynArgs(inst);
-			engine.setInputHandler(InputType.MENU, null,
-				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
+			engine.setMenu(
+				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString().toString(), inst.getDynArgs().indexOf(arg)))
+					.collect(Collectors.toList()));
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.INPUT_YES_NO, inst -> {
-			engine.setInputHandler(InputType.MENU, null, InputAction.YES_NO_ACTIONS);
+			engine.setMenu(YES_NO_ACTIONS);
 			compareResult = memory.getMenuChoice();
 		});
 		IMPL.put(EclOpCode.CALL, inst -> {
@@ -350,8 +352,9 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
 			printDynArgs(inst);
 			engine.addText(new EclString("WHAT DO YOU DO?"), false);
-			engine.setInputHandler(InputType.MENU, null,
-				inst.getDynArgs().stream().map(arg -> new InputAction(arg.valueAsString().toString())).collect(Collectors.toList()));
+			engine.setMenu(
+				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString().toString(), inst.getDynArgs().indexOf(arg)))
+					.collect(Collectors.toList()));
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, inst -> {
@@ -404,7 +407,7 @@ public class VirtualMachine {
 			engine.addText(new EclString(" AND YOU RECORD "), false);
 			engine.addText(stringValue(inst.getArgument(0)), false);
 			engine.addText(new EclString(" AS LOGBOOK ENTRY " + intValue(inst.getArgument(1)) + "."), false);
-			engine.setInputHandler(InputType.RETURN, "PRESS BUTTON OR RETURN TO CONTINUE", InputAction.RETURN_ACTIONS);
+			engine.setInput(CONTINUE);
 		});
 		IMPL.put(EclOpCode.DESTROY_ITEM, inst -> {
 

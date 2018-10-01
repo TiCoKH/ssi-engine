@@ -7,8 +7,6 @@ import engine.opcodes.EclString;
 public interface RendererCallback {
 	void textDisplayFinished();
 
-	void quit();
-
 	void handleInput(InputAction action);
 
 	EclString getPositionText();

@@ -5,7 +5,9 @@ import java.util.List;
 import engine.opcodes.EclString;
 
 public interface EngineCallback {
-	void setInputHandler(InputType inputType, String description, List<InputAction> action);
+	void setInput(InputType inputType);
+
+	void setMenu(List<InputAction> action);
 
 	void showPicture(int id);
 
@@ -19,7 +21,7 @@ public interface EngineCallback {
 
 	void loadAreaDecoration(int id1, int id2, int id3);
 
-	enum InputType {
-		NONE, TITLE, RETURN, MENU, MOVEMENT;
+	public enum InputType {
+		NONE, TITLE, CONTINUE, STANDARD;
 	}
 }

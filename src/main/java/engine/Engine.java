@@ -7,12 +7,14 @@ import static data.content.DAXContentType.GEO;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.WALLDEF;
 import static data.content.DAXContentType._8X8D;
+import static engine.EngineCallback.InputType.STANDARD;
+import static engine.EngineCallback.InputType.TITLE;
+import static engine.InputAction.MAINMENU_ACTIONS;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import data.content.DAXImageContent;
 import data.content.DungeonMap;
@@ -32,7 +34,6 @@ public class Engine implements EngineCallback, RendererCallback {
 	private VirtualMachine vm;
 	private VirtualMemory memory;
 
-	private boolean shouldShowTitles;
 	private boolean running;
 
 	private Thread gameLoop;
@@ -41,14 +42,10 @@ public class Engine implements EngineCallback, RendererCallback {
 	private WallDef currentWalls;
 	private DungeonMap currentMap;
 
-	private Consumer<InputAction> inputHandler;
-	private List<InputAction> viableActions;
 	private InputAction nextAction;
 
-	public Engine(String gameDir, boolean showTitles) throws IOException {
+	public Engine(String gameDir) throws IOException {
 		res = new EngineResources(gameDir);
-
-		shouldShowTitles = showTitles;
 
 		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders());
 		renderer.setNoPicture(ClassicBorders.SCREEN);
@@ -61,18 +58,23 @@ public class Engine implements EngineCallback, RendererCallback {
 
 		running = true;
 
-		this.viableActions = new ArrayList<>();
 		nextAction = null;
+	}
+
+	public void start() {
+		running = true;
 
 		gameLoop = new Thread(() -> {
 			while (running) {
 				long start = System.currentTimeMillis();
 				if (nextAction != null) {
-					inputHandler.accept(nextAction);
+					nextAction.getHandler().handle(this, nextAction);
 					nextAction = null;
 				}
+
 				renderer.increaseText();
 				renderer.repaint();
+
 				long end = System.currentTimeMillis();
 				if ((end - start) < 16) {
 					try {
@@ -83,51 +85,55 @@ public class Engine implements EngineCallback, RendererCallback {
 			}
 		}, "Game Loop");
 		gameLoop.start();
-
-		showTitles();
 	}
 
-	private void initGameMenu() {
-		currentThread = new Thread(() -> {
-			setInputHandler(InputType.MENU, "BUCK ROGERS V1.2", InputAction.MAINMENU_ACTIONS);
-			renderer.setTitleScreen(null);
-			renderer.setStatusLine(null);
-			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
-		}, "Title Menu");
+	public void stop() {
+		running = false;
+		vm.stopVM();
+	}
+
+	public void setCurrentThread(Runnable r, String title) {
+		currentThread = new Thread(r, title);
 		currentThread.start();
 	}
 
-	private void showTitles() {
-		currentThread = new Thread(() -> {
-			setInputHandler(InputType.TITLE, null, null); // TODO
+	public void showTitles() {
+		setCurrentThread(() -> {
+			setInput(TITLE);
 			synchronized (vm) {
 				try {
-					if (shouldShowTitles) {
-						BufferedImage title1 = res.getTitles(1).get(0);
-						renderer.setTitleScreen(title1);
-						vm.wait(5000L);
-						BufferedImage title2 = res.getTitles(2).get(0);
-						renderer.setTitleScreen(title2);
-						vm.wait(5000L);
-						BufferedImage title3 = res.getTitles(3).get(0);
-						renderer.setTitleScreen(title3);
-						vm.wait(5000L);
-					}
-					BufferedImage title4 = res.getTitles(4).get(0);
-					renderer.setTitleScreen(title4);
+					BufferedImage title1 = res.getTitles(1).get(0);
+					renderer.setTitleScreen(title1);
+					vm.wait(5000L);
+					BufferedImage title2 = res.getTitles(2).get(0);
+					renderer.setTitleScreen(title2);
+					vm.wait(5000L);
+					BufferedImage title3 = res.getTitles(3).get(0);
+					renderer.setTitleScreen(title3);
+					vm.wait(5000L);
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 				} catch (InterruptedException e) {
 				}
-				initGameMenu();
+				showStartMenu();
 			}
 		}, "Titles");
-		currentThread.start();
 	}
 
-	@Override
-	public void quit() {
-		running = false;
+	public void showStartMenu() {
+		setCurrentThread(() -> {
+			try {
+				BufferedImage title4 = res.getTitles(4).get(0);
+				renderer.setTitleScreen(title4);
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
+			}
+			renderer.setInputMenu("BUCK ROGERS V1.2", MAINMENU_ACTIONS);
+			pauseCurrentThread();
+			renderer.setTitleScreen(null);
+			renderer.setStatusLine(null);
+			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
+		}, "Title Menu");
 	}
 
 	@Override
@@ -135,80 +141,31 @@ public class Engine implements EngineCallback, RendererCallback {
 		this.nextAction = action;
 	}
 
-	public ClassicRenderer getRenderer() {
-		return renderer;
+	@Override
+	public void setInput(InputType inputType) {
+		renderer.setStatusLine(null);
+		switch (inputType) {
+			case NONE:
+				renderer.setInputNone();
+				break;
+			case TITLE:
+				renderer.setInputContinue();
+				break;
+			case CONTINUE:
+				renderer.setStatusLine("PRESS BUTTON OR RETURN TO CONTINUE");
+				renderer.setInputContinue();
+				pauseCurrentThread();
+				break;
+			case STANDARD:
+				renderer.setInputStandard();
+				break;
+		}
 	}
 
 	@Override
-	public void setInputHandler(InputType inputType, String description, List<InputAction> viable) {
-		this.viableActions.clear();
-		if (viable != null)
-			this.viableActions.addAll(viable);
-		renderer.setInputActions(description, viable);
-		switch (inputType) {
-			case NONE:
-				inputHandler = action -> {
-				};
-				break;
-			case TITLE:
-				inputHandler = action -> {
-					// Titles thread is current one
-					continueCurrentThread();
-				};
-				break;
-			case RETURN:
-				inputHandler = action -> {
-					setInputHandler(InputType.NONE, null, null);
-					// VM thread is the current one
-					continueCurrentThread();
-				};
-				pauseCurrentThread();
-				break;
-			case MENU:
-				inputHandler = action -> {
-					int index = viableActions.indexOf(action);
-					memory.setMenuChoice(index);
-					setInputHandler(InputType.NONE, null, null);
-					// either main menu or VM is current thread
-					continueCurrentThread();
-				};
-				pauseCurrentThread();
-				break;
-			case MOVEMENT:
-				inputHandler = action -> {
-					renderer.clearText();
-
-					Direction d = memory.getCurrentMapOrient();
-					int x = memory.getCurrentMapX();
-					int y = memory.getCurrentMapY();
-					if (InputAction.MOVE_FORWARD == action) {
-						if (currentMap.canMove(x, y, d)) {
-							x += d.getDeltaX();
-							y += d.getDeltaY();
-							memory.setCurrentMapX(x);
-							memory.setCurrentMapY(y);
-							memory.setSquareInfo(currentMap.squareInfoAt(x, y));
-
-							currentThread = new Thread(() -> {
-								vm.startSearchLocation();
-							}, "VM");
-							currentThread.start();
-						}
-					} else if (InputAction.TURN_AROUND == action) {
-						d = d.getReverse();
-					} else if (InputAction.TURN_LEFT == action) {
-						d = d.getLeft();
-					} else if (InputAction.TURN_RIGHT == action) {
-						d = d.getRight();
-					}
-					memory.setCurrentMapOrient(d);
-					memory.setWallType(currentMap.wallIndexAt(x, y, d));
-				};
-				break;
-
-			default:
-				break;
-		}
+	public void setMenu(List<InputAction> items) {
+		renderer.setInputMenu(null, items);
+		pauseCurrentThread();
 	}
 
 	@Override
@@ -218,6 +175,7 @@ public class Engine implements EngineCallback, RendererCallback {
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
 				vm.newEcl(ecl);
 				vm.startInitial();
+				setInput(STANDARD);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
@@ -352,7 +310,7 @@ public class Engine implements EngineCallback, RendererCallback {
 		return currentWalls.getWallDisplay(wallIndex - 1, dis, plc);
 	}
 
-	private void pauseCurrentThread() {
+	public void pauseCurrentThread() {
 		synchronized (vm) {
 			try {
 				this.vm.wait();
@@ -361,13 +319,29 @@ public class Engine implements EngineCallback, RendererCallback {
 		}
 	}
 
-	private void continueCurrentThread() {
+	public void continueCurrentThread() {
 		synchronized (vm) {
 			this.vm.notify();
 		}
 	}
 
-	private int clamp(int value, int min, int max) {
-		return value < min ? min : value > max ? max : value;
+	public ClassicRenderer getRenderer() {
+		return renderer;
+	}
+
+	public VirtualMachine getVirtualMachine() {
+		return vm;
+	}
+
+	public VirtualMemory getMemory() {
+		return memory;
+	}
+
+	public DungeonMap getCurrentMap() {
+		return currentMap;
+	}
+
+	public WallDef getCurrentWalls() {
+		return currentWalls;
 	}
 }

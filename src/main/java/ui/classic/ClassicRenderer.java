@@ -1,5 +1,7 @@
 package ui.classic;
 
+import static engine.InputAction.CONTINUE;
+import static engine.InputAction.QUIT;
 import static ui.BorderSymbols.EM;
 
 import java.awt.Color;
@@ -32,7 +34,8 @@ public class ClassicRenderer extends JPanel {
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
 	static {
 		KEY_MAPPING = new HashMap<>();
-		KEY_MAPPING.put(InputAction.ACCEPT, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+		KEY_MAPPING.put(InputAction.QUIT, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
+
 		KEY_MAPPING.put(InputAction.MOVE_FORWARD, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
 		KEY_MAPPING.put(InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
 		KEY_MAPPING.put(InputAction.TURN_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
@@ -98,39 +101,68 @@ public class ClassicRenderer extends JPanel {
 		this.backdrops = null;
 		this.wallSymbols = null;
 
-		this.menu = new ArrayList<>();
-
 		initRenderer();
+		resetInput();
 	}
 
-	public void setInputActions(String description, List<InputAction> newActions) {
-		this.menu.clear();
-		this.statusLine = description == null ? null : new EclString(description);
+	private void initRenderer() {
+		setDoubleBuffered(true);
+		setPreferredSize(new Dimension(320 * zoom, 200 * zoom));
+	}
 
+	private void resetInput() {
+		this.menu = null;
+
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(QUIT), QUIT);
+		getActionMap().clear();
+		mapToAction(QUIT);
+	}
+
+	public void setInputNone() {
 		resetInput();
+	}
 
-		if (newActions == null) {
-			return;
-		}
+	public void setInputContinue() {
+		resetInput();
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
+		mapToAction(CONTINUE);
+	}
 
-		if (newActions != InputAction.STANDARD_ACTIONS && newActions != InputAction.RETURN_ACTIONS) {
-			this.menu.addAll(newActions);
-		}
+	public void setInputMenu(String statusLine, List<InputAction> newActions) {
+		resetInput();
+		setStatusLine(statusLine);
+
+		this.menu = newActions;
+
 		newActions.stream().forEach(a -> {
-			KeyStroke k = KEY_MAPPING.containsKey(a) ? KEY_MAPPING.get(a) : KeyStroke.getKeyStroke(a.getName().toLowerCase().charAt(0));
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a.getName());
-			getActionMap().put(a.getName(), new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					renderCB.handleInput(a);
-				}
-			});
+			KeyStroke k = KeyStroke.getKeyStroke(a.getName().toLowerCase().charAt(0));
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
+			mapToAction(a);
 		});
 	}
 
-	public void setStatusLine(EclString statusLine) {
-		this.statusLine = statusLine;
+	public void setInputStandard() {
+		resetInput();
+		InputAction.STANDARD_ACTIONS.stream().forEach(a -> {
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
+			mapToAction(a);
+		});
+	}
+
+	private void mapToAction(InputAction a) {
+		getActionMap().put(a, new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				renderCB.handleInput(a);
+			}
+		});
+	}
+
+	public void setStatusLine(String statusLine) {
+		this.statusLine = statusLine != null ? new EclString(statusLine) : null;
 	}
 
 	public void setTitleScreen(BufferedImage title) {
@@ -230,26 +262,6 @@ public class ClassicRenderer extends JPanel {
 		}
 	}
 
-	private void initRenderer() {
-		setDoubleBuffered(true);
-		setPreferredSize(new Dimension(320 * zoom, 200 * zoom));
-		resetInput();
-	}
-
-	private void resetInput() {
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK), "quit");
-		getActionMap().clear();
-		getActionMap().put("quit", new AbstractAction() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				renderCB.quit();
-				System.exit(0);
-			}
-		});
-	}
-
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
@@ -258,7 +270,7 @@ public class ClassicRenderer extends JPanel {
 		g2d.setBackground(Color.BLACK);
 		g2d.clearRect(0, 0, 320 * zoom, 200 * zoom);
 
-		if (statusLine != null || !menu.isEmpty()) {
+		if (statusLine != null || menu != null) {
 			renderStatus(g2d);
 		}
 		if (title != null) {
@@ -281,14 +293,18 @@ public class ClassicRenderer extends JPanel {
 	private void renderStatus(Graphics2D g2d) {
 		int pos = 0;
 		EclString status = statusLine;
+		List<InputAction> menuActions = menu;
 		if (status != null) {
 			for (; pos < status.getLength(); pos++) {
 				renderChar(g2d, pos, 24, status.getChar(pos),
-					getActionMap().get(InputAction.ACCEPT.getName()) != null ? invertedFont : !menu.isEmpty() ? magentaFont : greenFont);
+					getActionMap().get(CONTINUE) != null ? invertedFont : menuActions != null ? magentaFont : greenFont);
 			}
 			pos++;
 		}
-		for (InputAction a : menu) {
+		if (menuActions == null) {
+			return;
+		}
+		for (InputAction a : menuActions) {
 			EclString menuName = new EclString(a.getName());
 			for (int pos2 = 0; pos2 < menuName.getLength(); pos2++) {
 				renderChar(g2d, pos + pos2, 24, menuName.getChar(pos2), pos2 == 0 ? bwFont : greenFont);

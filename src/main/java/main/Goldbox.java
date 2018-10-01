@@ -23,9 +23,15 @@ public class Goldbox {
 			}
 		}
 		try {
-			Engine engine = new Engine(dir, args.length != 2);
+			Engine engine = new Engine(dir);
 			EventQueue.invokeLater(() -> {
 				new DesktopFrame(engine.getRenderer());
+				engine.start();
+				if (args.length == 2) {
+					engine.showStartMenu();
+				} else {
+					engine.showTitles();
+				}
 			});
 		} catch (IOException e) {
 			System.err.println("Failure to initialize engine. Quitting.");
