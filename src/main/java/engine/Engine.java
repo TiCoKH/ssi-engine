@@ -80,6 +80,7 @@ public class Engine implements EngineCallback, RendererCallback {
 					try {
 						Thread.sleep(16 - (end - start));
 					} catch (InterruptedException e) {
+						System.err.println("Game Loop was interrupted");
 					}
 				}
 			}
@@ -170,6 +171,8 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	@Override
 	public void loadEcl(int id) {
+		memory.setLastECL(memory.getCurrentECL());
+		memory.setCurrentECL(id);
 		currentThread = new Thread(() -> {
 			try {
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
@@ -185,10 +188,7 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	@Override
 	public void loadArea(int id1, int id2, int id3) {
-		memory.setCurrentMapX(0);
-		memory.setCurrentMapY(0);
-		memory.setCurrentMapOrient(Direction.NORTH);
-
+		memory.setAreaValues(id1, id2, id3);
 		try {
 			currentMap = res.find(id1, DungeonMap.class, GEO);
 		} catch (IOException e) {
@@ -198,6 +198,7 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	@Override
 	public void loadAreaDecoration(int id1, int id2, int id3) {
+		memory.setAreaDecoValues(id1, id2, id3);
 		try {
 			currentWalls = res.find(id1, WallDef.class, WALLDEF);
 
@@ -327,6 +328,10 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	public ClassicRenderer getRenderer() {
 		return renderer;
+	}
+
+	public EngineResources getRes() {
+		return res;
 	}
 
 	public VirtualMachine getVirtualMachine() {

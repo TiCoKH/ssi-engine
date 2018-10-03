@@ -108,4 +108,16 @@ public class EngineResources {
 		}
 		return f;
 	}
+
+	public File getSavesPath() {
+		File parent = null;
+		if (System.getenv("XDG_DATA_DIR") != null) {
+			parent = new File(System.getenv("XDG_DATA_DIR"));
+		} else if (System.getProperty("user.home") != null) {
+			parent = new File(System.getProperty("user.home"), ".local" + File.separator + "share");
+		} else {
+			parent = new File(System.getProperty("user.dir"));
+		}
+		return new File(parent, "ssi-engine");
+	}
 }

@@ -1,13 +1,19 @@
 package engine;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 
 import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
 public class VirtualMemory {
+	public static final int MEMLOC_CURRENT_ECL = 0x0000;
+	public static final int MEMLOC_AREA_START = 0x0001;
+	public static final int MEMLOC_AREA_DECO_START = 0x0004;
+	public static final int MEMLOC_LAST_ECL = 0x4BF2;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
 	public static final int MEMLOC_MAP_POS_X = 0xC04B;
@@ -24,12 +30,67 @@ public class VirtualMemory {
 		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
+	public void loadFrom(FileChannel fc) throws IOException {
+		mem.position(0);
+		try {
+			fc.read(mem, 0);
+		} finally {
+			fc.close();
+		}
+	}
+
+	public void saveTo(FileChannel fc) throws IOException {
+		mem.position(0);
+		try {
+			fc.write(mem, 0);
+			fc.force(true);
+		} finally {
+			fc.close();
+		}
+	}
+
 	public int getMenuChoice() {
 		return menuChoice;
 	}
 
 	public void setMenuChoice(int menuChoice) {
 		this.menuChoice = menuChoice;
+	}
+
+	public int getCurrentECL() {
+		return mem.get(MEMLOC_CURRENT_ECL) & 0xFF;
+	}
+
+	public void setCurrentECL(int currentECL) {
+		mem.put(MEMLOC_CURRENT_ECL, (byte) currentECL);
+	}
+
+	public int getAreaValue(int id) {
+		return mem.get(MEMLOC_AREA_START + id) & 0xFF;
+	}
+
+	public void setAreaValues(int id0, int id1, int id2) {
+		mem.put(MEMLOC_AREA_START, (byte) id0);
+		mem.put(MEMLOC_AREA_START + 1, (byte) id1);
+		mem.put(MEMLOC_AREA_START + 2, (byte) id2);
+	}
+
+	public int getAreaDecoValue(int id) {
+		return mem.get(MEMLOC_AREA_DECO_START + id) & 0xFF;
+	}
+
+	public void setAreaDecoValues(int id0, int id1, int id2) {
+		mem.put(MEMLOC_AREA_DECO_START, (byte) id0);
+		mem.put(MEMLOC_AREA_DECO_START + 1, (byte) id1);
+		mem.put(MEMLOC_AREA_DECO_START + 2, (byte) id2);
+	}
+
+	public int getLastECL() {
+		return mem.get(MEMLOC_LAST_ECL) & 0xFF;
+	}
+
+	public void setLastECL(int lastECL) {
+		mem.put(MEMLOC_LAST_ECL, (byte) lastECL);
 	}
 
 	public int getForLoopCount() {

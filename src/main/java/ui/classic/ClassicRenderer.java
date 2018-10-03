@@ -1,6 +1,7 @@
 package ui.classic;
 
 import static engine.InputAction.CONTINUE;
+import static engine.InputAction.LOAD;
 import static engine.InputAction.QUIT;
 import static ui.BorderSymbols.EM;
 
@@ -34,6 +35,8 @@ public class ClassicRenderer extends JPanel {
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
 	static {
 		KEY_MAPPING = new HashMap<>();
+		KEY_MAPPING.put(InputAction.LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
+		KEY_MAPPING.put(InputAction.SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 		KEY_MAPPING.put(InputAction.QUIT, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 
 		KEY_MAPPING.put(InputAction.MOVE_FORWARD, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
@@ -87,6 +90,14 @@ public class ClassicRenderer extends JPanel {
 
 		this.zoom = 4;
 
+		initRenderer();
+
+		reset();
+	}
+
+	public void reset() {
+		resetInput();
+
 		this.title = null;
 
 		this.layout = null;
@@ -100,9 +111,6 @@ public class ClassicRenderer extends JPanel {
 
 		this.backdrops = null;
 		this.wallSymbols = null;
-
-		initRenderer();
-		resetInput();
 	}
 
 	private void initRenderer() {
@@ -114,8 +122,10 @@ public class ClassicRenderer extends JPanel {
 		this.menu = null;
 
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(LOAD), LOAD);
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(QUIT), QUIT);
 		getActionMap().clear();
+		mapToAction(LOAD);
 		mapToAction(QUIT);
 	}
 

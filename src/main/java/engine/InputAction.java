@@ -7,8 +7,10 @@ import com.google.common.collect.ImmutableList;
 import engine.input.ContinueHandler;
 import engine.input.DungeonMovementHandler;
 import engine.input.InputHandler;
+import engine.input.LoadHandler;
 import engine.input.MenuHandler;
 import engine.input.QuitHandler;
+import engine.input.SaveHandler;
 
 public class InputAction {
 	private static final InputHandler MOVEMENT_HANDLER = new DungeonMovementHandler();
@@ -23,6 +25,8 @@ public class InputAction {
 
 	public static final InputAction CONTINUE = new InputAction(new ContinueHandler());
 
+	public static final InputAction LOAD = new InputAction(new LoadHandler());
+	public static final InputAction SAVE = new InputAction(new SaveHandler());
 	public static final InputAction QUIT = new InputAction(new QuitHandler());
 
 	public static final InputAction MOVE_FORWARD = new InputAction(MOVEMENT_HANDLER);
@@ -32,7 +36,7 @@ public class InputAction {
 
 	public static final List<InputAction> MAINMENU_ACTIONS = ImmutableList.of(GAME, DEMO);
 	public static final List<InputAction> YES_NO_ACTIONS = ImmutableList.of(YES, NO);
-	public static final List<InputAction> STANDARD_ACTIONS = ImmutableList.of(MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, TURN_AROUND);
+	public static final List<InputAction> STANDARD_ACTIONS = ImmutableList.of(MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, TURN_AROUND, SAVE);
 
 	private final InputHandler handler;
 	private final String name;
