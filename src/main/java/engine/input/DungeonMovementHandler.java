@@ -16,14 +16,6 @@ public class DungeonMovementHandler implements InputHandler {
 		engine.getRenderer().clearText();
 
 		engine.setCurrentThread(() -> {
-			engine.getVirtualMachine().startAddress1();
-			boolean canMove = true; // TODO
-
-			if (!canMove) {
-				engine.setInput(STANDARD);
-				return;
-			}
-
 			DungeonMap currentMap = engine.getCurrentMap();
 			VirtualMemory memory = engine.getMemory();
 
@@ -31,6 +23,13 @@ public class DungeonMovementHandler implements InputHandler {
 			int x = memory.getCurrentMapX();
 			int y = memory.getCurrentMapY();
 			if (InputAction.MOVE_FORWARD == action) {
+				engine.getVirtualMachine().startAddress1();
+				boolean canMove = true; // TODO
+
+				if (!canMove) {
+					engine.setInput(STANDARD);
+					return;
+				}
 				if (currentMap.canMove(x, y, d)) {
 					x += d.getDeltaX();
 					y += d.getDeltaY();
