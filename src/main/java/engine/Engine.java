@@ -34,6 +34,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	private VirtualMemory memory;
 
 	private boolean running;
+	private boolean abortCurrentThread;
 
 	private Thread gameLoop;
 	private Thread currentThread;
@@ -53,8 +54,6 @@ public class Engine implements EngineCallback, RendererCallback {
 
 		currentWalls = null;
 		currentMap = null;
-
-		running = true;
 
 		nextAction = null;
 	}
@@ -91,25 +90,31 @@ public class Engine implements EngineCallback, RendererCallback {
 		vm.stopVM();
 	}
 
+	public void stopCurrentThread() {
+		abortCurrentThread = true;
+		vm.stopVM();
+		continueCurrentThread();
+	}
+
 	public void setCurrentThread(Runnable r, String title) {
+		abortCurrentThread = false;
 		currentThread = new Thread(r, title);
 		currentThread.start();
 	}
 
 	public void showTitles() {
 		setCurrentThread(() -> {
-			setInput(TITLE);
 			synchronized (vm) {
 				try {
-					BufferedImage title1 = res.getTitles(1).get(0);
-					renderer.setTitleScreen(title1);
-					vm.wait(5000L);
-					BufferedImage title2 = res.getTitles(2).get(0);
-					renderer.setTitleScreen(title2);
-					vm.wait(5000L);
-					BufferedImage title3 = res.getTitles(3).get(0);
-					renderer.setTitleScreen(title3);
-					vm.wait(5000L);
+					for (int i = 1; i < 4; i++) {
+						BufferedImage title = res.getTitles(i).get(0);
+						renderer.setTitleScreen(title);
+						setInput(TITLE);
+						vm.wait(5000L);
+						if (abortCurrentThread) {
+							return;
+						}
+					}
 				} catch (IOException e) {
 					e.printStackTrace(System.err);
 				} catch (InterruptedException e) {
@@ -129,9 +134,11 @@ public class Engine implements EngineCallback, RendererCallback {
 			}
 			renderer.setInputMenu("BUCK ROGERS V1.2", MAINMENU_ACTIONS);
 			pauseCurrentThread();
-			renderer.setTitleScreen(null);
-			renderer.setStatusLine(null);
-			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
+			if (!abortCurrentThread) {
+				renderer.setTitleScreen(null);
+				renderer.setStatusLine(null);
+				loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
+			}
 		}, "Title Menu");
 	}
 

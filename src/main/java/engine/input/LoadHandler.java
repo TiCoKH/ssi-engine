@@ -14,6 +14,8 @@ public class LoadHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
+		engine.stopCurrentThread();
+
 		File savesPath = engine.getRes().getSavesPath();
 		File saveGame = new File(savesPath, "savegame.dat");
 		if (!saveGame.exists() && !saveGame.canRead()) {
