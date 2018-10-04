@@ -24,7 +24,6 @@ import data.content.WallDef;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
 import engine.opcodes.EclString;
-import ui.classic.ClassicBorders;
 import ui.classic.ClassicRenderer;
 
 public class Engine implements EngineCallback, RendererCallback {
@@ -47,8 +46,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	public Engine(String gameDir) throws IOException {
 		res = new EngineResources(gameDir);
 
-		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders());
-		renderer.setNoPicture(ClassicBorders.SCREEN);
+		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders().toList());
 
 		vm = new VirtualMachine(this);
 		memory = vm.getMemory();
@@ -72,7 +70,7 @@ public class Engine implements EngineCallback, RendererCallback {
 					nextAction = null;
 				}
 
-				renderer.increaseText();
+				renderer.advance();
 				renderer.repaint();
 
 				long end = System.currentTimeMillis();
@@ -215,21 +213,21 @@ public class Engine implements EngineCallback, RendererCallback {
 	@Override
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
-			renderer.setNoPicture(ClassicBorders.GAME);
+			renderer.setNoPicture();
 			return;
 		}
 		try {
 			DAXImageContent smallPic = res.findImage(id, PIC);
 			if (smallPic != null) {
-				renderer.setSmallPicture(smallPic, 0);
+				renderer.setSmallPicture(smallPic.toList());
 				return;
 			}
 			DAXImageContent bigPic = res.findImage(id, BIGPIC);
 			if (bigPic != null) {
-				renderer.setBigPicture(bigPic, 0);
+				renderer.setBigPicture(bigPic.toList());
 				return;
 			}
-			renderer.setNoPicture(ClassicBorders.GAME);
+			renderer.setNoPicture();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}

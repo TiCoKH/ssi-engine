@@ -22,7 +22,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import data.content.DAXImageContent;
 import data.content.MonocromeSymbols;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
@@ -58,7 +57,7 @@ public class ClassicRenderer extends JPanel {
 	private List<BufferedImage> invertedFont;
 	private List<BufferedImage> greenFont;
 	private List<BufferedImage> magentaFont;
-	private DAXImageContent borderSymbols;
+	private List<BufferedImage> borderSymbols;
 
 	private int zoom;
 
@@ -68,7 +67,7 @@ public class ClassicRenderer extends JPanel {
 
 	private ClassicBorders layout;
 	private PictureType picType;
-	private DAXImageContent pic;
+	private List<BufferedImage> pic;
 	private int picIndex;
 
 	private List<Byte> charList;
@@ -80,7 +79,7 @@ public class ClassicRenderer extends JPanel {
 
 	private List<InputAction> menu;
 
-	public ClassicRenderer(RendererCallback renderCB, MonocromeSymbols font, DAXImageContent borderSymbols) {
+	public ClassicRenderer(RendererCallback renderCB, MonocromeSymbols font, List<BufferedImage> borderSymbols) {
 		this.renderCB = renderCB;
 		this.bwFont = font.toList();
 		this.invertedFont = font.withInvertedColors();
@@ -103,7 +102,6 @@ public class ClassicRenderer extends JPanel {
 		this.layout = null;
 		this.picType = null;
 		this.pic = null;
-		this.picIndex = -1;
 
 		this.charList = null;
 		this.textPos = 0;
@@ -186,23 +184,23 @@ public class ClassicRenderer extends JPanel {
 		this.wallSymbols = wallSymbols;
 	}
 
-	public void setNoPicture(ClassicBorders b) {
-		this.layout = b;
+	public void setNoPicture() {
+		this.layout = ClassicBorders.GAME;
 		this.picType = null;
 	}
 
-	public void setBigPicture(DAXImageContent pic, int picIndex) {
+	public void setBigPicture(List<BufferedImage> pic) {
 		this.layout = ClassicBorders.BIGPIC;
 		this.picType = PictureType.BIG;
 		this.pic = pic;
-		this.picIndex = picIndex;
+		this.picIndex = 0;
 	}
 
-	public void setSmallPicture(DAXImageContent pic, int picIndex) {
+	public void setSmallPicture(List<BufferedImage> pic) {
 		this.layout = ClassicBorders.GAME;
 		this.picType = PictureType.SMALL;
 		this.pic = pic;
-		this.picIndex = picIndex;
+		this.picIndex = 0;
 	}
 
 	public void clearText() {
@@ -261,7 +259,14 @@ public class ClassicRenderer extends JPanel {
 		this.textNeedsProgressing = true;
 	}
 
-	public void increaseText() {
+	public void advance() {
+		if (picType != null) {
+			if (picIndex < 60 * pic.size() - 1) {
+				picIndex++;
+			} else {
+				picIndex = 0;
+			}
+		}
 		if (textNeedsProgressing) {
 			if (textPos == charList.size()) {
 				textNeedsProgressing = false;
@@ -290,7 +295,7 @@ public class ClassicRenderer extends JPanel {
 		if (layout != null) {
 			renderBorders(g2d);
 		}
-		if (picType != null && pic.size() > picIndex) {
+		if (picType != null) {
 			renderPicture(g2d);
 		} else if (backdrops != null && wallSymbols != null) {
 			renderBackdrop(g2d);
@@ -344,7 +349,7 @@ public class ClassicRenderer extends JPanel {
 
 	private void renderPicture(Graphics2D g2d) {
 		int x = zoom8(picType == PictureType.SMALL ? 3 : 1);
-		BufferedImage p = pic.get(picIndex);
+		BufferedImage p = pic.get(picIndex / 60);
 		g2d.drawImage(p.getScaledInstance(zoom(p.getWidth()), zoom(p.getHeight()), 0), x, x, null);
 	}
 
