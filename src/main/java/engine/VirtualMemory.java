@@ -153,14 +153,14 @@ public class VirtualMemory {
 		if (!a.isMemAddress()) {
 			return 0;
 		}
-		return a.isShortValue() ? mem.getShort(a.valueAsInt()) : mem.get(a.valueAsInt());
+		return a.isShortValue() ? mem.getShort(a.valueAsInt()) & 0xFFFF : mem.get(a.valueAsInt()) & 0xFF;
 	}
 
 	public int readMemInt(EclArgument base, int offset) {
 		if (!base.isMemAddress()) {
 			return 0;
 		}
-		return base.isShortValue() ? mem.getShort(base.valueAsInt() + offset) : mem.get(base.valueAsInt() + offset);
+		return base.isShortValue() ? mem.getShort(base.valueAsInt() + offset) & 0xFFFF : mem.get(base.valueAsInt() + offset) & 0xFF;
 	}
 
 	public void writeMemInt(EclArgument a, int value) {
