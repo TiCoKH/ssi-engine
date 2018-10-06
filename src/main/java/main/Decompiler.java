@@ -81,6 +81,7 @@ public class Decompiler {
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_WALL_TYPE, "MAP_WALL");
 	}
 	private int base;
+	private int size;
 	private int indention = 0;
 
 	private SortedMap<Integer, Boolean> gotoAddressList = new TreeMap<>();
@@ -105,6 +106,7 @@ public class Decompiler {
 
 	private void start(String gameDir, EclProgram ecl) throws IOException {
 		ByteBufferWrapper eclCode = ecl.getCode();
+		size = eclCode.limit();
 		EclInstruction preMove = EclInstruction.parseNext(eclCode);
 		EclInstruction postMove = EclInstruction.parseNext(eclCode);
 		EclInstruction onRest = EclInstruction.parseNext(eclCode);
@@ -290,7 +292,7 @@ public class Decompiler {
 				out.println(inst.getArgument(1) + " + " + argR(inst, 2) + " = " + argR(inst, 0));
 				break;
 			case COPY_MEM:
-				out.println(argL(inst, 2) + " = [" + inst.getArgument(0) + " + " + argR(inst, 1) + "]");
+				out.println(argL(inst, 2) + " = [" + argR(inst, 0) + " + " + argR(inst, 1) + "]");
 				break;
 			case ADD:
 				out.println(argL(inst, 2) + " = " + argR(inst, 0) + " + " + argR(inst, 1));
@@ -430,6 +432,8 @@ public class Decompiler {
 		if (a.isMemAddress()) {
 			if (KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
 				return KNOWN_ADRESSES.get(a.valueAsInt());
+			} else if (a.valueAsInt() >= base && a.valueAsInt() <= (base + size)) {
+				return "CODE_" + Integer.toHexString(a.valueAsInt()).toUpperCase();
 			} else {
 				return "[" + a.toString() + "]";
 			}
