@@ -5,6 +5,7 @@ import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.ECL;
 import static data.content.DAXContentType.GEO;
 import static data.content.DAXContentType.PIC;
+import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType.WALLDEF;
 import static data.content.DAXContentType._8X8D;
 import static engine.EngineCallback.InputType.STANDARD;
@@ -212,6 +213,27 @@ public class Engine implements EngineCallback, RendererCallback {
 			backdrops.add(res.findImage(id1, BACK).get(0));
 			List<BufferedImage> currentWallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
 			renderer.setDungeonDisplay(backdrops, currentWallSymbols);
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+		}
+	}
+
+	@Override
+	public void advanceSprite() {
+		renderer.decreaseSpritIndex();
+	}
+
+	@Override
+	public void clearSprite() {
+		renderer.setSprit(null, 0);
+		renderer.setNoPicture();
+	}
+
+	@Override
+	public void showSprite(int id, int index) {
+		try {
+			DAXImageContent sprit = res.findImage(id, SPRIT);
+			renderer.setSprit(sprit.withSpritColor(), index);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}

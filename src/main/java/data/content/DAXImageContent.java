@@ -91,4 +91,8 @@ public abstract class DAXImageContent extends DAXContent {
 	public List<BufferedImage> withWallSymbolColor() {
 		return images.stream().map(CONVERTER::asWallSymbol).collect(Collectors.toList());
 	}
+
+	public List<BufferedImage> withSpritColor() {
+		return images.stream().map(CONVERTER::asSprit).collect(Collectors.toList());
+	}
 }

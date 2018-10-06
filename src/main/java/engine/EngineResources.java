@@ -5,6 +5,7 @@ import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.ECL;
 import static data.content.DAXContentType.GEO;
 import static data.content.DAXContentType.PIC;
+import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType.WALLDEF;
 import static data.content.DAXContentType._8X8D;
 
@@ -35,6 +36,7 @@ public class EngineResources {
 		fileMap.put(ECL, new String[] { "ECL1.DAX", "ECL2.DAX", "ECL3.DAX", "ECL4.DAX", "ECL5.DAX", "ECL6.DAX" });
 		fileMap.put(GEO, new String[] { "GEO1.DAX", "GEO2.DAX", "GEO3.DAX", "GEO4.DAX", "GEO5.DAX", "GEO6.DAX" });
 		fileMap.put(PIC, new String[] { "PIC1.DAX", "PIC2.DAX", "PIC3.DAX", "PIC4.DAX", "PIC5.DAX", "PIC6.DAX", "PIC7.DAX", "PIC8.DAX", "PIC9.DAX" });
+		fileMap.put(SPRIT, new String[] { "SPRIT1.DAX", "SPRIT2.DAX", "SPRIT3.DAX", "SPRIT4.DAX", "SPRIT5.DAX", "SPRIT6.DAX" });
 		fileMap.put(WALLDEF, new String[] { "WALLDEF1.DAX", "WALLDEF2.DAX", "WALLDEF3.DAX", "WALLDEF4.DAX", "WALLDEF5.DAX", "WALLDEF6.DAX" });
 	}
 	private static final Map<DAXContentType, Class<? extends DAXImageContent>> imageTypes = new EnumMap<>(DAXContentType.class);
@@ -43,6 +45,7 @@ public class EngineResources {
 		imageTypes.put(BACK, VGAImage.class);
 		imageTypes.put(BIGPIC, VGAImage.class);
 		imageTypes.put(PIC, VGADependentImages.class);
+		imageTypes.put(SPRIT, VGADependentImages.class);
 	}
 
 	private String gameDir;

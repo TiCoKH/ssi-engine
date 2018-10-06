@@ -69,6 +69,8 @@ public class ClassicRenderer extends JPanel {
 	private PictureType picType;
 	private List<BufferedImage> pic;
 	private int picIndex;
+	private List<BufferedImage> sprit;
+	private int spritIndex;
 
 	private List<Byte> charList;
 	private int textPos;
@@ -109,6 +111,7 @@ public class ClassicRenderer extends JPanel {
 
 		this.backdrops = null;
 		this.wallSymbols = null;
+		this.sprit = null;
 	}
 
 	private void initRenderer() {
@@ -203,6 +206,17 @@ public class ClassicRenderer extends JPanel {
 		this.picIndex = 0;
 	}
 
+	public void setSprit(List<BufferedImage> sprit, int spritIndex) {
+		this.sprit = sprit;
+		this.spritIndex = spritIndex;
+	}
+
+	public void decreaseSpritIndex() {
+		if (spritIndex > 0) {
+			spritIndex--;
+		}
+	}
+
 	public void clearText() {
 		this.textNeedsProgressing = false;
 		this.charList = null;
@@ -261,10 +275,18 @@ public class ClassicRenderer extends JPanel {
 
 	public void advance() {
 		if (picType != null) {
-			if (picIndex < 60 * pic.size() - 1) {
-				picIndex++;
+			if (sprit != null && spritIndex == 0) {
+				if (picIndex < 400 / 16) {
+					picIndex++;
+				} else {
+					sprit = null;
+				}
 			} else {
-				picIndex = 0;
+				if (picIndex < 60 * pic.size() - 1) {
+					picIndex++;
+				} else {
+					picIndex = 0;
+				}
 			}
 		}
 		if (textNeedsProgressing) {
@@ -295,12 +317,15 @@ public class ClassicRenderer extends JPanel {
 		if (layout != null) {
 			renderBorders(g2d);
 		}
-		if (picType != null) {
+		if (picType != null && sprit == null) {
 			renderPicture(g2d);
 		} else if (backdrops != null && wallSymbols != null) {
 			renderBackdrop(g2d);
 			renderDungeon(g2d);
 			renderPosition(g2d);
+			if (sprit != null) {
+				renderSprit(g2d);
+			}
 		}
 		renderText(g2d);
 	}
@@ -401,6 +426,12 @@ public class ClassicRenderer extends JPanel {
 		for (int pos = 0; pos < posStr.getLength(); pos++) {
 			renderChar(g2d, 17 + pos, 15, posStr.getChar(pos), greenFont);
 		}
+	}
+
+	private void renderSprit(Graphics2D g2d) {
+		int x = zoom8(3);
+		BufferedImage i = sprit.get(spritIndex);
+		g2d.drawImage(i.getScaledInstance(zoom(i.getWidth()), zoom(i.getHeight()), 0), x, x, null);
 	}
 
 	private void renderChar(Graphics2D g2d, int x, int y, byte c, List<BufferedImage> font) {

@@ -10,6 +10,11 @@ public class DAXImageContentConverter {
 		return new BufferedImage(newCM, src.getRaster(), false, null);
 	}
 
+	public BufferedImage asSprit(BufferedImage src) {
+		IndexColorModel newCM = DAXPalette.transformToSpritPalette((IndexColorModel) src.getColorModel());
+		return new BufferedImage(newCM, src.getRaster(), false, null);
+	}
+
 	public BufferedImage withGreenFG(BufferedImage src) {
 		IndexColorModel newCM = DAXPalette.binaryPaletteWithGreenFG();
 		return new BufferedImage(newCM, src.getRaster(), false, null);

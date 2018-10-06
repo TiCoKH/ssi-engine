@@ -197,11 +197,12 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.LOAD_MON, inst -> {
 
 		});
-		IMPL.put(EclOpCode.SETUP_MON, inst -> {
-
+		IMPL.put(EclOpCode.SPRITE_START, inst -> {
+			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)));
+			engine.showPicture(intValue(inst.getArgument(2)));
 		});
-		IMPL.put(EclOpCode.APPROACH, inst -> {
-
+		IMPL.put(EclOpCode.SPRITE_ADVANCE, inst -> {
+			engine.advanceSprite();
 		});
 		IMPL.put(EclOpCode.PICTURE, inst -> {
 			engine.showPicture(intValue(inst.getArgument(0)));
@@ -262,7 +263,7 @@ public class VirtualMachine {
 			exec(next, compareResult >= 0);
 		});
 		IMPL.put(EclOpCode.CLEAR_MON, inst -> {
-
+			engine.clearSprite();
 		});
 		IMPL.put(EclOpCode.PARTY_STRENGTH, inst -> {
 

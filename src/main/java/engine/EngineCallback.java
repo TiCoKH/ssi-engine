@@ -9,6 +9,12 @@ public interface EngineCallback {
 
 	void setMenu(List<InputAction> action);
 
+	void advanceSprite();
+
+	void clearSprite();
+
+	void showSprite(int id, int index);
+
 	void showPicture(int id);
 
 	void addText(EclString str, boolean clear);

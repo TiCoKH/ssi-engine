@@ -13,8 +13,8 @@ public enum EclOpCode {
 	WRITE_MEM(0x09, 2), //
 	LOAD_CHAR(0x0A, 1), //
 	LOAD_MON(0x0B, 3), //
-	SETUP_MON(0x0C, 4), // TODO: Game specific
-	APPROACH(0x0D, 0), //
+	SPRITE_START(0x0C, 4), // TODO: Game specific
+	SPRITE_ADVANCE(0x0D, 0), //
 	PICTURE(0x0E, 1), //
 	INPUT_NUMBER(0x0F, 2), //
 	INPUT_STRING(0x10, 2), //

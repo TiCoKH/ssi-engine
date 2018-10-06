@@ -32,6 +32,18 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void clearSprite() {
+			}
+
+			@Override
+			public void advanceSprite() {
+			}
+
+			@Override
+			public void showSprite(int id, int index) {
+			}
+
+			@Override
 			public void addText(EclString str, boolean clear) {
 			}
 
