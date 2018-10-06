@@ -17,6 +17,7 @@ import static engine.opcodes.EclOpCode.IF_GREATER_EQUALS;
 import static engine.opcodes.EclOpCode.IF_LESS;
 import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
 import static engine.opcodes.EclOpCode.IF_NOT_EQUALS;
+import static engine.opcodes.EclOpCode.INPUT_YES_NO;
 import static engine.opcodes.EclOpCode.MENU_HORIZONTAL;
 import static engine.opcodes.EclOpCode.MULTIPLY;
 import static engine.opcodes.EclOpCode.NEW_ECL;
@@ -57,7 +58,7 @@ import engine.opcodes.EclOpCode;
 
 public class Decompiler {
 	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE, GOTO, ON_GOTO, RETURN, NEW_ECL);
-	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR);
+	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO);
 	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
 		IF_NOT_EQUALS);
 	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
@@ -379,6 +380,12 @@ public class Decompiler {
 				out.print(argR(compInst, 0));
 				out.print(" | ");
 				out.print(argR(compInst, 1));
+				out.print(" ");
+				out.print(operator);
+				out.print(" 0");
+				break;
+			case INPUT_YES_NO:
+				out.print(compInst.toString());
 				out.print(" ");
 				out.print(operator);
 				out.print(" 0");
