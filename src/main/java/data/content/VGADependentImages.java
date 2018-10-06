@@ -1,24 +1,23 @@
 package data.content;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
-import java.nio.ByteBuffer;
+
+import common.ByteBufferWrapper;
 
 public class VGADependentImages extends DAXImageContent {
 
-	public VGADependentImages(ByteBuffer data) {
+	public VGADependentImages(ByteBufferWrapper data) {
 		// 11 byte Header
-		int height = data.getShort(0) & 0xFFFF;
-		int width = 8 * (data.getShort(2) & 0xFFFF);
-		int xStart = data.getShort(4) & 0xFFFF;
-		int yStart = data.getShort(6) & 0xFFFF;
-		int imageCount = 1 + data.get(8) & 0xFF;
-		int colorBase = data.get(9) & 0xFF;
-		int colorCount = data.get(10) & 0xFF;
+		int height = data.getUnsignedShort(0);
+		int width = 8 * data.getUnsignedShort(2);
+		int xStart = data.getUnsignedShort(4);
+		int yStart = data.getUnsignedShort(6);
+		int imageCount = 1 + data.getUnsigned(8);
+		int colorBase = data.getUnsigned(9);
+		int colorCount = data.getUnsigned(10);
 
 		int imageSize = width * height;
 
@@ -29,11 +28,11 @@ public class VGADependentImages extends DAXImageContent {
 		data.get(egaColorMapping);
 
 		data.position(data.position() + 4); // unkown
-		int baseImage = data.get() & 0xFF;
+		int baseImage = data.getUnsigned();
 		data.position(data.position() + 1); // unkown
 		data.position(data.position() + 3 * imageCount); // image packed sizes + 1 byte value
 
-		ByteBuffer allImageData = uncompress(data.slice().order(LITTLE_ENDIAN), imageCount * imageSize);
+		ByteBufferWrapper allImageData = uncompress(data.slice(), imageCount * imageSize);
 
 		// Read Base image first
 		byte[] baseImageData = new byte[imageSize];
@@ -67,8 +66,8 @@ public class VGADependentImages extends DAXImageContent {
 		return lowBits ? (egaColorMapping[mappingIndex] & 0x0F) : (egaColorMapping[mappingIndex] & 0xF0) >> 4;
 	}
 
-	public static ByteBuffer uncompress(ByteBuffer compressed, int sizeRaw) {
-		ByteBuffer result = ByteBuffer.allocate(sizeRaw).order(LITTLE_ENDIAN);
+	public static ByteBufferWrapper uncompress(ByteBufferWrapper compressed, int sizeRaw) {
+		ByteBufferWrapper result = ByteBufferWrapper.allocateLE(sizeRaw);
 
 		int in = 0;
 		int out = 0;

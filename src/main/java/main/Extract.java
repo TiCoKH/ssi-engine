@@ -2,10 +2,10 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 
+import common.ByteBufferWrapper;
 import data.DAXFile;
 
 public class Extract {
@@ -39,14 +39,14 @@ public class Extract {
 		outDir.mkdirs();
 
 		for (Integer id : df.getIds()) {
-			ByteBuffer buf = df.getById(id).getUncompressed();
+			ByteBufferWrapper buf = df.getById(id).getUncompressed();
 			buf.rewind();
 
 			File outFile = new File(outDir, f.getName() + "." + id);
 			System.out.println(outFile.getAbsolutePath());
-			try (FileChannel o = FileChannel.open(outFile.toPath(), StandardOpenOption.CREATE,
-					StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-				o.write(buf);
+			try (FileChannel o = FileChannel.open(outFile.toPath(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+				StandardOpenOption.WRITE)) {
+				buf.writeTo(o);
 			}
 		}
 	}

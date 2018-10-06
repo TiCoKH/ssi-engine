@@ -1,10 +1,9 @@
 package engine;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
+import common.ByteBufferWrapper;
 import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
@@ -22,27 +21,25 @@ public class VirtualMemory {
 	public static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
 	public static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
 
-	private ByteBuffer mem;
+	private ByteBufferWrapper mem;
 
 	private int menuChoice;
 
 	public VirtualMemory() {
-		mem = ByteBuffer.allocate(0x10000).order(ByteOrder.LITTLE_ENDIAN);
+		mem = ByteBufferWrapper.allocateLE(0x10000);
 	}
 
 	public void loadFrom(FileChannel fc) throws IOException {
-		mem.position(0);
 		try {
-			fc.read(mem, 0);
+			mem.position(0).readFrom(fc);
 		} finally {
 			fc.close();
 		}
 	}
 
 	public void saveTo(FileChannel fc) throws IOException {
-		mem.position(0);
 		try {
-			fc.write(mem, 0);
+			mem.position(0).writeTo(fc);
 			fc.force(true);
 		} finally {
 			fc.close();
@@ -58,7 +55,7 @@ public class VirtualMemory {
 	}
 
 	public int getCurrentECL() {
-		return mem.get(MEMLOC_CURRENT_ECL) & 0xFF;
+		return mem.getUnsigned(MEMLOC_CURRENT_ECL);
 	}
 
 	public void setCurrentECL(int currentECL) {
@@ -66,7 +63,7 @@ public class VirtualMemory {
 	}
 
 	public int getAreaValue(int id) {
-		return mem.get(MEMLOC_AREA_START + id) & 0xFF;
+		return mem.getUnsigned(MEMLOC_AREA_START + id);
 	}
 
 	public void setAreaValues(int id0, int id1, int id2) {
@@ -76,7 +73,7 @@ public class VirtualMemory {
 	}
 
 	public int getAreaDecoValue(int id) {
-		return mem.get(MEMLOC_AREA_DECO_START + id) & 0xFF;
+		return mem.getUnsigned(MEMLOC_AREA_DECO_START + id);
 	}
 
 	public void setAreaDecoValues(int id0, int id1, int id2) {
@@ -86,7 +83,7 @@ public class VirtualMemory {
 	}
 
 	public int getLastECL() {
-		return mem.get(MEMLOC_LAST_ECL) & 0xFF;
+		return mem.getUnsigned(MEMLOC_LAST_ECL);
 	}
 
 	public void setLastECL(int lastECL) {
@@ -94,7 +91,7 @@ public class VirtualMemory {
 	}
 
 	public int getForLoopCount() {
-		return mem.get(MEMLOC_FOR_LOOP_COUNT) & 0xFF;
+		return mem.getUnsigned(MEMLOC_FOR_LOOP_COUNT);
 	}
 
 	public void setForLoopCount(int loopCount) {
@@ -102,7 +99,7 @@ public class VirtualMemory {
 	}
 
 	public int getCombatResult() {
-		return mem.get(MEMLOC_COMBAT_RESULT) & 0xFF;
+		return mem.getUnsigned(MEMLOC_COMBAT_RESULT);
 	}
 
 	public void setCombatResult(int combatResult) {
@@ -110,7 +107,7 @@ public class VirtualMemory {
 	}
 
 	public int getCurrentMapX() {
-		return mem.get(MEMLOC_MAP_POS_X) & 0xFF;
+		return mem.getUnsigned(MEMLOC_MAP_POS_X);
 	}
 
 	public void setCurrentMapX(int currentMapX) {
@@ -118,7 +115,7 @@ public class VirtualMemory {
 	}
 
 	public int getCurrentMapY() {
-		return mem.get(MEMLOC_MAP_POS_Y) & 0xFF;
+		return mem.getUnsigned(MEMLOC_MAP_POS_Y);
 	}
 
 	public void setCurrentMapY(int currentMapY) {
@@ -126,7 +123,7 @@ public class VirtualMemory {
 	}
 
 	public Direction getCurrentMapOrient() {
-		return Direction.withId(mem.get(MEMLOC_MAP_ORIENTATION) & 0xFF);
+		return Direction.withId(mem.getUnsigned(MEMLOC_MAP_ORIENTATION));
 	}
 
 	public void setCurrentMapOrient(Direction currentMapOrient) {
@@ -134,7 +131,7 @@ public class VirtualMemory {
 	}
 
 	public int getWallType() {
-		return mem.get(MEMLOC_MAP_WALL_TYPE) & 0xFF;
+		return mem.getUnsigned(MEMLOC_MAP_WALL_TYPE);
 	}
 
 	public void setWallType(int wallType) {
@@ -142,7 +139,7 @@ public class VirtualMemory {
 	}
 
 	public int getSquareInfo() {
-		return mem.get(MEMLOC_MAP_SQUARE_INFO) & 0xFF;
+		return mem.getUnsigned(MEMLOC_MAP_SQUARE_INFO);
 	}
 
 	public void setSquareInfo(int squareInfo) {
@@ -153,14 +150,14 @@ public class VirtualMemory {
 		if (!a.isMemAddress()) {
 			return 0;
 		}
-		return a.isShortValue() ? mem.getShort(a.valueAsInt()) & 0xFFFF : mem.get(a.valueAsInt()) & 0xFF;
+		return a.isShortValue() ? mem.getUnsignedShort(a.valueAsInt()) : mem.getUnsigned(a.valueAsInt());
 	}
 
 	public int readMemInt(EclArgument base, int offset) {
 		if (!base.isMemAddress()) {
 			return 0;
 		}
-		return base.isShortValue() ? mem.getShort(base.valueAsInt() + offset) & 0xFFFF : mem.get(base.valueAsInt() + offset) & 0xFF;
+		return base.isShortValue() ? mem.getUnsignedShort(base.valueAsInt() + offset) : mem.getUnsigned(base.valueAsInt() + offset);
 	}
 
 	public void writeMemInt(EclArgument a, int value) {
@@ -202,9 +199,8 @@ public class VirtualMemory {
 		}
 
 		mem.position(a.valueAsInt());
-		int length = mem.get() & 0xFF;
-		ByteBuffer buf = mem.slice().order(ByteOrder.LITTLE_ENDIAN);
-		buf.limit(length);
+		int length = mem.getUnsigned();
+		ByteBufferWrapper buf = mem.slice().limit(length);
 		return new EclString(buf);
 	}
 
@@ -213,16 +209,14 @@ public class VirtualMemory {
 			return;
 		}
 
-		mem.position(a.valueAsInt());
-		mem.put((byte) value.getLength());
+		mem.position(a.valueAsInt()).put((byte) value.getLength());
 		for (int i = 0; i < value.getLength(); i++) {
 			mem.put(value.getChar(i));
 		}
 	}
 
-	public void writeProgram(int startAddress, ByteBuffer eclCode) {
+	public void writeProgram(int startAddress, ByteBufferWrapper eclCode) {
 		eclCode.rewind();
-		mem.position(startAddress);
-		mem.put(eclCode);
+		mem.position(startAddress).put(eclCode);
 	}
 }

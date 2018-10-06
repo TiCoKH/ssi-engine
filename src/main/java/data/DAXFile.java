@@ -2,14 +2,13 @@ package data;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import common.ByteBufferWrapper;
 import data.content.DAXContent;
 
 public class DAXFile {
@@ -24,29 +23,27 @@ public class DAXFile {
 			return null;
 		}
 
-		ByteBuffer file = ByteBuffer.allocate((int) c.size()).order(ByteOrder.LITTLE_ENDIAN);
+		ByteBufferWrapper file = ByteBufferWrapper.allocateLE((int) c.size());
 		try {
-			c.read(file);
+			file.readFrom(c);
 		} finally {
 			c.close();
 		}
 
-		short byteCount = file.getShort(0);
+		int byteCount = file.getUnsignedShort(0);
 		int headerCount = byteCount / 9;
 
 		Map<Integer, DAXBlock> blocks = new LinkedHashMap<>();
 
 		for (int i = 0; i < headerCount; i++) {
 			int headerStart = 2 + (i * 9);
-			int id = file.get(headerStart) & 0xFF;
-			int offset = file.getInt(headerStart + 1);
-			int sizeRaw = file.getShort(headerStart + 5) & 0xFFFF;
-			int sizeCmp = file.getShort(headerStart + 7) & 0xFFFF;
+			int id = file.getUnsigned(headerStart);
+			int offset = (int) file.getUnsignedInt(headerStart + 1);
+			int sizeRaw = file.getUnsignedShort(headerStart + 5);
+			int sizeCmp = file.getUnsignedShort(headerStart + 7);
 
 			file.position(2 + byteCount + offset);
-			ByteBuffer cmp = file.slice();
-			cmp.order(ByteOrder.LITTLE_ENDIAN);
-			cmp.limit(sizeCmp);
+			ByteBufferWrapper cmp = file.slice().limit(sizeCmp);
 
 			blocks.put(id, new DAXBlock(id, cmp, sizeRaw));
 		}
@@ -57,9 +54,9 @@ public class DAXFile {
 		DAXBlock b = blocks.get(id);
 		if (b != null) {
 			try {
-				return clazz.getConstructor(ByteBuffer.class).newInstance(b.getUncompressed());
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				return clazz.getConstructor(ByteBufferWrapper.class).newInstance(b.getUncompressed());
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
 				e.printStackTrace(System.err);
 			}
 		}

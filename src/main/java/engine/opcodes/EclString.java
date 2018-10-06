@@ -1,17 +1,16 @@
 package engine.opcodes;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import common.ByteBufferWrapper;
 
 public class EclString {
-	private ByteBuffer content;
+	private ByteBufferWrapper content;
 
-	public EclString(ByteBuffer content) {
+	public EclString(ByteBufferWrapper content) {
 		this.content = content;
 	}
 
 	public EclString(String s) {
-		content = ByteBuffer.allocate(s.length()).order(ByteOrder.LITTLE_ENDIAN);
+		content = ByteBufferWrapper.allocateLE(s.length());
 		s.chars().forEachOrdered(c -> content.put(deflateChar((char) c)));
 	}
 

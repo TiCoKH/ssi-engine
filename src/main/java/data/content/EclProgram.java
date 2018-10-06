@@ -1,23 +1,21 @@
 package data.content;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import common.ByteBufferWrapper;
 
 public class EclProgram extends DAXContent {
 
-	private ByteBuffer code;
+	private ByteBufferWrapper code;
 
-	public EclProgram(ByteBuffer data) {
+	public EclProgram(ByteBufferWrapper data) {
 		data.rewind();
-		int eclId = data.getShort() & 0xFFFF;
+		int eclId = data.getUnsignedShort();
 		if (eclId != 5000) {
 			throw new IllegalArgumentException("data is not a valid ecl program");
 		}
 		code = data.slice();
-		code.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	public ByteBuffer getCode() {
+	public ByteBufferWrapper getCode() {
 		return code;
 	}
 }

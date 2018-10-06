@@ -4,21 +4,22 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
-import java.nio.ByteBuffer;
+
+import common.ByteBufferWrapper;
 
 public class VGAImage extends DAXImageContent {
 
-	public VGAImage(ByteBuffer data) {
+	public VGAImage(ByteBufferWrapper data) {
 		// 10 byte Header
-		int height = data.get(0) & 0xFF;
-		int width = 8 * (data.get(1) & 0xFF);
+		int height = data.getUnsigned(0);
+		int width = 8 * data.getUnsigned(1);
 		// data[2] & 0xFF;
 		// data[3] & 0xFF;
 		// data[4] & 0xFF;
 		// data[5] & 0xFF;
-		int imageCount = data.getShort(6) & 0xFFFF;
-		int colorBase = data.get(8) & 0xFF;
-		int colorCount = 1 + (data.get(9) & 0xFF);
+		int imageCount = data.getUnsignedShort(6);
+		int colorBase = data.getUnsigned(8);
+		int colorCount = 1 + data.getUnsigned(9);
 
 		int imageSize = width * height;
 		int imageOffset = data.capacity() - (imageCount * imageSize);

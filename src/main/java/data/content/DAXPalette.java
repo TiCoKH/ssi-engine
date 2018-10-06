@@ -2,8 +2,9 @@ package data.content;
 
 import java.awt.Color;
 import java.awt.image.IndexColorModel;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import common.ByteBufferWrapper;
 
 public class DAXPalette {
 	public static final Color COLOR_TRANSPARENT = new Color(0x67F79F);
@@ -30,15 +31,15 @@ public class DAXPalette {
 
 	private static final Color[] COLOR_COMBAT_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_BLACK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 
-	public static IndexColorModel createGameColorModel(ByteBuffer data, int dataOffset, int colorCount, int colorStart) {
+	public static IndexColorModel createGameColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart) {
 		return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC);
 	}
 
-	public static IndexColorModel createCombatColorModel(ByteBuffer data, int dataOffset, int colorCount, int colorStart) {
+	public static IndexColorModel createCombatColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart) {
 		return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_COMBAT_STATIC);
 	}
 
-	private static IndexColorModel createColorModel(ByteBuffer data, int dataOffset, int colorCount, int colorStart, Color[] staticColors) {
+	private static IndexColorModel createColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart, Color[] staticColors) {
 		byte[] r = new byte[256];
 		byte[] g = new byte[256];
 		byte[] b = new byte[256];

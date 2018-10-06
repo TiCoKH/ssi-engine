@@ -1,13 +1,14 @@
 package data.content;
 
-import java.nio.ByteBuffer;
 import java.util.EnumMap;
 import java.util.Map;
+
+import common.ByteBufferWrapper;
 
 public class WallDef extends DAXContent {
 	private WallDisplay[] walls;
 
-	public WallDef(ByteBuffer data) {
+	public WallDef(ByteBufferWrapper data) {
 		data.rewind();
 
 		int setCount = data.remaining() / 156;

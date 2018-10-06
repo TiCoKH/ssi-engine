@@ -6,13 +6,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import common.ByteBufferWrapper;
+
 public class MonocromeSymbols extends DAXImageContent {
 
-	public MonocromeSymbols(ByteBuffer data) {
+	public MonocromeSymbols(ByteBufferWrapper data) {
 		for (int i = 0; i < data.capacity() / 8; i++) {
 			WritableRaster r = Raster.createPackedRaster(new DataBufferByte(data.array(), 8, i * 8), 8, 8, 1, null);
 			BufferedImage image = new BufferedImage(8, 8, TYPE_BYTE_BINARY);

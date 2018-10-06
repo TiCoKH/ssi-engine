@@ -35,7 +35,6 @@ import static engine.opcodes.EclOpCode.WRITE_MEM_BASE_OFF;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +47,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
+import common.ByteBufferWrapper;
 import data.content.EclProgram;
 import engine.EngineResources;
 import engine.VirtualMemory;
@@ -103,7 +103,7 @@ public class Decompiler {
 	}
 
 	private void start(String gameDir, EclProgram ecl) throws IOException {
-		ByteBuffer eclCode = ecl.getCode();
+		ByteBufferWrapper eclCode = ecl.getCode();
 		EclInstruction preMove = EclInstruction.parseNext(eclCode);
 		EclInstruction postMove = EclInstruction.parseNext(eclCode);
 		EclInstruction onRest = EclInstruction.parseNext(eclCode);
@@ -124,7 +124,7 @@ public class Decompiler {
 		startSection(gameDir, eclCode, onRestInterruption, "onRestInterrupt");
 	}
 
-	private void startSection(String gameDir, ByteBuffer eclCode, EclInstruction inst, String section) throws IOException {
+	private void startSection(String gameDir, ByteBufferWrapper eclCode, EclInstruction inst, String section) throws IOException {
 		File outFile = new File(gameDir + "/ECL/ECL." + currentId + "." + section);
 		outFile.getParentFile().mkdirs();
 		out = new PrintStream(outFile);
@@ -135,7 +135,7 @@ public class Decompiler {
 		}
 	}
 
-	private void disassemble(ByteBuffer eclCode, EclInstruction inst, String name) {
+	private void disassemble(ByteBufferWrapper eclCode, EclInstruction inst, String name) {
 		gotoAddressList.clear();
 
 		// To collect Goto and Gosub adresses
@@ -169,7 +169,7 @@ public class Decompiler {
 		}
 	}
 
-	private void addAdjacentGotos(ByteBuffer eclCode) {
+	private void addAdjacentGotos(ByteBufferWrapper eclCode) {
 		int address = base + eclCode.position();
 		while (gotoAddressList.containsKey(address)) {
 			disassemble(eclCode, address, true);
@@ -178,7 +178,7 @@ public class Decompiler {
 		}
 	}
 
-	private void disassemble(ByteBuffer eclCode, int address, boolean withOutput) {
+	private void disassemble(ByteBufferWrapper eclCode, int address, boolean withOutput) {
 		eclCode.position(address - base);
 		EclInstruction inst;
 		do {
@@ -187,7 +187,7 @@ public class Decompiler {
 		} while (!OP_CODE_STOP.contains(inst.getOpCode()));
 	}
 
-	private void disassembleInst(ByteBuffer eclCode, EclInstruction inst, boolean withOutput) {
+	private void disassembleInst(ByteBufferWrapper eclCode, EclInstruction inst, boolean withOutput) {
 		EclOpCode opCode = inst.getOpCode();
 
 		if (wasCompare && (!OP_CODE_IF.contains(opCode) || OP_CODE_MATH.contains(compare.getOpCode())) && withOutput) {

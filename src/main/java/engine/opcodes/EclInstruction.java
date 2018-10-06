@@ -6,7 +6,6 @@ import static engine.opcodes.EclOpCode.ON_GOTO;
 import static engine.opcodes.EclOpCode.SELECT_ACTION;
 import static engine.opcodes.EclOpCode.TREASURE;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +14,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
+
+import common.ByteBufferWrapper;
 
 public class EclInstruction {
 	private static final Map<Integer, EclOpCode> OP_CODES = Arrays.asList(EclOpCode.values()).stream()
@@ -35,9 +36,9 @@ public class EclInstruction {
 		this.dynArgs = dynArgs;
 	}
 
-	public static EclInstruction parseNext(ByteBuffer eclBlock) {
+	public static EclInstruction parseNext(ByteBufferWrapper eclBlock) {
 		int pos = eclBlock.position();
-		int id = eclBlock.get() & 0xFF;
+		int id = eclBlock.getUnsigned();
 		EclOpCode opCode = OP_CODES.get(id);
 		if (opCode == null) {
 			System.err.println("Unknown opcode " + Integer.toHexString(id) + " at " + Integer.toHexString(pos));

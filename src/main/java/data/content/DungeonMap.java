@@ -1,9 +1,9 @@
 package data.content;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.EnumMap;
 import java.util.Map;
+
+import common.ByteBufferWrapper;
 
 public class DungeonMap extends DAXContent {
 	private static final int WALLS_NE_START = 0x000;
@@ -13,14 +13,14 @@ public class DungeonMap extends DAXContent {
 
 	private DungeonSquare[][] map;
 
-	public DungeonMap(ByteBuffer data) {
+	public DungeonMap(ByteBufferWrapper data) {
 		data.rewind();
-		int geoId = data.getShort() & 0xFFFF;
+		int geoId = data.getUnsignedShort();
 		if (geoId != 4353) {
 			throw new IllegalArgumentException("data is not a valid geo dungeon map");
 		}
 
-		data = data.slice().order(ByteOrder.LITTLE_ENDIAN);
+		data = data.slice();
 
 		map = new DungeonSquare[16][16];
 		for (int y = 0; y < 16; y++) {

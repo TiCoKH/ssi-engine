@@ -1,8 +1,9 @@
 package engine.opcodes;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import common.ByteBufferWrapper;
 
 public class EclArgument {
 	private int type;
@@ -15,12 +16,12 @@ public class EclArgument {
 		this.value = value;
 	}
 
-	public static EclArgument parseNext(ByteBuffer eclBlock) {
+	public static EclArgument parseNext(ByteBufferWrapper eclBlock) {
 		int pos = eclBlock.position();
-		int type = eclBlock.get() & 0xFF;
+		int type = eclBlock.getUnsigned();
 		switch (type) {
 			case 0: {
-				int value = eclBlock.get() & 0xFF;
+				int value = eclBlock.getUnsigned();
 				return new EclArgument(type, 2, value);
 			}
 			case 1:
@@ -29,12 +30,12 @@ public class EclArgument {
 			case 5:
 			case 0x81: // string from memory address
 			{
-				int value = eclBlock.getShort() & 0xFFFF;
+				int value = eclBlock.getUnsignedShort();
 				return new EclArgument(type, 3, value);
 			}
 			case 0x80: {
 				// compressed string
-				int strLen = eclBlock.get() & 0xFF;
+				int strLen = eclBlock.getUnsigned();
 				byte[] cmpString = new byte[strLen];
 				eclBlock.get(cmpString);
 				EclString value = decompressString(cmpString);
@@ -83,7 +84,7 @@ public class EclArgument {
 			lastByte = ubyte;
 		}
 
-		ByteBuffer string = ByteBuffer.allocate(chars.size());
+		ByteBufferWrapper string = ByteBufferWrapper.allocateLE(chars.size());
 		chars.stream().forEachOrdered(string::put);
 		return new EclString(string);
 	}

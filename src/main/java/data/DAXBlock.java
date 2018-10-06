@@ -1,15 +1,13 @@
 package data;
 
-import static java.nio.ByteOrder.LITTLE_ENDIAN;
-
-import java.nio.ByteBuffer;
+import common.ByteBufferWrapper;
 
 public class DAXBlock {
 	private int id;
-	private ByteBuffer data;
+	private ByteBufferWrapper data;
 	private int sizeRaw;
 
-	public DAXBlock(int id, ByteBuffer data, int sizeRaw) {
+	public DAXBlock(int id, ByteBufferWrapper data, int sizeRaw) {
 		this.id = id;
 		this.data = data;
 		this.sizeRaw = sizeRaw;
@@ -19,11 +17,11 @@ public class DAXBlock {
 		return id;
 	}
 
-	public ByteBuffer getData() {
+	public ByteBufferWrapper getData() {
 		return data;
 	}
 
-	public ByteBuffer getUncompressed() {
+	public ByteBufferWrapper getUncompressed() {
 		return uncompress(data, sizeRaw);
 	}
 
@@ -31,8 +29,8 @@ public class DAXBlock {
 		return sizeRaw;
 	}
 
-	public static ByteBuffer uncompress(ByteBuffer compressed, int sizeRaw) {
-		ByteBuffer result = ByteBuffer.allocate(sizeRaw).order(LITTLE_ENDIAN);
+	public static ByteBufferWrapper uncompress(ByteBufferWrapper compressed, int sizeRaw) {
+		ByteBufferWrapper result = ByteBufferWrapper.allocateLE(sizeRaw);
 
 		int in = 0;
 		int out = 0;

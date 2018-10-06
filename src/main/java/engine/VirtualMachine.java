@@ -4,8 +4,6 @@ import static engine.EngineCallback.InputType.CONTINUE;
 import static engine.InputAction.MENU_HANDLER;
 import static engine.InputAction.YES_NO_ACTIONS;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Deque;
 import java.util.EnumMap;
 import java.util.Map;
@@ -14,6 +12,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import common.ByteBufferWrapper;
 import data.content.EclProgram;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
@@ -39,7 +38,7 @@ public class VirtualMachine {
 	private boolean stopped;
 
 	private int eclCodeBaseAddress;
-	private ByteBuffer eclCode;
+	private ByteBufferWrapper eclCode;
 	private EclInstruction onEvent1; // Gets called on entering or exiting a NEW_ECL
 	private EclInstruction onEnter;
 	private EclInstruction onRest;
@@ -63,7 +62,6 @@ public class VirtualMachine {
 
 	public void newEcl(EclProgram ecl) {
 		eclCode = ecl.getCode().duplicate();
-		eclCode.order(ByteOrder.LITTLE_ENDIAN);
 		onEvent1 = EclInstruction.parseNext(eclCode);
 		onEnter = EclInstruction.parseNext(eclCode);
 		onRest = EclInstruction.parseNext(eclCode);
