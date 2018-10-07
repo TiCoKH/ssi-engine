@@ -66,6 +66,10 @@ public class VirtualMachineTest {
 			@Override
 			public void loadAreaDecoration(int id1, int id2, int id3) {
 			}
+
+			@Override
+			public void updatePosition() {
+			}
 		});
 		vm.newEcl(ecls.getById(16, EclProgram.class));
 		System.out.println("Initial:");
