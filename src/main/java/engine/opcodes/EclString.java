@@ -33,7 +33,7 @@ public class EclString {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < content.capacity(); i++) {
+		for (int i = 0; i < content.limit(); i++) {
 			sb.append(inflateChar(content.get(i)));
 		}
 		return sb.toString();
