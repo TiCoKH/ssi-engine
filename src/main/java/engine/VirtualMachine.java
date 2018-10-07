@@ -302,7 +302,6 @@ public class VirtualMachine {
 			memory.setCombatResult(0);
 		});
 		IMPL.put(EclOpCode.ON_GOTO, inst -> {
-			printDynArgs(inst);
 			if (intValue(inst.getArgument(0)) >= intValue(inst.getArgument(1)) || intValue(inst.getArgument(0)) < 0) {
 				System.err.println("ON GOTO value=" + intValue(inst.getArgument(0)));
 				return;
@@ -310,7 +309,6 @@ public class VirtualMachine {
 			goTo(inst.getDynArgs().get(intValue(inst.getArgument(0))));
 		});
 		IMPL.put(EclOpCode.ON_GOSUB, inst -> {
-			printDynArgs(inst);
 			if (intValue(inst.getArgument(0)) >= intValue(inst.getArgument(1)) || intValue(inst.getArgument(0)) < 0) {
 				System.err.println("ON GOSUB value=" + intValue(inst.getArgument(0)));
 				return;
@@ -319,7 +317,7 @@ public class VirtualMachine {
 			goTo(inst.getDynArgs().get(intValue(inst.getArgument(0))));
 		});
 		IMPL.put(EclOpCode.TREASURE, inst -> {
-			printDynArgs(inst);
+
 		});
 		IMPL.put(EclOpCode.ROB, inst -> {
 
@@ -331,7 +329,6 @@ public class VirtualMachine {
 			memory.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
-			printDynArgs(inst);
 			engine.setMenu(
 				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString().toString(), inst.getDynArgs().indexOf(arg)))
 					.collect(Collectors.toList()));
@@ -363,7 +360,6 @@ public class VirtualMachine {
 			compareResult = result == 0 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
-			printDynArgs(inst);
 			engine.addText(new EclString("WHAT DO YOU DO?"), false);
 			engine.setMenu(
 				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString().toString(), inst.getDynArgs().indexOf(arg)))
@@ -470,9 +466,5 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.PICTURE2, inst -> {
 			engine.showPicture(intValue(inst.getArgument(1)));
 		});
-	}
-
-	private void printDynArgs(EclInstruction inst) {
-		System.out.println(String.join(", ", inst.getDynArgs().stream().map(EclArgument::toString).collect(Collectors.toList())));
 	}
 }
