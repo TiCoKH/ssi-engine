@@ -184,6 +184,7 @@ public class Engine implements EngineCallback, RendererCallback {
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
 				vm.newEcl(ecl);
 				vm.startInitial();
+				updatePosition();
 				setInput(STANDARD);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
@@ -242,6 +243,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	@Override
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
+			updatePosition();
 			renderer.setNoPicture();
 			return;
 		}
@@ -290,17 +292,6 @@ public class Engine implements EngineCallback, RendererCallback {
 	}
 
 	@Override
-	public EclString getPositionText() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(memory.getCurrentMapX());
-		sb.append(",");
-		sb.append(memory.getCurrentMapY());
-		sb.append(" ");
-		sb.append(memory.getCurrentMapOrient().name().charAt(0));
-		return new EclString(sb.toString());
-	}
-
-	@Override
 	public int getBackdropIndex() {
 		return (memory.getSquareInfo() & 0x80) >> 7;
 	}
@@ -338,6 +329,32 @@ public class Engine implements EngineCallback, RendererCallback {
 		return currentWalls.getWallDisplay(wallIndex - 1, dis, plc);
 	}
 
+	@Override
+	public void updatePosition() {
+		if (memory.getIsDungeon()) {
+			updatePosition(memory.getCurrentMapX(), memory.getCurrentMapY(), memory.getCurrentMapOrient());
+		} else {
+			renderer.setPositionText(null);
+		}
+	}
+
+	public void updatePosition(int x, int y, Direction d) {
+		memory.setCurrentMapX(x);
+		memory.setCurrentMapY(y);
+		memory.setCurrentMapOrient(d);
+		memory.setWallType(currentMap.wallIndexAt(x, y, d));
+		memory.setSquareInfo(currentMap.squareInfoAt(x, y));
+		renderer.setPositionText(x + "," + y + " " + d.name().charAt(0));
+	}
+
+	public boolean canMove(int x, int y, Direction d) {
+		vm.startAddress1();
+		if (vm.isStopMove()) {
+			return false;
+		}
+		return currentMap.canMove(x, y, d);
+	}
+
 	public void pauseCurrentThread() {
 		synchronized (vm) {
 			try {
@@ -367,13 +384,5 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	public VirtualMemory getMemory() {
 		return memory;
-	}
-
-	public DungeonMap getCurrentMap() {
-		return currentMap;
-	}
-
-	public WallDef getCurrentWalls() {
-		return currentWalls;
 	}
 }

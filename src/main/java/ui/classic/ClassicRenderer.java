@@ -64,6 +64,7 @@ public class ClassicRenderer extends JPanel {
 	private BufferedImage title;
 
 	private EclString statusLine;
+	private EclString position;
 
 	private ClassicBorders layout;
 	private PictureType picType;
@@ -174,6 +175,10 @@ public class ClassicRenderer extends JPanel {
 
 	public void setStatusLine(String statusLine) {
 		this.statusLine = statusLine != null ? new EclString(statusLine) : null;
+	}
+
+	public void setPositionText(String position) {
+		this.position = position != null ? new EclString(position) : null;
 	}
 
 	public void setTitleScreen(BufferedImage title) {
@@ -322,10 +327,12 @@ public class ClassicRenderer extends JPanel {
 		} else if (backdrops != null && wallSymbols != null) {
 			renderBackdrop(g2d);
 			renderDungeon(g2d);
-			renderPosition(g2d);
 			if (sprit != null) {
 				renderSprit(g2d);
 			}
+		}
+		if (position != null) {
+			renderPosition(g2d);
 		}
 		renderText(g2d);
 	}
@@ -422,7 +429,7 @@ public class ClassicRenderer extends JPanel {
 	}
 
 	private void renderPosition(Graphics2D g2d) {
-		EclString posStr = renderCB.getPositionText();
+		EclString posStr = position;
 		for (int pos = 0; pos < posStr.getLength(); pos++) {
 			renderChar(g2d, 17 + pos, 15, posStr.getChar(pos), greenFont);
 		}

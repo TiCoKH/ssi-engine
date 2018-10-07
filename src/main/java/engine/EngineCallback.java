@@ -27,6 +27,8 @@ public interface EngineCallback {
 
 	void loadAreaDecoration(int id1, int id2, int id3);
 
+	void updatePosition();
+
 	public enum InputType {
 		NONE, TITLE, CONTINUE, STANDARD;
 	}

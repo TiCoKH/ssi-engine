@@ -2,7 +2,6 @@ package engine.input;
 
 import static engine.EngineCallback.InputType.STANDARD;
 
-import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
 import engine.Engine;
 import engine.InputAction;
@@ -14,31 +13,23 @@ public class DungeonMovementHandler implements InputHandler {
 	public void handle(Engine engine, InputAction action) {
 		engine.getRenderer().setInputNone();
 		engine.getRenderer().clearText();
+		engine.getRenderer().setNoPicture();
 
 		engine.setCurrentThread(() -> {
-			DungeonMap currentMap = engine.getCurrentMap();
 			VirtualMemory memory = engine.getMemory();
 
 			Direction d = memory.getCurrentMapOrient();
 			int x = memory.getCurrentMapX();
 			int y = memory.getCurrentMapY();
 			if (InputAction.MOVE_FORWARD == action) {
-				engine.getVirtualMachine().startAddress1();
-				boolean canMove = true; // TODO
-
-				if (!canMove) {
-					engine.setInput(STANDARD);
-					return;
-				}
-				if (currentMap.canMove(x, y, d)) {
+				if (engine.canMove(x, y, d)) {
 					x += d.getDeltaX();
 					y += d.getDeltaY();
-					memory.setCurrentMapX(x);
-					memory.setCurrentMapY(y);
-					memory.setSquareInfo(currentMap.squareInfoAt(x, y));
-
+					engine.updatePosition(x, y, d);
 					engine.getVirtualMachine().startSearchLocation();
 				}
+				engine.setInput(STANDARD);
+				return;
 			} else if (InputAction.TURN_AROUND == action) {
 				d = d.getReverse();
 			} else if (InputAction.TURN_LEFT == action) {
@@ -46,8 +37,7 @@ public class DungeonMovementHandler implements InputHandler {
 			} else if (InputAction.TURN_RIGHT == action) {
 				d = d.getRight();
 			}
-			memory.setCurrentMapOrient(d);
-			memory.setWallType(currentMap.wallIndexAt(x, y, d));
+			engine.updatePosition(x, y, d);
 			engine.setInput(STANDARD);
 		}, "VM");
 	}
