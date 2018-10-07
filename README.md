@@ -41,4 +41,10 @@ In the title menu use
 * D to start the demo
 * G to start the game
 
+In a dungeon use
+
+* WSAD to move
+* Ctrl-S to save
+
+Ctrl-L will load the game,
 Ctrl-Q will quit anywhere.
