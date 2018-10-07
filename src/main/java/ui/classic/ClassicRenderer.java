@@ -4,6 +4,8 @@ import static engine.InputAction.CONTINUE;
 import static engine.InputAction.LOAD;
 import static engine.InputAction.QUIT;
 import static ui.BorderSymbols.EM;
+import static ui.classic.ClassicBorders.BIGPIC;
+import static ui.classic.ClassicBorders.GAME;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -187,25 +189,25 @@ public class ClassicRenderer extends JPanel {
 	}
 
 	public void setDungeonDisplay(List<BufferedImage> backdrops, List<BufferedImage> wallSymbols) {
-		this.layout = ClassicBorders.GAME;
+		this.layout = GAME;
 		this.backdrops = backdrops;
 		this.wallSymbols = wallSymbols;
 	}
 
 	public void setNoPicture() {
-		this.layout = ClassicBorders.GAME;
+		this.layout = GAME;
 		this.picType = null;
 	}
 
 	public void setBigPicture(List<BufferedImage> pic) {
-		this.layout = ClassicBorders.BIGPIC;
+		this.layout = BIGPIC;
 		this.picType = PictureType.BIG;
 		this.pic = pic;
 		this.picIndex = 0;
 	}
 
 	public void setSmallPicture(List<BufferedImage> pic) {
-		this.layout = ClassicBorders.GAME;
+		this.layout = GAME;
 		this.picType = PictureType.SMALL;
 		this.pic = pic;
 		this.picIndex = 0;
@@ -331,7 +333,7 @@ public class ClassicRenderer extends JPanel {
 				renderSprit(g2d);
 			}
 		}
-		if (position != null) {
+		if (position != null && layout == GAME) {
 			renderPosition(g2d);
 		}
 		renderText(g2d);
