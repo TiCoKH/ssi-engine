@@ -11,9 +11,9 @@ public class DungeonMovementHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		engine.getRenderer().setInputNone();
-		engine.getRenderer().clearText();
-		engine.getRenderer().setNoPicture();
+		engine.getUi().setInputNone();
+		engine.getUi().clearText();
+		engine.getUi().setNoPicture();
 
 		engine.setCurrentThread(() -> {
 			VirtualMemory memory = engine.getMemory();

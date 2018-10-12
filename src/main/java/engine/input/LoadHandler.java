@@ -34,7 +34,7 @@ public class LoadHandler implements InputHandler {
 			e.printStackTrace(System.err);
 		}
 
-		engine.getRenderer().reset();
+		engine.getUi().reset();
 
 		VirtualMemory m = engine.getMemory();
 		engine.loadArea(m.getAreaValue(0), m.getAreaValue(1), m.getAreaValue(2));

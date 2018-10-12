@@ -29,7 +29,7 @@ import ui.classic.ClassicRenderer;
 
 public class Engine implements EngineCallback, RendererCallback {
 	private EngineResources res;
-	private ClassicRenderer renderer;
+	private ClassicRenderer ui;
 
 	private VirtualMachine vm;
 	private VirtualMemory memory;
@@ -48,7 +48,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	public Engine(String gameDir) throws IOException {
 		res = new EngineResources(gameDir);
 
-		renderer = new ClassicRenderer(this, res.getFont(), res.getBorders().toList());
+		ui = new ClassicRenderer(this, res.getFont(), res.getBorders().toList());
 
 		vm = new VirtualMachine(this);
 		memory = vm.getMemory();
@@ -70,8 +70,8 @@ public class Engine implements EngineCallback, RendererCallback {
 					nextAction = null;
 				}
 
-				renderer.advance();
-				renderer.repaint();
+				ui.advance();
+				ui.repaint();
 
 				long end = System.currentTimeMillis();
 				if ((end - start) < 16) {
@@ -109,7 +109,7 @@ public class Engine implements EngineCallback, RendererCallback {
 				try {
 					for (int i = 1; i < 4; i++) {
 						BufferedImage title = res.getTitles(i).get(0);
-						renderer.setTitleScreen(title);
+						ui.setTitleScreen(title);
 						setInput(TITLE);
 						vm.wait(5000L);
 						if (abortCurrentThread) {
@@ -129,15 +129,15 @@ public class Engine implements EngineCallback, RendererCallback {
 		setCurrentThread(() -> {
 			try {
 				BufferedImage title4 = res.getTitles(4).get(0);
-				renderer.setTitleScreen(title4);
+				ui.setTitleScreen(title4);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
-			renderer.setInputMenu("BUCK ROGERS V1.2", MAINMENU_ACTIONS);
+			ui.setInputMenu("BUCK ROGERS V1.2", MAINMENU_ACTIONS);
 			pauseCurrentThread();
 			if (!abortCurrentThread) {
-				renderer.setTitleScreen(null);
-				renderer.setStatusLine(null);
+				ui.setTitleScreen(null);
+				ui.setStatusLine(null);
 				loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
 			}
 		}, "Title Menu");
@@ -150,28 +150,28 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	@Override
 	public void setInput(InputType inputType) {
-		renderer.setStatusLine(null);
+		ui.setStatusLine(null);
 		switch (inputType) {
 			case NONE:
-				renderer.setInputNone();
+				ui.setInputNone();
 				break;
 			case TITLE:
-				renderer.setInputContinue();
+				ui.setInputContinue();
 				break;
 			case CONTINUE:
-				renderer.setStatusLine("PRESS BUTTON OR RETURN TO CONTINUE");
-				renderer.setInputContinue();
+				ui.setStatusLine("PRESS BUTTON OR RETURN TO CONTINUE");
+				ui.setInputContinue();
 				pauseCurrentThread();
 				break;
 			case STANDARD:
-				renderer.setInputStandard();
+				ui.setInputStandard();
 				break;
 		}
 	}
 
 	@Override
 	public void setMenu(List<InputAction> items) {
-		renderer.setInputMenu(null, items);
+		ui.setInputMenu(null, items);
 		pauseCurrentThread();
 	}
 
@@ -213,7 +213,7 @@ public class Engine implements EngineCallback, RendererCallback {
 			backdrops.add(res.findImage(128 + id1, BACK).get(0));
 			backdrops.add(res.findImage(id1, BACK).get(0));
 			List<BufferedImage> currentWallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
-			renderer.setDungeonDisplay(backdrops, currentWallSymbols);
+			ui.setDungeonDisplay(backdrops, currentWallSymbols);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -221,20 +221,20 @@ public class Engine implements EngineCallback, RendererCallback {
 
 	@Override
 	public void advanceSprite() {
-		renderer.decreaseSpritIndex();
+		ui.decreaseSpritIndex();
 	}
 
 	@Override
 	public void clearSprite() {
-		renderer.setSprit(null, 0);
-		renderer.setNoPicture();
+		ui.setSprit(null, 0);
+		ui.setNoPicture();
 	}
 
 	@Override
 	public void showSprite(int id, int index) {
 		try {
 			DAXImageContent sprit = res.findImage(id, SPRIT);
-			renderer.setSprit(sprit.withSpritColor(), index);
+			ui.setSprit(sprit.withSpritColor(), index);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -244,21 +244,21 @@ public class Engine implements EngineCallback, RendererCallback {
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
 			updatePosition();
-			renderer.setNoPicture();
+			ui.setNoPicture();
 			return;
 		}
 		try {
 			DAXImageContent smallPic = res.findImage(id, PIC);
 			if (smallPic != null) {
-				renderer.setSmallPicture(smallPic.toList());
+				ui.setSmallPicture(smallPic.toList());
 				return;
 			}
 			DAXImageContent bigPic = res.findImage(id, BIGPIC);
 			if (bigPic != null) {
-				renderer.setBigPicture(bigPic.toList());
+				ui.setBigPicture(bigPic.toList());
 				return;
 			}
-			renderer.setNoPicture();
+			ui.setNoPicture();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -268,9 +268,9 @@ public class Engine implements EngineCallback, RendererCallback {
 	public void addText(EclString str, boolean clear) {
 		synchronized (vm) {
 			if (clear) {
-				renderer.clearText();
+				ui.clearText();
 			}
-			renderer.addText(str);
+			ui.addText(str);
 			// pause VM until all text is displayed
 			pauseCurrentThread();
 		}
@@ -279,7 +279,7 @@ public class Engine implements EngineCallback, RendererCallback {
 	@Override
 	public void addNewline() {
 		synchronized (vm) {
-			renderer.addLineBreak();
+			ui.addLineBreak();
 			// pause VM until all text is displayed
 			pauseCurrentThread();
 		}
@@ -334,7 +334,7 @@ public class Engine implements EngineCallback, RendererCallback {
 		if (memory.getIsDungeon()) {
 			updatePosition(memory.getCurrentMapX(), memory.getCurrentMapY(), memory.getCurrentMapOrient());
 		} else {
-			renderer.setPositionText(null);
+			ui.setPositionText(null);
 		}
 	}
 
@@ -344,7 +344,7 @@ public class Engine implements EngineCallback, RendererCallback {
 		memory.setCurrentMapOrient(d);
 		memory.setWallType(currentMap.wallIndexAt(x, y, d));
 		memory.setSquareInfo(currentMap.squareInfoAt(x, y));
-		renderer.setPositionText(x + "," + y + " " + d.name().charAt(0));
+		ui.setPositionText(x + "," + y + " " + d.name().charAt(0));
 	}
 
 	public boolean canMove(int x, int y, Direction d) {
@@ -370,8 +370,8 @@ public class Engine implements EngineCallback, RendererCallback {
 		}
 	}
 
-	public ClassicRenderer getRenderer() {
-		return renderer;
+	public ClassicRenderer getUi() {
+		return ui;
 	}
 
 	public EngineResources getRes() {

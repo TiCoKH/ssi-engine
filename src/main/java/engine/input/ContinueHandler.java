@@ -7,8 +7,8 @@ public class ContinueHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		engine.getRenderer().setInputNone();
-		engine.getRenderer().setStatusLine(null);
+		engine.getUi().setInputNone();
+		engine.getUi().setStatusLine(null);
 		engine.continueCurrentThread();
 	}
 }

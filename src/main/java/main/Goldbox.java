@@ -25,7 +25,7 @@ public class Goldbox {
 		try {
 			Engine engine = new Engine(dir);
 			EventQueue.invokeLater(() -> {
-				new DesktopFrame(engine.getRenderer());
+				new DesktopFrame(engine.getUi());
 				engine.start();
 				if (args.length == 2) {
 					engine.showStartMenu();
