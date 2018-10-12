@@ -28,9 +28,9 @@ import data.content.MonocromeSymbols;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
 import engine.InputAction;
-import engine.RendererCallback;
 import engine.opcodes.EclString;
 import ui.BorderSymbols;
+import ui.UICallback;
 
 public class ClassicRenderer extends JPanel {
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
@@ -53,7 +53,7 @@ public class ClassicRenderer extends JPanel {
 	private static final int[] WALL_START_X = { 8, 7, 5, 6, 5, 3, 9, 10, 12 };
 	private static final int[] WALL_START_Y = { 7, 6, 4, 6, 4, 3, 6, 4, 3 };
 
-	private RendererCallback renderCB;
+	private UICallback renderCB;
 
 	private List<BufferedImage> bwFont;
 	private List<BufferedImage> invertedFont;
@@ -84,7 +84,7 @@ public class ClassicRenderer extends JPanel {
 
 	private List<InputAction> menu;
 
-	public ClassicRenderer(RendererCallback renderCB, MonocromeSymbols font, List<BufferedImage> borderSymbols) {
+	public ClassicRenderer(UICallback renderCB, MonocromeSymbols font, List<BufferedImage> borderSymbols) {
 		this.renderCB = renderCB;
 		this.bwFont = font.toList();
 		this.invertedFont = font.withInvertedColors();

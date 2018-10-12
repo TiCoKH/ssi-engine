@@ -1,9 +1,10 @@
-package engine;
+package ui;
 
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
+import engine.InputAction;
 
-public interface RendererCallback {
+public interface UICallback {
 	void textDisplayFinished();
 
 	void handleInput(InputAction action);

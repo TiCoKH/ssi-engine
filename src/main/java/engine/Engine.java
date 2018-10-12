@@ -25,9 +25,10 @@ import data.content.WallDef;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
 import engine.opcodes.EclString;
+import ui.UICallback;
 import ui.classic.ClassicRenderer;
 
-public class Engine implements EngineCallback, RendererCallback {
+public class Engine implements EngineCallback, UICallback {
 	private EngineResources res;
 	private ClassicRenderer ui;
 
