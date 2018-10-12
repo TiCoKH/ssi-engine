@@ -32,7 +32,7 @@ import engine.opcodes.EclString;
 import ui.BorderSymbols;
 import ui.UICallback;
 
-public class ClassicRenderer extends JPanel {
+public class ClassicMode extends JPanel {
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
 	static {
 		KEY_MAPPING = new HashMap<>();
@@ -84,7 +84,7 @@ public class ClassicRenderer extends JPanel {
 
 	private List<InputAction> menu;
 
-	public ClassicRenderer(UICallback renderCB, MonocromeSymbols font, List<BufferedImage> borderSymbols) {
+	public ClassicMode(UICallback renderCB, MonocromeSymbols font, List<BufferedImage> borderSymbols) {
 		this.renderCB = renderCB;
 		this.bwFont = font.toList();
 		this.invertedFont = font.withInvertedColors();

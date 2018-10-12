@@ -26,11 +26,11 @@ import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
 import engine.opcodes.EclString;
 import ui.UICallback;
-import ui.classic.ClassicRenderer;
+import ui.classic.ClassicMode;
 
 public class Engine implements EngineCallback, UICallback {
 	private EngineResources res;
-	private ClassicRenderer ui;
+	private ClassicMode ui;
 
 	private VirtualMachine vm;
 	private VirtualMemory memory;
@@ -49,7 +49,7 @@ public class Engine implements EngineCallback, UICallback {
 	public Engine(String gameDir) throws IOException {
 		res = new EngineResources(gameDir);
 
-		ui = new ClassicRenderer(this, res.getFont(), res.getBorders().toList());
+		ui = new ClassicMode(this, res.getFont(), res.getBorders().toList());
 
 		vm = new VirtualMachine(this);
 		memory = vm.getMemory();
@@ -371,7 +371,7 @@ public class Engine implements EngineCallback, UICallback {
 		}
 	}
 
-	public ClassicRenderer getUi() {
+	public ClassicMode getUi() {
 		return ui;
 	}
 

@@ -4,18 +4,18 @@ import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 import javax.swing.JFrame;
 
-import ui.classic.ClassicRenderer;
+import ui.classic.ClassicMode;
 
 public class DesktopFrame {
 
 	private JFrame frame;
 
-	public DesktopFrame(ClassicRenderer renderer) {
+	public DesktopFrame(ClassicMode renderer) {
 		initFrame(renderer);
 		show();
 	}
 
-	private void initFrame(ClassicRenderer renderer) {
+	private void initFrame(ClassicMode renderer) {
 		this.frame = new JFrame("SSI");
 		this.frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.frame.setLocationByPlatform(true);
