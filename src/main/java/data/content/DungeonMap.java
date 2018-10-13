@@ -31,7 +31,7 @@ public class DungeonMap extends DAXContent {
 				wallTypes.put(Direction.EAST, data.get(WALLS_NE_START + stride + x) & 0x0F);
 				wallTypes.put(Direction.SOUTH, (data.get(WALLS_SW_START + stride + x) & 0xF0) >> 4);
 				wallTypes.put(Direction.WEST, data.get(WALLS_SW_START + stride + x) & 0x0F);
-				int squareInfo = data.get(SQUARE_INFO_START + stride + x) & 0xFF;
+				int squareInfo = data.getUnsigned(SQUARE_INFO_START + stride + x);
 				Map<Direction, Integer> doorFlags = new EnumMap<>(Direction.class);
 				doorFlags.put(Direction.WEST, (data.get(WALLS_FLAGS_START + stride + x) & 0xC0) >> 6);
 				doorFlags.put(Direction.SOUTH, (data.get(WALLS_FLAGS_START + stride + x) & 0x30) >> 4);
