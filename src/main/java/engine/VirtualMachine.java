@@ -207,8 +207,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.SPRITE_START, inst -> {
-			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)));
-			engine.showPicture(intValue(inst.getArgument(2)));
+			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
 		IMPL.put(EclOpCode.SPRITE_ADVANCE, inst -> {
 			engine.advanceSprite();
@@ -341,6 +340,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.CALL, inst -> {
 			switch (inst.getArgument(0).valueAsInt()) {
 				case 0x2DCB:
+					engine.showPicture(255);
 					engine.updatePosition();
 					break;
 				default:

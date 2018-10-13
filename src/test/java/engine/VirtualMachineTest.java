@@ -40,7 +40,7 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void showSprite(int id, int index) {
+			public void showSprite(int spriteId, int index, int picId) {
 			}
 
 			@Override

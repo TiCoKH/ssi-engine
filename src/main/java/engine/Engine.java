@@ -8,6 +8,9 @@ import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType.WALLDEF;
 import static data.content.DAXContentType._8X8D;
+import static data.content.WallDef.WallDistance.CLOSE;
+import static data.content.WallDef.WallDistance.MEDIUM;
+import static data.content.WallDef.WallPlacement.FOWARD;
 import static engine.EngineCallback.InputType.STANDARD;
 import static engine.EngineCallback.InputType.TITLE;
 import static engine.InputAction.MAINMENU_ACTIONS;
@@ -15,21 +18,29 @@ import static engine.InputAction.MAINMENU_ACTIONS;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import data.content.DAXImageContent;
 import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
+import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
+import data.content.MonocromeSymbols;
 import data.content.WallDef;
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
 import engine.opcodes.EclString;
+import ui.DungeonResources;
+import ui.FontType;
 import ui.UICallback;
+import ui.UIResources;
+import ui.UISettings;
+import ui.UIState;
 import ui.classic.ClassicMode;
 
 public class Engine implements EngineCallback, UICallback {
 	private EngineResources res;
+	private UISettings uicfg;
 	private ClassicMode ui;
 
 	private VirtualMachine vm;
@@ -41,23 +52,36 @@ public class Engine implements EngineCallback, UICallback {
 	private Thread gameLoop;
 	private Thread currentThread;
 
-	private WallDef currentWalls;
 	private DungeonMap currentMap;
+	private VisibleWalls visibleWalls;
 
 	private InputAction nextAction;
 
 	public Engine(String gameDir) throws IOException {
-		res = new EngineResources(gameDir);
+		this.res = new EngineResources(gameDir);
 
-		ui = new ClassicMode(this, res.getFont(), res.getBorders().toList());
+		MonocromeSymbols font = res.getFont();
+		Map<FontType, List<BufferedImage>> fontMap = new EnumMap<>(FontType.class);
+		fontMap.put(FontType.NORMAL, font.withGreenFG());
+		fontMap.put(FontType.INTENSE, font.withInvertedColors());
+		fontMap.put(FontType.SHORTCUT, font.toList());
+		fontMap.put(FontType.GAME_NAME, font.withMagentaFG());
+		fontMap.put(FontType.DAMAGE, fontMap.get(FontType.SHORTCUT));
+		fontMap.put(FontType.PC_HEADING, fontMap.get(FontType.NORMAL));
+		fontMap.put(FontType.SEL_PC, fontMap.get(FontType.NORMAL));
+		fontMap.put(FontType.PC, fontMap.get(FontType.NORMAL));
 
-		vm = new VirtualMachine(this);
-		memory = vm.getMemory();
+		UIResources uires = new UIResources(fontMap, res.getBorders().toList());
+		this.uicfg = new UISettings();
+		// TODO load settings
 
-		currentWalls = null;
-		currentMap = null;
+		this.ui = new ClassicMode(this, uires, uicfg);
 
-		nextAction = null;
+		this.vm = new VirtualMachine(this);
+		this.memory = vm.getMemory();
+
+		this.currentMap = null;
+		this.nextAction = null;
 	}
 
 	public void start() {
@@ -105,12 +129,12 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	public void showTitles() {
+		ui.setUIState(UIState.TITLE);
 		setCurrentThread(() -> {
 			synchronized (vm) {
 				try {
 					for (int i = 1; i < 4; i++) {
-						BufferedImage title = res.getTitles(i).get(0);
-						ui.setTitleScreen(title);
+						ui.setPic(res.getTitles(i).toList());
 						setInput(TITLE);
 						vm.wait(5000L);
 						if (abortCurrentThread) {
@@ -127,18 +151,17 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	public void showStartMenu() {
+		ui.setUIState(UIState.TITLE);
 		setCurrentThread(() -> {
 			try {
-				BufferedImage title4 = res.getTitles(4).get(0);
-				ui.setTitleScreen(title4);
+				ui.setPic(res.getTitles(4).toList());
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
-			ui.setInputMenu("BUCK ROGERS V1.2", MAINMENU_ACTIONS);
+			ui.setInputMenu("BUCK ROGERS V1.2", FontType.GAME_NAME, MAINMENU_ACTIONS);
 			pauseCurrentThread();
 			if (!abortCurrentThread) {
-				ui.setTitleScreen(null);
-				ui.setStatusLine(null);
+				ui.setPic(null);
 				loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
 			}
 		}, "Title Menu");
@@ -151,16 +174,14 @@ public class Engine implements EngineCallback, UICallback {
 
 	@Override
 	public void setInput(InputType inputType) {
-		ui.setStatusLine(null);
 		switch (inputType) {
 			case NONE:
 				ui.setInputNone();
 				break;
 			case TITLE:
-				ui.setInputContinue();
+				ui.setInputTitle();
 				break;
 			case CONTINUE:
-				ui.setStatusLine("PRESS BUTTON OR RETURN TO CONTINUE");
 				ui.setInputContinue();
 				pauseCurrentThread();
 				break;
@@ -172,7 +193,7 @@ public class Engine implements EngineCallback, UICallback {
 
 	@Override
 	public void setMenu(List<InputAction> items) {
-		ui.setInputMenu(null, items);
+		ui.setInputMenu(items);
 		pauseCurrentThread();
 	}
 
@@ -180,6 +201,7 @@ public class Engine implements EngineCallback, UICallback {
 	public void loadEcl(int id) {
 		memory.setLastECL(memory.getCurrentECL());
 		memory.setCurrentECL(id);
+		memory.setIsDungeon(false);
 		currentThread = new Thread(() -> {
 			try {
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
@@ -197,45 +219,62 @@ public class Engine implements EngineCallback, UICallback {
 	@Override
 	public void loadArea(int id1, int id2, int id3) {
 		memory.setAreaValues(id1, id2, id3);
-		try {
-			currentMap = res.find(id1, DungeonMap.class, GEO);
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
+		if (memory.getIsDungeon()) {
+			try {
+				currentMap = res.find(id1, DungeonMap.class, GEO);
+				visibleWalls = new VisibleWalls();
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
+			}
+		} else {
+			currentMap = null;
+			visibleWalls = null;
 		}
 	}
 
 	@Override
 	public void loadAreaDecoration(int id1, int id2, int id3) {
 		memory.setAreaDecoValues(id1, id2, id3);
-		try {
-			currentWalls = res.find(id1, WallDef.class, WALLDEF);
+		if (memory.getIsDungeon()) {
+			try {
+				WallDef walls = res.find(id1, WallDef.class, WALLDEF);
 
-			List<BufferedImage> backdrops = new ArrayList<>();
-			backdrops.add(res.findImage(128 + id1, BACK).get(0));
-			backdrops.add(res.findImage(id1, BACK).get(0));
-			List<BufferedImage> currentWallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
-			ui.setDungeonDisplay(backdrops, currentWallSymbols);
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
+				List<BufferedImage> wallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
+
+				List<BufferedImage> backdrops = new ArrayList<>();
+				backdrops.add(res.findImage(128 + id1, BACK).get(0));
+				backdrops.add(res.findImage(id1, BACK).get(0));
+
+				ui.setDungeonResources(new DungeonResources(memory, visibleWalls, walls, wallSymbols, backdrops));
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
+			}
 		}
+		updateUIState();
 	}
 
 	@Override
 	public void advanceSprite() {
-		ui.decreaseSpritIndex();
+		ui.advanceSprite();
 	}
 
 	@Override
 	public void clearSprite() {
-		ui.setSprit(null, 0);
-		ui.setNoPicture();
+		ui.clearSprite();
 	}
 
 	@Override
-	public void showSprite(int id, int index) {
+	public void showSprite(int spriteId, int index, int picId) {
+		if (index > 0 && visibleWalls.getVisibleWall(CLOSE, FOWARD)[1] > 0) {
+			index = 0;
+		}
+		if (index > 1 && visibleWalls.getVisibleWall(MEDIUM, FOWARD)[2] > 0) {
+			index = 1;
+		}
 		try {
-			DAXImageContent sprit = res.findImage(id, SPRIT);
-			ui.setSprit(sprit.withSpriteColor(), index);
+			DAXImageContent sprite = res.findImage(spriteId, SPRIT);
+			DAXImageContent pic = res.findImage(picId, PIC);
+			ui.setSprite(sprite.withSpriteColor(), pic.toList(), index);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -245,21 +284,24 @@ public class Engine implements EngineCallback, UICallback {
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
 			updatePosition();
-			ui.setNoPicture();
+			ui.setPic(null);
+			updateUIState();
 			return;
 		}
 		try {
 			DAXImageContent smallPic = res.findImage(id, PIC);
 			if (smallPic != null) {
-				ui.setSmallPicture(smallPic.toList());
+				ui.setPic(smallPic.toList());
+				updateUIState();
 				return;
 			}
 			DAXImageContent bigPic = res.findImage(id, BIGPIC);
 			if (bigPic != null) {
-				ui.setBigPicture(bigPic.toList());
+				ui.setPic(bigPic.toList());
+				ui.setUIState(UIState.BIGPIC);
 				return;
 			}
-			ui.setNoPicture();
+			ui.setPic(null);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -293,49 +335,9 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
-	public int getBackdropIndex() {
-		return (memory.getSquareInfo() & 0x80) >> 7;
-	}
-
-	@Override
-	public int[][] getWallDisplay(WallDistance dis, WallPlacement plc) {
-		Direction d = memory.getCurrentMapOrient();
-		int m = dis == WallDistance.FAR ? 2 : dis == WallDistance.MEDIUM ? 1 : 0;
-
-		int xPos = memory.getCurrentMapX() + m * d.getDeltaX();
-		if (xPos < 0 || xPos > 15) {
-			return null;
-		}
-		int yPos = memory.getCurrentMapY() + m * d.getDeltaY();
-		if (yPos < 0 || yPos > 15) {
-			return null;
-		}
-		int wallIndex;
-		switch (plc) {
-			case FOWARD:
-				wallIndex = currentMap.wallIndexAt(xPos, yPos, d);
-				break;
-			case LEFT:
-				wallIndex = currentMap.wallIndexAt(xPos, yPos, d.getLeft());
-				break;
-			case RIGHT:
-				wallIndex = currentMap.wallIndexAt(xPos, yPos, d.getRight());
-				break;
-			default:
-				throw new IllegalArgumentException("invalid direction " + plc);
-		}
-		if (wallIndex == 0) {
-			return null;
-		}
-		return currentWalls.getWallDisplay(wallIndex - 1, dis, plc);
-	}
-
-	@Override
 	public void updatePosition() {
 		if (memory.getIsDungeon()) {
 			updatePosition(memory.getCurrentMapX(), memory.getCurrentMapY(), memory.getCurrentMapOrient());
-		} else {
-			ui.setPositionText(null);
 		}
 	}
 
@@ -345,7 +347,16 @@ public class Engine implements EngineCallback, UICallback {
 		memory.setCurrentMapOrient(d);
 		memory.setWallType(currentMap.wallIndexAt(x, y, d));
 		memory.setSquareInfo(currentMap.squareInfoAt(x, y));
-		ui.setPositionText(x + "," + y + " " + d.name().charAt(0));
+
+		currentMap.visibleWallsAt(visibleWalls, x, y, d);
+	}
+
+	public void updateUIState() {
+		if (memory.getIsDungeon()) {
+			ui.setUIState(UIState.DUNGEON);
+		} else {
+			ui.setUIState(UIState.STORY);
+		}
 	}
 
 	public boolean canMove(int x, int y, Direction d) {

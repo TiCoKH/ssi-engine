@@ -3,9 +3,8 @@ package ui.classic;
 import static engine.InputAction.CONTINUE;
 import static engine.InputAction.LOAD;
 import static engine.InputAction.QUIT;
-import static ui.BorderSymbols.EM;
-import static ui.classic.ClassicBorders.BIGPIC;
-import static ui.classic.ClassicBorders.GAME;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static ui.FontType.INTENSE;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,21 +15,30 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import data.content.MonocromeSymbols;
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
 import engine.InputAction;
 import engine.opcodes.EclString;
-import ui.BorderSymbols;
+import ui.DungeonResources;
+import ui.FontType;
+import ui.StatusLine;
 import ui.UICallback;
+import ui.UIResources;
+import ui.UISettings;
+import ui.UIState;
 
 public class ClassicMode extends JPanel {
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
@@ -46,85 +54,59 @@ public class ClassicMode extends JPanel {
 		KEY_MAPPING.put(InputAction.TURN_AROUND, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
 	}
 
-	private static final int TEXT_START_X = 1;
-	private static final int TEXT_START_Y = 17;
-	private static final int TEXT_LINE_WIDTH = 38;
-	// Order is FORWARD(FAR,MEDIUM,CLOSE), LEFT(FAR,MEDIUM,CLOSE), RIGHT(FAR,MEDIUM,CLOSE)
-	private static final int[] WALL_START_X = { 8, 7, 5, 6, 5, 3, 9, 10, 12 };
-	private static final int[] WALL_START_Y = { 7, 6, 4, 6, 4, 3, 6, 4, 3 };
+	private transient UICallback callback;
 
-	private UICallback renderCB;
+	private transient Map<UIState, AbstractRenderer> renderers = new EnumMap<>(UIState.class);
+	private UIState currentState;
 
-	private List<BufferedImage> bwFont;
-	private List<BufferedImage> invertedFont;
-	private List<BufferedImage> greenFont;
-	private List<BufferedImage> magentaFont;
-	private List<BufferedImage> borderSymbols;
+	private boolean textNeedsProgressing = false;
 
-	private int zoom;
+	private transient UIResources resources;
+	private transient UISettings settings;
 
-	private BufferedImage title;
+	private transient ScheduledThreadPoolExecutor exec;
+	private transient ScheduledFuture<?> animationFuture;
 
-	private EclString statusLine;
-	private EclString position;
+	public ClassicMode(@Nonnull UICallback callback, @Nonnull UIResources resources, @Nonnull UISettings settings) {
+		this.callback = callback;
+		this.resources = resources;
+		this.settings = settings;
 
-	private ClassicBorders layout;
-	private PictureType picType;
-	private List<BufferedImage> pic;
-	private int picIndex;
-	private List<BufferedImage> sprit;
-	private int spritIndex;
-
-	private List<Byte> charList;
-	private int textPos;
-	private boolean textNeedsProgressing;
-
-	private List<BufferedImage> backdrops;
-	private List<BufferedImage> wallSymbols;
-
-	private List<InputAction> menu;
-
-	public ClassicMode(UICallback renderCB, MonocromeSymbols font, List<BufferedImage> borderSymbols) {
-		this.renderCB = renderCB;
-		this.bwFont = font.toList();
-		this.invertedFont = font.withInvertedColors();
-		this.greenFont = font.withGreenFG();
-		this.magentaFont = font.withMagentaFG();
-		this.borderSymbols = borderSymbols;
-
-		this.zoom = 4;
-
-		initRenderer();
-
-		reset();
-	}
-
-	public void reset() {
+		initRenderers();
+		initSurface();
+		initExecutorService();
 		resetInput();
-
-		this.title = null;
-
-		this.layout = null;
-		this.picType = null;
-		this.pic = null;
-
-		this.charList = null;
-		this.textPos = 0;
-		this.textNeedsProgressing = false;
-
-		this.backdrops = null;
-		this.wallSymbols = null;
-		this.sprit = null;
 	}
 
-	private void initRenderer() {
+	private void initRenderers() {
+		renderers.clear();
+		renderers.put(UIState.TITLE, new TitleRenderer(resources, settings));
+		renderers.put(UIState.STORY, new StoryRenderer(resources, settings));
+		renderers.put(UIState.BIGPIC, new BigPicRenderer(resources, settings));
+		renderers.put(UIState.DUNGEON, new DungeonRenderer(resources, settings));
+	}
+
+	private void initSurface() {
 		setDoubleBuffered(true);
-		setPreferredSize(new Dimension(320 * zoom, 200 * zoom));
+		setPreferredSize(new Dimension(zoom(320), zoom(200)));
+	}
+
+	private void initExecutorService() {
+		exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
+		exec.setRemoveOnCancelPolicy(true);
+	}
+
+	public void setUIState(@Nonnull UIState state) {
+		this.currentState = state;
+	}
+
+	public void clear() {
+		setInputNone();
+		setPic(null);
+		clearText();
 	}
 
 	private void resetInput() {
-		this.menu = null;
-
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(LOAD), LOAD);
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(QUIT), QUIT);
@@ -137,24 +119,36 @@ public class ClassicMode extends JPanel {
 		resetInput();
 	}
 
-	public void setInputContinue() {
+	public void setInputTitle() {
 		resetInput();
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
 		mapToAction(CONTINUE);
 	}
 
-	public void setInputMenu(String statusLine, List<InputAction> newActions) {
+	public void setInputContinue() {
 		resetInput();
-		setStatusLine(statusLine);
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
+		mapToAction(CONTINUE);
+		resources.setStatusLine(StatusLine.of("PRESS BUTTON OR RETURN TO CONTINUE", INTENSE));
+	}
 
-		this.menu = newActions;
+	public void setInputMenu(@Nonnull List<InputAction> newActions) {
+		setInputMenu(null, null, newActions);
+	}
+
+	public void setInputMenu(@Nullable String statusLine, @Nullable FontType textFont, @Nonnull List<InputAction> newActions) {
+		resetInput();
 
 		newActions.stream().forEach(a -> {
 			KeyStroke k = KeyStroke.getKeyStroke(a.getName().toLowerCase().charAt(0));
 			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
 			mapToAction(a);
 		});
+
+		List<String> menu = newActions.stream().map(InputAction::getName).collect(Collectors.toList());
+		resources.setStatusLine(StatusLine.of(statusLine, textFont, menu));
 	}
 
 	public void setInputStandard() {
@@ -165,79 +159,80 @@ public class ClassicMode extends JPanel {
 		});
 	}
 
-	private void mapToAction(InputAction a) {
+	private void mapToAction(@Nonnull InputAction a) {
 		getActionMap().put(a, new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				renderCB.handleInput(a);
+				resources.setStatusLine(null);
+				callback.handleInput(a);
 			}
 		});
 	}
 
-	public void setStatusLine(String statusLine) {
-		this.statusLine = statusLine != null ? new EclString(statusLine) : null;
+	public void setDungeonResources(DungeonResources dungeonResources) {
+		resources.setDungeonResources(dungeonResources);
 	}
 
-	public void setPositionText(String position) {
-		this.position = position != null ? new EclString(position) : null;
-	}
-
-	public void setTitleScreen(BufferedImage title) {
-		this.layout = null;
-		this.title = title;
-	}
-
-	public void setDungeonDisplay(List<BufferedImage> backdrops, List<BufferedImage> wallSymbols) {
-		this.layout = GAME;
-		this.backdrops = backdrops;
-		this.wallSymbols = wallSymbols;
-	}
-
-	public void setNoPicture() {
-		this.layout = GAME;
-		this.picType = null;
-	}
-
-	public void setBigPicture(List<BufferedImage> pic) {
-		this.layout = BIGPIC;
-		this.picType = PictureType.BIG;
-		this.pic = pic;
-		this.picIndex = 0;
-	}
-
-	public void setSmallPicture(List<BufferedImage> pic) {
-		this.layout = GAME;
-		this.picType = PictureType.SMALL;
-		this.pic = pic;
-		this.picIndex = 0;
-	}
-
-	public void setSprit(List<BufferedImage> sprit, int spritIndex) {
-		this.sprit = sprit;
-		this.spritIndex = spritIndex;
-	}
-
-	public void decreaseSpritIndex() {
-		if (spritIndex > 0) {
-			spritIndex--;
+	public void setPic(@Nullable List<BufferedImage> pic) {
+		stopPicAnimation();
+		resources.setPic(pic);
+		if (pic != null && pic.size() > 1) {
+			startPicAnimation();
 		}
+	}
+
+	private void startPicAnimation() {
+		animationFuture = exec.scheduleWithFixedDelay(() -> resources.incPicIndex(), 400, 400, MILLISECONDS);
+	}
+
+	private void stopPicAnimation() {
+		if (animationFuture != null) {
+			animationFuture.cancel(true);
+			animationFuture = null;
+		}
+	}
+
+	public void setSprite(@Nullable List<BufferedImage> sprite, @Nullable List<BufferedImage> pic, int index) {
+		stopPicAnimation();
+		resources.setPic(pic);
+		resources.getDungeonResources().ifPresent(r -> {
+			r.setSprite(sprite, index);
+			if (sprite != null)
+				spriteReplacement(r);
+		});
+	}
+
+	public void advanceSprite() {
+		resources.getDungeonResources().ifPresent(r -> {
+			r.advanceSprite();
+			spriteReplacement(r);
+		});
+	}
+
+	private void spriteReplacement(DungeonResources r) {
+		if (!r.spriteAdvancementPossible() && animationFuture == null) {
+			animationFuture = exec.schedule(() -> {
+				r.setSprite(null, 0);
+				startPicAnimation();
+			}, 1000, MILLISECONDS);
+		}
+	}
+
+	public void clearSprite() {
+		setSprite(null, null, 0);
 	}
 
 	public void clearText() {
 		this.textNeedsProgressing = false;
-		this.charList = null;
-		this.textPos = 0;
+		resources.setCharList(null);
 	}
 
 	public void addText(EclString text) {
-		List<Byte> oldCharList = charList;
 		List<Byte> newCharList = new ArrayList<>();
-		if (oldCharList != null) {
-			newCharList.addAll(oldCharList);
-		}
+
 		int wordStart = 0;
-		int charCount = newCharList.size() % 38;
+		int charCount = resources.getCharCount() % 38;
 		for (int i = 0; i < text.getLength(); i++) {
 			boolean endOfText = i + 1 == text.getLength();
 			if (text.getChar(i) == ' ' || endOfText) {
@@ -262,46 +257,27 @@ public class ClassicMode extends JPanel {
 				}
 			}
 		}
-		this.charList = newCharList;
+		resources.addChars(newCharList);
 		this.textNeedsProgressing = true;
 	}
 
 	public void addLineBreak() {
-		List<Byte> oldCharList = charList;
-		if (oldCharList == null) {
-			return;
-		}
-		int charCount = oldCharList.size() % 38;
-		List<Byte> newCharList = new ArrayList<>(oldCharList);
+		int charCount = resources.getCharCount() % 38;
+		List<Byte> newCharList = new ArrayList<>();
 		for (int i = charCount; i < 38; i++) {
 			newCharList.add((byte) 0x20);
 		}
-		this.charList = newCharList;
+		resources.addChars(newCharList);
 		this.textNeedsProgressing = true;
 	}
 
 	public void advance() {
-		if (picType != null) {
-			if (sprit != null && spritIndex == 0) {
-				if (picIndex < 400 / 16) {
-					picIndex++;
-				} else {
-					sprit = null;
-				}
-			} else {
-				if (picIndex < 60 * pic.size() - 1) {
-					picIndex++;
-				} else {
-					picIndex = 0;
-				}
-			}
-		}
 		if (textNeedsProgressing) {
-			if (textPos == charList.size()) {
+			if (resources.hasCharStopReachedLimit()) {
 				textNeedsProgressing = false;
-				renderCB.textDisplayFinished();
+				callback.textDisplayFinished();
 			} else {
-				textPos++;
+				resources.incCharStop();
 			}
 		}
 	}
@@ -312,151 +288,12 @@ public class ClassicMode extends JPanel {
 
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setBackground(Color.BLACK);
-		g2d.clearRect(0, 0, 320 * zoom, 200 * zoom);
+		g2d.clearRect(0, 0, zoom(320), zoom(200));
 
-		if (statusLine != null || menu != null) {
-			renderStatus(g2d);
-		}
-		if (title != null) {
-			renderTitle(g2d);
-			return;
-		}
-		if (layout != null) {
-			renderBorders(g2d);
-		}
-		if (picType != null && sprit == null) {
-			renderPicture(g2d);
-		} else if (backdrops != null && wallSymbols != null) {
-			renderBackdrop(g2d);
-			renderDungeon(g2d);
-			if (sprit != null) {
-				renderSprit(g2d);
-			}
-		}
-		if (position != null && layout == GAME) {
-			renderPosition(g2d);
-		}
-		renderText(g2d);
-	}
-
-	private void renderStatus(Graphics2D g2d) {
-		int pos = 0;
-		EclString status = statusLine;
-		List<InputAction> menuActions = menu;
-		if (status != null) {
-			for (; pos < status.getLength(); pos++) {
-				renderChar(g2d, pos, 24, status.getChar(pos),
-					getActionMap().get(CONTINUE) != null ? invertedFont : menuActions != null ? magentaFont : greenFont);
-			}
-			pos++;
-		}
-		if (menuActions == null) {
-			return;
-		}
-		for (InputAction a : menuActions) {
-			EclString menuName = new EclString(a.getName());
-			for (int pos2 = 0; pos2 < menuName.getLength(); pos2++) {
-				renderChar(g2d, pos + pos2, 24, menuName.getChar(pos2), pos2 == 0 ? bwFont : greenFont);
-			}
-			pos += menuName.getLength() + 1;
-		}
-	}
-
-	private void renderTitle(Graphics2D g2d) {
-		int x = zoom((320 - title.getWidth()) / 2);
-		int y = zoom((200 - title.getHeight()) / 2);
-		g2d.drawImage(title.getScaledInstance(zoom(title.getWidth()), zoom(title.getHeight()), 0), x, y, null);
-	}
-
-	private void renderBorders(Graphics2D g2d) {
-		for (int y = 0; y < 24; y++) {
-			BorderSymbols[] row = layout.getSymbols()[y];
-			for (int x = 0; x < 40; x++) {
-				if (x >= row.length || row[x] == EM) {
-					continue;
-				}
-				BufferedImage s = borderSymbols.get(row[x].getIndex());
-				g2d.drawImage(s.getScaledInstance(zoom(s.getWidth()), zoom(s.getHeight()), 0), zoom8(x), zoom8(y), null);
-			}
-		}
-	}
-
-	private void renderPicture(Graphics2D g2d) {
-		int x = zoom8(picType == PictureType.SMALL ? 3 : 1);
-		BufferedImage p = pic.get(picIndex / 60);
-		g2d.drawImage(p.getScaledInstance(zoom(p.getWidth()), zoom(p.getHeight()), 0), x, x, null);
-	}
-
-	private void renderText(Graphics2D g2d) {
-		List<Byte> chars = charList;
-		if (chars == null) {
-			return;
-		}
-		for (int pos = 0; pos < textPos; pos++) {
-			int x = TEXT_START_X + (pos % TEXT_LINE_WIDTH);
-			int y = TEXT_START_Y + (pos / TEXT_LINE_WIDTH);
-			renderChar(g2d, x, y, chars.get(pos), greenFont);
-		}
-	}
-
-	private void renderBackdrop(Graphics2D g2d) {
-		int x = zoom8(3);
-		BufferedImage bd = backdrops.get(renderCB.getBackdropIndex());
-		g2d.drawImage(bd.getScaledInstance(zoom(bd.getWidth()), zoom(bd.getHeight()), 0), x, x, null);
-	}
-
-	private void renderDungeon(Graphics2D g2d) {
-		for (WallDistance dis : WallDistance.values()) {
-			for (WallPlacement plc : WallPlacement.values()) {
-				int[][] wd = renderCB.getWallDisplay(dis, plc);
-				if (wd != null) {
-					int xStart = WALL_START_X[3 * plc.ordinal() + dis.ordinal()];
-					int yStart = WALL_START_Y[3 * plc.ordinal() + dis.ordinal()];
-					renderWall(g2d, wd, xStart, yStart);
-				}
-			}
-		}
-	}
-
-	private void renderWall(Graphics2D g2d, int[][] wallDisplay, int xStart, int yStart) {
-		for (int y = 0; y < wallDisplay.length; y++) {
-			int[] row = wallDisplay[y];
-			for (int x = 0; x < row.length; x++) {
-				int xPos = zoom8(xStart + x);
-				int yPos = zoom8(yStart + y);
-				BufferedImage w = wallSymbols.get(row[x]);
-				g2d.drawImage(w.getScaledInstance(zoom(w.getWidth()), zoom(w.getHeight()), 0), xPos, yPos, null);
-			}
-		}
-	}
-
-	private void renderPosition(Graphics2D g2d) {
-		EclString posStr = position;
-		for (int pos = 0; pos < posStr.getLength(); pos++) {
-			renderChar(g2d, 17 + pos, 15, posStr.getChar(pos), greenFont);
-		}
-	}
-
-	private void renderSprit(Graphics2D g2d) {
-		int x = zoom8(3);
-		BufferedImage i = sprit.get(spritIndex);
-		g2d.drawImage(i.getScaledInstance(zoom(i.getWidth()), zoom(i.getHeight()), 0), x, x, null);
-	}
-
-	private void renderChar(Graphics2D g2d, int x, int y, byte c, List<BufferedImage> font) {
-		BufferedImage ci = font.get(c);
-		g2d.drawImage(ci.getScaledInstance(zoom(ci.getWidth()), zoom(ci.getHeight()), 0), zoom8(x), zoom8(y), null);
+		renderers.get(currentState).render(g2d);
 	}
 
 	private int zoom(int pos) {
-		return zoom * pos;
-	}
-
-	private int zoom8(int pos) {
-		return zoom * 8 * pos;
-	}
-
-	private enum PictureType {
-		SMALL, BIG;
+		return settings.getZoom() * pos;
 	}
 }
