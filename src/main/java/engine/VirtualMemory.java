@@ -8,7 +8,7 @@ import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
-public class VirtualMemory {
+public class VirtualMemory implements ViewDungeonPosition {
 	public static final int MEMLOC_CURRENT_ECL = 0x0000;
 	public static final int MEMLOC_AREA_START = 0x0001;
 	public static final int MEMLOC_AREA_DECO_START = 0x0004;
@@ -115,6 +115,7 @@ public class VirtualMemory {
 		mem.put(MEMLOC_COMBAT_RESULT, (byte) combatResult);
 	}
 
+	@Override
 	public int getCurrentMapX() {
 		return mem.getUnsigned(MEMLOC_MAP_POS_X);
 	}
@@ -123,6 +124,7 @@ public class VirtualMemory {
 		mem.put(MEMLOC_MAP_POS_X, (byte) currentMapX);
 	}
 
+	@Override
 	public int getCurrentMapY() {
 		return mem.getUnsigned(MEMLOC_MAP_POS_Y);
 	}
@@ -131,6 +133,7 @@ public class VirtualMemory {
 		mem.put(MEMLOC_MAP_POS_Y, (byte) currentMapY);
 	}
 
+	@Override
 	public Direction getCurrentMapOrient() {
 		return Direction.withId(mem.getUnsigned(MEMLOC_MAP_ORIENTATION));
 	}
@@ -153,6 +156,11 @@ public class VirtualMemory {
 
 	public void setSquareInfo(int squareInfo) {
 		mem.put(MEMLOC_MAP_SQUARE_INFO, (byte) squareInfo);
+	}
+
+	@Override
+	public int getBackdropIndex() {
+		return (getSquareInfo() & 0x80) >> 7;
 	}
 
 	public int readMemInt(EclArgument a) {
