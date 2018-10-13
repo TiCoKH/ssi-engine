@@ -482,7 +482,13 @@ public class Decompiler {
 			System.err.println("Value is not a memory address at " + Integer.toHexString(inst.getPosition() + base).toUpperCase());
 		}
 		if (!KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
-			KNOWN_ADRESSES.put(a.valueAsInt(), "var_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+			if (a.isStringValue()) {
+				KNOWN_ADRESSES.put(a.valueAsInt(), "string_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+			} else if (a.isShortValue()) {
+				KNOWN_ADRESSES.put(a.valueAsInt(), "short_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+			} else {
+				KNOWN_ADRESSES.put(a.valueAsInt(), "byte_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+			}
 		}
 		return KNOWN_ADRESSES.get(a.valueAsInt());
 	}
