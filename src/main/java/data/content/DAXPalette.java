@@ -71,7 +71,7 @@ public class DAXPalette {
 		return new IndexColorModel(8, 256, r, g, b, Arrays.asList(COLOR_GAME_STATIC).indexOf(COLOR_MAGENTA_BRIGHT));
 	}
 
-	public static IndexColorModel transformToSpritPalette(IndexColorModel cm) {
+	public static IndexColorModel transformToSpritePalette(IndexColorModel cm) {
 		byte[] r = new byte[256];
 		byte[] g = new byte[256];
 		byte[] b = new byte[256];
