@@ -31,6 +31,13 @@ public class WallDef extends DAXContent {
 		return walls[wallIndex].getDisplay(dis, plc);
 	}
 
+	public int[][] getWallDisplayFarFiller(int wallIndex) {
+		if (wallIndex < 0 || wallIndex >= walls.length) {
+			throw new IllegalArgumentException("invalid value for wall: " + wallIndex);
+		}
+		return walls[wallIndex].farFiller;
+	}
+
 	public enum WallPlacement {
 		FOWARD, LEFT, RIGHT;
 	}
