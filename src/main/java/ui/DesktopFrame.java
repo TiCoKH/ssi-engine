@@ -8,18 +8,21 @@ import ui.classic.ClassicMode;
 
 public class DesktopFrame {
 
+	private ClassicMode ui;
+
 	private JFrame frame;
 
-	public DesktopFrame(ClassicMode renderer) {
-		initFrame(renderer);
+	public DesktopFrame(ClassicMode ui) {
+		this.ui = ui;
+		initFrame();
 		show();
 	}
 
-	private void initFrame(ClassicMode renderer) {
+	private void initFrame() {
 		this.frame = new JFrame("SSI");
 		this.frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.frame.setLocationByPlatform(true);
-		this.frame.add(renderer);
+		this.frame.add(ui);
 	}
 
 	private void show() {
