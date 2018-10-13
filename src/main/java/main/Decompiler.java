@@ -450,7 +450,7 @@ public class Decompiler {
 				out.print(compInst.toString());
 				out.print(" ");
 				out.print(operator);
-				out.print(" 0");
+				out.print(" YES");
 				break;
 			default:
 				throw new IllegalArgumentException("unkown compare statement " + compInst);
