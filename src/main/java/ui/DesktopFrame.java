@@ -2,6 +2,7 @@ package ui;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
+import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
 import ui.classic.ClassicMode;
@@ -12,7 +13,7 @@ public class DesktopFrame {
 
 	private JFrame frame;
 
-	public DesktopFrame(ClassicMode ui) {
+	public DesktopFrame(@Nonnull ClassicMode ui) {
 		this.ui = ui;
 		initFrame();
 		show();
