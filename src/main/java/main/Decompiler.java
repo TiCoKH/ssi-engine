@@ -146,7 +146,8 @@ public class Decompiler {
 
 	private SortedMap<Integer, Boolean> gotoAddressList = new TreeMap<>();
 
-	private EclInstruction compare;
+	private EclInstruction compare = null;
+	private EclOpCode lastIf = null;
 	private boolean wasCompare = false;
 
 	private PrintStream out;
@@ -276,10 +277,13 @@ public class Decompiler {
 				output(inst, dynArgs);
 		} else if (OP_CODE_COMP.contains(opCode)) {
 			compare = inst;
+			lastIf = null;
 			wasCompare = true;
 		} else if (OP_CODE_IF.contains(opCode)) {
-			if (withOutput)
+			if (withOutput && (lastIf == null || lastIf != opCode)) {
 				outputCompare(compare, inst);
+			}
+			lastIf = opCode;
 
 			indention += 1;
 			EclInstruction compResultInst = EclInstruction.parseNext(eclCode);
