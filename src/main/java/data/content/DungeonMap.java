@@ -70,38 +70,31 @@ public class DungeonMap extends DAXContent {
 		vwalls.closeRight[0] = wallIndexAt(x, y, o.getRight());
 
 		vwalls.closeAhead[0] = //
-			vwalls.closeLeft[0] == 0 ? //
-				wallIndexAt(x + o.getLeft().getDeltaX(), y + o.getLeft().getDeltaY(), o) : -1;
+			wallIndexAt(x + o.getLeft().getDeltaX(), y + o.getLeft().getDeltaY(), o);
 		vwalls.closeAhead[1] = wallIndexAt(x, y, o);
 		vwalls.closeAhead[2] = //
-			vwalls.closeRight[0] == 0 ? //
-				wallIndexAt(x + o.getRight().getDeltaX(), y + o.getRight().getDeltaY(), o) : -1;
+			wallIndexAt(x + o.getRight().getDeltaX(), y + o.getRight().getDeltaY(), o);
 
 		vwalls.medLeft[0] = //
-			vwalls.closeLeft[0] == 0 && vwalls.closeAhead[0] == 0 ? //
-				wallIndexAt(x + o.getDeltaX() + o.getLeft().getDeltaX(), y + o.getDeltaY() + o.getLeft().getDeltaY(), o.getLeft()) : -1;
+			wallIndexAt(x + o.getDeltaX() + o.getLeft().getDeltaX(), y + o.getDeltaY() + o.getLeft().getDeltaY(), o.getLeft());
 		vwalls.medLeft[1] = //
-			vwalls.closeAhead[1] == 0 ? //
-				wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o.getLeft()) : -1;
+			wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o.getLeft());
 
 		vwalls.medRight[0] = //
-			vwalls.closeAhead[0] == 0 ? //
-				wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o.getRight()) : -1;
+			wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o.getRight());
 		vwalls.medRight[1] = //
-			vwalls.closeAhead[1] == 0 && vwalls.closeRight[0] == 0 ? //
-				wallIndexAt(x + o.getDeltaX() + o.getRight().getDeltaX(), y + o.getDeltaY() + o.getRight().getDeltaY(), o.getRight()) : -1;
+			wallIndexAt(x + o.getDeltaX() + o.getRight().getDeltaX(), y + o.getDeltaY() + o.getRight().getDeltaY(), o.getRight());
 
 		vwalls.medAhead[0] = //
-			vwalls.closeLeft[0] == 0 && vwalls.closeAhead[0] == 0 ? //
-				wallIndexAt(x + o.getDeltaX() + 2 * o.getLeft().getDeltaX(), y + o.getDeltaY() + 2 * o.getLeft().getDeltaY(), o) : -1;
-		vwalls.medAhead[1] = wallIndexAt(x + o.getDeltaX() + o.getLeft().getDeltaX(), y + o.getDeltaY() + o.getLeft().getDeltaY(), o);
+			wallIndexAt(x + o.getDeltaX() + 2 * o.getLeft().getDeltaX(), y + o.getDeltaY() + 2 * o.getLeft().getDeltaY(), o);
+		vwalls.medAhead[1] = //
+			wallIndexAt(x + o.getDeltaX() + o.getLeft().getDeltaX(), y + o.getDeltaY() + o.getLeft().getDeltaY(), o);
 		vwalls.medAhead[2] = //
-			vwalls.closeAhead[1] == 0 ? //
-				wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o) : -1;
-		vwalls.medAhead[3] = wallIndexAt(x + o.getDeltaX() + o.getRight().getDeltaX(), y + o.getDeltaY() + o.getRight().getDeltaY(), o);
+			wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o);
+		vwalls.medAhead[3] = //
+			wallIndexAt(x + o.getDeltaX() + o.getRight().getDeltaX(), y + o.getDeltaY() + o.getRight().getDeltaY(), o);
 		vwalls.medAhead[4] = //
-			vwalls.closeRight[0] == 0 && vwalls.closeAhead[2] == 0 ? //
-				wallIndexAt(x + o.getDeltaX() + 2 * o.getRight().getDeltaX(), y + o.getDeltaY() + 2 * o.getRight().getDeltaY(), o) : -1;
+			wallIndexAt(x + o.getDeltaX() + 2 * o.getRight().getDeltaX(), y + o.getDeltaY() + 2 * o.getRight().getDeltaY(), o);
 
 		vwalls.farLeft[0] = //
 			wallIndexAt(x + 2 * o.getDeltaX() + 2 * o.getLeft().getDeltaX(), y + 2 * o.getDeltaY() + 2 * o.getLeft().getDeltaY(), o.getLeft());
