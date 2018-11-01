@@ -274,7 +274,7 @@ public class Engine implements EngineCallback, UICallback {
 		try {
 			DAXImageContent sprite = res.findImage(spriteId, SPRIT);
 			DAXImageContent pic = res.findImage(picId, PIC);
-			ui.setSprite(sprite.withSpriteColor(), pic.toList(), index);
+			ui.setSprite(sprite.withSpriteColor(), pic != null ? pic.toList() : null, index);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}

@@ -198,7 +198,7 @@ public class ClassicMode extends JPanel {
 		resources.setPic(pic);
 		resources.getDungeonResources().ifPresent(r -> {
 			r.setSprite(sprite, index);
-			if (sprite != null)
+			if (sprite != null && pic != null)
 				spriteReplacement(r);
 		});
 	}
@@ -206,7 +206,8 @@ public class ClassicMode extends JPanel {
 	public void advanceSprite() {
 		resources.getDungeonResources().ifPresent(r -> {
 			r.advanceSprite();
-			spriteReplacement(r);
+			if (resources.getPic().isPresent())
+				spriteReplacement(r);
 		});
 	}
 
