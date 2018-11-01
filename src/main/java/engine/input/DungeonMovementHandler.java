@@ -11,7 +11,6 @@ public class DungeonMovementHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		engine.getUi().clear();
 		engine.setCurrentThread(() -> {
 			VirtualMemory memory = engine.getMemory();
 
@@ -25,7 +24,9 @@ public class DungeonMovementHandler implements InputHandler {
 					engine.updatePosition(x, y, d);
 					engine.getVirtualMachine().startSearchLocation();
 				}
-				engine.setInput(STANDARD);
+				if (!engine.isAbortCurrentThread()) {
+					engine.setInput(STANDARD);
+				}
 				return;
 			} else if (InputAction.TURN_AROUND == action) {
 				d = d.getReverse();

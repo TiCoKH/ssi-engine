@@ -50,6 +50,7 @@ public class Engine implements EngineCallback, UICallback {
 
 	private Thread gameLoop = null;
 	private Thread currentThread = null;
+	private Thread nextThread = null;
 
 	private DungeonMap currentMap = null;
 	private VisibleWalls visibleWalls = null;
@@ -90,6 +91,14 @@ public class Engine implements EngineCallback, UICallback {
 					nextAction.getHandler().handle(this, nextAction);
 					nextAction = null;
 				}
+				if (currentThread != null && currentThread.isAlive() && nextThread != null) {
+					System.out.println("currentThread still alive, waiting...");
+				} else if (nextThread != null) {
+					currentThread = nextThread;
+					nextThread = null;
+					abortCurrentThread = false;
+					currentThread.start();
+				}
 
 				ui.advance();
 				ui.repaint();
@@ -117,16 +126,16 @@ public class Engine implements EngineCallback, UICallback {
 		ui.clear();
 	}
 
-	public void stopCurrentThread() {
+	private void stopCurrentThread() {
 		abortCurrentThread = true;
 		vm.stopVM();
 		continueCurrentThread();
 	}
 
 	public void setCurrentThread(Runnable r, String title) {
-		abortCurrentThread = false;
-		currentThread = new Thread(r, title);
-		currentThread.start();
+		stopCurrentThread();
+		clear();
+		nextThread = new Thread(r, title);
 	}
 
 	public void showTitles() {
@@ -204,18 +213,20 @@ public class Engine implements EngineCallback, UICallback {
 		memory.setLastECL(memory.getCurrentECL());
 		memory.setCurrentECL(id);
 		memory.setIsDungeon(false);
-		currentThread = new Thread(() -> {
+		setCurrentThread(() -> {
 			try {
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
 				vm.newEcl(ecl);
 				vm.startInitial();
+				if (abortCurrentThread) {
+					return;
+				}
 				updatePosition();
 				setInput(STANDARD);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
 		}, "VM");
-		currentThread.start();
 	}
 
 	@Override
@@ -363,7 +374,7 @@ public class Engine implements EngineCallback, UICallback {
 
 	public boolean canMove(int x, int y, Direction d) {
 		vm.startAddress1();
-		if (vm.isStopMove()) {
+		if (abortCurrentThread || vm.isStopMove()) {
 			return false;
 		}
 		return currentMap.canMove(x, y, d);
@@ -410,5 +421,9 @@ public class Engine implements EngineCallback, UICallback {
 
 	public VirtualMemory getMemory() {
 		return memory;
+	}
+
+	public boolean isAbortCurrentThread() {
+		return abortCurrentThread;
 	}
 }
