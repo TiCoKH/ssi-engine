@@ -40,22 +40,21 @@ import ui.classic.ClassicMode;
 
 public class Engine implements EngineCallback, UICallback {
 	private EngineResources res;
-	private UISettings uicfg;
 	private ClassicMode ui;
 
 	private VirtualMachine vm;
 	private VirtualMemory memory;
 
-	private boolean running;
-	private boolean abortCurrentThread;
+	private boolean running = false;
+	private boolean abortCurrentThread = false;
 
-	private Thread gameLoop;
-	private Thread currentThread;
+	private Thread gameLoop = null;
+	private Thread currentThread = null;
 
-	private DungeonMap currentMap;
-	private VisibleWalls visibleWalls;
+	private DungeonMap currentMap = null;
+	private VisibleWalls visibleWalls = null;
 
-	private InputAction nextAction;
+	private InputAction nextAction = null;
 
 	public Engine(String gameDir) throws IOException {
 		this.res = new EngineResources(gameDir);
@@ -72,16 +71,13 @@ public class Engine implements EngineCallback, UICallback {
 		fontMap.put(FontType.PC, fontMap.get(FontType.NORMAL));
 
 		UIResources uires = new UIResources(fontMap, res.getBorders().toList());
-		this.uicfg = new UISettings();
+		UISettings uicfg = new UISettings();
 		// TODO load settings
 
 		this.ui = new ClassicMode(this, uires, uicfg);
 
 		this.vm = new VirtualMachine(this);
 		this.memory = vm.getMemory();
-
-		this.currentMap = null;
-		this.nextAction = null;
 	}
 
 	public void start() {
