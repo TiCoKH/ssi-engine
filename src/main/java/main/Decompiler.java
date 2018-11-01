@@ -390,8 +390,59 @@ public class Decompiler {
 	private void outputCompare(EclInstruction compInst, EclInstruction ifInst) {
 		outputInstStart(base + compInst.getPosition());
 		out.print("if (");
+		switch (compInst.getOpCode()) {
+			case COMPARE:
+				outputCompare(compInst, 0, 1, ifInst.getOpCode());
+				break;
+			case COMPARE_AND:
+				out.print("(");
+				outputCompare(compInst, 0, 1, IF_EQUALS);
+				out.print(" && ");
+				outputCompare(compInst, 2, 3, IF_EQUALS);
+				out.print(")");
+				outputCompareOp(ifInst.getOpCode());
+				out.print("TRUE");
+				break;
+			case AND:
+				out.print(argR(compInst, 0));
+				out.print(" & ");
+				out.print(argR(compInst, 1));
+				outputCompareOp(ifInst.getOpCode());
+				out.print("0");
+				break;
+			case OR:
+				out.print(argR(compInst, 0));
+				out.print(" | ");
+				out.print(argR(compInst, 1));
+				outputCompareOp(ifInst.getOpCode());
+				out.print("0");
+				break;
+			case INPUT_YES_NO:
+				out.print(compInst.toString());
+				outputCompareOp(ifInst.getOpCode());
+				out.print("YES");
+				break;
+			default:
+				throw new IllegalArgumentException("unkown compare statement " + compInst);
+		}
+		out.println(")");
+	}
+
+	private void outputCompare(EclInstruction compInst, int argIndex1, int argIndex2, EclOpCode ifOp) {
+		if (compInst.getArgument(argIndex2).isMemAddress() && !compInst.getArgument(argIndex1).isMemAddress()) {
+			out.print(argR(compInst, argIndex2));
+			outputCompareOp(reverse(ifOp));
+			out.print(argR(compInst, argIndex1));
+		} else {
+			out.print(argR(compInst, argIndex1));
+			outputCompareOp(ifOp);
+			out.print(argR(compInst, argIndex2));
+		}
+	}
+
+	private void outputCompareOp(EclOpCode ifOp) {
 		String operator;
-		switch (ifInst.getOpCode()) {
+		switch (ifOp) {
 			case IF_EQUALS:
 				operator = "==";
 				break;
@@ -411,55 +462,29 @@ public class Decompiler {
 				operator = "!=";
 				break;
 			default:
-				throw new IllegalArgumentException("unkown if statement " + ifInst);
+				throw new IllegalArgumentException("unkown if statement " + ifOp);
 		}
-		switch (compInst.getOpCode()) {
-			case COMPARE:
-				out.print(argR(compInst, 0));
-				out.print(" ");
-				out.print(operator);
-				out.print(" ");
-				out.print(argR(compInst, 1));
-				break;
-			case COMPARE_AND:
-				out.print("(");
-				out.print(argR(compInst, 0));
-				out.print(" == ");
-				out.print(argR(compInst, 1));
-				out.print(" && ");
-				out.print(argR(compInst, 2));
-				out.print(" == ");
-				out.print(argR(compInst, 3));
-				out.print(") ");
-				out.print(operator);
-				out.print(" TRUE");
-				break;
-			case AND:
-				out.print(argR(compInst, 0));
-				out.print(" & ");
-				out.print(argR(compInst, 1));
-				out.print(" ");
-				out.print(operator);
-				out.print(" 0");
-				break;
-			case OR:
-				out.print(argR(compInst, 0));
-				out.print(" | ");
-				out.print(argR(compInst, 1));
-				out.print(" ");
-				out.print(operator);
-				out.print(" 0");
-				break;
-			case INPUT_YES_NO:
-				out.print(compInst.toString());
-				out.print(" ");
-				out.print(operator);
-				out.print(" YES");
-				break;
+		out.print(" ");
+		out.print(operator);
+		out.print(" ");
+	}
+
+	private EclOpCode reverse(EclOpCode ifOp) {
+		switch (ifOp) {
+			case IF_EQUALS:
+			case IF_NOT_EQUALS:
+				return ifOp;
+			case IF_GREATER:
+				return IF_LESS_EQUALS;
+			case IF_GREATER_EQUALS:
+				return IF_LESS;
+			case IF_LESS:
+				return IF_GREATER_EQUALS;
+			case IF_LESS_EQUALS:
+				return IF_GREATER;
 			default:
-				throw new IllegalArgumentException("unkown compare statement " + compInst);
+				throw new IllegalArgumentException("unkown if statement " + ifOp);
 		}
-		out.println(")");
 	}
 
 	private void output(EclInstruction inst, List<EclArgument> dynArgs) {
