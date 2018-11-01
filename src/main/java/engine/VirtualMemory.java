@@ -14,6 +14,7 @@ public class VirtualMemory implements ViewDungeonPosition {
 	public static final int MEMLOC_AREA_DECO_START = 0x0004;
 	public static final int MEMLOC_ENGINE_CONF_IS_DUNGEON = 0x4BAB;
 	public static final int MEMLOC_LAST_ECL = 0x4BF2;
+	public static final int MEMLOC_ENGINE_CONF_GAME_SPEED = 0x4BFC;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
 	public static final int MEMLOC_MAP_POS_X = 0xC04B;
@@ -97,6 +98,14 @@ public class VirtualMemory implements ViewDungeonPosition {
 
 	public void setLastECL(int lastECL) {
 		mem.put(MEMLOC_LAST_ECL, (byte) lastECL);
+	}
+
+	public int getGameSpeed() {
+		return mem.getUnsigned(MEMLOC_ENGINE_CONF_GAME_SPEED);
+	}
+
+	public void setGameSpeed(int gameSpeed) {
+		mem.put(MEMLOC_ENGINE_CONF_GAME_SPEED, (byte) gameSpeed);
 	}
 
 	public int getForLoopCount() {

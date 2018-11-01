@@ -162,6 +162,7 @@ public class Engine implements EngineCallback, UICallback {
 			pauseCurrentThread();
 			if (!abortCurrentThread) {
 				ui.setPic(null);
+				memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
 				loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
 			}
 		}, "Title Menu");
@@ -365,6 +366,18 @@ public class Engine implements EngineCallback, UICallback {
 			return false;
 		}
 		return currentMap.canMove(x, y, d);
+	}
+
+	@Override
+	public void delayCurrentThread(boolean showStatus) {
+		if (showStatus)
+			ui.setStatus("LOADING...PLEASE WAIT");
+		try {
+			Thread.sleep(memory.getGameSpeed() * 100L);
+		} catch (InterruptedException e) {
+		}
+		if (showStatus)
+			ui.clearStatus();
 	}
 
 	public void pauseCurrentThread() {

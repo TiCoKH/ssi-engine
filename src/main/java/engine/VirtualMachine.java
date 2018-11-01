@@ -393,12 +393,7 @@ public class VirtualMachine {
 			memory.writeMemInt(SELECTED_PLAYER_STATUS, 1);
 		});
 		IMPL.put(EclOpCode.DELAY, inst -> {
-			try {
-				Thread.sleep(900);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			engine.delayCurrentThread(true);
 		});
 		IMPL.put(EclOpCode.SPELL, inst -> {
 

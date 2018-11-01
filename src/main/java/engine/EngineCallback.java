@@ -29,6 +29,8 @@ public interface EngineCallback {
 
 	void updatePosition();
 
+	void delayCurrentThread(boolean showStatus);
+
 	public enum InputType {
 		NONE, TITLE, CONTINUE, STANDARD;
 	}

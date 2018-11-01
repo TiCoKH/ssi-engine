@@ -70,6 +70,10 @@ public class VirtualMachineTest {
 			@Override
 			public void updatePosition() {
 			}
+
+			@Override
+			public void delayCurrentThread(boolean showStatus) {
+			}
 		});
 		vm.newEcl(ecls.getById(16, EclProgram.class));
 		System.out.println("Initial:");
