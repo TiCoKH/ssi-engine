@@ -104,6 +104,7 @@ public class ClassicMode extends JPanel {
 		setInputNone();
 		setPic(null);
 		clearText();
+		clearStatus();
 	}
 
 	private void resetInput() {
@@ -168,6 +169,14 @@ public class ClassicMode extends JPanel {
 				callback.handleInput(a);
 			}
 		});
+	}
+
+	public void clearStatus() {
+		resources.setStatusLine(null);
+	}
+
+	public void setStatus(@Nonnull String status) {
+		resources.setStatusLine(StatusLine.of(status));
 	}
 
 	public void setDungeonResources(DungeonResources dungeonResources) {
