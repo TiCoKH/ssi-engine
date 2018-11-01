@@ -232,15 +232,16 @@ public class ClassicMode extends JPanel {
 	public void addText(EclString text) {
 		List<Byte> newCharList = new ArrayList<>();
 
+		int lineWidth = renderers.get(currentState).getLineWidth();
 		int wordStart = 0;
-		int charCount = resources.getCharCount() % 38;
+		int charCount = resources.getCharCount() % lineWidth;
 		for (int i = 0; i < text.getLength(); i++) {
 			boolean endOfText = i + 1 == text.getLength();
 			if (text.getChar(i) == ' ' || endOfText) {
 				// Space is not part of the word, last char is.
 				int wordLength = (i - wordStart) + (endOfText ? 1 : 0);
-				if (charCount + wordLength > 38) {
-					for (int j = charCount; j < 38; j++) {
+				if (charCount + wordLength > lineWidth) {
+					for (int j = charCount; j < lineWidth; j++) {
 						newCharList.add((byte) 0x20);
 					}
 					charCount = 0;
@@ -250,7 +251,7 @@ public class ClassicMode extends JPanel {
 				}
 				wordStart = i + 1;
 				charCount += wordLength;
-				if (charCount < 38 && !endOfText) {
+				if (charCount < lineWidth && !endOfText) {
 					newCharList.add((byte) 0x20);
 					charCount++;
 				} else {
@@ -263,9 +264,10 @@ public class ClassicMode extends JPanel {
 	}
 
 	public void addLineBreak() {
-		int charCount = resources.getCharCount() % 38;
+		int lineWidth = renderers.get(currentState).getLineWidth();
+		int charCount = resources.getCharCount() % lineWidth;
 		List<Byte> newCharList = new ArrayList<>();
-		for (int i = charCount; i < 38; i++) {
+		for (int i = charCount; i < lineWidth; i++) {
 			newCharList.add((byte) 0x20);
 		}
 		resources.addChars(newCharList);
