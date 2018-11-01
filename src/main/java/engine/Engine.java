@@ -171,7 +171,7 @@ public class Engine implements EngineCallback, UICallback {
 			ui.setInputMenu("BUCK ROGERS V1.2", FontType.GAME_NAME, MAINMENU_ACTIONS);
 			pauseCurrentThread();
 			if (!abortCurrentThread) {
-				ui.setPic(null);
+				clear();
 				memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
 				loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
 			}
@@ -297,7 +297,7 @@ public class Engine implements EngineCallback, UICallback {
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
 			updatePosition();
-			ui.setPic(null);
+			clear();
 			updateUIState();
 			return;
 		}
