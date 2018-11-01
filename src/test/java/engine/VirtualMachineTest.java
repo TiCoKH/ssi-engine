@@ -24,6 +24,10 @@ public class VirtualMachineTest {
 		DAXFile ecls = DAXFile.createFrom(c);
 		VirtualMachine vm = new VirtualMachine(new EngineCallback() {
 			@Override
+			public void clear() {
+			}
+
+			@Override
 			public void setInput(InputType inputType) {
 			}
 

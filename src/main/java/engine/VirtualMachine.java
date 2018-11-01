@@ -422,6 +422,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.STOP_MOVE, inst -> {
 			stopMove = true;
 			stopVM();
+			engine.clear();
 		});
 		IMPL.put(EclOpCode.SOUND_EVENT, inst -> {
 

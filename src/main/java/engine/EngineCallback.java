@@ -5,6 +5,8 @@ import java.util.List;
 import engine.opcodes.EclString;
 
 public interface EngineCallback {
+	void clear();
+
 	void setInput(InputType inputType);
 
 	void setMenu(List<InputAction> action);

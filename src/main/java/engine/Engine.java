@@ -116,6 +116,11 @@ public class Engine implements EngineCallback, UICallback {
 		vm.stopVM();
 	}
 
+	@Override
+	public void clear() {
+		ui.clear();
+	}
+
 	public void stopCurrentThread() {
 		abortCurrentThread = true;
 		vm.stopVM();
