@@ -21,6 +21,7 @@ import engine.opcodes.EclString;
 
 public class VirtualMachine {
 	private static final EclArgument SELECTED_PLAYER_NAME = new EclArgument(1, 3, 0x7C00);
+	private static final EclArgument SELECTED_PLAYER_MONEY = new EclArgument(5, 3, 0x7C2B);
 	private static final EclArgument SELECTED_PLAYER_STATUS = new EclArgument(1, 3, 0x7D00);
 
 	private final Map<EclOpCode, Consumer<EclInstruction>> IMPL = new EnumMap<>(EclOpCode.class);
@@ -375,6 +376,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.WHO, inst -> {
 			// TODO Implement party management
 			memory.writeMemString(SELECTED_PLAYER_NAME, new EclString("THIS ONE"));
+			memory.writeMemInt(SELECTED_PLAYER_MONEY, 10000);
 			memory.writeMemInt(SELECTED_PLAYER_STATUS, 1);
 		});
 		IMPL.put(EclOpCode.DELAY, inst -> {
