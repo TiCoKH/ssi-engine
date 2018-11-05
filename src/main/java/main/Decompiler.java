@@ -431,7 +431,7 @@ public class Decompiler {
 	private void outputCompare(EclInstruction compInst, int argIndex1, int argIndex2, EclOpCode ifOp) {
 		if (compInst.getArgument(argIndex2).isMemAddress() && !compInst.getArgument(argIndex1).isMemAddress()) {
 			out.print(argR(compInst, argIndex2));
-			outputCompareOp(reverse(ifOp));
+			outputCompareOp(exchange(ifOp));
 			out.print(argR(compInst, argIndex1));
 		} else {
 			out.print(argR(compInst, argIndex1));
@@ -469,19 +469,19 @@ public class Decompiler {
 		out.print(" ");
 	}
 
-	private EclOpCode reverse(EclOpCode ifOp) {
+	private EclOpCode exchange(EclOpCode ifOp) {
 		switch (ifOp) {
 			case IF_EQUALS:
 			case IF_NOT_EQUALS:
 				return ifOp;
 			case IF_GREATER:
-				return IF_LESS_EQUALS;
-			case IF_GREATER_EQUALS:
 				return IF_LESS;
+			case IF_GREATER_EQUALS:
+				return IF_LESS_EQUALS;
 			case IF_LESS:
-				return IF_GREATER_EQUALS;
-			case IF_LESS_EQUALS:
 				return IF_GREATER;
+			case IF_LESS_EQUALS:
+				return IF_GREATER_EQUALS;
 			default:
 				throw new IllegalArgumentException("unkown if statement " + ifOp);
 		}
