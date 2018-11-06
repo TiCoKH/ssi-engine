@@ -36,6 +36,14 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void setInputNumber(int maxDigits) {
+			}
+
+			@Override
+			public void setInputString(int maxLetters) {
+			}
+
+			@Override
 			public void setMenu(List<InputAction> action) {
 			}
 

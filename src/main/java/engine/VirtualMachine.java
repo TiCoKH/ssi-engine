@@ -202,10 +202,14 @@ public class VirtualMachine {
 			engine.showPicture(intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.INPUT_NUMBER, inst -> {
-
+			engine.setInputNumber(intValue(inst.getArgument(0)));
+			int value = Integer.parseUnsignedInt(memory.getInput());
+			memory.writeMemInt(inst.getArgument(1), value);
 		});
 		IMPL.put(EclOpCode.INPUT_STRING, inst -> {
-
+			engine.setInputString(intValue(inst.getArgument(0)));
+			EclString value = new EclString(memory.getInput());
+			memory.writeMemString(inst.getArgument(1), value);
 		});
 		IMPL.put(EclOpCode.PRINT, inst -> {
 			EclArgument a0 = inst.getArgument(0);

@@ -213,6 +213,18 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
+	public void setInputNumber(int maxDigits) {
+		ui.setInputNumber(maxDigits);
+		pauseCurrentThread();
+	}
+
+	@Override
+	public void setInputString(int maxLetters) {
+		ui.setInputString(maxLetters);
+		pauseCurrentThread();
+	}
+
+	@Override
 	public void setMenu(List<InputAction> items) {
 		ui.setInputMenu(items);
 		pauseCurrentThread();

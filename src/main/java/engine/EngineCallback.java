@@ -11,6 +11,10 @@ public interface EngineCallback {
 
 	void setInput(InputType inputType);
 
+	void setInputNumber(int maxDigits);
+
+	void setInputString(int maxLetters);
+
 	void setMenu(List<InputAction> action);
 
 	void advanceSprite();

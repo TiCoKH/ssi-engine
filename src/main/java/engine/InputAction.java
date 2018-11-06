@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import engine.input.ContinueHandler;
 import engine.input.DungeonMovementHandler;
 import engine.input.InputHandler;
+import engine.input.InputNumberStringHandler;
 import engine.input.LoadHandler;
 import engine.input.MenuHandler;
 import engine.input.OverlandMovementHandler;
@@ -20,6 +21,7 @@ public class InputAction {
 	private static final InputHandler SPACE_MOVEMENT_HANDLER = new SpaceMovementHandler();
 
 	public static final InputHandler MENU_HANDLER = new MenuHandler();
+	public static final InputHandler INPUT_HANDLER = new InputNumberStringHandler();
 
 	private static final InputAction GAME = new InputAction(MENU_HANDLER, "GAME", 0);
 	private static final InputAction DEMO = new InputAction(MENU_HANDLER, "DEMO", 1);

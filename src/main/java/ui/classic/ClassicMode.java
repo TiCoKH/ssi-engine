@@ -1,6 +1,7 @@
 package ui.classic;
 
 import static engine.InputAction.CONTINUE;
+import static engine.InputAction.INPUT_HANDLER;
 import static engine.InputAction.LOAD;
 import static engine.InputAction.QUIT;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -43,6 +44,9 @@ import ui.UISettings;
 import ui.UIState;
 
 public class ClassicMode extends JPanel {
+	private static final String INPUT_NUMBER = "INPUT NUMBER: ";
+	private static final String INPUT_STRING = "INPUT STRING: ";
+
 	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
 	static {
 		KEY_MAPPING = new HashMap<>();
@@ -78,6 +82,9 @@ public class ClassicMode extends JPanel {
 
 	private transient ScheduledThreadPoolExecutor exec;
 	private transient ScheduledFuture<?> animationFuture;
+
+	private StringBuilder input = new StringBuilder();
+	private String inputPrefix = null;
 
 	public ClassicMode(@Nonnull UICallback callback, @Nonnull UIResources resources, @Nonnull UISettings settings) {
 		this.callback = callback;
@@ -169,6 +176,99 @@ public class ClassicMode extends JPanel {
 
 		List<String> menu = newActions.stream().map(InputAction::getName).collect(Collectors.toList());
 		resources.setStatusLine(StatusLine.of(statusLine, textFont, menu));
+	}
+
+	public void setInputNumber(int maxDigits) {
+		resetInput();
+		input.setLength(0);
+		inputPrefix = INPUT_NUMBER;
+		resources.setStatusLine(StatusLine.of(inputPrefix, FontType.NORMAL));
+		for (char c = '0'; c <= '9'; c++) {
+			Character d = c;
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
+			getActionMap().put(d, new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (input.length() < maxDigits) {
+						input.append(d);
+					}
+					if (input.length() == 1) {
+						mapInputDone();
+					}
+					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
+				}
+			});
+		}
+		mapInputBack();
+	}
+
+	public void setInputString(int maxLetters) {
+		resetInput();
+		input.setLength(0);
+		inputPrefix = INPUT_STRING;
+		resources.setStatusLine(StatusLine.of(inputPrefix, FontType.NORMAL));
+		for (char c = 'A'; c <= 'Z'; c++) {
+			Character d = c;
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
+			getActionMap().put(d, new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (input.length() < maxLetters) {
+						input.append(d);
+					}
+					if (input.length() == 1) {
+						mapInputDone();
+					}
+					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
+				}
+			});
+		}
+		for (char c = '0'; c <= '9'; c++) {
+			Character d = c;
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
+			getActionMap().put(d, new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (input.length() < maxLetters) {
+						input.append(d);
+					}
+					if (input.length() == 1) {
+						mapInputDone();
+					}
+					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
+				}
+			});
+		}
+		mapInputBack();
+	}
+
+	private void mapInputBack() {
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "_INPUT_BACK");
+		getActionMap().put("_INPUT_BACK", new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (input.length() > 0) {
+					input.setLength(input.length() - 1);
+					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
+				}
+			}
+		});
+	}
+
+	private void mapInputDone() {
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "_INPUT_DONE");
+		getActionMap().put("_INPUT_DONE", new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				resources.setStatusLine(null);
+				callback.handleInput(new InputAction(INPUT_HANDLER, input.toString(), -1));
+			}
+		});
 	}
 
 	public void setInputStandard() {

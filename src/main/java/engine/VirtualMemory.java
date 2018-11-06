@@ -53,6 +53,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private ByteBufferWrapper mem;
 
 	private int menuChoice;
+	private String input;
 
 	public VirtualMemory() {
 		mem = ByteBufferWrapper.allocateLE(0x10000);
@@ -105,6 +106,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setMenuChoice(int menuChoice) {
 		this.menuChoice = menuChoice;
+	}
+
+	public String getInput() {
+		return input;
+	}
+
+	public void setInput(String input) {
+		this.input = input;
 	}
 
 	public int getCurrentECL() {
