@@ -35,8 +35,8 @@ public enum EclOpCode {
 	SPACE_COMBAT(0x1F, 4), //
 	NEW_ECL(0x20, 1), //
 	LOAD_AREA_MAP(0x21, 3), //
-	PARTY_SURPRISE(0x22, 3), // TODO: Game specific
-	SURPRISE(0x23, 3), // TODO: Game specific
+	PARTY_SKILL_CHECK(0x22, 3), // TODO: Game specific
+	SKILL_CHECK(0x23, 3), // TODO: Game specific
 	COMBAT(0x24, 0), //
 	ON_GOTO(0x25, 2), //
 	ON_GOSUB(0x26, 2), //

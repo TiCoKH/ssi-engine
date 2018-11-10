@@ -279,10 +279,10 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.LOAD_AREA_MAP, inst -> {
 			engine.loadArea(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
-		IMPL.put(EclOpCode.PARTY_SURPRISE, inst -> {
-
+		IMPL.put(EclOpCode.PARTY_SKILL_CHECK, inst -> {
+			memory.writeMemInt(inst.getArgument(2), 100);
 		});
-		IMPL.put(EclOpCode.SURPRISE, inst -> {
+		IMPL.put(EclOpCode.SKILL_CHECK, inst -> {
 
 		});
 		IMPL.put(EclOpCode.COMBAT, inst -> {
