@@ -393,7 +393,7 @@ public class VirtualMachine {
 			memory.writeMemInt(SELECTED_PLAYER_STATUS, 1);
 		});
 		IMPL.put(EclOpCode.DELAY, inst -> {
-			engine.delayCurrentThread(true);
+			engine.delayCurrentThread();
 		});
 		IMPL.put(EclOpCode.SPELL, inst -> {
 

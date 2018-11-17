@@ -76,7 +76,7 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void delayCurrentThread(boolean showStatus) {
+			public void delayCurrentThread() {
 			}
 		});
 		vm.newEcl(ecls.getById(16, EclProgram.class));

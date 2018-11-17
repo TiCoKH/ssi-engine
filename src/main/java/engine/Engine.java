@@ -381,15 +381,11 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
-	public void delayCurrentThread(boolean showStatus) {
-		if (showStatus)
-			ui.setStatus("LOADING...PLEASE WAIT");
+	public void delayCurrentThread() {
 		try {
 			Thread.sleep(memory.getGameSpeed() * 100L);
 		} catch (InterruptedException e) {
 		}
-		if (showStatus)
-			ui.clearStatus();
 	}
 
 	public void pauseCurrentThread() {
