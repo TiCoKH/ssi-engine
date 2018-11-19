@@ -59,4 +59,8 @@ public class StatusLine {
 	public void setMenuIndex(int menuIndex) {
 		this.menuIndex = menuIndex;
 	}
+
+	public void setText(@Nonnull String text) {
+		this.text = Optional.of(new EclString(text));
+	}
 }
