@@ -13,13 +13,19 @@ public class VirtualMemory implements ViewDungeonPosition {
 	public static final int MEMLOC_AREA_START = 0x0001;
 	public static final int MEMLOC_AREA_DECO_START = 0x0004;
 	public static final int MEMLOC_ENGINE_CONF_IS_DUNGEON = 0x4BAB;
+	public static final int MEMLOC_LAST_DUNGEON_X = 0x4BF0;
+	public static final int MEMLOC_LAST_DUNGEON_Y = 0x4BF1;
 	public static final int MEMLOC_LAST_ECL = 0x4BF2;
 	public static final int MEMLOC_ENGINE_CONF_GAME_SPEED = 0x4BFC;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
+	public static final int MEMLOC_EXTENDED_DUNGEON_X = 0x4CFD;
+	public static final int MEMLOC_EXTENDED_DUNGEON_Y = 0x4CFE;
 	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
-	public static final int MEMLOC_MAP_POS_X = 0xC04B;
-	public static final int MEMLOC_MAP_POS_Y = 0xC04C;
-	public static final int MEMLOC_MAP_ORIENTATION = 0xC04D;
+	public static final int MEMLOC_MOVEMENT_BLOCK = 0x7EC9;
+	public static final int MEMLOC_TRIED_TO_LEAVE_MAP = 0x7ED5;
+	public static final int MEMLOC_DUNGEON_X = 0xC04B;
+	public static final int MEMLOC_DUNGEON_Y = 0xC04C;
+	public static final int MEMLOC_DUNGEON_DIR = 0xC04D;
 	public static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
 	public static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
 
@@ -92,6 +98,22 @@ public class VirtualMemory implements ViewDungeonPosition {
 		mem.put(MEMLOC_ENGINE_CONF_IS_DUNGEON, (byte) (isDungeon ? 1 : 0));
 	}
 
+	public int getLastDungeonX() {
+		return mem.getUnsigned(MEMLOC_LAST_DUNGEON_X);
+	}
+
+	public void setLastDungeonX(int lastDungeonX) {
+		mem.put(MEMLOC_LAST_DUNGEON_X, (byte) lastDungeonX);
+	}
+
+	public int getLastDungeonY() {
+		return mem.getUnsigned(MEMLOC_LAST_DUNGEON_Y);
+	}
+
+	public void setLastDungeonY(int lastDungeonY) {
+		mem.put(MEMLOC_LAST_DUNGEON_Y, (byte) lastDungeonY);
+	}
+
 	public int getLastECL() {
 		return mem.getUnsigned(MEMLOC_LAST_ECL);
 	}
@@ -116,6 +138,24 @@ public class VirtualMemory implements ViewDungeonPosition {
 		mem.put(MEMLOC_FOR_LOOP_COUNT, (byte) loopCount);
 	}
 
+	@Override
+	public int getExtendedDungeonX() {
+		return mem.getUnsigned(MEMLOC_EXTENDED_DUNGEON_X);
+	}
+
+	public void setExtendedDungeonX(int extendedDungeonX) {
+		mem.put(MEMLOC_EXTENDED_DUNGEON_X, (byte) extendedDungeonX);
+	}
+
+	@Override
+	public int getExtendedDungeonY() {
+		return mem.getUnsigned(MEMLOC_EXTENDED_DUNGEON_Y);
+	}
+
+	public void setExtendedDungeonY(int extendedDungeonY) {
+		mem.put(MEMLOC_EXTENDED_DUNGEON_Y, (byte) extendedDungeonY);
+	}
+
 	public int getCombatResult() {
 		return mem.getUnsigned(MEMLOC_COMBAT_RESULT);
 	}
@@ -124,31 +164,47 @@ public class VirtualMemory implements ViewDungeonPosition {
 		mem.put(MEMLOC_COMBAT_RESULT, (byte) combatResult);
 	}
 
-	@Override
-	public int getCurrentMapX() {
-		return mem.getUnsigned(MEMLOC_MAP_POS_X);
+	public int getMovementBlock() {
+		return mem.getUnsigned(MEMLOC_MOVEMENT_BLOCK);
 	}
 
-	public void setCurrentMapX(int currentMapX) {
-		mem.put(MEMLOC_MAP_POS_X, (byte) currentMapX);
+	public void setMovementBlock(int movementBlock) {
+		mem.put(MEMLOC_MOVEMENT_BLOCK, (byte) movementBlock);
 	}
 
-	@Override
-	public int getCurrentMapY() {
-		return mem.getUnsigned(MEMLOC_MAP_POS_Y);
+	public boolean getTriedToLeaveMap() {
+		return mem.getUnsigned(MEMLOC_TRIED_TO_LEAVE_MAP) > 0;
 	}
 
-	public void setCurrentMapY(int currentMapY) {
-		mem.put(MEMLOC_MAP_POS_Y, (byte) currentMapY);
+	public void setTriedToLeaveMap(boolean triedToLeaveMap) {
+		mem.put(MEMLOC_TRIED_TO_LEAVE_MAP, (byte) (triedToLeaveMap ? 1 : 0));
 	}
 
 	@Override
-	public Direction getCurrentMapOrient() {
-		return Direction.withId(mem.getUnsigned(MEMLOC_MAP_ORIENTATION));
+	public int getDungeonX() {
+		return mem.getUnsigned(MEMLOC_DUNGEON_X);
 	}
 
-	public void setCurrentMapOrient(Direction currentMapOrient) {
-		mem.put(MEMLOC_MAP_ORIENTATION, (byte) currentMapOrient.ordinal());
+	public void setDungeonX(int dungeonX) {
+		mem.put(MEMLOC_DUNGEON_X, (byte) dungeonX);
+	}
+
+	@Override
+	public int getDungeonY() {
+		return mem.getUnsigned(MEMLOC_DUNGEON_Y);
+	}
+
+	public void setDungeonY(int dungeonY) {
+		mem.put(MEMLOC_DUNGEON_Y, (byte) dungeonY);
+	}
+
+	@Override
+	public Direction getDungeonDir() {
+		return Direction.withId(mem.getUnsigned(MEMLOC_DUNGEON_DIR));
+	}
+
+	public void setDungeonDir(Direction dungeonDir) {
+		mem.put(MEMLOC_DUNGEON_DIR, (byte) dungeonDir.ordinal());
 	}
 
 	public int getWallType() {

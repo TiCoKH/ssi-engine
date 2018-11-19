@@ -3,12 +3,15 @@ package engine;
 import data.content.DungeonMap.Direction;
 
 public interface ViewDungeonPosition {
+	int getExtendedDungeonX();
 
-	int getCurrentMapX();
+	int getExtendedDungeonY();
 
-	int getCurrentMapY();
+	int getDungeonX();
 
-	Direction getCurrentMapOrient();
+	int getDungeonY();
+
+	Direction getDungeonDir();
 
 	int getBackdropIndex();
 }

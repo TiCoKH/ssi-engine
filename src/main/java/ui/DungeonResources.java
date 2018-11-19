@@ -47,7 +47,10 @@ public class DungeonResources {
 
 	@Nonnull
 	public String getPosition() {
-		return position.getCurrentMapX() + "," + position.getCurrentMapY() + " " + position.getCurrentMapOrient().name().charAt(0);
+		if (position.getExtendedDungeonX() != 255) {
+			return position.getExtendedDungeonX() + "," + position.getExtendedDungeonY() + " " + position.getDungeonDir().name().charAt(0);
+		}
+		return position.getDungeonX() + "," + position.getDungeonY() + " " + position.getDungeonDir().name().charAt(0);
 	}
 
 	@Nonnull

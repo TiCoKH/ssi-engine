@@ -35,8 +35,6 @@ public class VirtualMachine {
 	private int forLoopAddress;
 	private int forLoopMax;
 
-	private boolean stopMove;
-
 	private boolean stopped;
 
 	private int eclCodeBaseAddress;
@@ -54,7 +52,6 @@ public class VirtualMachine {
 		gosubStack = new ConcurrentLinkedDeque<>();
 		compareResult = 0;
 		rnd = new Random();
-		stopMove = false;
 		stopped = true;
 		initImpl();
 	}
@@ -86,17 +83,11 @@ public class VirtualMachine {
 		eclCodeBaseAddress = address - 0x14;
 	}
 
-	public boolean isStopMove() {
-		return stopMove;
-	}
-
 	public void startAddress1() {
-		stopMove = false;
 		startEvent(onEvent1);
 	}
 
 	public void startSearchLocation() {
-		stopMove = false;
 		startEvent(onEnter);
 	}
 
@@ -420,8 +411,8 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.STOP_MOVE, inst -> {
-			stopMove = true;
 			stopVM();
+			engine.updatePosition();
 			engine.clear();
 		});
 		IMPL.put(EclOpCode.SOUND_EVENT, inst -> {

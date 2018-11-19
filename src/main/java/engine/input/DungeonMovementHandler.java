@@ -2,9 +2,10 @@ package engine.input;
 
 import static engine.EngineCallback.InputType.STANDARD;
 
-import data.content.DungeonMap.Direction;
+import data.content.DungeonMap;
 import engine.Engine;
 import engine.InputAction;
+import engine.VirtualMachine;
 import engine.VirtualMemory;
 
 public class DungeonMovementHandler implements InputHandler {
@@ -12,30 +13,38 @@ public class DungeonMovementHandler implements InputHandler {
 	@Override
 	public void handle(Engine engine, InputAction action) {
 		engine.setCurrentThread(() -> {
-			VirtualMemory memory = engine.getMemory();
+			VirtualMachine vm = engine.getVirtualMachine();
+			VirtualMemory mem = engine.getMemory();
+			DungeonMap map = engine.getDungeonMap();
 
-			Direction d = memory.getCurrentMapOrient();
-			int x = memory.getCurrentMapX();
-			int y = memory.getCurrentMapY();
 			if (InputAction.MOVE_FORWARD == action) {
-				if (engine.canMove(x, y, d)) {
-					x += d.getDeltaX();
-					y += d.getDeltaY();
-					engine.updatePosition(x, y, d);
-					engine.getVirtualMachine().startSearchLocation();
+				mem.setTriedToLeaveMap(map.couldExit(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir()));
+				mem.setMovementBlock(0);
+				vm.startAddress1();
+				if (engine.isAbortCurrentThread()) {
+					return;
 				}
-				if (!engine.isAbortCurrentThread()) {
-					engine.setInput(STANDARD);
+				engine.updatePosition();
+				if (mem.getMovementBlock() < 255 && map.canMove(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir())) {
+					mem.setLastDungeonX(mem.getDungeonX());
+					mem.setLastDungeonY(mem.getDungeonY());
+					mem.setDungeonX(mem.getDungeonX() + mem.getDungeonDir().getDeltaX());
+					mem.setDungeonY(mem.getDungeonY() + mem.getDungeonDir().getDeltaY());
+					engine.updatePosition();
 				}
-				return;
+				vm.startSearchLocation();
+				if (engine.isAbortCurrentThread()) {
+					return;
+				}
 			} else if (InputAction.TURN_AROUND == action) {
-				d = d.getReverse();
+				mem.setDungeonDir(mem.getDungeonDir().getReverse());
 			} else if (InputAction.TURN_LEFT == action) {
-				d = d.getLeft();
+				mem.setDungeonDir(mem.getDungeonDir().getLeft());
 			} else if (InputAction.TURN_RIGHT == action) {
-				d = d.getRight();
+				mem.setDungeonDir(mem.getDungeonDir().getRight());
 			}
-			engine.updatePosition(x, y, d);
+			engine.updatePosition();
+			engine.clearPics();
 			engine.setInput(STANDARD);
 		}, "VM");
 	}

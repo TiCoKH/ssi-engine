@@ -64,6 +64,13 @@ public class DungeonMap extends DAXContent {
 		return false;
 	}
 
+	public boolean couldExit(int x, int y, Direction d) {
+		DungeonSquare square = map[x][y];
+		int newX = x + d.getDeltaX();
+		int newY = y + d.getDeltaY();
+		return square.isDoor(d) && (newX < 0 || newX > 15 || newY < 0 || newY > 15);
+	}
+
 	public void visibleWallsAt(@Nonnull VisibleWalls vwalls, int x, int y, @Nonnull Direction o) {
 		vwalls.closeLeft[0] = wallIndexAt(x, y, o.getLeft());
 

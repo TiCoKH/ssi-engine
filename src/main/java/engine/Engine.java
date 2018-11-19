@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import data.content.DAXImageContent;
 import data.content.DungeonMap;
@@ -52,8 +53,8 @@ public class Engine implements EngineCallback, UICallback {
 	private Thread currentThread = null;
 	private Thread nextThread = null;
 
-	private DungeonMap currentMap = null;
-	private VisibleWalls visibleWalls = null;
+	private Optional<DungeonMap> currentMap = Optional.empty();
+	private VisibleWalls visibleWalls = new VisibleWalls();
 
 	private InputAction nextAction = null;
 
@@ -237,23 +238,21 @@ public class Engine implements EngineCallback, UICallback {
 	@Override
 	public void loadArea(int id1, int id2, int id3) {
 		memory.setAreaValues(id1, id2, id3);
-		if (memory.getIsDungeon()) {
+		if (id1 != 127 && id1 != 255) {
 			try {
-				currentMap = res.find(id1, DungeonMap.class, GEO);
-				visibleWalls = new VisibleWalls();
+				currentMap = Optional.ofNullable(res.find(id1, DungeonMap.class, GEO));
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
 		} else {
-			currentMap = null;
-			visibleWalls = null;
+			currentMap = Optional.empty();
 		}
 	}
 
 	@Override
 	public void loadAreaDecoration(int id1, int id2, int id3) {
 		memory.setAreaDecoValues(id1, id2, id3);
-		if (memory.getIsDungeon()) {
+		if (currentMap.isPresent()) {
 			try {
 				WallDef walls = res.find(id1, WallDef.class, WALLDEF);
 
@@ -283,11 +282,13 @@ public class Engine implements EngineCallback, UICallback {
 
 	@Override
 	public void showSprite(int spriteId, int index, int picId) {
-		if (index > 0 && visibleWalls.getVisibleWall(CLOSE, FOWARD)[1] > 0) {
-			index = 0;
-		}
-		if (index > 1 && visibleWalls.getVisibleWall(MEDIUM, FOWARD)[2] > 0) {
-			index = 1;
+		if (currentMap.isPresent()) {
+			if (index > 0 && visibleWalls.getVisibleWall(CLOSE, FOWARD)[1] > 0) {
+				index = 0;
+			}
+			if (index > 1 && visibleWalls.getVisibleWall(MEDIUM, FOWARD)[2] > 0) {
+				index = 1;
+			}
 		}
 		try {
 			DAXImageContent sprite = res.findImage(spriteId, SPRIT);
@@ -354,35 +355,19 @@ public class Engine implements EngineCallback, UICallback {
 
 	@Override
 	public void updatePosition() {
-		if (memory.getIsDungeon()) {
-			updatePosition(memory.getCurrentMapX(), memory.getCurrentMapY(), memory.getCurrentMapOrient());
-		}
-	}
+		currentMap.ifPresent(m -> {
+			int x = memory.getDungeonX();
+			int y = memory.getDungeonY();
+			Direction d = memory.getDungeonDir();
+			memory.setWallType(m.wallIndexAt(x, y, d));
+			memory.setSquareInfo(m.squareInfoAt(x, y));
 
-	public void updatePosition(int x, int y, Direction d) {
-		memory.setCurrentMapX(x);
-		memory.setCurrentMapY(y);
-		memory.setCurrentMapOrient(d);
-		memory.setWallType(currentMap.wallIndexAt(x, y, d));
-		memory.setSquareInfo(currentMap.squareInfoAt(x, y));
-
-		currentMap.visibleWallsAt(visibleWalls, x, y, d);
+			m.visibleWallsAt(visibleWalls, x, y, d);
+		});
 	}
 
 	public void updateUIState() {
-		if (memory.getIsDungeon()) {
-			ui.setUIState(UIState.DUNGEON);
-		} else {
-			ui.setUIState(UIState.STORY);
-		}
-	}
-
-	public boolean canMove(int x, int y, Direction d) {
-		vm.startAddress1();
-		if (abortCurrentThread || vm.isStopMove()) {
-			return false;
-		}
-		return currentMap.canMove(x, y, d);
+		ui.setUIState(currentMap.map(m -> UIState.DUNGEON).orElse(UIState.STORY));
 	}
 
 	@Override
@@ -422,6 +407,10 @@ public class Engine implements EngineCallback, UICallback {
 
 	public VirtualMemory getMemory() {
 		return memory;
+	}
+
+	public DungeonMap getDungeonMap() {
+		return currentMap.get();
 	}
 
 	public boolean isAbortCurrentThread() {
