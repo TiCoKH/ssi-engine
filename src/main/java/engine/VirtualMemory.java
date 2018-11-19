@@ -8,17 +8,37 @@ import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 
-public class VirtualMemory implements ViewDungeonPosition {
+public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition {
 	public static final int MEMLOC_CURRENT_ECL = 0x0000;
 	public static final int MEMLOC_AREA_START = 0x0001;
 	public static final int MEMLOC_AREA_DECO_START = 0x0004;
+	public static final int MEMLOC_CELESTIAL_POS_START = 0x4B85;
+	public static final int MEMLOC_SPACE_X = 0x4BBE;
+	public static final int MEMLOC_SPACE_Y = 0x4BBF;
+	public static final int MEMLOC_SPACE_DIR = 0x4BC0;
+	public static final int MEMLOC_OVERLAND_X = 0x4BC3;
+	public static final int MEMLOC_OVERLAND_Y = 0x4BC4;
 	public static final int MEMLOC_LAST_DUNGEON_X = 0x4BF0;
 	public static final int MEMLOC_LAST_DUNGEON_Y = 0x4BF1;
 	public static final int MEMLOC_LAST_ECL = 0x4BF2;
 	public static final int MEMLOC_ENGINE_CONF_GAME_SPEED = 0x4BFC;
+	public static final int MEMLOC_MED_SUPPLIES = 0x4C63;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_EXTENDED_DUNGEON_X = 0x4CFD;
 	public static final int MEMLOC_EXTENDED_DUNGEON_Y = 0x4CFE;
+	public static final int MEMLOC_HULL = 0x4D16;
+	public static final int MEMLOC_SENSORS = 0x4D18;
+	public static final int MEMLOC_CONTROL = 0x4D1A;
+	public static final int MEMLOC_LIFE = 0x4D1C;
+	public static final int MEMLOC_FUEL = 0x4D1E;
+	public static final int MEMLOC_ENGINE = 0x4D20;
+	public static final int MEMLOC_KCANNON_WEAPONS = 0x4D3E;
+	public static final int MEMLOC_KCANNON_AMMO = 0x4D40;
+	public static final int MEMLOC_KCANNON_RELOAD = 0x4D41;
+	public static final int MEMLOC_MISSILE_WEAPONS = 0x4D44;
+	public static final int MEMLOC_MISSILE_AMMO = 0x4D46;
+	public static final int MEMLOC_MISSILE_RELOAD = 0x4D47;
+	public static final int MEMLOC_LASER_WEAPONS = 0x4D4A;
 	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
 	public static final int MEMLOC_MOVEMENT_BLOCK = 0x7EC9;
 	public static final int MEMLOC_TRIED_TO_LEAVE_MAP = 0x7ED5;
@@ -28,12 +48,38 @@ public class VirtualMemory implements ViewDungeonPosition {
 	public static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
 	public static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
 
+	private static final int[] CELESTIAL_INITIAL_X = new int[] { 12, 12, 9, 9, 21, 18, 12, 6, 2, 4, 8, 14, 20 };
+	private static final int[] CELESTIAL_INITIAL_Y = new int[] { 10, 9, 8, 15, 11, 17, 20, 18, 13, 3, 1, 1, 7 };
 	private ByteBufferWrapper mem;
 
 	private int menuChoice;
 
 	public VirtualMemory() {
 		mem = ByteBufferWrapper.allocateLE(0x10000);
+
+		// set intial locations
+		for (Celestial c : Celestial.values()) {
+			setCelestialX(c, CELESTIAL_INITIAL_X[c.ordinal()]);
+			setCelestialY(c, CELESTIAL_INITIAL_Y[c.ordinal()]);
+		}
+		setSpaceX(getCelestialX(Celestial.EARTH));
+		setSpaceY(getCelestialY(Celestial.EARTH));
+
+		// Spaceship
+		setMedSupplies(10);
+		setHull(600);
+		setSensors(150);
+		setControl(150);
+		setLife(300);
+		setFuel(450);
+		setEngine(450);
+		setKWeapons(2);
+		setKWeaponAmmo(6);
+		setKWeaponReloads(5);
+		setMissiles(2);
+		setMissileAmmo(4);
+		setMissileReload(7);
+		setLasers(5);
 	}
 
 	public void loadFrom(FileChannel fc) throws IOException {
@@ -89,6 +135,69 @@ public class VirtualMemory implements ViewDungeonPosition {
 		mem.put(MEMLOC_AREA_DECO_START + 2, (byte) id2);
 	}
 
+	@Override
+	public int getCelestialX(Celestial c) {
+		return mem.getUnsigned(MEMLOC_CELESTIAL_POS_START + 2 * c.ordinal());
+	}
+
+	public void setCelestialX(Celestial c, int celestialX) {
+		mem.put(MEMLOC_CELESTIAL_POS_START + 2 * c.ordinal(), (byte) celestialX);
+	}
+
+	@Override
+	public int getCelestialY(Celestial c) {
+		return mem.getUnsigned(MEMLOC_CELESTIAL_POS_START + 1 + 2 * c.ordinal());
+	}
+
+	public void setCelestialY(Celestial c, int celestialY) {
+		mem.put(MEMLOC_CELESTIAL_POS_START + 1 + 2 * c.ordinal(), (byte) celestialY);
+	}
+
+	@Override
+	public int getSpaceX() {
+		return mem.getUnsigned(MEMLOC_SPACE_X);
+	}
+
+	public void setSpaceX(int spaceX) {
+		mem.put(MEMLOC_SPACE_X, (byte) spaceX);
+	}
+
+	@Override
+	public int getSpaceY() {
+		return mem.getUnsigned(MEMLOC_SPACE_Y);
+	}
+
+	public void setSpaceY(int spaceY) {
+		mem.put(MEMLOC_SPACE_Y, (byte) spaceY);
+	}
+
+	@Override
+	public SpaceDirection getSpaceDir() {
+		return SpaceDirection.values()[mem.getUnsigned(MEMLOC_SPACE_DIR)];
+	}
+
+	public void setSpaceDir(SpaceDirection spaceDir) {
+		mem.put(MEMLOC_SPACE_DIR, (byte) spaceDir.ordinal());
+	}
+
+	@Override
+	public int getOverlandX() {
+		return mem.getUnsigned(MEMLOC_OVERLAND_X);
+	}
+
+	public void setOverlandX(int overlandX) {
+		mem.put(MEMLOC_OVERLAND_X, (byte) overlandX);
+	}
+
+	@Override
+	public int getOverlandY() {
+		return mem.getUnsigned(MEMLOC_OVERLAND_Y);
+	}
+
+	public void setOverlandY(int overlandY) {
+		mem.put(MEMLOC_OVERLAND_Y, (byte) overlandY);
+	}
+
 	public int getLastDungeonX() {
 		return mem.getUnsigned(MEMLOC_LAST_DUNGEON_X);
 	}
@@ -121,6 +230,14 @@ public class VirtualMemory implements ViewDungeonPosition {
 		mem.put(MEMLOC_ENGINE_CONF_GAME_SPEED, (byte) gameSpeed);
 	}
 
+	public int getMedSupplies() {
+		return mem.getUnsigned(MEMLOC_MED_SUPPLIES);
+	}
+
+	public void setMedSupplies(int medSupplies) {
+		mem.put(MEMLOC_MED_SUPPLIES, (byte) medSupplies);
+	}
+
 	public int getForLoopCount() {
 		return mem.getUnsigned(MEMLOC_FOR_LOOP_COUNT);
 	}
@@ -145,6 +262,111 @@ public class VirtualMemory implements ViewDungeonPosition {
 
 	public void setExtendedDungeonY(int extendedDungeonY) {
 		mem.put(MEMLOC_EXTENDED_DUNGEON_Y, (byte) extendedDungeonY);
+	}
+
+	public int getHull() {
+		return mem.getUnsignedShort(MEMLOC_HULL);
+	}
+
+	public void setHull(int hull) {
+		mem.putShort(MEMLOC_HULL, (short) hull);
+	}
+
+	public int getSensors() {
+		return mem.getUnsignedShort(MEMLOC_SENSORS);
+	}
+
+	public void setSensors(int sensors) {
+		mem.putShort(MEMLOC_SENSORS, (short) sensors);
+	}
+
+	public int getControl() {
+		return mem.getUnsignedShort(MEMLOC_CONTROL);
+	}
+
+	public void setControl(int control) {
+		mem.putShort(MEMLOC_CONTROL, (short) control);
+	}
+
+	public int getLife() {
+		return mem.getUnsignedShort(MEMLOC_LIFE);
+	}
+
+	public void setLife(int life) {
+		mem.putShort(MEMLOC_LIFE, (short) life);
+	}
+
+	@Override
+	public int getFuel() {
+		return mem.getUnsignedShort(MEMLOC_FUEL);
+	}
+
+	public void setFuel(int fuel) {
+		mem.putShort(MEMLOC_FUEL, (short) fuel);
+	}
+
+	public int getEngine() {
+		return mem.getUnsignedShort(MEMLOC_ENGINE);
+	}
+
+	public void setEngine(int engine) {
+		mem.putShort(MEMLOC_ENGINE, (short) engine);
+	}
+
+	public int getKWeapons() {
+		return mem.getUnsigned(MEMLOC_KCANNON_WEAPONS);
+	}
+
+	public void setKWeapons(int kWeapons) {
+		mem.put(MEMLOC_KCANNON_WEAPONS, (byte) kWeapons);
+	}
+
+	public int getKWeaponAmmo() {
+		return mem.getUnsigned(MEMLOC_KCANNON_AMMO);
+	}
+
+	public void setKWeaponAmmo(int kWeaponAmmo) {
+		mem.put(MEMLOC_KCANNON_AMMO, (byte) kWeaponAmmo);
+	}
+
+	public int getKWeaponReloads() {
+		return mem.getUnsigned(MEMLOC_KCANNON_RELOAD);
+	}
+
+	public void setKWeaponReloads(int kWeaponReloads) {
+		mem.put(MEMLOC_KCANNON_RELOAD, (byte) kWeaponReloads);
+	}
+
+	public int getMissiles() {
+		return mem.getUnsigned(MEMLOC_MISSILE_WEAPONS);
+	}
+
+	public void setMissiles(int missiles) {
+		mem.put(MEMLOC_MISSILE_WEAPONS, (byte) missiles);
+	}
+
+	public int getMissileAmmo() {
+		return mem.getUnsigned(MEMLOC_MISSILE_AMMO);
+	}
+
+	public void setMissileAmmo(int missileAmmo) {
+		mem.put(MEMLOC_MISSILE_AMMO, (byte) missileAmmo);
+	}
+
+	public int getMissileReload() {
+		return mem.getUnsigned(MEMLOC_MISSILE_RELOAD);
+	}
+
+	public void setMissileReload(int missileReload) {
+		mem.put(MEMLOC_MISSILE_RELOAD, (byte) missileReload);
+	}
+
+	public int getLasers() {
+		return mem.getUnsigned(MEMLOC_LASER_WEAPONS);
+	}
+
+	public void setLasers(int lasers) {
+		mem.put(MEMLOC_LASER_WEAPONS, (byte) lasers);
 	}
 
 	public int getCombatResult() {

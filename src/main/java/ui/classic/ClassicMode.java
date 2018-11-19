@@ -34,6 +34,8 @@ import engine.InputAction;
 import engine.opcodes.EclString;
 import ui.DungeonResources;
 import ui.FontType;
+import ui.OverlandResources;
+import ui.SpaceResources;
 import ui.StatusLine;
 import ui.UICallback;
 import ui.UIResources;
@@ -52,6 +54,16 @@ public class ClassicMode extends JPanel {
 		KEY_MAPPING.put(InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
 		KEY_MAPPING.put(InputAction.TURN_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
 		KEY_MAPPING.put(InputAction.TURN_AROUND, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+
+		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
+		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
+		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
+		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+
+		KEY_MAPPING.put(InputAction.MOVE_SPACE_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
+		KEY_MAPPING.put(InputAction.MOVE_SPACE_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
+		KEY_MAPPING.put(InputAction.MOVE_SPACE_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
+		KEY_MAPPING.put(InputAction.MOVE_SPACE_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
 	}
 
 	private transient UICallback callback;
@@ -84,6 +96,8 @@ public class ClassicMode extends JPanel {
 		renderers.put(UIState.STORY, new StoryRenderer(resources, settings));
 		renderers.put(UIState.BIGPIC, new BigPicRenderer(resources, settings));
 		renderers.put(UIState.DUNGEON, new DungeonRenderer(resources, settings));
+		renderers.put(UIState.OVERLAND, new OverlandMapRenderer(resources, settings));
+		renderers.put(UIState.SPACE, new SpaceTravelRenderer(resources, settings));
 	}
 
 	private void initSurface() {
@@ -159,10 +173,31 @@ public class ClassicMode extends JPanel {
 
 	public void setInputStandard() {
 		resetInput();
-		InputAction.STANDARD_ACTIONS.stream().forEach(a -> {
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
-			mapToAction(a);
-		});
+		switch (currentState) {
+			case DUNGEON:
+				InputAction.DUNGEON_MOVEMENT.stream().forEach(a -> {
+					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
+					mapToAction(a);
+				});
+				break;
+			case OVERLAND:
+				InputAction.OVERLAND_MOVEMENT.stream().forEach(a -> {
+					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
+					mapToAction(a);
+				});
+				break;
+			case SPACE:
+				InputAction.SPACE_MOVEMENT.stream().forEach(a -> {
+					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
+					mapToAction(a);
+				});
+				resources.getSpaceResources().ifPresent(r -> {
+					resources.setStatusLine(r.getStatusLine());
+				});
+				break;
+			default:
+				System.err.println("Unknown input for current ui state: " + currentState);
+		}
 	}
 
 	private void mapToAction(@Nonnull InputAction a) {
@@ -184,8 +219,16 @@ public class ClassicMode extends JPanel {
 		resources.setStatusLine(StatusLine.of(status));
 	}
 
-	public void setDungeonResources(DungeonResources dungeonResources) {
+	public void setDungeonResources(@Nonnull DungeonResources dungeonResources) {
 		resources.setDungeonResources(dungeonResources);
+	}
+
+	public void setOverlandResources(@Nonnull OverlandResources overlandResources) {
+		resources.setOverlandResources(overlandResources);
+	}
+
+	public void setSpaceResources(@Nonnull SpaceResources spaceResources) {
+		resources.setSpaceResources(spaceResources);
 	}
 
 	public void setPic(@Nullable List<BufferedImage> pic) {

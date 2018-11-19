@@ -71,6 +71,7 @@ public class Engine implements EngineCallback, UICallback {
 		fontMap.put(FontType.PC_HEADING, fontMap.get(FontType.NORMAL));
 		fontMap.put(FontType.SEL_PC, fontMap.get(FontType.NORMAL));
 		fontMap.put(FontType.PC, fontMap.get(FontType.NORMAL));
+		fontMap.put(FontType.FUEL, fontMap.get(FontType.GAME_NAME));
 
 		UIResources uires = new UIResources(fontMap, res.getBorders().toList());
 		UISettings uicfg = new UISettings();

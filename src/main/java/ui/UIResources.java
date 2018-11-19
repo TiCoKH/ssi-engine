@@ -17,6 +17,12 @@ public class UIResources {
 	// Elements to render 3D dungeons, only available in dungeons
 	private Optional<DungeonResources> dungeonResources = Optional.empty();
 
+	// Elements to render the position on the overland map
+	private Optional<OverlandResources> overlandResources = Optional.empty();
+
+	// Elements to render the space map and ship combat, only available in space
+	private Optional<SpaceResources> spaceResources = Optional.empty();
+
 	// The flavor picture(s), can be a small or big picture
 	// Also used for the title pictures
 	private Optional<List<BufferedImage>> pic = Optional.empty();
@@ -47,6 +53,7 @@ public class UIResources {
 		return borderSymbols;
 	}
 
+	@Nonnull
 	public Optional<List<Byte>> getCharList() {
 		return charList;
 	}
@@ -59,6 +66,7 @@ public class UIResources {
 		return charStop;
 	}
 
+	@Nonnull
 	public Optional<DungeonResources> getDungeonResources() {
 		return dungeonResources;
 	}
@@ -68,10 +76,22 @@ public class UIResources {
 		return fonts.get(type);
 	}
 
+	@Nonnull
+	public Optional<OverlandResources> getOverlandResources() {
+		return overlandResources;
+	}
+
+	@Nonnull
 	public Optional<BufferedImage> getPic() {
 		return pic.map(p -> p.get(picIndex));
 	}
 
+	@Nonnull
+	public Optional<SpaceResources> getSpaceResources() {
+		return spaceResources;
+	}
+
+	@Nonnull
 	public Optional<StatusLine> getStatusLine() {
 		return statusLine;
 	}
@@ -109,9 +129,17 @@ public class UIResources {
 		this.dungeonResources = Optional.of(dungeonRes);
 	}
 
+	public void setOverlandResources(@Nonnull OverlandResources overlandResources) {
+		this.overlandResources = Optional.of(overlandResources);
+	}
+
 	public void setPic(@Nullable List<BufferedImage> pic) {
 		this.pic = Optional.ofNullable(pic);
 		this.picIndex = 0;
+	}
+
+	public void setSpaceResources(@Nonnull SpaceResources spaceResources) {
+		this.spaceResources = Optional.of(spaceResources);
 	}
 
 	public void setStatusLine(@Nullable StatusLine statusLine) {
