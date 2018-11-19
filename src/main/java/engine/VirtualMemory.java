@@ -12,7 +12,6 @@ public class VirtualMemory implements ViewDungeonPosition {
 	public static final int MEMLOC_CURRENT_ECL = 0x0000;
 	public static final int MEMLOC_AREA_START = 0x0001;
 	public static final int MEMLOC_AREA_DECO_START = 0x0004;
-	public static final int MEMLOC_ENGINE_CONF_IS_DUNGEON = 0x4BAB;
 	public static final int MEMLOC_LAST_DUNGEON_X = 0x4BF0;
 	public static final int MEMLOC_LAST_DUNGEON_Y = 0x4BF1;
 	public static final int MEMLOC_LAST_ECL = 0x4BF2;
@@ -88,14 +87,6 @@ public class VirtualMemory implements ViewDungeonPosition {
 		mem.put(MEMLOC_AREA_DECO_START, (byte) id0);
 		mem.put(MEMLOC_AREA_DECO_START + 1, (byte) id1);
 		mem.put(MEMLOC_AREA_DECO_START + 2, (byte) id2);
-	}
-
-	public boolean getIsDungeon() {
-		return mem.getUnsigned(MEMLOC_ENGINE_CONF_IS_DUNGEON) > 0;
-	}
-
-	public void setIsDungeon(boolean isDungeon) {
-		mem.put(MEMLOC_ENGINE_CONF_IS_DUNGEON, (byte) (isDungeon ? 1 : 0));
 	}
 
 	public int getLastDungeonX() {

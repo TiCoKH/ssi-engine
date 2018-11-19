@@ -218,7 +218,6 @@ public class Engine implements EngineCallback, UICallback {
 	public void loadEcl(int id) {
 		memory.setLastECL(memory.getCurrentECL());
 		memory.setCurrentECL(id);
-		memory.setIsDungeon(false);
 		setCurrentThread(() -> {
 			try {
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);

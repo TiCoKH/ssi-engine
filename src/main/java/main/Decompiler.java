@@ -67,7 +67,7 @@ public class Decompiler {
 
 	private static final Map<Integer, String> KNOWN_ADRESSES = new HashMap<>();
 	static {
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_ENGINE_CONF_IS_DUNGEON, "ENGINE_CONF_IS_DUNGEON");
+		KNOWN_ADRESSES.put(0x4BAB, "ENGINE_CONF_4BAB");
 		KNOWN_ADRESSES.put(0x4BBE, "SPACE_X");
 		KNOWN_ADRESSES.put(0x4BBF, "SPACE_Y");
 		KNOWN_ADRESSES.put(0x4BC3, "OVERLAND_X");
