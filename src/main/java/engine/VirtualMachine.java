@@ -340,8 +340,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.CALL, inst -> {
 			switch (inst.getArgument(0).valueAsInt()) {
 				case 0x2DCB:
-					engine.showPicture(255);
 					engine.updatePosition();
+					engine.clearPics();
 					break;
 				default:
 			}

@@ -102,9 +102,14 @@ public class ClassicMode extends JPanel {
 
 	public void clear() {
 		setInputNone();
-		setPic(null);
+		clearPics();
 		clearText();
 		clearStatus();
+	}
+
+	public void clearPics() {
+		setPic(null);
+		clearSprite();
 	}
 
 	private void resetInput() {

@@ -126,6 +126,11 @@ public class Engine implements EngineCallback, UICallback {
 		ui.clear();
 	}
 
+	@Override
+	public void clearPics() {
+		ui.clearPics();
+	}
+
 	private void stopCurrentThread() {
 		abortCurrentThread = true;
 		vm.stopVM();
@@ -297,7 +302,7 @@ public class Engine implements EngineCallback, UICallback {
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
 			updatePosition();
-			clear();
+			clearPics();
 			updateUIState();
 			return;
 		}

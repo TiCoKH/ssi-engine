@@ -28,6 +28,10 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void clearPics() {
+			}
+
+			@Override
 			public void setInput(InputType inputType) {
 			}
 

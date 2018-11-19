@@ -7,6 +7,8 @@ import engine.opcodes.EclString;
 public interface EngineCallback {
 	void clear();
 
+	void clearPics();
+
 	void setInput(InputType inputType);
 
 	void setMenu(List<InputAction> action);
