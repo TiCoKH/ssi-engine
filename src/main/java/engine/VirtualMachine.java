@@ -27,15 +27,15 @@ public class VirtualMachine {
 
 	private EngineCallback engine;
 
-	private VirtualMemory memory;
-	private Deque<Integer> gosubStack;
-	private int compareResult;
-	private Random rnd;
+	private VirtualMemory memory = new VirtualMemory();
+	private Deque<Integer> gosubStack = new ConcurrentLinkedDeque<>();
+	private int compareResult = 0;
+	private Random rnd = new Random();
 
 	private int forLoopAddress;
 	private int forLoopMax;
 
-	private boolean stopped;
+	private boolean stopped = true;
 
 	private int eclCodeBaseAddress;
 	private ByteBufferWrapper eclCode;
@@ -47,12 +47,6 @@ public class VirtualMachine {
 
 	public VirtualMachine(EngineCallback engine) {
 		this.engine = engine;
-
-		memory = new VirtualMemory();
-		gosubStack = new ConcurrentLinkedDeque<>();
-		compareResult = 0;
-		rnd = new Random();
-		stopped = true;
 		initImpl();
 	}
 
