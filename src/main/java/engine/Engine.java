@@ -179,11 +179,12 @@ public class Engine implements EngineCallback, UICallback {
 			}
 			ui.setInputMenu("BUCK ROGERS V1.2", FontType.GAME_NAME, MAINMENU_ACTIONS);
 			pauseCurrentThread();
-			if (!abortCurrentThread) {
-				clear();
-				memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
-				loadEcl(memory.getMenuChoice() == 0 ? 16 : 18);
+			if (abortCurrentThread) {
+				return;
 			}
+			clear();
+			memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
+			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18, false);
 		}, "Title Menu");
 	}
 
@@ -219,10 +220,15 @@ public class Engine implements EngineCallback, UICallback {
 
 	@Override
 	public void loadEcl(int id) {
+		loadEcl(id, true);
+	}
+
+	public void loadEcl(int id, boolean fromVM) {
 		memory.setLastECL(memory.getCurrentECL());
 		memory.setCurrentECL(id);
 		setCurrentThread(() -> {
 			try {
+				delayCurrentThread();
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
 				vm.newEcl(ecl);
 				vm.startInitial();
@@ -230,6 +236,20 @@ public class Engine implements EngineCallback, UICallback {
 					return;
 				}
 				updatePosition();
+				if (fromVM) {
+					vm.startAddress1();
+					if (abortCurrentThread) {
+						return;
+					}
+					updatePosition();
+					vm.startSearchLocation();
+					if (abortCurrentThread) {
+						return;
+					}
+					updatePosition();
+					clearPics();
+				}
+				clearSprite();
 				setInput(STANDARD);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
