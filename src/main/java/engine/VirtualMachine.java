@@ -279,7 +279,7 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.PARTY_CHECK, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_1F, inst -> {
+		IMPL.put(EclOpCode.SPACE_COMBAT, inst -> {
 
 		});
 		IMPL.put(EclOpCode.NEW_ECL, inst -> {

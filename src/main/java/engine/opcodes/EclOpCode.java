@@ -32,7 +32,7 @@ public enum EclOpCode {
 	CLEAR_MON(0x1C, 0), //
 	PARTY_STRENGTH(0x1D, 1), //
 	PARTY_CHECK(0x1E, 6), //
-	UNKNOWN_1F(0x1F, 4), //
+	SPACE_COMBAT(0x1F, 4), //
 	NEW_ECL(0x20, 1), //
 	LOAD_AREA_MAP(0x21, 3), //
 	PARTY_SURPRISE(0x22, 3), // TODO: Game specific
