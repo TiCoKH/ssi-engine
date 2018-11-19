@@ -14,7 +14,7 @@ public class OverlandMovementHandler implements InputHandler {
 		engine.setCurrentThread(() -> {
 			VirtualMemory memory = engine.getMemory();
 
-			engine.getVirtualMachine().startAddress1();
+			engine.getVirtualMachine().startMove();
 			if (engine.isAbortCurrentThread()) {
 				return;
 			}

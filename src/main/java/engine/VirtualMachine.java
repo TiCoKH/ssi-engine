@@ -40,8 +40,8 @@ public class VirtualMachine {
 
 	private int eclCodeBaseAddress;
 	private ByteBufferWrapper eclCode;
-	private EclInstruction onEvent1; // Gets called on entering or exiting a NEW_ECL
-	private EclInstruction onEnter;
+	private EclInstruction onMove;
+	private EclInstruction onSearchLocation;
 	private EclInstruction onRest;
 	private EclInstruction onRestInterruption;
 	private EclInstruction onInit;
@@ -57,8 +57,8 @@ public class VirtualMachine {
 
 	public void newEcl(EclProgram ecl) {
 		eclCode = ecl.getCode().duplicate();
-		onEvent1 = EclInstruction.parseNext(eclCode);
-		onEnter = EclInstruction.parseNext(eclCode);
+		onMove = EclInstruction.parseNext(eclCode);
+		onSearchLocation = EclInstruction.parseNext(eclCode);
 		onRest = EclInstruction.parseNext(eclCode);
 		onRestInterruption = EclInstruction.parseNext(eclCode);
 		onInit = EclInstruction.parseNext(eclCode);
@@ -70,7 +70,7 @@ public class VirtualMachine {
 		// An Ecl Block starts with 5 GOTO Statements to different parts of the Code.
 		// One of them will jump to XX14, the first instruction after these.
 		// This is the lowest Address. Use it to determine CodeBase as XX00.
-		int address = Math.min(onEvent1.getArgument(0).valueAsInt(), onEnter.getArgument(0).valueAsInt());
+		int address = Math.min(onMove.getArgument(0).valueAsInt(), onSearchLocation.getArgument(0).valueAsInt());
 		address = Math.min(address, onRest.getArgument(0).valueAsInt());
 		address = Math.min(address, onRestInterruption.getArgument(0).valueAsInt());
 		address = Math.min(address, onInit.getArgument(0).valueAsInt());
@@ -78,23 +78,28 @@ public class VirtualMachine {
 		eclCodeBaseAddress = address - 0x14;
 	}
 
-	public void startAddress1() {
-		startEvent(onEvent1);
+	public void startMove() {
+		System.out.println("onMove:");
+		startEvent(onMove);
 	}
 
 	public void startSearchLocation() {
-		startEvent(onEnter);
+		System.out.println("onSearchLocation:");
+		startEvent(onSearchLocation);
 	}
 
-	public void startPreCampCheck() {
+	public void startRest() {
+		System.out.println("onRest:");
 		startEvent(onRest);
 	}
 
-	public void startCampInterrupted() {
+	public void startRestInterruption() {
+		System.out.println("onRestInterruption:");
 		startEvent(onRestInterruption);
 	}
 
-	public void startInitial() {
+	public void startInit() {
+		System.out.println("onInit:");
 		startEvent(onInit);
 	}
 

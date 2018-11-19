@@ -179,13 +179,13 @@ public class Decompiler {
 	private void start(String gameDir, EclProgram ecl) throws IOException {
 		ByteBufferWrapper eclCode = ecl.getCode();
 		size = eclCode.limit();
-		EclInstruction preMove = EclInstruction.parseNext(eclCode);
-		EclInstruction postMove = EclInstruction.parseNext(eclCode);
+		EclInstruction onMove = EclInstruction.parseNext(eclCode);
+		EclInstruction onSearchLocation = EclInstruction.parseNext(eclCode);
 		EclInstruction onRest = EclInstruction.parseNext(eclCode);
 		EclInstruction onRestInterruption = EclInstruction.parseNext(eclCode);
 		EclInstruction onInit = EclInstruction.parseNext(eclCode);
 
-		int address = Math.min(preMove.getArgument(0).valueAsInt(), postMove.getArgument(0).valueAsInt());
+		int address = Math.min(onMove.getArgument(0).valueAsInt(), onSearchLocation.getArgument(0).valueAsInt());
 		address = Math.min(address, onRest.getArgument(0).valueAsInt());
 		address = Math.min(address, onRestInterruption.getArgument(0).valueAsInt());
 		address = Math.min(address, onInit.getArgument(0).valueAsInt());
@@ -193,10 +193,10 @@ public class Decompiler {
 		base = address - 0x14;
 
 		startSection(gameDir, eclCode, onInit, "onInit");
-		startSection(gameDir, eclCode, preMove, "preMove");
-		startSection(gameDir, eclCode, postMove, "postMove");
+		startSection(gameDir, eclCode, onMove, "onMove");
+		startSection(gameDir, eclCode, onSearchLocation, "onSearchLocation");
 		startSection(gameDir, eclCode, onRest, "onRest");
-		startSection(gameDir, eclCode, onRestInterruption, "onRestInterrupt");
+		startSection(gameDir, eclCode, onRestInterruption, "onRestInterruption");
 	}
 
 	private void startSection(String gameDir, ByteBufferWrapper eclCode, EclInstruction inst, String section) throws IOException {

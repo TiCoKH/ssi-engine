@@ -243,13 +243,13 @@ public class Engine implements EngineCallback, UICallback {
 				delayCurrentThread();
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
 				vm.newEcl(ecl);
-				vm.startInitial();
+				vm.startInit();
 				if (abortCurrentThread) {
 					return;
 				}
 				updatePosition();
 				if (fromVM) {
-					vm.startAddress1();
+					vm.startMove();
 					if (abortCurrentThread) {
 						return;
 					}

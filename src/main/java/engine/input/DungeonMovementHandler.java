@@ -20,7 +20,7 @@ public class DungeonMovementHandler implements InputHandler {
 			if (InputAction.MOVE_FORWARD == action) {
 				mem.setTriedToLeaveMap(map.couldExit(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir()));
 				mem.setMovementBlock(0);
-				vm.startAddress1();
+				vm.startMove();
 				if (engine.isAbortCurrentThread()) {
 					return;
 				}

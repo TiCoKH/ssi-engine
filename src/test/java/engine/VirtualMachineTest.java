@@ -96,16 +96,16 @@ public class VirtualMachineTest {
 			}
 		});
 		vm.newEcl(ecls.getById(16, EclProgram.class));
-		System.out.println("Initial:");
-		vm.startInitial();
-		System.out.println("Address:");
-		vm.startAddress1();
-		System.out.println("Search:");
+		System.out.println("Init:");
+		vm.startInit();
+		System.out.println("Move:");
+		vm.startMove();
+		System.out.println("SearchLocation:");
 		vm.startSearchLocation();
-		System.out.println("PreCamp:");
-		vm.startPreCampCheck();
-		System.out.println("CampInterrupt:");
-		vm.startCampInterrupted();
+		System.out.println("Rest:");
+		vm.startRest();
+		System.out.println("RestInterruption:");
+		vm.startRestInterruption();
 	}
 
 }
