@@ -48,12 +48,12 @@ public class EngineResources {
 		imageTypes.put(SPRIT, VGADependentImages.class);
 	}
 
+	private Map<String, DAXFile> files = new HashMap<>();
+
 	private String gameDir;
-	private Map<String, DAXFile> files;
 
 	public EngineResources(String gameDir) {
 		this.gameDir = gameDir;
-		this.files = new HashMap<>();
 	}
 
 	public MonocromeSymbols getFont() throws IOException {
@@ -64,8 +64,16 @@ public class EngineResources {
 		return load("BORDERS.DAX", 0, VGAImage.class);
 	}
 
-	public DAXImageContent getSpaceTiles() throws IOException {
+	public DAXImageContent getOverlandCursor() throws IOException {
+		return load("CURSOR.DAX", 1, VGAImage.class);
+	}
+
+	public DAXImageContent getSpaceSymbols() throws IOException {
 		return load("8X8D0.DAX", 1, VGAImage.class);
+	}
+
+	public DAXImageContent getSpaceBackground() throws IOException {
+		return load("SHIPS.DAX", 128, VGAImage.class);
 	}
 
 	public DAXImageContent getTitles(int id) throws IOException {

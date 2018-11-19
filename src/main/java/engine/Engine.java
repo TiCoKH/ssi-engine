@@ -33,6 +33,8 @@ import data.content.WallDef;
 import engine.opcodes.EclString;
 import ui.DungeonResources;
 import ui.FontType;
+import ui.OverlandResources;
+import ui.SpaceResources;
 import ui.UICallback;
 import ui.UIResources;
 import ui.UISettings;
@@ -252,8 +254,14 @@ public class Engine implements EngineCallback, UICallback {
 	@Override
 	public void loadAreaDecoration(int id1, int id2, int id3) {
 		memory.setAreaDecoValues(id1, id2, id3);
-		if (currentMap.isPresent()) {
-			try {
+		try {
+			if (!currentMap.isPresent() && id1 == 1) {
+				List<BufferedImage> symbols = res.getSpaceSymbols().toList();
+
+				BufferedImage background = res.getSpaceBackground().get(0);
+
+				ui.setSpaceResources(new SpaceResources(memory, background, symbols));
+			} else if (currentMap.isPresent()) {
 				WallDef walls = res.find(id1, WallDef.class, WALLDEF);
 
 				List<BufferedImage> wallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
@@ -263,9 +271,9 @@ public class Engine implements EngineCallback, UICallback {
 				backdrops.add(res.findImage(id1, BACK).get(0));
 
 				ui.setDungeonResources(new DungeonResources(memory, visibleWalls, walls, wallSymbols, backdrops));
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
 			}
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
 		}
 		updateUIState();
 	}
@@ -327,6 +335,37 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
+	public void showPicture(int gameState, int id) {
+		switch (gameState) {
+			case 0:
+			case 2:
+				updateUIState();
+				showPicture(id);
+				break;
+			case 1:
+				ui.setUIState(UIState.BIGPIC);
+				showPicture(id);
+				break;
+			case 3:
+				showPicture(id);
+				break;
+			case 4:
+				try {
+					DAXImageContent map = res.findImage(id, BIGPIC);
+					DAXImageContent cursor = res.getOverlandCursor();
+					ui.setOverlandResources(new OverlandResources(memory, map.get(0), cursor.withWallSymbolColor().get(0)));
+					ui.setUIState(UIState.OVERLAND);
+					memory.setAreaDecoValues(255, 127, 127);
+				} catch (IOException e) {
+					e.printStackTrace(System.err);
+				}
+				break;
+			default:
+				System.err.println("Unknown game state: " + gameState);
+		}
+	}
+
+	@Override
 	public void addText(EclString str, boolean clear) {
 		synchronized (vm) {
 			if (clear) {
@@ -367,7 +406,7 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	public void updateUIState() {
-		ui.setUIState(currentMap.map(m -> UIState.DUNGEON).orElse(UIState.STORY));
+		ui.setUIState(currentMap.map(m -> UIState.DUNGEON).orElse(memory.getAreaDecoValue(0) == 1 ? UIState.SPACE : UIState.STORY));
 	}
 
 	@Override

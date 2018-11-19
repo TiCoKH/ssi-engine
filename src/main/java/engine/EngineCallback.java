@@ -21,6 +21,8 @@ public interface EngineCallback {
 
 	void showPicture(int id);
 
+	void showPicture(int gameState, int id);
+
 	void addText(EclString str, boolean clear);
 
 	void addNewline();

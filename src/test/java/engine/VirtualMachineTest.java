@@ -64,6 +64,10 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void showPicture(int gameState, int id) {
+			}
+
+			@Override
 			public void loadEcl(int id) {
 			}
 

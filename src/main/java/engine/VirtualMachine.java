@@ -445,7 +445,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PICTURE2, inst -> {
-			engine.showPicture(intValue(inst.getArgument(1)));
+			engine.showPicture(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)));
 		});
 	}
 }
