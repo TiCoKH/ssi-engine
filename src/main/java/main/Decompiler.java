@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 
 import common.ByteBufferWrapper;
+import common.FileMap;
 import data.content.EclProgram;
 import engine.EngineResources;
 import engine.VirtualMemory;
@@ -166,7 +167,8 @@ public class Decompiler {
 	private int currentId;
 
 	public Decompiler(String gameDir) throws IOException {
-		EngineResources res = new EngineResources(gameDir);
+		FileMap fm = new FileMap(gameDir);
+		EngineResources res = new EngineResources(fm);
 		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
 		for (Integer id : ids) {
 			currentId = id;

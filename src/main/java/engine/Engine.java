@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import common.FileMap;
 import data.content.DAXImageContent;
 import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
@@ -61,7 +62,8 @@ public class Engine implements EngineCallback, UICallback {
 	private InputAction nextAction = null;
 
 	public Engine(String gameDir) throws IOException {
-		this.res = new EngineResources(gameDir);
+		FileMap fm = new FileMap(gameDir);
+		this.res = new EngineResources(fm);
 
 		MonocromeSymbols font = res.getFont();
 		Map<FontType, List<BufferedImage>> fontMap = new EnumMap<>(FontType.class);

@@ -34,8 +34,6 @@ where `<directory>` is the one in which the game data for
 Buck Rogers 1 resides and noShowTitle argument makes the engine
 skip the screens before the title menu.
 
-Make sure all game data filenames are uppercase.
-
 In the title menu use
 
 * D to start the demo
