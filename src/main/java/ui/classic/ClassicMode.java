@@ -208,6 +208,23 @@ public class ClassicMode extends JPanel {
 		input.setLength(0);
 		inputPrefix = INPUT_STRING;
 		resources.setStatusLine(StatusLine.of(inputPrefix, FontType.NORMAL));
+		for (char c = 'a'; c <= 'z'; c++) {
+			Character d = c;
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
+			getActionMap().put(d, new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (input.length() < maxLetters) {
+						input.append(Character.toUpperCase(d));
+					}
+					if (input.length() == 1) {
+						mapInputDone();
+					}
+					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
+				}
+			});
+		}
 		for (char c = 'A'; c <= 'Z'; c++) {
 			Character d = c;
 			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
