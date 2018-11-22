@@ -34,6 +34,77 @@ public class DAXPalette {
 	private static final Color[] COLOR_SPRITE_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_BLACK, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 	private static final Color[] COLOR_COMBAT_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_BLACK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 
+	public static IndexColorModel createColorModel(@Nonnull DAXContentType type) {
+		switch (type) {
+			case _8X8D:
+			case BACK:
+				return createColorModel(COLOR_GAME_STATIC, COLOR_MAGENTA_BRIGHT);
+			case BIGPIC:
+			case PIC:
+			case TITLE:
+				return createColorModel(COLOR_GAME_STATIC, null);
+			case SPRIT:
+				return createColorModel(COLOR_SPRITE_STATIC, COLOR_TRANSPARENT);
+			default:
+				throw new IllegalArgumentException("illegal image type: " + type.name());
+		}
+	}
+
+	private static IndexColorModel createColorModel(@Nonnull Color[] staticColors, @Nullable Color transparent) {
+		byte[] r = new byte[16];
+		byte[] g = new byte[16];
+		byte[] b = new byte[16];
+
+		for (int i = 0; i < staticColors.length; i++) {
+			r[i] = (byte) staticColors[i].getRed();
+			g[i] = (byte) staticColors[i].getGreen();
+			b[i] = (byte) staticColors[i].getBlue();
+		}
+		if (transparent == null)
+			return new IndexColorModel(4, 16, r, g, b);
+		else
+			return new IndexColorModel(4, 16, r, g, b, Arrays.asList(staticColors).indexOf(transparent));
+	}
+
+	public static IndexColorModel createColorModel(@Nonnull byte[] data, @Nonnull DAXContentType type) {
+		switch (type) {
+			case _8X8D:
+			case BACK:
+				return createColorModel(data, COLOR_GAME_STATIC, COLOR_MAGENTA_BRIGHT);
+			case BIGPIC:
+			case PIC:
+			case TITLE:
+				return createColorModel(data, COLOR_GAME_STATIC, null);
+			default:
+				throw new IllegalArgumentException("illegal image type: " + type.name());
+		}
+	}
+
+	private static IndexColorModel createColorModel(@Nonnull byte[] data, @Nonnull Color[] staticColors, @Nullable Color transparent) {
+		byte[] r = new byte[256];
+		byte[] g = new byte[256];
+		byte[] b = new byte[256];
+
+		for (int i = 0; i < staticColors.length; i++) {
+			for (int h = 0; h < 0xFF; h += 0x10) {
+				r[h + i] = (byte) staticColors[i].getRed();
+				g[h + i] = (byte) staticColors[i].getGreen();
+				b[h + i] = (byte) staticColors[i].getBlue();
+			}
+		}
+
+		for (int i = 0; i < 16; i++) {
+			r[0x10 + i] = (byte) (data[3 * i + 0] << 2);
+			g[0x10 + i] = (byte) (data[3 * i + 1] << 2);
+			b[0x10 + i] = (byte) (data[3 * i + 2] << 2);
+		}
+
+		if (transparent == null)
+			return new IndexColorModel(8, 256, r, g, b);
+		else
+			return new IndexColorModel(8, 256, r, g, b, Arrays.asList(staticColors).indexOf(transparent));
+	}
+
 	public static IndexColorModel createColorModel(@Nonnull ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart,
 		@Nonnull DAXContentType type) {
 
