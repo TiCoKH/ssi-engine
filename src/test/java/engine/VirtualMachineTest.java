@@ -88,8 +88,9 @@ public class VirtualMachineTest {
 			@Override
 			public void delayCurrentThread() {
 			}
-		}, new VirtualMemory(cfg));
+		}, new VirtualMemory(cfg), cfg.getCodeBase());
 		vm.newEcl(ecls.getById(16, EclProgram.class, DAXContentType.ECL));
+
 		System.out.println("Init:");
 		vm.startInit();
 		System.out.println("Move:");

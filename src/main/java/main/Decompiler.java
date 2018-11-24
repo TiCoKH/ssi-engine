@@ -52,6 +52,7 @@ import common.ByteBufferWrapper;
 import common.FileMap;
 import data.ResourceLoader;
 import data.content.EclProgram;
+import engine.EngineConfiguration;
 import engine.VirtualMemory;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
@@ -166,9 +167,13 @@ public class Decompiler {
 
 	private int currentId;
 
-	public Decompiler(String gameDir) throws IOException {
+	public Decompiler(String gameDir) throws Exception {
 		FileMap fm = new FileMap(gameDir);
 		ResourceLoader res = new ResourceLoader(fm);
+		EngineConfiguration cfg = new EngineConfiguration(fm);
+
+		base = cfg.getCodeBase();
+
 		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
 		for (Integer id : ids) {
 			currentId = id;
@@ -186,13 +191,6 @@ public class Decompiler {
 		EclInstruction onRest = EclInstruction.parseNext(eclCode);
 		EclInstruction onRestInterruption = EclInstruction.parseNext(eclCode);
 		EclInstruction onInit = EclInstruction.parseNext(eclCode);
-
-		int address = Math.min(onMove.getArgument(0).valueAsInt(), onSearchLocation.getArgument(0).valueAsInt());
-		address = Math.min(address, onRest.getArgument(0).valueAsInt());
-		address = Math.min(address, onRestInterruption.getArgument(0).valueAsInt());
-		address = Math.min(address, onInit.getArgument(0).valueAsInt());
-
-		base = address - 0x14;
 
 		startSection(gameDir, eclCode, onInit, "onInit");
 		startSection(gameDir, eclCode, onMove, "onMove");
@@ -565,7 +563,7 @@ public class Decompiler {
 		return String.format("%04X", value);
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		new Decompiler(args[0]);
 	}
 }

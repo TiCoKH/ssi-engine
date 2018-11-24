@@ -52,7 +52,7 @@ public class Engine implements EngineCallback, EngineStub {
 		this.res = new ResourceLoader(fm);
 		this.cfg = new EngineConfiguration(fm);
 		this.memory = new VirtualMemory(cfg);
-		this.vm = new VirtualMachine(this, this.memory);
+		this.vm = new VirtualMachine(this, this.memory, cfg.getCodeBase());
 	}
 
 	@Override

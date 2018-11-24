@@ -51,9 +51,10 @@ public class VirtualMachine {
 	private EclInstruction onRestInterruption;
 	private EclInstruction onInit;
 
-	public VirtualMachine(EngineCallback engine, VirtualMemory memory) {
+	public VirtualMachine(EngineCallback engine, VirtualMemory memory, int eclCodeBaseAddress) {
 		this.engine = engine;
 		this.memory = memory;
+		this.eclCodeBaseAddress = eclCodeBaseAddress;
 		initImpl();
 	}
 
@@ -68,20 +69,7 @@ public class VirtualMachine {
 		onRest = EclInstruction.parseNext(eclCode);
 		onRestInterruption = EclInstruction.parseNext(eclCode);
 		onInit = EclInstruction.parseNext(eclCode);
-		initCodeBase();
 		memory.writeProgram(eclCodeBaseAddress, eclCode);
-	}
-
-	private void initCodeBase() {
-		// An Ecl Block starts with 5 GOTO Statements to different parts of the Code.
-		// One of them will jump to XX14, the first instruction after these.
-		// This is the lowest Address. Use it to determine CodeBase as XX00.
-		int address = Math.min(onMove.getArgument(0).valueAsInt(), onSearchLocation.getArgument(0).valueAsInt());
-		address = Math.min(address, onRest.getArgument(0).valueAsInt());
-		address = Math.min(address, onRestInterruption.getArgument(0).valueAsInt());
-		address = Math.min(address, onInit.getArgument(0).valueAsInt());
-
-		eclCodeBaseAddress = address - 0x14;
 	}
 
 	public void startMove() {
