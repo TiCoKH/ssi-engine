@@ -139,11 +139,11 @@ public class Decompiler {
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_WALL_TYPE, "DUNGEON_WALL");
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_SQUARE_INFO, "DUNGEON_SQUARE");
 		for (int i = 0x4C01; i < 0x4C20; i++) {
-			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + Integer.toHexString(i).toUpperCase());
+			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));
 		}
 		for (int i = 0x7C01; i < 0x7D03; i++) {
 			if (!KNOWN_ADRESSES.containsKey(i))
-				KNOWN_ADRESSES.put(i, "SEL_PC_0x" + Integer.toHexString(i).toUpperCase());
+				KNOWN_ADRESSES.put(i, "SEL_PC_0x" + hex(i));
 		}
 		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS", "PSYCHE", "JUNO",
 			"HYGEIA", "AURORA", "THULE");
@@ -323,7 +323,7 @@ public class Decompiler {
 	}
 
 	private void outputLinestart(int address) {
-		out.print(Integer.toHexString(address).toUpperCase() + ":");
+		out.print(hex(address) + ":");
 		for (int i = 0; i < indention; i++) {
 			out.print('\t');
 		}
@@ -521,15 +521,15 @@ public class Decompiler {
 	private String argL(EclInstruction inst, int argNr) {
 		EclArgument a = inst.getArgument(argNr);
 		if (!a.isMemAddress()) {
-			System.err.println("Value is not a memory address at " + Integer.toHexString(inst.getPosition() + base).toUpperCase());
+			System.err.println("Value is not a memory address at " + hex(inst.getPosition() + base));
 		}
 		if (!KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
 			if (a.isStringValue()) {
-				KNOWN_ADRESSES.put(a.valueAsInt(), "string_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+				KNOWN_ADRESSES.put(a.valueAsInt(), "string_" + currentId + "_" + hex(a.valueAsInt()));
 			} else if (a.isShortValue()) {
-				KNOWN_ADRESSES.put(a.valueAsInt(), "short_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+				KNOWN_ADRESSES.put(a.valueAsInt(), "short_" + currentId + "_" + hex(a.valueAsInt()));
 			} else {
-				KNOWN_ADRESSES.put(a.valueAsInt(), "byte_" + currentId + "_" + Integer.toHexString(a.valueAsInt()).toUpperCase());
+				KNOWN_ADRESSES.put(a.valueAsInt(), "byte_" + currentId + "_" + hex(a.valueAsInt()));
 			}
 		}
 		return KNOWN_ADRESSES.get(a.valueAsInt());
@@ -541,7 +541,7 @@ public class Decompiler {
 			if (KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
 				return KNOWN_ADRESSES.get(a.valueAsInt());
 			} else if (a.valueAsInt() >= base && a.valueAsInt() <= (base + size)) {
-				return "CODE_" + Integer.toHexString(a.valueAsInt()).toUpperCase();
+				return "CODE_" + hex(a.valueAsInt());
 			} else {
 				return "[" + a.toString() + "]";
 			}
@@ -552,6 +552,10 @@ public class Decompiler {
 			}
 		}
 		return a.toString();
+	}
+
+	private static String hex(int value) {
+		return String.format("%04X", value);
 	}
 
 	public static void main(String[] args) throws IOException {
