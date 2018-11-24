@@ -26,6 +26,7 @@ import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
+import engine.opcodes.EclInstruction;
 import types.CustomGoldboxString;
 import types.EngineStub;
 import types.GoldboxString;
@@ -51,6 +52,10 @@ public class Engine implements EngineCallback, EngineStub {
 	public Engine(@Nonnull FileMap fm) throws Exception {
 		this.res = new ResourceLoader(fm);
 		this.cfg = new EngineConfiguration(fm);
+
+		if (cfg.getCodeBase() != 0)
+			EclInstruction.configOpCodes(cfg.getOpCodes());
+
 		this.memory = new VirtualMemory(cfg);
 		this.vm = new VirtualMachine(this, this.memory, cfg.getCodeBase());
 	}

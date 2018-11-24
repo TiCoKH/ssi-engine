@@ -8,6 +8,7 @@ import static engine.opcodes.EclOpCode.COMPARE;
 import static engine.opcodes.EclOpCode.COMPARE_AND;
 import static engine.opcodes.EclOpCode.COPY_MEM;
 import static engine.opcodes.EclOpCode.DIVIDE;
+import static engine.opcodes.EclOpCode.ENCOUNTER_MENU;
 import static engine.opcodes.EclOpCode.EXIT;
 import static engine.opcodes.EclOpCode.GOSUB;
 import static engine.opcodes.EclOpCode.GOTO;
@@ -17,18 +18,21 @@ import static engine.opcodes.EclOpCode.IF_GREATER_EQUALS;
 import static engine.opcodes.EclOpCode.IF_LESS;
 import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
 import static engine.opcodes.EclOpCode.IF_NOT_EQUALS;
-import static engine.opcodes.EclOpCode.INPUT_YES_NO;
+import static engine.opcodes.EclOpCode.INPUT_YES_NO_22;
+import static engine.opcodes.EclOpCode.INPUT_YES_NO_2C;
 import static engine.opcodes.EclOpCode.MENU_HORIZONTAL;
 import static engine.opcodes.EclOpCode.MULTIPLY;
 import static engine.opcodes.EclOpCode.NEW_ECL;
 import static engine.opcodes.EclOpCode.ON_GOSUB;
 import static engine.opcodes.EclOpCode.ON_GOTO;
 import static engine.opcodes.EclOpCode.OR;
+import static engine.opcodes.EclOpCode.PARLAY;
 import static engine.opcodes.EclOpCode.RANDOM;
 import static engine.opcodes.EclOpCode.RANDOM0;
 import static engine.opcodes.EclOpCode.RETURN;
 import static engine.opcodes.EclOpCode.SELECT_ACTION;
-import static engine.opcodes.EclOpCode.STOP_MOVE;
+import static engine.opcodes.EclOpCode.STOP_MOVE_23;
+import static engine.opcodes.EclOpCode.STOP_MOVE_42;
 import static engine.opcodes.EclOpCode.SUBTRACT;
 import static engine.opcodes.EclOpCode.WRITE_MEM;
 import static engine.opcodes.EclOpCode.WRITE_MEM_BASE_OFF;
@@ -59,12 +63,12 @@ import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
 
 public class Decompiler {
-	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE, GOTO, ON_GOTO, RETURN, NEW_ECL);
-	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO);
+	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO, ON_GOTO, RETURN, NEW_ECL);
+	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO_22, INPUT_YES_NO_2C);
 	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
 		IF_NOT_EQUALS);
 	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
-		AND, OR, RANDOM, RANDOM0);
+		AND, OR, RANDOM, RANDOM0, ENCOUNTER_MENU, PARLAY);
 	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);
 
 	private static final Map<Integer, String> KNOWN_ADRESSES = new HashMap<>();
@@ -173,6 +177,7 @@ public class Decompiler {
 		EngineConfiguration cfg = new EngineConfiguration(fm);
 
 		base = cfg.getCodeBase();
+		EclInstruction.configOpCodes(cfg.getOpCodes());
 
 		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
 		for (Integer id : ids) {
@@ -353,7 +358,7 @@ public class Decompiler {
 		if (OP_CODE_MATH.contains(inst.getOpCode()))
 			outputMath(inst);
 		else if (inst.getOpCode() != GOTO && inst.getOpCode() != GOSUB && inst.getOpCode() != CALL) {
-			out.print(inst.getOpCode().name() + "(");
+			out.print(opCodeName(inst) + "(");
 			for (int i = 0; i < inst.getArguments().length; i++) {
 				if (i != 0)
 					out.print(", ");
@@ -400,6 +405,15 @@ public class Decompiler {
 			case RANDOM0:
 				out.println(argL(inst, 0) + " = RANDOM0(" + argR(inst, 1) + ")");
 				break;
+			case ENCOUNTER_MENU:
+				String argsEM = String.join(", ", argR(inst, 0), argR(inst, 1), argR(inst, 2), argR(inst, 4), argR(inst, 5), argR(inst, 6),
+					argR(inst, 7), argR(inst, 8), argR(inst, 9), argR(inst, 10), argR(inst, 11), argR(inst, 12), argR(inst, 13));
+				out.println(argL(inst, 3) + " = ENCOUNTER_MENU(" + argsEM + ")");
+				break;
+			case PARLAY:
+				String argsP = String.join(", ", argR(inst, 0), argR(inst, 1), argR(inst, 2), argR(inst, 3), argR(inst, 4));
+				out.println(argL(inst, 5) + " = PARLAY(" + argsP + ")");
+				break;
 			default:
 				break;
 		}
@@ -435,8 +449,9 @@ public class Decompiler {
 				outputCompareOp(ifInst.getOpCode());
 				out.print("0");
 				break;
-			case INPUT_YES_NO:
-				out.print(compInst.toString());
+			case INPUT_YES_NO_22:
+			case INPUT_YES_NO_2C:
+				out.print(opCodeName(compInst) + "()");
 				outputCompareOp(ifInst.getOpCode());
 				out.print("YES");
 				break;
@@ -510,9 +525,9 @@ public class Decompiler {
 		if (inst.getOpCode() == ON_GOTO || inst.getOpCode() == ON_GOSUB) {
 			out.print("ON " + argL(inst, 0) + (inst.getOpCode() == ON_GOTO ? " GOTO " : " GOSUB "));
 		} else if (inst.getOpCode() == MENU_HORIZONTAL || inst.getOpCode() == SELECT_ACTION) {
-			out.print(argL(inst, 0) + " = " + inst.getOpCode().name());
+			out.print(argL(inst, 0) + " = " + opCodeName(inst));
 		} else {
-			out.print(inst.getOpCode().name() + "(");
+			out.print(opCodeName(inst) + "(");
 			for (int i = 0; i < inst.getArguments().length; i++) {
 				if (i != 0)
 					out.print(", ");
@@ -561,6 +576,14 @@ public class Decompiler {
 
 	private static String hex(int value) {
 		return String.format("%04X", value);
+	}
+
+	private static String opCodeName(EclInstruction inst) {
+		String opName = inst.getOpCode().name();
+		if (opName.endsWith(String.format("_%02X", inst.getOpCode().getId()))) {
+			opName = opName.substring(0, opName.length() - 3);
+		}
+		return opName;
 	}
 
 	public static void main(String[] args) throws Exception {

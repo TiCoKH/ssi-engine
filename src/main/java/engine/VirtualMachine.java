@@ -191,7 +191,10 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.LOAD_MON, inst -> {
 
 		});
-		IMPL.put(EclOpCode.SPRITE_START, inst -> {
+		IMPL.put(EclOpCode.SPRITE_START3, inst -> {
+			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
+		});
+		IMPL.put(EclOpCode.SPRITE_START4, inst -> {
 			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
 		IMPL.put(EclOpCode.SPRITE_ADVANCE, inst -> {
@@ -262,11 +265,18 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.CLEAR_MON, inst -> {
 			engine.clearSprite();
 		});
+		IMPL.put(EclOpCode.INPUT_RETURN_1D, inst -> {
+			engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+		});
 		IMPL.put(EclOpCode.PARTY_STRENGTH, inst -> {
 
 		});
 		IMPL.put(EclOpCode.PARTY_CHECK, inst -> {
 
+		});
+		IMPL.put(EclOpCode.JOURNAL_ENTRY, inst -> {
+			engine.addText(new CustomGoldboxString("THIS IS RECORDED AS JOURNAL ENTRY " + intValue(inst.getArgument(0)) + "."), true);
+			engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
 		});
 		IMPL.put(EclOpCode.SPACE_COMBAT, inst -> {
 
@@ -275,11 +285,30 @@ public class VirtualMachine {
 			stopVM();
 			engine.loadEcl(intValue(inst.getArgument(0)));
 		});
+		IMPL.put(EclOpCode.LOAD_AREA_MAP_DECO, inst -> {
+			engine.loadArea(intValue(inst.getArgument(0)), 127, 127);
+			engine.loadAreaDecoration(intValue(inst.getArgument(1)), 127, 127);
+		});
 		IMPL.put(EclOpCode.LOAD_AREA_MAP, inst -> {
 			engine.loadArea(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 		});
-		IMPL.put(EclOpCode.PARTY_SKILL_CHECK, inst -> {
+		IMPL.put(EclOpCode.INPUT_YES_NO_22, inst -> {
+			engine.setMenu(HORIZONTAL, YES_NO_ACTIONS, null);
+			compareResult = memory.getMenuChoice();
+		});
+		IMPL.put(EclOpCode.PARTY_SKILL_CHECK2, inst -> {
+
+		});
+		IMPL.put(EclOpCode.PARTY_SKILL_CHECK3, inst -> {
 			memory.writeMemInt(inst.getArgument(2), 100);
+		});
+		IMPL.put(EclOpCode.STOP_MOVE_23, inst -> {
+			stopVM();
+			engine.updatePosition();
+			engine.clear();
+		});
+		IMPL.put(EclOpCode.SURPRISE, inst -> {
+
 		});
 		IMPL.put(EclOpCode.SKILL_CHECK, inst -> {
 
@@ -307,11 +336,23 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.TREASURE, inst -> {
 
 		});
+		IMPL.put(EclOpCode.TREASURE_MULTICOIN, inst -> {
+
+		});
+		IMPL.put(EclOpCode.TREASURE_MULTICOIN4, inst -> {
+
+		});
 		IMPL.put(EclOpCode.ROB, inst -> {
 
 		});
-		IMPL.put(EclOpCode.INPUT_RETURN, inst -> {
+		IMPL.put(EclOpCode.ENCOUNTER_MENU, inst -> {
+
+		});
+		IMPL.put(EclOpCode.INPUT_RETURN_29, inst -> {
 			engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+		});
+		IMPL.put(EclOpCode.POD_29, inst -> {
+
 		});
 		IMPL.put(EclOpCode.COPY_MEM, inst -> {
 			memory.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
@@ -329,7 +370,13 @@ public class VirtualMachine {
 				memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 			}
 		});
-		IMPL.put(EclOpCode.INPUT_YES_NO, inst -> {
+		IMPL.put(EclOpCode.PARLAY, inst -> {
+
+		});
+		IMPL.put(EclOpCode.SOUND_EVENT_2C, inst -> {
+
+		});
+		IMPL.put(EclOpCode.INPUT_YES_NO_2C, inst -> {
 			engine.setMenu(HORIZONTAL, YES_NO_ACTIONS, null);
 			compareResult = memory.getMenuChoice();
 		});
@@ -355,6 +402,9 @@ public class VirtualMachine {
 			memory.writeMemInt(inst.getArgument(2), result);
 			compareResult = result == 0 ? 0 : 1;
 		});
+		IMPL.put(EclOpCode.SPRITE_OFF, inst -> {
+			engine.clearSprite();
+		});
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
 			engine.addText(new CustomGoldboxString("WHAT DO YOU DO?"), false);
 			engine.setMenu(HORIZONTAL, inst.getDynArgs().stream()
@@ -364,16 +414,25 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.FIND_ITEM, inst -> {
 
 		});
+		IMPL.put(EclOpCode.GTTSF_32, inst -> {
+
+		});
 		IMPL.put(EclOpCode.PRINT_RETURN, inst -> {
 			engine.addNewline();
 		});
-		IMPL.put(EclOpCode.CLOCK, inst -> {
+		IMPL.put(EclOpCode.CLOCK1, inst -> {
+
+		});
+		IMPL.put(EclOpCode.CLOCK2, inst -> {
 
 		});
 		IMPL.put(EclOpCode.WRITE_MEM_BASE_OFF, inst -> {
 			memory.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(2)), intValue(inst.getArgument(0)));
 		});
-		IMPL.put(EclOpCode.ADD_NPC, inst -> {
+		IMPL.put(EclOpCode.NPC_ADD, inst -> {
+
+		});
+		IMPL.put(EclOpCode.NPC_FIND, inst -> {
 
 		});
 		IMPL.put(EclOpCode.LOAD_AREA_DECO, inst -> {
@@ -394,13 +453,22 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.SPELL, inst -> {
 
 		});
-		IMPL.put(EclOpCode.PROTECTION, inst -> {
+		IMPL.put(EclOpCode.PRINT_RUNES, inst -> {
+
+		});
+		IMPL.put(EclOpCode.COPY_PROTECTION, inst -> {
+
+		});
+		IMPL.put(EclOpCode.STORE, inst -> {
 
 		});
 		IMPL.put(EclOpCode.CLEAR_BOX, inst -> {
 
 		});
-		IMPL.put(EclOpCode.DUMP, inst -> {
+		IMPL.put(EclOpCode.NPC_REMOVE, inst -> {
+
+		});
+		IMPL.put(EclOpCode.HAS_EFFECT, inst -> {
 
 		});
 		IMPL.put(EclOpCode.LOGBOOK_ENTRY, inst -> {
@@ -412,15 +480,22 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.DESTROY_ITEM, inst -> {
 
 		});
-		IMPL.put(EclOpCode.UNKNOWN_41, inst -> {
+		IMPL.put(EclOpCode.GTTSF_40, inst -> {
 
 		});
-		IMPL.put(EclOpCode.STOP_MOVE, inst -> {
+		IMPL.put(EclOpCode.GIVE_EXP, inst -> {
+
+		});
+		IMPL.put(EclOpCode.STOP_MOVE_42, inst -> {
 			stopVM();
 			engine.updatePosition();
 			engine.clear();
 		});
-		IMPL.put(EclOpCode.SOUND_EVENT, inst -> {
+		IMPL.put(EclOpCode.LOAD_AREA_MAP_DECOS, inst -> {
+			engine.loadArea(intValue(inst.getArgument(0)), 127, 127);
+			engine.loadAreaDecoration(intValue(inst.getArgument(1)), intValue(inst.getArgument(2)), intValue(inst.getArgument(3)));
+		});
+		IMPL.put(EclOpCode.SOUND_EVENT_43, inst -> {
 
 		});
 		IMPL.put(EclOpCode.UNKNOWN_44, inst -> {
