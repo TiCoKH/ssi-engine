@@ -256,12 +256,16 @@ public class Decompiler {
 	}
 
 	private void disassemble(ByteBufferWrapper eclCode, int address, boolean withOutput) {
-		eclCode.position(address - base);
-		EclInstruction inst;
-		do {
-			inst = EclInstruction.parseNext(eclCode);
-			disassembleInst(eclCode, inst, withOutput);
-		} while (!OP_CODE_STOP.contains(inst.getOpCode()));
+		if ((address - base) < size && (address - base) > 0) {
+			eclCode.position(address - base);
+			EclInstruction inst;
+			do {
+				inst = EclInstruction.parseNext(eclCode);
+				disassembleInst(eclCode, inst, withOutput);
+			} while (!OP_CODE_STOP.contains(inst.getOpCode()));
+		} else {
+			System.err.println("Adress " + hex(address) + " is outside the ECL code block!");
+		}
 	}
 
 	private void disassembleInst(ByteBufferWrapper eclCode, EclInstruction inst, boolean withOutput) {
