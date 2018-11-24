@@ -206,7 +206,10 @@ public class Decompiler {
 		outFile.getParentFile().mkdirs();
 		out = new PrintStream(outFile);
 		try {
+			System.out.println(section + ":");
 			disassemble(eclCode, inst, section);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 		} finally {
 			out.close();
 		}
