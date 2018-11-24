@@ -272,7 +272,7 @@ public class Decompiler {
 		}
 		wasCompare = false;
 
-		if (inst.hasDynArgs()) {
+		if (opCode.hasDynArgs()) {
 			List<EclArgument> dynArgs = inst.getDynArgs();
 
 			if (opCode == ON_GOTO) {
