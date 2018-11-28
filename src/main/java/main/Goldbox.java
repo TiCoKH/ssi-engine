@@ -1,7 +1,8 @@
 package main;
 
 import java.awt.EventQueue;
-import java.io.IOException;
+
+import javax.swing.UIManager;
 
 import engine.Engine;
 import ui.DesktopFrame;
@@ -23,6 +24,7 @@ public class Goldbox {
 			}
 		}
 		try {
+			UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");
 			Engine engine = new Engine(dir);
 			EventQueue.invokeLater(() -> {
 				new DesktopFrame(engine.getUi());
@@ -33,7 +35,7 @@ public class Goldbox {
 					engine.showTitles();
 				}
 			});
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println("Failure to initialize engine. Quitting.");
 			e.printStackTrace(System.err);
 			System.exit(1);
