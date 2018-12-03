@@ -37,12 +37,14 @@ import shared.UserInterface;
 import ui.UISettings.ScaleMethod;
 import ui.UISettings.TextSpeed;
 import ui.classic.ClassicMode;
+import ui.debug.EclCodeViewer;
 import ui.resource.ResourceViewer;
 
 public class DesktopFrame implements ExceptionHandler {
 	private JFrame frame;
 
 	private ResourceViewer resourceUi;
+	private EclCodeViewer codeViewUi;
 
 	private UIResourceConfiguration config;
 	private UISettings settings;
@@ -107,6 +109,7 @@ public class DesktopFrame implements ExceptionHandler {
 	private JMenu scaleMethod;
 	private JMenu textSpeed;
 	private JMenuItem resource;
+	private JMenuItem codeView;
 
 	private JMenuBar getMainMenu() {
 		if (mainMenu == null) {
@@ -153,6 +156,10 @@ public class DesktopFrame implements ExceptionHandler {
 			resource = debug.add("Resource Viewer");
 			resource.setEnabled(false);
 			resource.addActionListener(ev -> resourceUi.show());
+
+			codeView = debug.add("ECL Code");
+			codeView.setEnabled(false);
+			codeView.addActionListener(ev -> codeViewUi.show());
 
 			mainMenu = new JMenuBar();
 			mainMenu.add(game);
@@ -231,7 +238,9 @@ public class DesktopFrame implements ExceptionHandler {
 			config = new UIResourceConfiguration(fm);
 			ui = Optional.of(new ClassicMode(fm, engine, config, settings, this));
 			resourceUi = new ResourceViewer(fm, config, settings, this);
+			codeViewUi = new EclCodeViewer(fm);
 			resource.setEnabled(true);
+			codeView.setEnabled(true);
 		} catch (Exception e) {
 			handleException("Error creating game display", e);
 		}
