@@ -31,7 +31,9 @@ public abstract class ContentFile {
 				ByteBufferWrapper file = ByteBufferWrapper.allocateLE((int) c.size()).readFrom(c);
 				switch (type.get()) {
 					case DAX:
-						return Optional.of(DAXFile.createFrom(file));
+						return Optional.of(DAXFile.createFrom(file.rewind()));
+					case TLB:
+						return Optional.of(TLBFile.createFrom(file.rewind()));
 				}
 			}
 		}
@@ -43,7 +45,7 @@ public abstract class ContentFile {
 	}
 
 	private static enum ContentFileType {
-		DAX(".+?\\.DAX$");
+		DAX(".+?\\.DAX$"), TLB(".+?\\.[GT]LB$");
 
 		private String namePattern;
 

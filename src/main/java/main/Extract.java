@@ -28,7 +28,7 @@ public class Extract {
 			else if (ContentFile.isKnown(arg))
 				writeFile(arg);
 			else {
-				System.err.println("Unsupported file " + args[0] + ", only DAX files are supported.");
+				System.err.println("Unsupported file " + args[0] + ", only DAX or (G|T)LB files are supported.");
 				System.exit(1);
 			}
 		} catch (IOException e) {

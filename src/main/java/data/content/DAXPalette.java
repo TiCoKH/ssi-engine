@@ -150,6 +150,51 @@ public class DAXPalette {
 			return new IndexColorModel(8, 256, r, g, b, Arrays.asList(staticColors).indexOf(transparent));
 	}
 
+	public static IndexColorModel createColorModelNoShift(@Nonnull ByteBufferWrapper data, int colorCount, int colorStart, boolean transparent,
+		@Nonnull DAXContentType type) {
+
+		switch (type) {
+			case _8X8D:
+			case BACK:
+				return createColorModelNoShift(data, colorCount, colorStart, transparent, COLOR_GAME_STATIC);
+			case BIGPIC:
+			case PIC:
+			case TITLE:
+				return createColorModelNoShift(data, colorCount, colorStart, transparent, COLOR_GAME_STATIC);
+			case SPRIT:
+				return createColorModelNoShift(data, colorCount, colorStart, transparent, COLOR_SPRITE_STATIC);
+			default:
+				throw new IllegalArgumentException("illegal image type: " + type.name());
+		}
+	}
+
+	private static IndexColorModel createColorModelNoShift(ByteBufferWrapper data, int colorCount, int colorStart, boolean transparent,
+		Color[] staticColors) {
+
+		byte[] r = new byte[256];
+		byte[] g = new byte[256];
+		byte[] b = new byte[256];
+
+		for (int i = 0; i < staticColors.length; i++) {
+			for (int h = 0; h < 0xFF; h += 0x10) {
+				r[h + i] = (byte) staticColors[i].getRed();
+				g[h + i] = (byte) staticColors[i].getGreen();
+				b[h + i] = (byte) staticColors[i].getBlue();
+			}
+		}
+
+		for (int i = 0; i < colorCount; i++) {
+			r[colorStart + i] = data.get(3 * i + 0);
+			g[colorStart + i] = data.get(3 * i + 1);
+			b[colorStart + i] = data.get(3 * i + 2);
+		}
+
+		if (transparent) {
+			return new IndexColorModel(8, 256, r, g, b, 255);
+		}
+		return new IndexColorModel(8, 256, r, g, b);
+	}
+
 	public static IndexColorModel binaryInvertedPalette() {
 		return binaryPaletteWith(COLOR_WHITE, COLOR_BLACK);
 	}
