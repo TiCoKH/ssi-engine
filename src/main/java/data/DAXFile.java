@@ -1,39 +1,29 @@
 package data;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.channels.FileChannel;
-import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedMap;
 
 import common.ByteBufferWrapper;
 import data.content.DAXContent;
 
-public class DAXFile {
-	private Map<Integer, DAXBlock> blocks;
+public class DAXFile extends ContentFile {
+	private Map<Integer, ByteBufferWrapper> blocks;
 
-	private DAXFile(Map<Integer, DAXBlock> blocks) {
+	private DAXFile(Map<Integer, ByteBufferWrapper> blocks) {
 		this.blocks = blocks;
 	}
 
-	public static DAXFile createFrom(FileChannel c) throws IOException {
-		if (!c.isOpen()) {
-			return null;
-		}
-
-		ByteBufferWrapper file = ByteBufferWrapper.allocateLE((int) c.size());
-		try {
-			file.readFrom(c);
-		} finally {
-			c.close();
-		}
-
+	public static DAXFile createFrom(ByteBufferWrapper file) {
 		int byteCount = file.getUnsignedShort(0);
 		int headerCount = byteCount / 9;
 
-		Map<Integer, DAXBlock> blocks = new LinkedHashMap<>();
+		Map<Integer, ByteBufferWrapper> blocks = new LinkedHashMap<>();
 
 		for (int i = 0; i < headerCount; i++) {
 			int headerStart = 2 + (i * 9);
@@ -43,18 +33,18 @@ public class DAXFile {
 			int sizeCmp = file.getUnsignedShort(headerStart + 7);
 
 			file.position(2 + byteCount + offset);
-			ByteBufferWrapper cmp = file.slice().limit(sizeCmp);
 
-			blocks.put(id, new DAXBlock(id, cmp, sizeRaw));
+			blocks.put(id, uncompress(file.slice().limit(sizeCmp), sizeRaw));
 		}
-		return new DAXFile(Collections.unmodifiableMap(blocks));
+		return new DAXFile(ImmutableSortedMap.copyOf(blocks));
 	}
 
+	@Override
 	public <T extends DAXContent> T getById(int id, Class<T> clazz) {
-		DAXBlock b = blocks.get(id);
+		ByteBufferWrapper b = blocks.get(id);
 		if (b != null) {
 			try {
-				return clazz.getConstructor(ByteBufferWrapper.class).newInstance(b.getUncompressed());
+				return clazz.getConstructor(ByteBufferWrapper.class).newInstance(b.rewind());
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 				e.printStackTrace(System.err);
@@ -63,11 +53,36 @@ public class DAXFile {
 		return null;
 	}
 
-	public DAXBlock getById(int id) {
-		return blocks.get(id);
+	@Override
+	public List<ByteBufferWrapper> getById(int id) {
+		return ImmutableList.of(blocks.get(id));
 	}
 
+	@Override
 	public Set<Integer> getIds() {
 		return blocks.keySet();
+	}
+
+	private static ByteBufferWrapper uncompress(ByteBufferWrapper compressed, int sizeRaw) {
+		ByteBufferWrapper result = ByteBufferWrapper.allocateLE(sizeRaw);
+
+		int in = 0;
+		int out = 0;
+		compressed.rewind();
+		while (in < compressed.limit()) {
+			byte next = compressed.get(in++);
+			int count = Math.abs(next);
+			if (next >= 0) {
+				for (int i = 0; i < 1 + count; i++) {
+					result.put(out++, compressed.get(in++));
+				}
+			} else {
+				byte repeat = compressed.get(in++);
+				for (int i = 0; i < count; i++) {
+					result.put(out++, repeat);
+				}
+			}
+		}
+		return result;
 	}
 }

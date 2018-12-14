@@ -2,14 +2,12 @@ package engine;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import org.junit.Assume;
 import org.junit.Test;
 
-import data.DAXFile;
+import data.ContentFile;
 import data.content.EclProgram;
 import engine.opcodes.EclString;
 
@@ -20,8 +18,7 @@ public class VirtualMachineTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/ECL1.DAX");
 		Assume.assumeTrue(f.exists());
 
-		FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ);
-		DAXFile ecls = DAXFile.createFrom(c);
+		ContentFile ecls = ContentFile.create(f).get();
 		VirtualMachine vm = new VirtualMachine(new EngineCallback() {
 			@Override
 			public void clear() {

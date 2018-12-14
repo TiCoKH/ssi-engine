@@ -2,14 +2,11 @@ package data;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 import org.junit.Assume;
 import org.junit.Test;
 
-public class DAXFileTest {
+public class ContentFileTest {
 
 	@Test
 	public void test() throws IOException {
@@ -23,15 +20,10 @@ public class DAXFileTest {
 		for (int i = 0; i < content.length; i++) {
 			if (content[i].isDirectory()) {
 				testDir(content[i]);
-			} else if (content[i].isFile() && content[i].getName().endsWith(".DAX")) {
+			} else if (content[i].isFile() && ContentFile.isKnown(content[i])) {
 				System.out.println(content[i].getAbsolutePath());
-				testFile(content[i].toPath());
+				ContentFile.create(content[i]);
 			}
 		}
-	}
-
-	private void testFile(Path p) throws IOException {
-		FileChannel c = FileChannel.open(p, StandardOpenOption.READ);
-		DAXFile df = DAXFile.createFrom(c);
 	}
 }

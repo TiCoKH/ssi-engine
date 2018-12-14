@@ -9,8 +9,6 @@ import static data.content.DAXContentType._8X8D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,7 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import common.FileMap;
-import data.DAXFile;
+import data.ContentFile;
 import data.content.DAXContent;
 import data.content.DAXContentType;
 import data.content.DAXImageContent;
@@ -39,7 +37,8 @@ public class EngineResources {
 	}
 
 	private static final Map<DAXContentType, List<String>> contentMap = new EnumMap<>(DAXContentType.class);
-	private Map<String, DAXFile> files = new HashMap<>();
+	private Map<String, ContentFile> files = new HashMap<>();
+
 	private FileMap fileMap;
 
 	public EngineResources(FileMap fileMap) {
@@ -82,7 +81,7 @@ public class EngineResources {
 		Set<Integer> result = new HashSet<>();
 		List<String> filenames = contentMap.get(type);
 		for (int i = 0; i < filenames.size(); i++) {
-			DAXFile f = load(filenames.get(i));
+			ContentFile f = load(filenames.get(i));
 			result.addAll(f.getIds());
 		}
 		return result;
@@ -103,14 +102,13 @@ public class EngineResources {
 		return load(name).getById(blockId, clazz);
 	}
 
-	private DAXFile load(String name) throws IOException {
+	private ContentFile load(String name) throws IOException {
 		if (!files.containsKey(name)) {
 			Optional<File> f = fileMap.toFile(name);
 			if (f.isPresent()) {
-				try (FileChannel c = FileChannel.open(f.get().toPath(), StandardOpenOption.READ)) {
-					files.put(name, DAXFile.createFrom(c));
-				}
-			} else {
+				ContentFile.create(f.get()).ifPresent(c -> files.put(name, c));
+			}
+			if (!files.containsKey(name)) {
 				throw new FileNotFoundException(name + " wasnt found in the game dir.");
 			}
 		}
