@@ -32,12 +32,14 @@ public class ByteBufferWrapper {
 		return new ByteBufferWrapper(buf);
 	}
 
-	public void readFrom(FileChannel c) throws IOException {
+	public ByteBufferWrapper readFrom(FileChannel c) throws IOException {
 		c.read(buf);
+		return this;
 	}
 
-	public void writeTo(FileChannel c) throws IOException {
+	public ByteBufferWrapper writeTo(FileChannel c) throws IOException {
 		c.write(buf);
+		return this;
 	}
 
 	public final byte[] array() {
