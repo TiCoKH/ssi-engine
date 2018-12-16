@@ -11,7 +11,7 @@ public class EclProgram extends DAXContent {
 	public EclProgram(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
 		int eclId = data.getUnsignedShort();
 		if (eclId != 5000) {
-			throw new IllegalArgumentException("data is not a valid ecl program");
+			data.rewind();
 		}
 		code = data.slice();
 	}
