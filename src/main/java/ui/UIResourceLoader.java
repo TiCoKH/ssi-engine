@@ -43,6 +43,11 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
+	public DAXImageContent getMisc() throws IOException {
+		return load("8X8D1.DAX", 202, VGAImage.class, _8X8D);
+	}
+
+	@Nonnull
 	public DAXImageContent getBorders() throws IOException {
 		return load("BORDERS.DAX", 0, VGAImage.class, _8X8D);
 	}

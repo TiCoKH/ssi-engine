@@ -3,8 +3,6 @@ package ui;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Optional;
 
@@ -23,9 +21,12 @@ import common.FileMap;
 import engine.Engine;
 import types.UserInterface;
 import ui.classic.ClassicMode;
+import ui.resource.ResourceViewer;
 
 public class DesktopFrame implements ExceptionHandler {
 	private JFrame frame;
+
+	private ResourceViewer resourceUi;
 
 	private UISettings settings;
 
@@ -68,6 +69,7 @@ public class DesktopFrame implements ExceptionHandler {
 	}
 
 	private JMenuBar mainMenu;
+	private JMenuItem resource;
 
 	private JMenuBar getMainMenu() {
 		if (mainMenu == null) {
@@ -81,8 +83,15 @@ public class DesktopFrame implements ExceptionHandler {
 				}
 			});
 
+			JMenu debug = new JMenu("Debug");
+
+			resource = debug.add("Resource Viewer");
+			resource.setEnabled(false);
+			resource.addActionListener(ev -> resourceUi.show());
+
 			mainMenu = new JMenuBar();
 			mainMenu.add(game);
+			mainMenu.add(debug);
 		}
 		return mainMenu;
 	}
@@ -117,6 +126,8 @@ public class DesktopFrame implements ExceptionHandler {
 			FileMap fm = new FileMap(dir);
 			Engine engine = new Engine(fm);
 			ui = Optional.of(new ClassicMode(fm, engine, settings, this));
+			resourceUi = new ResourceViewer(fm, settings);
+			resource.setEnabled(true);
 		} catch (Exception e) {
 			handleException("Error creating game display", e);
 		}
