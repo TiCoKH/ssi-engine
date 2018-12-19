@@ -43,6 +43,11 @@ public class ResourceLoader {
 		return result;
 	}
 
+	@Nonnull
+	protected Set<String> filesFor(@Nonnull DAXContentType type) throws IOException {
+		return new HashSet<>(contentMap.get(type));
+	}
+
 	@Nullable
 	public <T extends DAXContent> T find(int id, @Nonnull Class<T> clazz, @Nonnull DAXContentType type) throws IOException {
 		List<String> filenames = contentMap.get(type);

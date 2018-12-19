@@ -2,6 +2,7 @@ package ui;
 
 import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.PIC;
+import static data.content.DAXContentType.WALLDEF;
 import static data.content.DAXContentType._8X8D;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import data.content.DAXContentType;
 import data.content.DAXImageContent;
 import data.content.MonocromeLargeSymbols;
 import data.content.MonocromeSymbols;
+import data.content.WallDef;
 
 public class UIResourceLoader extends ResourceLoader {
 	private UIResourceConfiguration config;
@@ -95,6 +97,19 @@ public class UIResourceLoader extends ResourceLoader {
 			return findImage(id);
 		}
 		return find(id, config.getImageTypeClass(type), type);
+	}
+
+	public DAXImageContent find8x8d(int id) throws IOException {
+		for (String fn : filesFor(WALLDEF)) {
+			WallDef wallDef = load(fn, id, WallDef.class, WALLDEF);
+			if (wallDef != null) {
+				// 8X8D ids arent unique in some games
+				// always load the 8X8D from the 8X8D?.DAX that corresponds to the WALLDEF?.DAX,
+				// where the walls with id are found
+				return load(fn.replace("WALLDEF", "8X8D"), id, _8X8D);
+			}
+		}
+		return null;
 	}
 
 	@Nonnull

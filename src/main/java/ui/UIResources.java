@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import data.content.DungeonMap.VisibleWalls;
-import data.content.WallDef;
 import engine.ViewDungeonPosition;
 import engine.ViewOverlandPosition;
 import engine.ViewSpacePosition;
@@ -222,13 +221,8 @@ public class UIResources {
 		}
 
 		@Nonnull
-		public Optional<WallDef> getWalls() {
-			return Optional.ofNullable(resman.getWallResource(res));
-		}
-
-		@Nonnull
-		public List<BufferedImage> getWallSymbols() {
-			return resman.getImageResource(res);
+		public List<DungeonWall> getWalls() {
+			return resman.getWallResource(res);
 		}
 
 		public void setSprite(int spriteId, int spriteIndex) {

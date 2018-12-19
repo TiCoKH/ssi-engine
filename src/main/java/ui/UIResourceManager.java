@@ -1,8 +1,5 @@
 package ui;
 
-import static data.content.DAXContentType.WALLDEF;
-import static data.content.DAXContentType._8X8D;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
@@ -19,6 +16,8 @@ import javax.annotation.Nullable;
 import data.content.DAXImageContent;
 import data.content.DAXPalette;
 import data.content.WallDef;
+import data.content.WallDef.WallDistance;
+import data.content.WallDef.WallPlacement;
 
 public class UIResourceManager {
 	private static final ImageResource INTERNAL_ID_MISC = new ImageResource(1000, null);
@@ -34,10 +33,11 @@ public class UIResourceManager {
 	private DAXImageContent originalFont;
 	private DAXImageContent originalMisc;
 	private DAXImageContent originalFrames;
+	private Map<DungeonResource, List<DungeonWall>> originalWalls = new HashMap<>();
 
 	private Map<FontType, List<BufferedImage>> fonts = new EnumMap<>(FontType.class);
 	private Map<ImageResource, List<BufferedImage>> imageResources = new HashMap<>();
-	private Map<Integer, WallDef> walldefs = new HashMap<>();
+	private Map<DungeonResource, List<DungeonWall>> walls = new HashMap<>();
 
 	public UIResourceManager(@Nonnull UIResourceLoader loader, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler)
 		throws IOException {
@@ -45,6 +45,7 @@ public class UIResourceManager {
 		settings.addPropertyChangeListener(e -> {
 			fonts.clear();
 			imageResources.clear();
+			walls.clear();
 		});
 
 		this.loader = loader;
@@ -86,21 +87,9 @@ public class UIResourceManager {
 		return getOrCreateResource(r);
 	}
 
-	@Nonnull
-	public List<BufferedImage> getImageResource(@Nonnull DungeonResource r) {
-		return getOrCreateResource(new ImageResource(r.getId1(), _8X8D));
-	}
-
 	@Nullable
-	public WallDef getWallResource(@Nonnull DungeonResource r) {
-		return walldefs.computeIfAbsent(r.getId1(), x -> {
-			try {
-				return loader.find(x, WallDef.class, WALLDEF);
-			} catch (IOException e) {
-				excHandler.handleException("Error reading WallDef for " + r, e);
-			}
-			return null;
-		});
+	public List<DungeonWall> getWallResource(@Nonnull DungeonResource r) {
+		return getOrCreateResource(r);
 	}
 
 	@Nonnull
@@ -114,6 +103,11 @@ public class UIResourceManager {
 			imageResources.put(r, scale(content));
 		}
 		return imageResources.get(r);
+	}
+
+	@Nonnull
+	private List<DungeonWall> getOrCreateResource(@Nonnull DungeonResource r) {
+		return walls.computeIfAbsent(r, this::createWalls);
 	}
 
 	@Nonnull
@@ -162,6 +156,38 @@ public class UIResourceManager {
 		List<BufferedImage> brokenResult = new ArrayList<>();
 		brokenResult.add(BROKEN);
 		return brokenResult;
+	}
+
+	@Nonnull
+	private List<DungeonWall> createWalls(@Nonnull DungeonResource r) {
+		List<DungeonWall> originalWallRes = originalWalls.computeIfAbsent(r, res -> {
+			try {
+				DungeonWallSetBuilder builder = new DungeonWallSetBuilder(loader);
+				return builder //
+					.withWallDecoIds(res.getId1(), res.getId2(), res.getId3()) //
+					.build();
+			} catch (IOException e) {
+				excHandler.handleException("Error reading WallDefs " + res.getId1() + ", " + res.getId2() + ", " + res.getId3(), e);
+			}
+			return new ArrayList<>();
+		});
+		return originalWallRes.stream().map(this::scale).collect(Collectors.toList());
+	}
+
+	@Nonnull
+	private DungeonWall scale(@Nonnull DungeonWall originalWall) {
+		Map<WallDistance, Map<WallPlacement, BufferedImage>> wallViewsMap = new HashMap<WallDef.WallDistance, Map<WallPlacement, BufferedImage>>();
+		wallViewsMap.put(WallDistance.CLOSE, new HashMap<WallDef.WallPlacement, BufferedImage>());
+		wallViewsMap.put(WallDistance.MEDIUM, new HashMap<WallDef.WallPlacement, BufferedImage>());
+		wallViewsMap.put(WallDistance.FAR, new HashMap<WallDef.WallPlacement, BufferedImage>());
+
+		for (WallDistance dis : WallDistance.values()) {
+			for (WallPlacement plc : WallPlacement.values()) {
+				wallViewsMap.get(dis).put(plc, scaler.scale(originalWall.getWallViewFor(dis, plc)));
+			}
+		}
+		BufferedImage farFiller = scaler.scale(originalWall.getFarFiller());
+		return new DungeonWall(wallViewsMap, farFiller);
 	}
 
 	@Nonnull

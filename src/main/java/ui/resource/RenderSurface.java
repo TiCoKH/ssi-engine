@@ -25,8 +25,8 @@ import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
-import data.content.WallDef;
 import ui.DungeonResource;
+import ui.DungeonWall;
 import ui.FontType;
 import ui.ImageResource;
 import ui.UIFrame;
@@ -38,7 +38,6 @@ import ui.classic.FrameRenderer;
 public class RenderSurface extends JPanel implements Scrollable {
 	private static final long serialVersionUID = -3126585855013388072L;
 
-	private transient UIResourceConfiguration config;
 	private transient UIResourceManager resman;
 	private transient UISettings settings;
 
@@ -51,7 +50,6 @@ public class RenderSurface extends JPanel implements Scrollable {
 	private int index = 0;
 
 	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
-		this.config = config;
 		this.resman = resman;
 		this.settings = settings;
 		this.frameRenderer = new FrameRenderer(config, resman, settings);
@@ -99,9 +97,9 @@ public class RenderSurface extends JPanel implements Scrollable {
 	}
 
 	public void changeRenderObject(@Nonnull DungeonResource dr) {
-		WallDef walls = resman.getWallResource(dr);
+		List<DungeonWall> walls = resman.getWallResource(dr);
 		renderObject = Optional.of(dr);
-		adaptSize(settings.zoom8(22), settings.zoom8(11 * walls.getWallCount()));
+		adaptSize(settings.zoom8(22), settings.zoom8(11 * walls.size()));
 	}
 
 	public void changeRenderObject(@Nonnull UIFrame frame) {
@@ -141,23 +139,25 @@ public class RenderSurface extends JPanel implements Scrollable {
 				}
 			} else if (o instanceof DungeonResource) {
 				DungeonResource res = (DungeonResource) o;
-				WallDef walls = resman.getWallResource(res);
-				List<BufferedImage> wallSymbols = resman.getImageResource(res);
+
+				List<DungeonWall> walls = resman.getWallResource(res);
 
 				g2d.setBackground(Color.BLUE);
 				g2d.clearRect(0, 0, getWidth(), getHeight());
 
-				for (int i = 0; i < walls.getWallCount(); i++) {
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, CLOSE, LEFT), i, 0, 0);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, CLOSE, FOWARD), i, 2, 1);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, MEDIUM, LEFT), i, 9, 1);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, MEDIUM, FOWARD), i, 11, 3);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, FAR, LEFT), i, 14, 3);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, FAR, FOWARD), i, 15, 4);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplayFarFiller(i), i, 16, 4);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, FAR, RIGHT), i, 17, 3);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, MEDIUM, RIGHT), i, 18, 1);
-					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, CLOSE, RIGHT), i, 20, 0);
+				int i = 0;
+				for (DungeonWall wall : walls) {
+					drawWallView(g2d, wall.getWallViewFor(CLOSE, LEFT), i, 0, 0, 88);
+					drawWallView(g2d, wall.getWallViewFor(CLOSE, FOWARD), i, 2, 1, 64);
+					drawWallView(g2d, wall.getWallViewFor(MEDIUM, LEFT), i, 9, 1, 64);
+					drawWallView(g2d, wall.getWallViewFor(MEDIUM, FOWARD), i, 11, 3, 32);
+					drawWallView(g2d, wall.getWallViewFor(FAR, LEFT), i, 14, 3, 32);
+					drawWallView(g2d, wall.getWallViewFor(FAR, FOWARD), i, 15, 4, 16);
+					drawWallView(g2d, wall.getFarFiller(), i, 16, 4, 16);
+					drawWallView(g2d, wall.getWallViewFor(FAR, RIGHT), i, 17, 3, 32);
+					drawWallView(g2d, wall.getWallViewFor(MEDIUM, RIGHT), i, 18, 1, 64);
+					drawWallView(g2d, wall.getWallViewFor(CLOSE, RIGHT), i, 20, 0, 88);
+					i++;
 				}
 			} else if (o instanceof UIFrame) {
 				frameRenderer.render(g2d, (UIFrame) o);
@@ -165,13 +165,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 		});
 	}
 
-	private void drawWallView(Graphics2D g2d, List<BufferedImage> wallSymbols, int[][] wallView, int wallIndex, int xStart, int yStart) {
-		for (int y = 0; y < wallView.length; y++) {
-			int[] row = wallView[y];
-			for (int x = 0; x < row.length; x++) {
-				g2d.drawImage(wallSymbols.get(row[x]), settings.zoom8(xStart + x), settings.zoom8(11 * wallIndex + yStart + y), null);
-			}
-		}
+	private void drawWallView(Graphics2D g2d, BufferedImage image, int wallIndex, int xStart, int yStart, int maxHeight) {
+		g2d.drawImage(image, settings.zoom8(xStart), settings.zoom8(11 * wallIndex + yStart) + settings.zoom(maxHeight) - image.getHeight(), null);
 	}
 
 	private void adaptSize(int width, int height) {

@@ -6,6 +6,7 @@ import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType.TITLE;
 import static data.content.DAXContentType.WALLDEF;
+import static data.content.DAXContentType._8X8D;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
@@ -120,13 +121,15 @@ public class ResourceViewer {
 
 	private void initWallChildren(MutableTreeNode root) throws IOException {
 		Set<Integer> ids = new TreeSet<>(loader.idsFor(WALLDEF));
-		if (!ids.isEmpty()) {
-			MutableTreeNode parent = new DefaultMutableTreeNode(WALLDEF.name());
-			for (Integer id : ids) {
-				parent.insert(new DefaultMutableTreeNode(new DungeonResource(id)), parent.getChildCount());
-			}
-			root.insert(parent, root.getChildCount());
+		if (ids.isEmpty()) {
+			ids = new TreeSet<>(loader.idsFor(_8X8D));
 		}
+
+		MutableTreeNode parent = new DefaultMutableTreeNode(WALLDEF.name());
+		for (Integer id : ids) {
+			parent.insert(new DefaultMutableTreeNode(new DungeonResource(id)), parent.getChildCount());
+		}
+		root.insert(parent, root.getChildCount());
 	}
 
 	private void initFrameChildren(MutableTreeNode root) {

@@ -12,6 +12,7 @@ import common.ByteBufferWrapper;
 public class DAXPalette {
 	public static final Color COLOR_TRANSPARENT = new Color(0xff000000);
 	public static final Color COLOR_GREY = new Color(0x525252);
+	public static final Color COLOR_MAGENTA_BRIGHT = new Color(0xFF55FF);
 
 	private static final Color COLOR_BLACK = new Color(0x000000);
 	private static final Color COLOR_BLUE = new Color(0x0000AA);
@@ -26,7 +27,6 @@ public class DAXPalette {
 	private static final Color COLOR_GREEN_BRIGHT = new Color(0x55FF55);
 	private static final Color COLOR_CYAN_BRIGHT = new Color(0x55FFFF);
 	private static final Color COLOR_RED_BRIGHT = new Color(0xFF5555);
-	private static final Color COLOR_MAGENTA_BRIGHT = new Color(0xFF55FF);
 	private static final Color COLOR_YELLOW_BRIGHT = new Color(0xFFFF55);
 	private static final Color COLOR_WHITE = new Color(0xFFFFFF);
 
