@@ -382,9 +382,24 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.CALL, inst -> {
 			switch (inst.getArgument(0).valueAsInt()) {
-				case 0x2DCB:
+				case 0x0809: // GttSF
+					engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+					break;
+				case 0x080C: // GttSF
+					engine.setMenu(HORIZONTAL, YES_NO_ACTIONS, null);
+					compareResult = memory.getMenuChoice() == 0 ? 1 : 0;
+					break;
+				case 0x0001: // PoD
+				case 0x2C90: // PoR
+				case 0x2DCB: // BR, SotSB
+				case 0x2E10: // CotAB, GttSF
 					engine.updatePosition();
 					engine.clearSprite();
+					break;
+				case 0x0002: // PoD
+				case 0xC01E: // PoR, CotAB
+					memory.setDungeonX((memory.getDungeonX() + memory.getDungeonDir().getDeltaX()) & 0xF);
+					memory.setDungeonY((memory.getDungeonY() + memory.getDungeonDir().getDeltaY()) & 0xF);
 					break;
 				default:
 			}
