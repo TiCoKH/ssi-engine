@@ -18,6 +18,7 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_8X8D = "8x8d.format";
 	private static final String CONFIG_FORMAT_BACK = "back.format";
 	private static final String CONFIG_FORMAT_BIGPIC = "bigpic.format";
+	private static final String CONFIG_FORMAT_BODYHEAD = "bodyHead.format";
 	private static final String CONFIG_FORMAT_PICTURE = "picture.format";
 	private static final String CONFIG_FORMAT_SPRITE = "sprite.format";
 	private static final String CONFIG_FORMAT_TITLE = "title.format";
@@ -54,6 +55,9 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 				return getFormatClass(CONFIG_FORMAT_BACK);
 			case BIGPIC:
 				return getFormatClass(CONFIG_FORMAT_BIGPIC);
+			case BODY:
+			case HEAD:
+				return getFormatClass(CONFIG_FORMAT_BODYHEAD);
 			case PIC:
 				return getFormatClass(CONFIG_FORMAT_PICTURE);
 			case SPRIT:

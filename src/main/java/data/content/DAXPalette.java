@@ -40,6 +40,8 @@ public class DAXPalette {
 			case BACK:
 				return createColorModel(COLOR_GAME_STATIC, COLOR_MAGENTA_BRIGHT);
 			case BIGPIC:
+			case BODY:
+			case HEAD:
 			case PIC:
 			case TITLE:
 				return createColorModel(COLOR_GAME_STATIC, null);
@@ -72,6 +74,8 @@ public class DAXPalette {
 			case BACK:
 				return createColorModel(data, COLOR_GAME_STATIC, COLOR_MAGENTA_BRIGHT);
 			case BIGPIC:
+			case BODY:
+			case HEAD:
 			case PIC:
 			case TITLE:
 				return createColorModel(data, COLOR_GAME_STATIC, null);
@@ -113,6 +117,8 @@ public class DAXPalette {
 			case BACK:
 				return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC, COLOR_MAGENTA_BRIGHT);
 			case BIGPIC:
+			case BODY:
+			case HEAD:
 			case PIC:
 			case TITLE:
 				return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC, null);

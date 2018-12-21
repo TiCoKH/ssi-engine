@@ -2,6 +2,8 @@ package ui.resource;
 
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.BIGPIC;
+import static data.content.DAXContentType.BODY;
+import static data.content.DAXContentType.HEAD;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType.TITLE;
@@ -10,6 +12,7 @@ import static data.content.DAXContentType._8X8D;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
+import static types.GameFeature.BODY_HEAD;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
@@ -94,6 +97,10 @@ public class ResourceViewer {
 		initFrameChildren(root);
 		initChildren(root, BIGPIC);
 		initChildren(root, BACK);
+		if (config.isUsingFeature(BODY_HEAD)) {
+			initChildren(root, BODY);
+			initChildren(root, HEAD);
+		}
 		initChildren(root, PIC);
 		initChildren(root, SPRIT);
 		initChildren(root, TITLE);
