@@ -13,6 +13,7 @@ public class EngineConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_MAIN_PREFIX = "main.";
 	private static final String CONFIG_MAIN_NAME = CONFIG_MAIN_PREFIX + "name";
 	private static final String CONFIG_CODE_BASE = "code.base";
+	private static final String CONFIG_ADDRESS_PREFIX = "address.";
 
 	public EngineConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
@@ -52,5 +53,9 @@ public class EngineConfiguration extends GameResourceConfiguration {
 			return op2;
 		}
 		return op1;
+	}
+
+	public int getEngineAddress(EngineAddress address) {
+		return Integer.parseInt(getProperty(CONFIG_ADDRESS_PREFIX + address.name(), "0"), 16);
 	}
 }

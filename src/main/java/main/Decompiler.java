@@ -1,6 +1,9 @@
 package main;
 
 import static data.content.DAXContentType.ECL;
+import static engine.EngineAddress.SAVED_TEMP_START;
+import static engine.EngineAddress.SEL_PC_START;
+import static engine.EngineAddress.TEMP_START;
 import static engine.opcodes.EclOpCode.ADD;
 import static engine.opcodes.EclOpCode.AND;
 import static engine.opcodes.EclOpCode.CALL;
@@ -56,6 +59,7 @@ import common.ByteBufferWrapper;
 import common.FileMap;
 import data.ResourceLoader;
 import data.content.EclProgram;
+import engine.EngineAddress;
 import engine.EngineConfiguration;
 import engine.VirtualMemory;
 import engine.opcodes.EclArgument;
@@ -76,8 +80,6 @@ public class Decompiler {
 		KNOWN_ADRESSES.put(0x4BAB, "ENGINE_CONF_4BAB"); // probably boolean flag game state changed
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_SPACE_X, "SPACE_X");
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_SPACE_Y, "SPACE_Y");
-		KNOWN_ADRESSES.put(0x4BC3, "OVERLAND_X");
-		KNOWN_ADRESSES.put(0x4BC4, "OVERLAND_Y");
 		KNOWN_ADRESSES.put(0x4BC5, "GEO_ID");
 		KNOWN_ADRESSES.put(0x4BC7, "TIME_MIN_ONE");
 		KNOWN_ADRESSES.put(0x4BC8, "TIME_MIN_TEN");
@@ -88,13 +90,8 @@ public class Decompiler {
 		KNOWN_ADRESSES.put(0x4BE7, "ENGINE_CONF_4BE7"); // configures OpCode LOAD_AREA_DECO
 		KNOWN_ADRESSES.put(0x4BE8, "ENGINE_CONF_4BE8"); // configures OpCode LOAD_AREA_DECO
 		KNOWN_ADRESSES.put(0x4BE9, "ENGINE_CONF_4BE9");
-		KNOWN_ADRESSES.put(0x4BF0, "LAST_DUNGEON_X");
-		KNOWN_ADRESSES.put(0x4BF1, "LAST_DUNGEON_Y");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_LAST_ECL, "LAST_ECL");
 		KNOWN_ADRESSES.put(0x4BFB, "ENGINE_CONF_NO_AREA_MAP");
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_ENGINE_CONF_GAME_SPEED, "ENGINE_CONF_GAME_SPEED");
-		KNOWN_ADRESSES.put(0x4BFD, "SKY_COLOR_OUTDOORS");
-		KNOWN_ADRESSES.put(0x4BFE, "SKY_COLOR_INDOORS");
 		KNOWN_ADRESSES.put(0x4BFF, "PICS_ARE_DRAWN");
 		KNOWN_ADRESSES.put(0x4C2F, "CURRENT_PIC");
 		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MED_SUPPLIES, "MED_SUPPLIES");
@@ -128,30 +125,6 @@ public class Decompiler {
 		KNOWN_ADRESSES.put(0x7D00, "SEL_PC_STATUS");
 		KNOWN_ADRESSES.put(0x7EC6, "COMBAT_MORALE_BASE");
 		KNOWN_ADRESSES.put(0x7ECB, "COMBAT_IS_AMBUSH");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_TRIED_TO_LEAVE_MAP, "TRIED_TO_LEAVE_MAP");
-		KNOWN_ADRESSES.put(0x7F79, "TEMP1");
-		KNOWN_ADRESSES.put(0x7F7A, "TEMP2");
-		KNOWN_ADRESSES.put(0x7F7B, "TEMP3");
-		KNOWN_ADRESSES.put(0x7F7C, "TEMP4");
-		KNOWN_ADRESSES.put(0x7F7D, "TEMP5");
-		KNOWN_ADRESSES.put(0x7F7E, "TEMP6");
-		KNOWN_ADRESSES.put(0x7F7F, "TEMP7");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_COMBAT_RESULT, "COMBAT_RESULT");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MOVEMENT_BLOCK, "MOVEMENT_BLOCK");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_PICTURE_HEAD_ID, "PICTURE_HEAD_ID");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_DIVISION_MODULO, "DIVISION_MODULO");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_DUNGEON_X, "DUNGEON_X");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_DUNGEON_Y, "DUNGEON_Y");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_DUNGEON_DIR, "DUNGEON_DIR");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_WALL_TYPE, "DUNGEON_WALL");
-		KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_MAP_SQUARE_INFO, "DUNGEON_SQUARE");
-		for (int i = 0x4C01; i < 0x4C20; i++) {
-			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));
-		}
-		for (int i = 0x7C01; i < 0x7D03; i++) {
-			if (!KNOWN_ADRESSES.containsKey(i))
-				KNOWN_ADRESSES.put(i, "SEL_PC_0x" + hex(i));
-		}
 		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS", "PSYCHE", "JUNO",
 			"HYGEIA", "AURORA", "THULE");
 		for (int i = 0; i < 13; i++) {
@@ -180,6 +153,22 @@ public class Decompiler {
 
 		base = cfg.getCodeBase();
 		EclInstruction.configOpCodes(cfg.getOpCodes());
+
+		for (EngineAddress address : EngineAddress.values()) {
+			KNOWN_ADRESSES.put(cfg.getEngineAddress(address), address.name());
+		}
+		int savedTempStart = cfg.getEngineAddress(SAVED_TEMP_START);
+		for (int i = savedTempStart; i < savedTempStart + 0x20; i++) {
+			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));
+		}
+		int selPCStart = cfg.getEngineAddress(SEL_PC_START);
+		for (int i = selPCStart; i < selPCStart + 0x103; i++) {
+			KNOWN_ADRESSES.put(i, "SEL_PC_" + hex(i));
+		}
+		int tempStart = cfg.getEngineAddress(TEMP_START);
+		for (int i = 0; i < 0xA; i++) {
+			KNOWN_ADRESSES.put(tempStart + i, "TEMP" + String.format("%01X", i + 1));
+		}
 
 		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
 		for (Integer id : ids) {

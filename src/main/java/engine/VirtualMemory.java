@@ -1,5 +1,23 @@
 package engine;
 
+import static engine.EngineAddress.COMBAT_RESULT;
+import static engine.EngineAddress.DIVISION_MODULO;
+import static engine.EngineAddress.DUNGEON_DIR;
+import static engine.EngineAddress.DUNGEON_X;
+import static engine.EngineAddress.DUNGEON_Y;
+import static engine.EngineAddress.LAST_DUNGEON_X;
+import static engine.EngineAddress.LAST_DUNGEON_Y;
+import static engine.EngineAddress.LAST_ECL;
+import static engine.EngineAddress.MAP_SQUARE_INFO;
+import static engine.EngineAddress.MAP_WALL_TYPE;
+import static engine.EngineAddress.MOVEMENT_BLOCK;
+import static engine.EngineAddress.OVERLAND_X;
+import static engine.EngineAddress.OVERLAND_Y;
+import static engine.EngineAddress.PICTURE_HEAD_ID;
+import static engine.EngineAddress.SKY_COLOR_INDOORS;
+import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
+import static engine.EngineAddress.TRIED_TO_LEAVE_MAP;
+
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
@@ -19,14 +37,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_SPACE_X = 0x4BBE;
 	public static final int MEMLOC_SPACE_Y = 0x4BBF;
 	public static final int MEMLOC_SPACE_DIR = 0x4BC0;
-	public static final int MEMLOC_OVERLAND_X = 0x4BC3;
-	public static final int MEMLOC_OVERLAND_Y = 0x4BC4;
-	public static final int MEMLOC_LAST_DUNGEON_X = 0x4BF0;
-	public static final int MEMLOC_LAST_DUNGEON_Y = 0x4BF1;
-	public static final int MEMLOC_LAST_ECL = 0x4BF2;
+	private static int MEMLOC_OVERLAND_X;
+	private static int MEMLOC_OVERLAND_Y;
+	private static int MEMLOC_LAST_DUNGEON_X;
+	private static int MEMLOC_LAST_DUNGEON_Y;
+	private static int MEMLOC_LAST_ECL;
 	public static final int MEMLOC_ENGINE_CONF_GAME_SPEED = 0x4BFC;
-	public static final int MEMLOC_SKY_COLOR_OUTDOORS = 0x4BFD;
-	public static final int MEMLOC_SKY_COLOR_INDOORS = 0x4BFE;
+	private static int MEMLOC_SKY_COLOR_OUTDOORS;
+	private static int MEMLOC_SKY_COLOR_INDOORS;
 	public static final int MEMLOC_MED_SUPPLIES = 0x4C63;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_EXTENDED_DUNGEON_X = 0x4CFD;
@@ -44,16 +62,16 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_MISSILE_AMMO = 0x4D46;
 	public static final int MEMLOC_MISSILE_RELOAD = 0x4D47;
 	public static final int MEMLOC_LASER_WEAPONS = 0x4D4A;
-	public static final int MEMLOC_COMBAT_RESULT = 0x7EC7;
-	public static final int MEMLOC_MOVEMENT_BLOCK = 0x7EC9;
-	public static final int MEMLOC_TRIED_TO_LEAVE_MAP = 0x7ED5;
-	public static final int MEMLOC_PICTURE_HEAD_ID = 0x7EE1;
-	public static final int MEMLOC_DIVISION_MODULO = 0x7F3F;
-	public static final int MEMLOC_DUNGEON_X = 0xC04B;
-	public static final int MEMLOC_DUNGEON_Y = 0xC04C;
-	public static final int MEMLOC_DUNGEON_DIR = 0xC04D;
-	public static final int MEMLOC_MAP_WALL_TYPE = 0xC04E;
-	public static final int MEMLOC_MAP_SQUARE_INFO = 0xC04F;
+	private static int MEMLOC_COMBAT_RESULT;
+	private static int MEMLOC_MOVEMENT_BLOCK;
+	private static int MEMLOC_TRIED_TO_LEAVE_MAP;
+	private static int MEMLOC_PICTURE_HEAD_ID;
+	private static int MEMLOC_DIVISION_MODULO;
+	private static int MEMLOC_DUNGEON_X;
+	private static int MEMLOC_DUNGEON_Y;
+	private static int MEMLOC_DUNGEON_DIR;
+	private static int MEMLOC_MAP_WALL_TYPE;
+	private static int MEMLOC_MAP_SQUARE_INFO;
 
 	private static final int[] CELESTIAL_INITIAL_X = new int[] { 12, 12, 9, 9, 21, 18, 12, 6, 2, 4, 8, 14, 20 };
 	private static final int[] CELESTIAL_INITIAL_Y = new int[] { 10, 9, 8, 15, 11, 17, 20, 18, 13, 3, 1, 1, 7 };
@@ -68,6 +86,24 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		this.cfg = cfg;
 
 		mem = ByteBufferWrapper.allocateLE(0x10000);
+
+		MEMLOC_OVERLAND_X = cfg.getEngineAddress(OVERLAND_X);
+		MEMLOC_OVERLAND_Y = cfg.getEngineAddress(OVERLAND_Y);
+		MEMLOC_LAST_DUNGEON_X = cfg.getEngineAddress(LAST_DUNGEON_X);
+		MEMLOC_LAST_DUNGEON_Y = cfg.getEngineAddress(LAST_DUNGEON_Y);
+		MEMLOC_LAST_ECL = cfg.getEngineAddress(LAST_ECL);
+		MEMLOC_SKY_COLOR_OUTDOORS = cfg.getEngineAddress(SKY_COLOR_OUTDOORS);
+		MEMLOC_SKY_COLOR_INDOORS = cfg.getEngineAddress(SKY_COLOR_INDOORS);
+		MEMLOC_COMBAT_RESULT = cfg.getEngineAddress(COMBAT_RESULT);
+		MEMLOC_MOVEMENT_BLOCK = cfg.getEngineAddress(MOVEMENT_BLOCK);
+		MEMLOC_TRIED_TO_LEAVE_MAP = cfg.getEngineAddress(TRIED_TO_LEAVE_MAP);
+		MEMLOC_PICTURE_HEAD_ID = cfg.getEngineAddress(PICTURE_HEAD_ID);
+		MEMLOC_DIVISION_MODULO = cfg.getEngineAddress(DIVISION_MODULO);
+		MEMLOC_DUNGEON_X = cfg.getEngineAddress(DUNGEON_X);
+		MEMLOC_DUNGEON_Y = cfg.getEngineAddress(DUNGEON_Y);
+		MEMLOC_DUNGEON_DIR = cfg.getEngineAddress(DUNGEON_DIR);
+		MEMLOC_MAP_WALL_TYPE = cfg.getEngineAddress(MAP_WALL_TYPE);
+		MEMLOC_MAP_SQUARE_INFO = cfg.getEngineAddress(MAP_SQUARE_INFO);
 
 		// set intial locations
 		for (Celestial c : Celestial.values()) {
