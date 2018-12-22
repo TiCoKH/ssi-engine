@@ -240,6 +240,8 @@ public class Engine implements EngineCallback, UICallback {
 	public void loadEcl(int id, boolean fromVM) {
 		memory.setLastECL(memory.getCurrentECL());
 		memory.setCurrentECL(id);
+		memory.setTriedToLeaveMap(false);
+		memory.setMovementBlock(0);
 		setCurrentThread(() -> {
 			try {
 				delayCurrentThread();
