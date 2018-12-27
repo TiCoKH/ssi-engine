@@ -466,7 +466,14 @@ public class VirtualMachine {
 			}
 		});
 		IMPL.put(EclOpCode.PARLAY, inst -> {
-
+			engine.setMenu(HORIZONTAL, ImmutableList.of( //
+				new InputAction(MENU_HANDLER, "HAUGHTY", 0), //
+				new InputAction(MENU_HANDLER, "SLY", 1), //
+				new InputAction(MENU_HANDLER, "NICE", 2), //
+				new InputAction(MENU_HANDLER, "MEEK", 3), //
+				new InputAction(MENU_HANDLER, "ABUSIVE", 4) //
+			), null);
+			memory.writeMemInt(inst.getArgument(5), intValue(inst.getArgument(memory.getMenuChoice())));
 		});
 		IMPL.put(EclOpCode.SOUND_EVENT_2C, inst -> {
 
