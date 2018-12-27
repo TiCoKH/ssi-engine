@@ -503,9 +503,13 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		}
 
 		mem.position(a.valueAsInt());
-		int length = mem.getUnsigned();
-		ByteBufferWrapper buf = mem.slice().limit(length);
-		return new EclString(buf);
+		StringBuilder sb = new StringBuilder();
+		int c = mem.getUnsigned();
+		while (c != 0) {
+			sb.append((char) c);
+			c = mem.getUnsigned();
+		}
+		return new EclString(sb.toString());
 	}
 
 	public void writeMemString(EclArgument a, EclString value) {
@@ -513,10 +517,11 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 			return;
 		}
 
-		mem.position(a.valueAsInt()).put((byte) value.getLength());
+		mem.position(a.valueAsInt());
 		for (int i = 0; i < value.getLength(); i++) {
 			mem.put(value.getChar(i));
 		}
+		mem.put((byte) 0);
 	}
 
 	public void writeProgram(int startAddress, ByteBufferWrapper eclCode) {
