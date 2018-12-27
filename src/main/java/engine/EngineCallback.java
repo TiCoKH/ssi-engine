@@ -21,7 +21,7 @@ public interface EngineCallback {
 
 	void clearSprite();
 
-	void showSprite(int spriteId, int index, int picId);
+	int showSprite(int spriteId, int index, int picId);
 
 	void showPicture(int id);
 

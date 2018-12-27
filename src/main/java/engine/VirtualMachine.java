@@ -346,7 +346,102 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.ENCOUNTER_MENU, inst -> {
+			// TODO Determine party movement rates
+			int pt_move_min = 6, pt_move_max = 12;
+			int distance = engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
 
+			boolean do_another_round;
+			do {
+				do_another_round = false;
+
+				GoldboxString desc;
+				int index = distance;
+				do {
+					desc = stringValue(inst.getArgument(9 + index));
+					index = (index + 1) % 3;
+				} while (desc.getLength() == 0 && index != distance);
+				if (desc.getLength() != 0) {
+					engine.addText(desc, true);
+				}
+				engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+
+				engine.setMenu(HORIZONTAL, ImmutableList.of( //
+					new InputAction(MENU_HANDLER, "COMBAT", 0), //
+					new InputAction(MENU_HANDLER, "WAIT", 1), //
+					new InputAction(MENU_HANDLER, "FLEE", 2), //
+					distance != 0 ? new InputAction(MENU_HANDLER, "ADVANCE", 3) : new InputAction(MENU_HANDLER, "PARLAY", 4) //
+				), null);
+
+				int enc_move_min = intValue(inst.getArgument(12));
+				int enc_move_max = intValue(inst.getArgument(13));
+				int choice = memory.getMenuChoice();
+				int behaviour = intValue(inst.getArgument(4 + choice));
+				switch (behaviour) {
+					case 0: // aggressive monsters
+						int result0 = choice != 2 || pt_move_min < enc_move_min ? 1 : 2; // Combat or Party flees
+						memory.writeMemInt(inst.getArgument(3), result0);
+						break;
+					case 1: // passive monsters
+						if (choice == 0) {
+							memory.writeMemInt(inst.getArgument(3), 1); // Combat
+						} else if (choice == 1) {
+							engine.addText(new CustomGoldboxString("BOTH SIDES WAIT."), true);
+							engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+							do_another_round = true;
+						} else if (choice == 2) {
+							memory.writeMemInt(inst.getArgument(3), 2); // Party flees
+						} else if (choice == 4) {
+							memory.writeMemInt(inst.getArgument(3), 3); // Parlay
+						} else if (distance > 0) {
+							engine.advanceSprite();
+							distance--;
+							do_another_round = true;
+						} else {
+							engine.addText(new CustomGoldboxString("BOTH SIDES WAIT."), true);
+							engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+							do_another_round = true;
+						}
+						break;
+					case 2: // cowardly monsters
+						int result2 = choice == 0 && pt_move_max > enc_move_max ? 1 : 0; // Combat or Monsters flee
+						memory.writeMemInt(inst.getArgument(3), result2);
+						if (choice != 0 || enc_move_max > pt_move_max) {
+							engine.addText(new CustomGoldboxString("THE MONSTERS FLEE."), true);
+							engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+						}
+						break;
+					case 3: // cautious monsters
+						if (choice == 0) {
+							memory.writeMemInt(inst.getArgument(3), 1); // Combat
+						} else if (choice == 1) {
+							engine.addText(new CustomGoldboxString("BOTH SIDES WAIT."), true);
+							engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
+							do_another_round = true;
+						} else if (choice == 2) {
+							memory.writeMemInt(inst.getArgument(3), 2); // Party flees
+						} else if (distance > 0) {
+							engine.advanceSprite();
+							distance--;
+							do_another_round = true;
+						} else {
+							memory.writeMemInt(inst.getArgument(3), 3); // Parlay
+						}
+						break;
+					case 4: // confident monsters
+						if (choice == 0) {
+							memory.writeMemInt(inst.getArgument(3), 1); // Combat
+						} else if (choice == 2) {
+							memory.writeMemInt(inst.getArgument(3), 2); // Party flees
+						} else if (distance > 0) {
+							engine.advanceSprite();
+							distance--;
+							do_another_round = true;
+						} else {
+							memory.writeMemInt(inst.getArgument(3), 3); // Parlay
+						}
+						break;
+				}
+			} while (do_another_round);
 		});
 		IMPL.put(EclOpCode.INPUT_RETURN_29, inst -> {
 			engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);

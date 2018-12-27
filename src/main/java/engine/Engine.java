@@ -236,7 +236,7 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public void showSprite(int spriteId, int distance, int picId) {
+	public int showSprite(int spriteId, int distance, int picId) {
 		if (currentMap.isPresent()) {
 			if (distance > 0 && visibleWalls.getVisibleWall(CLOSE, FOWARD)[1] > 0) {
 				distance = 0;
@@ -246,6 +246,7 @@ public class Engine implements EngineCallback, EngineStub {
 			}
 		}
 		ui.showSprite(spriteId, picId, distance);
+		return distance;
 	}
 
 	@Override
