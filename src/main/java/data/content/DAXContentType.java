@@ -8,6 +8,7 @@ public enum DAXContentType {
 	GEO("GEO[1-9].DAX"), //
 	PIC("PIC[1-9].DAX"), //
 	SPRIT("SPRIT[1-9].DAX"), //
+	TITLE("TITLE.DAX"), //
 	WALLDEF("WALLDEF[1-9].DAX");
 
 	private String filePattern;

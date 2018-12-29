@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import common.FileMap;
+import data.content.DAXContentType;
 import data.content.DAXImageContent;
 import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
@@ -155,7 +156,7 @@ public class Engine implements EngineCallback, UICallback {
 			synchronized (vm) {
 				try {
 					for (int i = 1; i < 4; i++) {
-						ui.setPic(res.getTitles(i).toList());
+						ui.setPic(res.findImage(i, DAXContentType.TITLE).toList());
 						setInput(TITLE);
 						vm.wait(5000L);
 						if (abortCurrentThread) {
@@ -175,7 +176,7 @@ public class Engine implements EngineCallback, UICallback {
 		ui.setUIState(UIState.TITLE);
 		setCurrentThread(() -> {
 			try {
-				ui.setPic(res.getTitles(4).toList());
+				ui.setPic(res.findImage(4, DAXContentType.TITLE).toList());
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}

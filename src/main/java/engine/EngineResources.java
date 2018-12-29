@@ -4,6 +4,7 @@ import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
+import static data.content.DAXContentType.TITLE;
 import static data.content.DAXContentType._8X8D;
 
 import java.io.File;
@@ -34,6 +35,7 @@ public class EngineResources {
 		imageTypes.put(BIGPIC, VGAImage.class);
 		imageTypes.put(PIC, VGADependentImages.class);
 		imageTypes.put(SPRIT, VGADependentImages.class);
+		imageTypes.put(TITLE, VGAImage.class);
 	}
 
 	private static final Map<DAXContentType, List<String>> contentMap = new EnumMap<>(DAXContentType.class);
@@ -67,10 +69,6 @@ public class EngineResources {
 
 	public DAXImageContent getSpaceBackground() throws IOException {
 		return load("SHIPS.DAX", 128, VGAImage.class);
-	}
-
-	public DAXImageContent getTitles(int id) throws IOException {
-		return load("TITLE.DAX", id, VGAImage.class);
 	}
 
 	public DAXImageContent findImage(int id, DAXContentType type) throws IOException {
