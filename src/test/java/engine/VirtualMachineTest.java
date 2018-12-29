@@ -8,6 +8,7 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import data.ContentFile;
+import data.content.DAXContentType;
 import data.content.EclProgram;
 import engine.opcodes.EclString;
 
@@ -92,7 +93,7 @@ public class VirtualMachineTest {
 			public void delayCurrentThread() {
 			}
 		});
-		vm.newEcl(ecls.getById(16, EclProgram.class));
+		vm.newEcl(ecls.getById(16, EclProgram.class, DAXContentType.ECL));
 		System.out.println("Init:");
 		vm.startInit();
 		System.out.println("Move:");

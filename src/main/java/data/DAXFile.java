@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedMap;
 
 import common.ByteBufferWrapper;
 import data.content.DAXContent;
+import data.content.DAXContentType;
 
 public class DAXFile extends ContentFile {
 	private Map<Integer, ByteBufferWrapper> blocks;
@@ -19,7 +22,7 @@ public class DAXFile extends ContentFile {
 		this.blocks = blocks;
 	}
 
-	public static DAXFile createFrom(ByteBufferWrapper file) {
+	public static DAXFile createFrom(@Nonnull ByteBufferWrapper file) {
 		int byteCount = file.getUnsignedShort(0);
 		int headerCount = byteCount / 9;
 
@@ -40,11 +43,11 @@ public class DAXFile extends ContentFile {
 	}
 
 	@Override
-	public <T extends DAXContent> T getById(int id, Class<T> clazz) {
+	public <T extends DAXContent> T getById(int id, @Nonnull Class<T> clazz, @Nonnull DAXContentType type) {
 		ByteBufferWrapper b = blocks.get(id);
 		if (b != null) {
 			try {
-				return clazz.getConstructor(ByteBufferWrapper.class).newInstance(b.rewind());
+				return clazz.getConstructor(ByteBufferWrapper.class, DAXContentType.class).newInstance(b.rewind(), type);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 				e.printStackTrace(System.err);

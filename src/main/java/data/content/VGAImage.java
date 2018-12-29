@@ -5,11 +5,13 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 
+import javax.annotation.Nonnull;
+
 import common.ByteBufferWrapper;
 
 public class VGAImage extends DAXImageContent {
 
-	public VGAImage(ByteBufferWrapper data) {
+	public VGAImage(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
 		// 10 byte Header
 		int height = data.getUnsigned(0);
 		int width = 8 * data.getUnsigned(1);

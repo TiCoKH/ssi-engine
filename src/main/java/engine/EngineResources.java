@@ -52,23 +52,23 @@ public class EngineResources {
 	}
 
 	public MonocromeSymbols getFont() throws IOException {
-		return load("8X8D1.DAX", 201, MonocromeSymbols.class);
+		return load("8X8D1.DAX", 201, MonocromeSymbols.class, _8X8D);
 	}
 
 	public DAXImageContent getBorders() throws IOException {
-		return load("BORDERS.DAX", 0, VGAImage.class);
+		return load("BORDERS.DAX", 0, VGAImage.class, _8X8D);
 	}
 
 	public DAXImageContent getOverlandCursor() throws IOException {
-		return load("CURSOR.DAX", 1, VGAImage.class);
+		return load("CURSOR.DAX", 1, VGAImage.class, _8X8D);
 	}
 
 	public DAXImageContent getSpaceSymbols() throws IOException {
-		return load("8X8D0.DAX", 1, VGAImage.class);
+		return load("8X8D0.DAX", 1, VGAImage.class, _8X8D);
 	}
 
 	public DAXImageContent getSpaceBackground() throws IOException {
-		return load("SHIPS.DAX", 128, VGAImage.class);
+		return load("SHIPS.DAX", 128, VGAImage.class, BIGPIC);
 	}
 
 	public DAXImageContent findImage(int id, DAXContentType type) throws IOException {
@@ -88,7 +88,7 @@ public class EngineResources {
 	public <T extends DAXContent> T find(int id, Class<T> clazz, DAXContentType type) throws IOException {
 		List<String> filenames = contentMap.get(type);
 		for (int i = 0; i < filenames.size(); i++) {
-			T dic = load(filenames.get(i), id, clazz);
+			T dic = load(filenames.get(i), id, clazz, type);
 			if (dic != null) {
 				return dic;
 			}
@@ -96,8 +96,8 @@ public class EngineResources {
 		return null;
 	}
 
-	public <T extends DAXContent> T load(String name, int blockId, Class<T> clazz) throws IOException {
-		return load(name).getById(blockId, clazz);
+	private <T extends DAXContent> T load(String name, int blockId, Class<T> clazz, DAXContentType type) throws IOException {
+		return load(name).getById(blockId, clazz, type);
 	}
 
 	private ContentFile load(String name) throws IOException {

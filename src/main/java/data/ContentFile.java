@@ -12,10 +12,11 @@ import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
 import data.content.DAXContent;
+import data.content.DAXContentType;
 
 public abstract class ContentFile {
 
-	public abstract <T extends DAXContent> T getById(int id, Class<T> clazz);
+	public abstract <T extends DAXContent> T getById(int id, Class<T> clazz, DAXContentType type);
 
 	public abstract List<ByteBufferWrapper> getById(int id);
 

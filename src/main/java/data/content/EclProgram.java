@@ -1,12 +1,14 @@
 package data.content;
 
+import javax.annotation.Nonnull;
+
 import common.ByteBufferWrapper;
 
 public class EclProgram extends DAXContent {
 
 	private ByteBufferWrapper code;
 
-	public EclProgram(ByteBufferWrapper data) {
+	public EclProgram(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
 		data.rewind();
 		int eclId = data.getUnsignedShort();
 		if (eclId != 5000) {
