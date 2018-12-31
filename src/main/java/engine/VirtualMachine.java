@@ -71,6 +71,10 @@ public class VirtualMachine {
 		onRestInterruption = EclInstruction.parseNext(eclCode);
 		onInit = EclInstruction.parseNext(eclCode);
 		memory.writeProgram(eclCodeBaseAddress, eclCode);
+
+		gosubStack.clear();
+		compareResult = 0;
+		memory.clearTemps();
 	}
 
 	public void startMove() {

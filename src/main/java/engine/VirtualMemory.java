@@ -14,8 +14,10 @@ import static engine.EngineAddress.MOVEMENT_BLOCK;
 import static engine.EngineAddress.OVERLAND_X;
 import static engine.EngineAddress.OVERLAND_Y;
 import static engine.EngineAddress.PICTURE_HEAD_ID;
+import static engine.EngineAddress.SAVED_TEMP_START;
 import static engine.EngineAddress.SKY_COLOR_INDOORS;
 import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
+import static engine.EngineAddress.TEMP_START;
 import static engine.EngineAddress.TRIED_TO_LEAVE_MAP;
 import static types.GameFeature.EXTENDED_DUNGEON;
 
@@ -145,6 +147,17 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 			fc.force(true);
 		} finally {
 			fc.close();
+		}
+	}
+
+	public void clearTemps() {
+		int savedTempStart = cfg.getEngineAddress(SAVED_TEMP_START);
+		for (int i = savedTempStart; i < savedTempStart + 0x20; i++) {
+			mem.put(i, (byte) 0);
+		}
+		int tempStart = cfg.getEngineAddress(TEMP_START);
+		for (int i = tempStart; i < tempStart + 0xA; i++) {
+			mem.put(i, (byte) 0);
 		}
 	}
 
