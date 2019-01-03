@@ -8,6 +8,8 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import types.GoldboxString;
+
 public class UIResources {
 
 	// Font and border symbols, always available
@@ -32,8 +34,11 @@ public class UIResources {
 	private Optional<List<Byte>> charList = Optional.empty();
 	private int charStop = 0;
 
-	// Elements to render on the status line
-	private Optional<StatusLine> statusLine = Optional.empty();
+	// the status text
+	private Optional<GoldboxString> statusLine = Optional.empty();
+
+	// a game menu
+	private Optional<Menu> menu = Optional.empty();
 
 	public UIResources(@Nonnull Map<FontType, List<BufferedImage>> fonts, @Nonnull List<BufferedImage> borderSymbols) {
 		this.fonts = fonts;
@@ -77,6 +82,11 @@ public class UIResources {
 	}
 
 	@Nonnull
+	public Optional<Menu> getMenu() {
+		return menu;
+	}
+
+	@Nonnull
 	public Optional<OverlandResources> getOverlandResources() {
 		return overlandResources;
 	}
@@ -92,7 +102,7 @@ public class UIResources {
 	}
 
 	@Nonnull
-	public Optional<StatusLine> getStatusLine() {
+	public Optional<GoldboxString> getStatusLine() {
 		return statusLine;
 	}
 
@@ -129,6 +139,10 @@ public class UIResources {
 		this.dungeonResources = Optional.of(dungeonRes);
 	}
 
+	public void setMenu(@Nullable Menu menu) {
+		this.menu = Optional.ofNullable(menu);
+	}
+
 	public void setOverlandResources(@Nonnull OverlandResources overlandResources) {
 		this.overlandResources = Optional.of(overlandResources);
 	}
@@ -142,7 +156,7 @@ public class UIResources {
 		this.spaceResources = Optional.of(spaceResources);
 	}
 
-	public void setStatusLine(@Nullable StatusLine statusLine) {
+	public void setStatusLine(@Nullable GoldboxString statusLine) {
 		this.statusLine = Optional.ofNullable(statusLine);
 	}
 }

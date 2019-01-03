@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 import engine.ViewSpacePosition;
 import engine.ViewSpacePosition.Celestial;
+import types.GoldboxString;
 
 public class SpaceResources {
 	private ViewSpacePosition position;
@@ -14,7 +15,7 @@ public class SpaceResources {
 	private BufferedImage background;
 	private List<BufferedImage> symbols;
 
-	private StatusLine statusLine;
+	private GoldboxString statusLine;
 
 	public SpaceResources(@Nonnull ViewSpacePosition position, @Nonnull BufferedImage background, @Nonnull List<BufferedImage> symbols) {
 		if (symbols.size() != 95) {
@@ -23,7 +24,7 @@ public class SpaceResources {
 		this.position = position;
 		this.background = background;
 		this.symbols = symbols;
-		this.statusLine = new SpaceStatusLine(position);
+		this.statusLine = new GoldboxStringFuel(position);
 	}
 
 	@Nonnull
@@ -81,7 +82,7 @@ public class SpaceResources {
 		return 1 + position.getSpaceY();
 	}
 
-	public StatusLine getStatusLine() {
+	public GoldboxString getStatusLine() {
 		return statusLine;
 	}
 }

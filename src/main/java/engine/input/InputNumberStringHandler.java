@@ -7,7 +7,7 @@ public class InputNumberStringHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		engine.getMemory().setInput(action.getName());
+		engine.getMemory().setInput(action.getName().orElse(null));
 		engine.getUi().setInputNone();
 		engine.continueCurrentThread();
 	}

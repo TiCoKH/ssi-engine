@@ -2,7 +2,11 @@ package engine;
 
 import java.util.List;
 
-import engine.opcodes.EclString;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import types.GoldboxString;
+import ui.Menu.MenuType;
 
 public interface EngineCallback {
 	void clear();
@@ -15,7 +19,7 @@ public interface EngineCallback {
 
 	void setInputString(int maxLetters);
 
-	void setMenu(List<InputAction> action);
+	void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description);
 
 	void advanceSprite();
 
@@ -27,7 +31,7 @@ public interface EngineCallback {
 
 	void showPicture(int gameState, int id);
 
-	void addText(EclString str, boolean clear);
+	void addText(GoldboxString str, boolean clear);
 
 	void addNewline();
 
@@ -42,6 +46,6 @@ public interface EngineCallback {
 	void delayCurrentThread();
 
 	public enum InputType {
-		NONE, TITLE, CONTINUE, STANDARD;
+		NONE, CONTINUE, STANDARD;
 	}
 }

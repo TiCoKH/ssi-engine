@@ -7,6 +7,7 @@ import common.ByteBufferWrapper;
 import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
+import types.GoldboxString;
 
 public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition {
 	public static final int MEMLOC_CURRENT_ECL = 0x0000;
@@ -53,7 +54,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private ByteBufferWrapper mem;
 
 	private int menuChoice;
-	private String input;
+	private GoldboxString input;
 
 	public VirtualMemory() {
 		mem = ByteBufferWrapper.allocateLE(0x10000);
@@ -108,11 +109,11 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		this.menuChoice = menuChoice;
 	}
 
-	public String getInput() {
+	public GoldboxString getInput() {
 		return input;
 	}
 
-	public void setInput(String input) {
+	public void setInput(GoldboxString input) {
 		this.input = input;
 	}
 
@@ -497,22 +498,22 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		}
 	}
 
-	public EclString readMemString(EclArgument a) {
+	public GoldboxString readMemString(EclArgument a) {
 		if (!a.isMemAddress()) {
 			return null;
 		}
 
-		mem.position(a.valueAsInt());
-		StringBuilder sb = new StringBuilder();
-		int c = mem.getUnsigned();
+		int pos = a.valueAsInt();
+		int c = mem.getUnsigned(pos);
 		while (c != 0) {
-			sb.append((char) c);
-			c = mem.getUnsigned();
+			c = mem.getUnsigned(++pos);
 		}
-		return new EclString(sb.toString());
+		ByteBufferWrapper data = ByteBufferWrapper.allocateLE(pos - a.valueAsInt());
+		data.put(mem.array(), a.valueAsInt(), pos - a.valueAsInt());
+		return new EclString(data);
 	}
 
-	public void writeMemString(EclArgument a, EclString value) {
+	public void writeMemString(EclArgument a, GoldboxString value) {
 		if (!a.isMemAddress()) {
 			return;
 		}

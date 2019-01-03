@@ -1,6 +1,5 @@
 package ui.classic;
 
-import static ui.FontType.NORMAL;
 import static ui.classic.ClassicBorders.GAME;
 
 import java.awt.Graphics2D;
@@ -25,29 +24,25 @@ public class StoryRenderer extends AbstractRenderer {
 	}
 
 	@Override
+	public int getTextStartX() {
+		return TEXT_START_X;
+	}
+
+	@Override
+	public int getTextStartY() {
+		return TEXT_START_Y;
+	}
+
+	@Override
 	public void render(@Nonnull Graphics2D g2d) {
 		renderBorders(g2d, GAME);
 		renderPicture(g2d, 3);
-		renderText(g2d);
-		renderStatus(g2d);
+		renderMenuOrTextStatus(g2d);
 	}
 
 	protected void renderPicture(@Nonnull Graphics2D g2d, int start) {
 		resources.getPic().ifPresent(pic -> {
 			renderImage(g2d, pic, start, start);
-		});
-	}
-
-	protected void renderText(@Nonnull Graphics2D g2d) {
-		resources.getCharList().ifPresent(text -> {
-			int charStop = resources.getCharStop();
-			if (!text.isEmpty() && charStop != 0) {
-				for (int pos = 0; pos < charStop; pos++) {
-					int x = TEXT_START_X + (pos % getLineWidth());
-					int y = TEXT_START_Y + (pos / getLineWidth());
-					renderChar(g2d, x, y, text.get(pos), NORMAL);
-				}
-			}
 		});
 	}
 }

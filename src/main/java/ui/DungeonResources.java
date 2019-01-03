@@ -10,9 +10,11 @@ import javax.annotation.Nullable;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.WallDef;
 import engine.ViewDungeonPosition;
+import types.GoldboxString;
 
 public class DungeonResources {
 	private ViewDungeonPosition position;
+	private GoldboxString positionText;
 
 	private VisibleWalls visibleWalls;
 
@@ -28,6 +30,7 @@ public class DungeonResources {
 		@Nonnull List<BufferedImage> wallSymbols, @Nonnull List<BufferedImage> backdrops) {
 
 		this.position = position;
+		this.positionText = new GoldboxStringPosition(position);
 		this.visibleWalls = visibleWalls;
 		this.walls = walls;
 		this.wallSymbols = wallSymbols;
@@ -45,12 +48,8 @@ public class DungeonResources {
 		return backdrops.get(position.getBackdropIndex());
 	}
 
-	@Nonnull
-	public String getPosition() {
-		if (position.getExtendedDungeonX() != 255) {
-			return position.getExtendedDungeonX() + "," + position.getExtendedDungeonY() + " " + position.getDungeonDir().name().charAt(0);
-		}
-		return position.getDungeonX() + "," + position.getDungeonY() + " " + position.getDungeonDir().name().charAt(0);
+	public GoldboxString getPositionText() {
+		return positionText;
 	}
 
 	@Nonnull

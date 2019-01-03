@@ -11,9 +11,10 @@ import static data.content.DAXContentType._8X8D;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
+import static engine.EngineCallback.InputType.CONTINUE;
 import static engine.EngineCallback.InputType.STANDARD;
-import static engine.EngineCallback.InputType.TITLE;
 import static engine.InputAction.MAINMENU_ACTIONS;
+import static ui.Menu.MenuType.HORIZONTAL;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -22,6 +23,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import common.FileMap;
 import data.content.DAXContentType;
@@ -32,9 +36,10 @@ import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
 import data.content.MonocromeSymbols;
 import data.content.WallDef;
-import engine.opcodes.EclString;
+import types.GoldboxString;
 import ui.DungeonResources;
 import ui.FontType;
+import ui.Menu.MenuType;
 import ui.OverlandResources;
 import ui.SpaceResources;
 import ui.UICallback;
@@ -157,7 +162,7 @@ public class Engine implements EngineCallback, UICallback {
 				try {
 					for (int i = 1; i < 4; i++) {
 						ui.setPic(res.findImage(i, DAXContentType.TITLE).toList());
-						setInput(TITLE);
+						setInput(CONTINUE);
 						vm.wait(5000L);
 						if (abortCurrentThread) {
 							return;
@@ -180,8 +185,7 @@ public class Engine implements EngineCallback, UICallback {
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
-			ui.setInputMenu("BUCK ROGERS V1.2", FontType.GAME_NAME, MAINMENU_ACTIONS);
-			pauseCurrentThread();
+			setMenu(HORIZONTAL, MAINMENU_ACTIONS, new CustomGoldboxString("BUCK ROGERS V1.2"));
 			if (abortCurrentThread) {
 				return;
 			}
@@ -202,12 +206,8 @@ public class Engine implements EngineCallback, UICallback {
 			case NONE:
 				ui.setInputNone();
 				break;
-			case TITLE:
-				ui.setInputTitle();
-				break;
 			case CONTINUE:
 				ui.setInputContinue();
-				pauseCurrentThread();
 				break;
 			case STANDARD:
 				ui.setInputStandard();
@@ -228,8 +228,8 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
-	public void setMenu(List<InputAction> items) {
-		ui.setInputMenu(items);
+	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
+		ui.setInputMenu(type, menuItems, description);
 		pauseCurrentThread();
 	}
 
@@ -403,7 +403,7 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
-	public void addText(EclString str, boolean clear) {
+	public void addText(GoldboxString str, boolean clear) {
 		synchronized (vm) {
 			if (clear) {
 				ui.clearText();

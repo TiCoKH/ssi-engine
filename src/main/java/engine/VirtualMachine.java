@@ -1,8 +1,10 @@
 package engine;
 
-import static engine.EngineCallback.InputType.CONTINUE;
+import static engine.InputAction.CONTINUE_ACTION;
+import static engine.InputAction.CONTINUE_HANDLER;
 import static engine.InputAction.MENU_HANDLER;
 import static engine.InputAction.YES_NO_ACTIONS;
+import static ui.Menu.MenuType.HORIZONTAL;
 
 import java.util.Deque;
 import java.util.EnumMap;
@@ -12,12 +14,14 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
+
 import common.ByteBufferWrapper;
 import data.content.EclProgram;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
-import engine.opcodes.EclString;
+import types.GoldboxString;
 
 public class VirtualMachine {
 	private static final EclArgument SELECTED_PLAYER_NAME = new EclArgument(1, 3, 0x7C00);
@@ -142,7 +146,7 @@ public class VirtualMachine {
 		return a.isMemAddress() ? memory.readMemInt(a) : a.valueAsInt();
 	}
 
-	private EclString stringValue(EclArgument a) {
+	private GoldboxString stringValue(EclArgument a) {
 		if (!a.isStringValue()) {
 			return null;
 		}
@@ -208,12 +212,12 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.INPUT_NUMBER, inst -> {
 			engine.setInputNumber(intValue(inst.getArgument(0)));
-			int value = Integer.parseUnsignedInt(memory.getInput());
+			int value = Integer.parseUnsignedInt(memory.getInput().toString());
 			memory.writeMemInt(inst.getArgument(1), value);
 		});
 		IMPL.put(EclOpCode.INPUT_STRING, inst -> {
 			engine.setInputString(intValue(inst.getArgument(0)));
-			EclString value = new EclString(memory.getInput());
+			GoldboxString value = memory.getInput();
 			memory.writeMemString(inst.getArgument(1), value);
 		});
 		IMPL.put(EclOpCode.PRINT, inst -> {
@@ -221,14 +225,14 @@ public class VirtualMachine {
 			if (a0.isStringValue())
 				engine.addText(stringValue(a0), false);
 			else
-				engine.addText(new EclString(Integer.toString(intValue(a0))), false);
+				engine.addText(new CustomGoldboxString(Integer.toString(intValue(a0))), false);
 		});
 		IMPL.put(EclOpCode.PRINT_CLEAR, inst -> {
 			EclArgument a0 = inst.getArgument(0);
 			if (a0.isStringValue())
 				engine.addText(stringValue(a0), true);
 			else
-				engine.addText(new EclString(Integer.toString(intValue(a0))), true);
+				engine.addText(new CustomGoldboxString(Integer.toString(intValue(a0))), true);
 		});
 		IMPL.put(EclOpCode.RETURN, inst -> {
 			eclCode.position(gosubStack.pop());
@@ -317,19 +321,26 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.INPUT_RETURN, inst -> {
-			engine.setInput(CONTINUE);
+			engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
 		});
 		IMPL.put(EclOpCode.COPY_MEM, inst -> {
 			memory.copyMemInt(inst.getArgument(0), intValue(inst.getArgument(1)), inst.getArgument(2));
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
-			engine.setMenu(
-				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString().toString(), inst.getDynArgs().indexOf(arg)))
-					.collect(Collectors.toList()));
-			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
+			if (inst.getDynArgs().size() == 1) {
+				engine.setMenu(HORIZONTAL, ImmutableList.of( //
+					new InputAction(CONTINUE_HANDLER, stringValue(inst.getDynArgs().get(0)), -1) //
+				), null);
+			} else {
+				engine.setMenu(HORIZONTAL, //
+					inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
+						.collect(Collectors.toList()),
+					null);
+				memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
+			}
 		});
 		IMPL.put(EclOpCode.INPUT_YES_NO, inst -> {
-			engine.setMenu(YES_NO_ACTIONS);
+			engine.setMenu(HORIZONTAL, YES_NO_ACTIONS, null);
 			compareResult = memory.getMenuChoice();
 		});
 		IMPL.put(EclOpCode.CALL, inst -> {
@@ -355,10 +366,9 @@ public class VirtualMachine {
 			compareResult = result == 0 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
-			engine.addText(new EclString("WHAT DO YOU DO?"), false);
-			engine.setMenu(
-				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString().toString(), inst.getDynArgs().indexOf(arg)))
-					.collect(Collectors.toList()));
+			engine.addText(new CustomGoldboxString("WHAT DO YOU DO?"), false);
+			engine.setMenu(HORIZONTAL, inst.getDynArgs().stream()
+				.map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg))).collect(Collectors.toList()), null);
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, inst -> {
@@ -384,7 +394,7 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.WHO, inst -> {
 			// TODO Implement party management
-			memory.writeMemString(SELECTED_PLAYER_NAME, new EclString("THIS ONE"));
+			memory.writeMemString(SELECTED_PLAYER_NAME, new CustomGoldboxString("THIS ONE"));
 			memory.writeMemInt(SELECTED_PLAYER_MONEY, 10000);
 			memory.writeMemInt(SELECTED_PLAYER_STATUS, 1);
 		});
@@ -404,10 +414,10 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.LOGBOOK_ENTRY, inst -> {
-			engine.addText(new EclString(" AND YOU RECORD "), false);
+			engine.addText(new CustomGoldboxString(" AND YOU RECORD "), false);
 			engine.addText(stringValue(inst.getArgument(0)), false);
-			engine.addText(new EclString(" AS LOGBOOK ENTRY " + intValue(inst.getArgument(1)) + "."), false);
-			engine.setInput(CONTINUE);
+			engine.addText(new CustomGoldboxString(" AS LOGBOOK ENTRY " + intValue(inst.getArgument(1)) + "."), false);
+			engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
 		});
 		IMPL.put(EclOpCode.DESTROY_ITEM, inst -> {
 

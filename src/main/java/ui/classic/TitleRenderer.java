@@ -20,9 +20,19 @@ public class TitleRenderer extends AbstractRenderer {
 	}
 
 	@Override
+	public int getTextStartX() {
+		return 0;
+	}
+
+	@Override
+	public int getTextStartY() {
+		return 0;
+	}
+
+	@Override
 	public void render(@Nonnull Graphics2D g2d) {
 		renderTitle(g2d);
-		renderStatus(g2d);
+		renderMenuOrTextStatus(g2d);
 	}
 
 	private void renderTitle(@Nonnull Graphics2D g2d) {

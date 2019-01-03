@@ -27,8 +27,7 @@ public class SpaceTravelRenderer extends StoryRenderer {
 		renderBorders(g2d, SPACE);
 		renderSpace(g2d);
 		renderPicture(g2d, 3);
-		renderText(g2d);
-		renderStatus(g2d);
+		renderMenuOrTextStatus(g2d);
 	}
 
 	protected void renderSpace(@Nonnull Graphics2D g2d) {

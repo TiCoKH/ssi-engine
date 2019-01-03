@@ -10,7 +10,8 @@ import org.junit.Test;
 import data.ContentFile;
 import data.content.DAXContentType;
 import data.content.EclProgram;
-import engine.opcodes.EclString;
+import types.GoldboxString;
+import ui.Menu.MenuType;
 
 public class VirtualMachineTest {
 
@@ -42,7 +43,7 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void setMenu(List<InputAction> action) {
+			public void setMenu(MenuType type, List<InputAction> menuItems, GoldboxString description) {
 			}
 
 			@Override
@@ -58,7 +59,7 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void addText(EclString str, boolean clear) {
+			public void addText(GoldboxString str, boolean clear) {
 			}
 
 			@Override

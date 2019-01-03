@@ -5,7 +5,6 @@ import static engine.InputAction.INPUT_HANDLER;
 import static engine.InputAction.LOAD;
 import static engine.InputAction.QUIT;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static ui.FontType.INTENSE;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,18 +30,23 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import engine.InputAction;
-import engine.opcodes.EclString;
+import types.GoldboxString;
 import ui.DungeonResources;
-import ui.FontType;
+import ui.GoldboxStringInput;
+import ui.Menu;
+import ui.Menu.MenuType;
 import ui.OverlandResources;
 import ui.SpaceResources;
-import ui.StatusLine;
 import ui.UICallback;
 import ui.UIResources;
 import ui.UISettings;
 import ui.UIState;
 
 public class ClassicMode extends JPanel {
+	private static final String MENU_PREV = "__MENU_PREV";
+	private static final String MENU_NEXT = "__MENU_NEXT";
+	private static final String MENU_ACTION = "__MENU_ACTION";
+
 	private static final String INPUT_NUMBER = "INPUT NUMBER: ";
 	private static final String INPUT_STRING = "INPUT STRING: ";
 
@@ -83,8 +86,7 @@ public class ClassicMode extends JPanel {
 	private transient ScheduledThreadPoolExecutor exec;
 	private transient ScheduledFuture<?> animationFuture;
 
-	private StringBuilder input = new StringBuilder();
-	private String inputPrefix = null;
+	private transient GoldboxStringInput input = null;
 
 	public ClassicMode(@Nonnull UICallback callback, @Nonnull UIResources resources, @Nonnull UISettings settings) {
 		this.callback = callback;
@@ -146,43 +148,72 @@ public class ClassicMode extends JPanel {
 		resetInput();
 	}
 
-	public void setInputTitle() {
-		resetInput();
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
-		mapToAction(CONTINUE);
-	}
-
 	public void setInputContinue() {
 		resetInput();
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
 		mapToAction(CONTINUE);
-		resources.setStatusLine(StatusLine.of("PRESS BUTTON OR RETURN TO CONTINUE", INTENSE));
 	}
 
-	public void setInputMenu(@Nonnull List<InputAction> newActions) {
-		setInputMenu(null, null, newActions);
+	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems) {
+		setInputMenu(type, menuItems, null);
 	}
 
-	public void setInputMenu(@Nullable String statusLine, @Nullable FontType textFont, @Nonnull List<InputAction> newActions) {
+	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
 		resetInput();
 
-		newActions.stream().forEach(a -> {
-			KeyStroke k = KeyStroke.getKeyStroke(a.getName().toLowerCase().charAt(0));
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
-			mapToAction(a);
+		if (menuItems.size() > 1) {
+			menuItems.stream().filter(a -> a.getName().isPresent()).forEach(a -> {
+				KeyStroke k = KeyStroke.getKeyStroke(Character.toLowerCase(a.getName().get().toString().charAt(0)));
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
+				mapToAction(a);
+			});
+			if (type == MenuType.HORIZONTAL) {
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), MENU_PREV);
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), MENU_PREV);
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), MENU_NEXT);
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0), MENU_NEXT);
+			} else {
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), MENU_PREV);
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), MENU_PREV);
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), MENU_NEXT);
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), MENU_NEXT);
+			}
+			getActionMap().put(MENU_PREV, new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					resources.getMenu().ifPresent(Menu::prev);
+				}
+			});
+			getActionMap().put(MENU_NEXT, new AbstractAction() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					resources.getMenu().ifPresent(Menu::next);
+				}
+			});
+		}
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), MENU_ACTION);
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), MENU_ACTION);
+		getActionMap().put(MENU_ACTION, new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				resources.getMenu().ifPresent(m -> {
+					resources.setMenu(null);
+					callback.handleInput(m.getSelectedItem());
+				});
+			}
 		});
 
-		List<String> menu = newActions.stream().map(InputAction::getName).collect(Collectors.toList());
-		resources.setStatusLine(StatusLine.of(statusLine, textFont, menu));
+		resources.setMenu(new Menu(type, menuItems, description));
 	}
 
 	public void setInputNumber(int maxDigits) {
 		resetInput();
-		input.setLength(0);
-		inputPrefix = INPUT_NUMBER;
-		resources.setStatusLine(StatusLine.of(inputPrefix, FontType.NORMAL));
+		input = new GoldboxStringInput(INPUT_NUMBER, maxDigits);
+		resources.setStatusLine(input);
 		for (char c = '0'; c <= '9'; c++) {
 			Character d = c;
 			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
@@ -190,13 +221,10 @@ public class ClassicMode extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (input.length() < maxDigits) {
-						input.append(d);
-					}
-					if (input.length() == 1) {
+					input.addChar(d);
+					if (input.getInputCount() == 1) {
 						mapInputDone();
 					}
-					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
 				}
 			});
 		}
@@ -205,9 +233,8 @@ public class ClassicMode extends JPanel {
 
 	public void setInputString(int maxLetters) {
 		resetInput();
-		input.setLength(0);
-		inputPrefix = INPUT_STRING;
-		resources.setStatusLine(StatusLine.of(inputPrefix, FontType.NORMAL));
+		input = new GoldboxStringInput(INPUT_STRING, maxLetters);
+		resources.setStatusLine(input);
 		for (char c = 'a'; c <= 'z'; c++) {
 			Character d = c;
 			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
@@ -215,13 +242,10 @@ public class ClassicMode extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (input.length() < maxLetters) {
-						input.append(Character.toUpperCase(d));
-					}
-					if (input.length() == 1) {
+					input.addChar(Character.toUpperCase(d));
+					if (input.getInputCount() == 1) {
 						mapInputDone();
 					}
-					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
 				}
 			});
 		}
@@ -232,13 +256,10 @@ public class ClassicMode extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (input.length() < maxLetters) {
-						input.append(d);
-					}
-					if (input.length() == 1) {
+					input.addChar(Character.toUpperCase(d));
+					if (input.getInputCount() == 1) {
 						mapInputDone();
 					}
-					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
 				}
 			});
 		}
@@ -249,13 +270,10 @@ public class ClassicMode extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (input.length() < maxLetters) {
-						input.append(d);
-					}
-					if (input.length() == 1) {
+					input.addChar(Character.toUpperCase(d));
+					if (input.getInputCount() == 1) {
 						mapInputDone();
 					}
-					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
 				}
 			});
 		}
@@ -268,10 +286,7 @@ public class ClassicMode extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (input.length() > 0) {
-					input.setLength(input.length() - 1);
-					resources.getStatusLine().ifPresent(s -> s.setText(inputPrefix + input));
-				}
+				input.removeLastChar();
 			}
 		});
 	}
@@ -282,7 +297,7 @@ public class ClassicMode extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				resources.setStatusLine(null);
+				clearStatus();
 				callback.handleInput(new InputAction(INPUT_HANDLER, input.toString(), -1));
 			}
 		});
@@ -322,7 +337,7 @@ public class ClassicMode extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				resources.setStatusLine(null);
+				resources.setMenu(null);
 				callback.handleInput(a);
 			}
 		});
@@ -332,8 +347,8 @@ public class ClassicMode extends JPanel {
 		resources.setStatusLine(null);
 	}
 
-	public void setStatus(@Nonnull String status) {
-		resources.setStatusLine(StatusLine.of(status));
+	public void setStatus(@Nonnull GoldboxString status) {
+		resources.setStatusLine(status);
 	}
 
 	public void setDungeonResources(@Nonnull DungeonResources dungeonResources) {
@@ -403,7 +418,7 @@ public class ClassicMode extends JPanel {
 		resources.setCharList(null);
 	}
 
-	public void addText(EclString text) {
+	public void addText(GoldboxString text) {
 		List<Byte> newCharList = new ArrayList<>();
 
 		int lineWidth = renderers.get(currentState).getLineWidth();

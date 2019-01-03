@@ -1,6 +1,10 @@
 package engine;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
@@ -14,12 +18,14 @@ import engine.input.OverlandMovementHandler;
 import engine.input.QuitHandler;
 import engine.input.SaveHandler;
 import engine.input.SpaceMovementHandler;
+import types.GoldboxString;
 
 public class InputAction {
 	private static final InputHandler DUNGEON_MOVEMENT_HANDLER = new DungeonMovementHandler();
 	private static final InputHandler OVERLAND_MOVEMENT_HANDLER = new OverlandMovementHandler();
 	private static final InputHandler SPACE_MOVEMENT_HANDLER = new SpaceMovementHandler();
 
+	public static final InputHandler CONTINUE_HANDLER = new ContinueHandler();
 	public static final InputHandler MENU_HANDLER = new MenuHandler();
 	public static final InputHandler INPUT_HANDLER = new InputNumberStringHandler();
 
@@ -29,7 +35,7 @@ public class InputAction {
 	private static final InputAction YES = new InputAction(MENU_HANDLER, "YES", 0);
 	private static final InputAction NO = new InputAction(MENU_HANDLER, "NO", 1);
 
-	public static final InputAction CONTINUE = new InputAction(new ContinueHandler());
+	public static final InputAction CONTINUE = new InputAction(CONTINUE_HANDLER, "PRESS BUTTON OR RETURN TO CONTINUE", 0);
 
 	public static final InputAction LOAD = new InputAction(new LoadHandler());
 	public static final InputAction SAVE = new InputAction(new SaveHandler());
@@ -56,18 +62,23 @@ public class InputAction {
 	public static final List<InputAction> OVERLAND_MOVEMENT = ImmutableList.of(MOVE_OVERLAND_UP, MOVE_OVERLAND_LEFT, MOVE_OVERLAND_RIGHT,
 		MOVE_OVERLAND_DOWN, SAVE);
 	public static final List<InputAction> SPACE_MOVEMENT = ImmutableList.of(MOVE_SPACE_UP, MOVE_SPACE_LEFT, MOVE_SPACE_RIGHT, MOVE_SPACE_DOWN, SAVE);
+	public static final List<InputAction> CONTINUE_ACTION = ImmutableList.of(CONTINUE);
 
 	private final InputHandler handler;
-	private final String name;
+	private final Optional<GoldboxString> name;
 	private final int index;
 
-	public InputAction(InputHandler handler) {
-		this(handler, "", -1);
+	public InputAction(@Nonnull InputHandler handler) {
+		this(handler, (GoldboxString) null, -1);
 	}
 
-	public InputAction(InputHandler handler, String name, int index) {
+	public InputAction(@Nonnull InputHandler handler, @Nullable String name, int index) {
+		this(handler, name != null ? new CustomGoldboxString(name) : null, index);
+	}
+
+	public InputAction(@Nonnull InputHandler handler, @Nullable GoldboxString name, int index) {
 		this.handler = handler;
-		this.name = name;
+		this.name = Optional.ofNullable(name);
 		this.index = index;
 	}
 
@@ -75,7 +86,7 @@ public class InputAction {
 		return handler;
 	}
 
-	public String getName() {
+	public Optional<GoldboxString> getName() {
 		return name;
 	}
 

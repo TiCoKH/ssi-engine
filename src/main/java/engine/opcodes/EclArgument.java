@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import common.ByteBufferWrapper;
+import types.GoldboxString;
 
 public class EclArgument {
 	private int type;
@@ -38,7 +39,7 @@ public class EclArgument {
 				int strLen = eclBlock.getUnsigned();
 				byte[] cmpString = new byte[strLen];
 				eclBlock.get(cmpString);
-				EclString value = decompressString(cmpString);
+				GoldboxString value = decompressString(cmpString);
 				return new EclArgument(type, 2 + strLen, value);
 			}
 			default: {
@@ -54,7 +55,7 @@ public class EclArgument {
 	 * @param data
 	 * @return
 	 */
-	private static EclString decompressString(byte[] data) {
+	private static GoldboxString decompressString(byte[] data) {
 		int state = 1;
 		int lastByte = 0;
 
@@ -121,7 +122,7 @@ public class EclArgument {
 		return (Integer) value;
 	}
 
-	public EclString valueAsString() {
+	public GoldboxString valueAsString() {
 		return (EclString) value;
 	}
 

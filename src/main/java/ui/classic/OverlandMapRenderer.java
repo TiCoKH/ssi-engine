@@ -19,8 +19,7 @@ public class OverlandMapRenderer extends StoryRenderer {
 	public void render(@Nonnull Graphics2D g2d) {
 		renderBorders(g2d, BIGPIC);
 		renderMap(g2d);
-		renderText(g2d);
-		renderStatus(g2d);
+		renderMenuOrTextStatus(g2d);
 	}
 
 	protected void renderMap(@Nonnull Graphics2D g2d) {

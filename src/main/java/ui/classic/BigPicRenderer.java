@@ -19,7 +19,6 @@ public class BigPicRenderer extends StoryRenderer {
 	public void render(Graphics2D g2d) {
 		renderBorders(g2d, BIGPIC);
 		renderPicture(g2d, 1);
-		renderText(g2d);
-		renderStatus(g2d);
+		renderMenuOrTextStatus(g2d);
 	}
 }

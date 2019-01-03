@@ -13,7 +13,7 @@ import data.content.DungeonMap.VisibleWalls;
 import data.content.WallDef;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
-import engine.opcodes.EclString;
+import types.GoldboxString;
 import ui.UIResources;
 import ui.UISettings;
 
@@ -30,8 +30,7 @@ public class DungeonRenderer extends StoryRenderer {
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
 		renderBorders(g2d, GAME);
-		renderText(g2d);
-		renderStatus(g2d);
+		renderMenuOrTextStatus(g2d);
 		if (resources.getPic().isPresent() && !resources.preferSprite()) {
 			renderPicture(g2d, 3);
 		} else {
@@ -86,7 +85,7 @@ public class DungeonRenderer extends StoryRenderer {
 
 	private void renderPosition(@Nonnull Graphics2D g2d) {
 		resources.getDungeonResources().ifPresent(r -> {
-			EclString position = new EclString(r.getPosition());
+			GoldboxString position = r.getPositionText();
 			for (int pos = 0; pos < position.getLength(); pos++) {
 				renderChar(g2d, 17 + pos, 15, position.getChar(pos), NORMAL);
 			}
