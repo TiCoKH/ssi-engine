@@ -48,6 +48,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_MOVEMENT_BLOCK = 0x7EC9;
 	public static final int MEMLOC_TRIED_TO_LEAVE_MAP = 0x7ED5;
 	public static final int MEMLOC_PICTURE_HEAD_ID = 0x7EE1;
+	public static final int MEMLOC_DIVISION_MODULO = 0x7F3F;
 	public static final int MEMLOC_DUNGEON_X = 0xC04B;
 	public static final int MEMLOC_DUNGEON_Y = 0xC04C;
 	public static final int MEMLOC_DUNGEON_DIR = 0xC04D;
@@ -428,6 +429,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setPictureHeadId(int pictureHeadId) {
 		mem.put(MEMLOC_PICTURE_HEAD_ID, (byte) pictureHeadId);
+	}
+
+	public int getDivisionModulo() {
+		return mem.getUnsigned(MEMLOC_DIVISION_MODULO);
+	}
+
+	public void setDivisionModulo(int divisionModulo) {
+		mem.put(MEMLOC_DIVISION_MODULO, (byte) divisionModulo);
 	}
 
 	@Override
