@@ -1,9 +1,13 @@
 package data.content;
 
+import static data.content.ImageContentProperties.X_OFFSET;
+import static data.content.ImageContentProperties.Y_OFFSET;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.Hashtable;
 
 import javax.annotation.Nonnull;
 
@@ -23,15 +27,19 @@ public class VGADependentImages extends DAXImageContent {
 
 		int imageSize = width * height;
 
+		Hashtable<String, Integer> props = new Hashtable<>();
+		props.put(X_OFFSET.name(), xStart);
+		props.put(Y_OFFSET.name(), yStart);
+
 		IndexColorModel cm = DAXPalette.createColorModel(data, 11, colorCount, colorBase, type);
 
 		byte[] egaColorMapping = new byte[colorCount >> 1];
 		data.position(11 + 3 * colorCount);
 		data.get(egaColorMapping);
 
-		data.position(data.position() + 4); // unkown
+		data.position(data.position() + 4); // unknown
 		int baseImage = data.getUnsigned();
-		data.position(data.position() + 1); // unkown
+		data.position(data.position() + 1); // unknown
 		data.position(data.position() + 3 * imageCount); // image packed sizes + 1 byte value
 
 		ByteBufferWrapper allImageData = uncompress(data.slice(), imageCount * imageSize);
@@ -55,7 +63,7 @@ public class VGADependentImages extends DAXImageContent {
 			DataBufferByte db = new DataBufferByte(imageData, imageSize);
 			WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 }, null);
 
-			images.add(new BufferedImage(cm, r, false, null));
+			images.add(new BufferedImage(cm, r, false, props));
 		}
 	}
 
