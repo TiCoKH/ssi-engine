@@ -11,8 +11,6 @@ import static data.content.DAXContentType._8X8D;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
-import static engine.EngineCallback.InputType.CONTINUE;
-import static engine.EngineCallback.InputType.STANDARD;
 import static engine.InputAction.MAINMENU_ACTIONS;
 import static ui.Menu.MenuType.HORIZONTAL;
 
@@ -162,7 +160,7 @@ public class Engine implements EngineCallback, UICallback {
 				try {
 					for (int i = 1; i < 4; i++) {
 						ui.setPic(res.findImage(i, DAXContentType.TITLE).toList());
-						setInput(CONTINUE);
+						ui.setInputContinue();
 						vm.wait(5000L);
 						if (abortCurrentThread) {
 							return;
@@ -198,21 +196,6 @@ public class Engine implements EngineCallback, UICallback {
 	@Override
 	public void handleInput(InputAction action) {
 		this.nextAction = action;
-	}
-
-	@Override
-	public void setInput(InputType inputType) {
-		switch (inputType) {
-			case NONE:
-				ui.setInputNone();
-				break;
-			case CONTINUE:
-				ui.setInputContinue();
-				break;
-			case STANDARD:
-				ui.setInputStandard();
-				break;
-		}
 	}
 
 	@Override
@@ -267,7 +250,7 @@ public class Engine implements EngineCallback, UICallback {
 					clearPics();
 				}
 				clearSprite();
-				setInput(STANDARD);
+				ui.setInputStandard();
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}

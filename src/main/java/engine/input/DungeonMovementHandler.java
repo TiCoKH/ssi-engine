@@ -1,7 +1,5 @@
 package engine.input;
 
-import static engine.EngineCallback.InputType.STANDARD;
-
 import data.content.DungeonMap;
 import engine.Engine;
 import engine.InputAction;
@@ -45,7 +43,7 @@ public class DungeonMovementHandler implements InputHandler {
 			}
 			engine.updatePosition();
 			engine.clearPics();
-			engine.setInput(STANDARD);
+			engine.getUi().setInputStandard();
 		}, "VM");
 	}
 }

@@ -13,8 +13,6 @@ public interface EngineCallback {
 
 	void clearPics();
 
-	void setInput(InputType inputType);
-
 	void setInputNumber(int maxDigits);
 
 	void setInputString(int maxLetters);
@@ -44,8 +42,4 @@ public interface EngineCallback {
 	void updatePosition();
 
 	void delayCurrentThread();
-
-	public enum InputType {
-		NONE, CONTINUE, STANDARD;
-	}
 }

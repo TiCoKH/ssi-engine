@@ -1,7 +1,5 @@
 package engine.input;
 
-import static engine.EngineCallback.InputType.STANDARD;
-
 import common.MathUtil;
 import engine.Engine;
 import engine.InputAction;
@@ -46,7 +44,7 @@ public class SpaceMovementHandler implements InputHandler {
 				return;
 			}
 
-			engine.setInput(STANDARD);
+			engine.getUi().setInputStandard();
 		}, "VM");
 	}
 }

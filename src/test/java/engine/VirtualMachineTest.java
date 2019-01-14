@@ -31,10 +31,6 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void setInput(InputType inputType) {
-			}
-
-			@Override
 			public void setInputNumber(int maxDigits) {
 			}
 
