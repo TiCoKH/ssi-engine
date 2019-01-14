@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.image.IndexColorModel;
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import common.ByteBufferWrapper;
 
 public class DAXPalette {
@@ -28,18 +31,30 @@ public class DAXPalette {
 	private static final Color COLOR_WHITE = new Color(0xFFFFFF);
 
 	private static final Color[] COLOR_GAME_STATIC = { COLOR_BLACK, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
-
+	private static final Color[] COLOR_SPRITE_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_BLACK, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 	private static final Color[] COLOR_COMBAT_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_BLACK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 
-	public static IndexColorModel createGameColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart) {
-		return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC);
+	public static IndexColorModel createColorModel(@Nonnull ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart,
+		@Nonnull DAXContentType type) {
+
+		switch (type) {
+			case _8X8D:
+			case BACK:
+				return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC, COLOR_MAGENTA_BRIGHT);
+			case BIGPIC:
+			case PIC:
+			case TITLE:
+				return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_GAME_STATIC, null);
+			case SPRIT:
+				return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_SPRITE_STATIC, COLOR_TRANSPARENT);
+			default:
+				throw new IllegalArgumentException("illegal image type: " + type.name());
+		}
 	}
 
-	public static IndexColorModel createCombatColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart) {
-		return createColorModel(data, dataOffset, colorCount, colorStart, COLOR_COMBAT_STATIC);
-	}
+	private static IndexColorModel createColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart, Color[] staticColors,
+		@Nullable Color transparent) {
 
-	private static IndexColorModel createColorModel(ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart, Color[] staticColors) {
 		byte[] r = new byte[256];
 		byte[] g = new byte[256];
 		byte[] b = new byte[256];
@@ -57,29 +72,11 @@ public class DAXPalette {
 			g[colorStart + i] = (byte) (data.get(dataOffset + 3 * i + 1) << 2);
 			b[colorStart + i] = (byte) (data.get(dataOffset + 3 * i + 2) << 2);
 		}
-		return new IndexColorModel(8, 256, r, g, b);
-	}
 
-	public static IndexColorModel transformToWallPalette(IndexColorModel cm) {
-		byte[] r = new byte[256];
-		byte[] g = new byte[256];
-		byte[] b = new byte[256];
-		cm.getReds(r);
-		cm.getGreens(g);
-		cm.getBlues(b);
-
-		return new IndexColorModel(8, 256, r, g, b, Arrays.asList(COLOR_GAME_STATIC).indexOf(COLOR_MAGENTA_BRIGHT));
-	}
-
-	public static IndexColorModel transformToSpritePalette(IndexColorModel cm) {
-		byte[] r = new byte[256];
-		byte[] g = new byte[256];
-		byte[] b = new byte[256];
-		cm.getReds(r);
-		cm.getGreens(g);
-		cm.getBlues(b);
-
-		return new IndexColorModel(8, 256, r, g, b, Arrays.asList(COLOR_GAME_STATIC).indexOf(COLOR_BLACK));
+		if (transparent == null)
+			return new IndexColorModel(8, 256, r, g, b);
+		else
+			return new IndexColorModel(8, 256, r, g, b, Arrays.asList(staticColors).indexOf(transparent));
 	}
 
 	public static IndexColorModel binaryInvertedPalette() {

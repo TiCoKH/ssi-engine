@@ -284,7 +284,7 @@ public class Engine implements EngineCallback, UICallback {
 			} else if (currentMap.isPresent()) {
 				WallDef walls = res.find(id1, WallDef.class, WALLDEF);
 
-				List<BufferedImage> wallSymbols = res.findImage(id1, _8X8D).withWallSymbolColor();
+				List<BufferedImage> wallSymbols = res.findImage(id1, _8X8D).toList();
 
 				List<BufferedImage> backdrops = new ArrayList<>();
 				backdrops.add(res.findImage(128 + id1, BACK).get(0));
@@ -321,7 +321,7 @@ public class Engine implements EngineCallback, UICallback {
 		try {
 			DAXImageContent sprite = res.findImage(spriteId, SPRIT);
 			DAXImageContent pic = res.findImage(picId, PIC);
-			ui.setSprite(sprite.withSpriteColor(), pic != null ? pic.toList() : null, index);
+			ui.setSprite(sprite.toList(), pic != null ? pic.toList() : null, index);
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
@@ -373,7 +373,7 @@ public class Engine implements EngineCallback, UICallback {
 				try {
 					DAXImageContent map = res.findImage(id, BIGPIC);
 					DAXImageContent cursor = res.getOverlandCursor();
-					ui.setOverlandResources(new OverlandResources(memory, map.get(0), cursor.withWallSymbolColor().get(0)));
+					ui.setOverlandResources(new OverlandResources(memory, map.get(0), cursor.get(0)));
 					ui.setUIState(UIState.OVERLAND);
 					memory.setAreaDecoValues(255, 127, 127);
 				} catch (IOException e) {

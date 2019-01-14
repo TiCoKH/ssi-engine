@@ -26,7 +26,7 @@ public class VGAImage extends DAXImageContent {
 		int imageSize = width * height;
 		int imageOffset = data.capacity() - (imageCount * imageSize);
 
-		IndexColorModel cm = DAXPalette.createGameColorModel(data, 10, colorCount, colorBase);
+		IndexColorModel cm = DAXPalette.createColorModel(data, 10, colorCount, colorBase, type);
 
 		data.position(imageOffset);
 		for (int i = 0; i < imageCount; i++, imageOffset += imageSize) {

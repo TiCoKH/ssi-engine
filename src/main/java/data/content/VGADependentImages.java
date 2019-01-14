@@ -23,7 +23,7 @@ public class VGADependentImages extends DAXImageContent {
 
 		int imageSize = width * height;
 
-		IndexColorModel cm = DAXPalette.createGameColorModel(data, 11, colorCount, colorBase);
+		IndexColorModel cm = DAXPalette.createColorModel(data, 11, colorCount, colorBase, type);
 
 		byte[] egaColorMapping = new byte[colorCount >> 1];
 		data.position(11 + 3 * colorCount);

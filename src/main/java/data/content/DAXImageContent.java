@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class DAXImageContent extends DAXContent {
@@ -86,13 +85,5 @@ public abstract class DAXImageContent extends DAXContent {
 
 	public List<BufferedImage> toList() {
 		return new ArrayList<>(images);
-	}
-
-	public List<BufferedImage> withWallSymbolColor() {
-		return images.stream().map(CONVERTER::asWallSymbol).collect(Collectors.toList());
-	}
-
-	public List<BufferedImage> withSpriteColor() {
-		return images.stream().map(CONVERTER::asSprite).collect(Collectors.toList());
 	}
 }
