@@ -14,7 +14,13 @@ import static engine.opcodes.EclOpCode.RETURN;
 import static engine.opcodes.EclOpCode.STOP_MOVE_23;
 import static engine.opcodes.EclOpCode.STOP_MOVE_42;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
@@ -30,7 +36,15 @@ public class EclinstructionWrapper implements EclInstructionData {
 	private EclInstruction inst;
 	private boolean conditional;
 
-	public EclinstructionWrapper(EclInstruction inst, boolean conditional) {
+	private Map<Integer, String> argumentNames = new HashMap<>();
+
+	private Optional<EclArgument> lArgBase = Optional.empty();
+	private Optional<EclArgument> lArgOffset = Optional.empty();
+	private Optional<String> lArgBaseName = Optional.empty();
+	private Optional<String> lArgOffsetName = Optional.empty();
+	private Optional<String> rArgExpression = Optional.empty();
+
+	public EclinstructionWrapper(@Nonnull EclInstruction inst, boolean conditional) {
 		this.inst = inst;
 		this.conditional = conditional;
 	}
@@ -52,7 +66,13 @@ public class EclinstructionWrapper implements EclInstructionData {
 
 	@Override
 	public String getCodeline() {
-		return toString();
+		if (lArgBase.isPresent() && lArgOffset.isPresent()) {
+			return String.format("[%s + %s] = %s", //
+				lArgBaseName.orElse(lArgBase.get().toString()), //
+				lArgOffsetName.orElse(lArgOffset.get().toString()), //
+				rArgExpression.orElse(toString()));
+		}
+		return lArgBase.map(a -> lArgBaseName.orElse(a.toString()) + " = ").orElse("") + rArgExpression.orElse(toString());
 	}
 
 	public boolean isBlockFinisher() {
@@ -67,6 +87,10 @@ public class EclinstructionWrapper implements EclInstructionData {
 		return inst.getArgument(index);
 	}
 
+	public String getArgumentName(int index) {
+		return argumentNames.get(index);
+	}
+
 	public EclArgument[] getArguments() {
 		return inst.getArguments();
 	}
@@ -77,6 +101,47 @@ public class EclinstructionWrapper implements EclInstructionData {
 
 	public EclOpCode getOpCode() {
 		return inst.getOpCode();
+	}
+
+	public void setlArgBase(@Nonnull EclArgument lArgBase) {
+		this.lArgBase = Optional.of(lArgBase);
+	}
+
+	public void setlArgOffset(@Nonnull EclArgument lArgOffset) {
+		this.lArgOffset = Optional.of(lArgOffset);
+	}
+
+	public void setlArgBaseName(@Nonnull String lArgBaseName) {
+		this.lArgBaseName = Optional.of(lArgBaseName);
+	}
+
+	public void setlArgOffsetName(@Nonnull String lArgOffsetName) {
+		this.lArgOffsetName = Optional.of(lArgOffsetName);
+	}
+
+	public void setrArgExpression(@Nonnull String rArgExpression) {
+		this.rArgExpression = Optional.of(rArgExpression);
+	}
+
+	public void setrArgName(int index, String name) {
+		argumentNames.put(index, name);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(inst);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof EclinstructionWrapper)) {
+			return false;
+		}
+		EclinstructionWrapper other = (EclinstructionWrapper) obj;
+		return Objects.equals(inst, other.inst);
 	}
 
 	@Override

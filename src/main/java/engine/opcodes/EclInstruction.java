@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import common.ByteBufferWrapper;
@@ -82,6 +83,23 @@ public class EclInstruction {
 			return null;
 		}
 		return arguments[index];
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(opCode, position);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof EclInstruction)) {
+			return false;
+		}
+		EclInstruction other = (EclInstruction) obj;
+		return opCode == other.opCode && position == other.position;
 	}
 
 	@Override
