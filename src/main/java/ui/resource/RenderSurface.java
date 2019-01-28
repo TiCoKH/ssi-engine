@@ -2,6 +2,8 @@ package ui.resource;
 
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
+import static data.content.ImageContentProperties.X_OFFSET;
+import static data.content.ImageContentProperties.Y_OFFSET;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.FAR;
 import static data.content.WallDef.WallDistance.MEDIUM;
@@ -134,8 +136,10 @@ public class RenderSurface extends JPanel implements Scrollable {
 					}
 				} else {
 					BufferedImage image = resman.getImageResource(ir).get(index);
-					adaptSize(image.getWidth(), image.getHeight());
-					g2d.drawImage(image, 0, 0, null);
+					int xOffset = settings.zoom(Math.abs((int) image.getProperty(X_OFFSET.name())));
+					int yOffset = settings.zoom(Math.abs((int) image.getProperty(Y_OFFSET.name())));
+					adaptSize(image.getWidth() + xOffset, image.getHeight() + yOffset);
+					g2d.drawImage(image, xOffset, yOffset, null);
 				}
 			} else if (o instanceof DungeonResource) {
 				DungeonResource res = (DungeonResource) o;

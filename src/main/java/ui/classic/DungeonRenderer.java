@@ -1,5 +1,7 @@
 package ui.classic;
 
+import static data.content.ImageContentProperties.X_OFFSET;
+import static data.content.ImageContentProperties.Y_OFFSET;
 import static ui.FontType.NORMAL;
 import static ui.UIFrame.GAME;
 
@@ -47,7 +49,11 @@ public class DungeonRenderer extends StoryRenderer {
 			renderVisibleWalls(g2d, r.getVisibleWalls(), r.getWalls());
 
 			r.getSprite().ifPresent(sprite -> {
-				renderImage(g2d, sprite, 3, 3);
+				int xOffset = Math.abs((int) sprite.getProperty(X_OFFSET.name()));
+				int yOffset = Math.abs((int) sprite.getProperty(Y_OFFSET.name()));
+				int x = settings.zoom8(3) + settings.zoom(xOffset);
+				int y = settings.zoom8(3) + settings.zoom(yOffset);
+				g2d.drawImage(sprite, x, y, null);
 			});
 		});
 	}

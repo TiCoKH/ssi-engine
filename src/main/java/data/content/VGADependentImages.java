@@ -28,8 +28,8 @@ public class VGADependentImages extends DAXImageContent {
 		int imageSize = width * height;
 
 		Hashtable<String, Integer> props = new Hashtable<>();
-		props.put(X_OFFSET.name(), xStart);
-		props.put(Y_OFFSET.name(), yStart);
+		props.put(X_OFFSET.name(), 8 * xStart);
+		props.put(Y_OFFSET.name(), 8 * yStart);
 
 		IndexColorModel cm = DAXPalette.createColorModel(data, 11, colorCount, colorBase, type);
 

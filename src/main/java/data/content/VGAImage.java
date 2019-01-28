@@ -29,8 +29,8 @@ public class VGAImage extends DAXImageContent {
 		int imageOffset = data.capacity() - (imageCount * imageSize);
 
 		Hashtable<String, Integer> props = new Hashtable<>();
-		props.put(X_OFFSET.name(), xStart);
-		props.put(Y_OFFSET.name(), yStart);
+		props.put(X_OFFSET.name(), 8 * xStart);
+		props.put(Y_OFFSET.name(), 8 * yStart);
 
 		IndexColorModel cm = DAXPalette.createColorModel(data, 10, colorCount, colorBase, type);
 
