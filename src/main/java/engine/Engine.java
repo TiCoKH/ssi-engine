@@ -34,6 +34,7 @@ import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
 import data.content.MonocromeSymbols;
 import data.content.WallDef;
+import types.CustomGoldboxString;
 import types.GoldboxString;
 import ui.DungeonResources;
 import ui.FontType;

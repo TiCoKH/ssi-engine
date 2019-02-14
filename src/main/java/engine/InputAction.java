@@ -18,6 +18,7 @@ import engine.input.OverlandMovementHandler;
 import engine.input.QuitHandler;
 import engine.input.SaveHandler;
 import engine.input.SpaceMovementHandler;
+import types.CustomGoldboxString;
 import types.GoldboxString;
 
 public class InputAction {

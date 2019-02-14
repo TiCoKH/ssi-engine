@@ -1,11 +1,9 @@
-package engine;
+package types;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-
-import types.GoldboxString;
 
 public class CustomGoldboxString extends GoldboxString {
 	protected List<Byte> content = new ArrayList<>();

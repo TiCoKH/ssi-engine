@@ -21,6 +21,7 @@ import data.content.EclProgram;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
+import types.CustomGoldboxString;
 import types.GoldboxString;
 
 public class VirtualMachine {

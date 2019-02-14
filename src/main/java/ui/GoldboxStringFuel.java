@@ -2,8 +2,8 @@ package ui;
 
 import javax.annotation.Nonnull;
 
-import engine.CustomGoldboxString;
 import engine.ViewSpacePosition;
+import types.CustomGoldboxString;
 
 public class GoldboxStringFuel extends CustomGoldboxString {
 	private ViewSpacePosition position;
