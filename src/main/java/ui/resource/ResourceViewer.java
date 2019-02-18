@@ -14,6 +14,8 @@ import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
 import static shared.GameFeature.BODY_HEAD;
+import static shared.GameFeature.FLEXIBLE_DUNGEON_SIZE;
+import static shared.GameFeature.OVERLAND_DUNGEON;
 
 import java.awt.BorderLayout;
 import java.io.File;
@@ -36,7 +38,7 @@ import data.ContentFile;
 import data.DAXFile;
 import data.content.DAXContentType;
 import data.content.DungeonMap;
-import shared.GameFeature;
+import data.content.DungeonMap2;
 import ui.BackdropMode;
 import ui.DungeonMapResource;
 import ui.DungeonResource;
@@ -195,8 +197,13 @@ public class ResourceViewer {
 
 		MutableTreeNode parent = new DefaultMutableTreeNode(GEO.name());
 		for (Integer id : ids) {
-			DungeonMap dungeon = loader.find(id, DungeonMap.class, GEO);
-			if (config.isUsingFeature(GameFeature.OVERLAND_DUNGEON) && id >= 21 && id <= 26)
+			DungeonMap dungeon;
+			if (config.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
+				dungeon = loader.find(id, DungeonMap2.class, GEO);
+			} else {
+				dungeon = loader.find(id, DungeonMap.class, GEO);
+			}
+			if (config.isUsingFeature(OVERLAND_DUNGEON) && id >= 21 && id <= 26)
 				parent.insert(new DefaultMutableTreeNode( //
 					new DungeonMapResource(dungeon.generateOverlandMap(), //
 						new DungeonResource(18, 2 * id + 8, 2 * id + 9))),

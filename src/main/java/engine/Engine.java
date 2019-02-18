@@ -13,6 +13,7 @@ import static engine.EngineInputAction.MOVEMENT_ACTIONS;
 import static engine.EngineInputAction.MOVEMENT_HANDLER;
 import static java.nio.file.StandardOpenOption.READ;
 import static shared.GameFeature.BODY_HEAD;
+import static shared.GameFeature.FLEXIBLE_DUNGEON_SIZE;
 import static shared.GameFeature.INTERACTIVE_OVERLAND;
 import static shared.GameFeature.OVERLAND_DUNGEON;
 import static shared.MenuType.HORIZONTAL;
@@ -37,6 +38,7 @@ import data.ResourceLoader;
 import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
+import data.content.DungeonMap2;
 import data.content.EclProgram;
 import engine.input.MovementHandler;
 import engine.opcodes.EclInstruction;
@@ -266,7 +268,11 @@ public class Engine implements EngineCallback, EngineStub {
 		memory.setAreaValues(id1, id2, id3);
 		if (id1 != 127 && id1 != 255) {
 			try {
-				currentMap = Optional.ofNullable(res.find(id1, DungeonMap.class, GEO));
+				if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
+					currentMap = Optional.ofNullable(res.find(id1, DungeonMap2.class, GEO));
+				} else {
+					currentMap = Optional.ofNullable(res.find(id1, DungeonMap.class, GEO));
+				}
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}

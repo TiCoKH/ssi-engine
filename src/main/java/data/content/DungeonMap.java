@@ -10,21 +10,34 @@ import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
 
 public class DungeonMap extends DAXContent {
-	private static final int WALLS_NE_START = 0x000;
-	private static final int WALLS_SW_START = 0x100;
-	private static final int SQUARE_INFO_START = 0x200;
-	private static final int WALLS_FLAGS_START = 0x300;
-
+	private int height;
+	private int width;
 	private DungeonSquare[][] map;
 
+	protected DungeonMap(int height, int width) {
+		this.height = height;
+		this.width = width;
+		this.map = new DungeonSquare[width][height];
+	}
+
 	public DungeonMap(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+		this(16, 16);
+
 		data.getUnsignedShort(); // GEO ID, different for each game
 		data = data.slice();
 
-		map = new DungeonSquare[16][16];
-		for (int y = 0; y < 16; y++) {
-			int stride = y << 4;
-			for (int x = 0; x < 16; x++) {
+		readMap(data.slice());
+	}
+
+	protected void readMap(@Nonnull ByteBufferWrapper data) {
+		final int WALLS_NE_START = 0 * height * width;
+		final int WALLS_SW_START = 1 * height * width;
+		final int SQUARE_INFO_START = 2 * height * width;
+		final int WALLS_FLAGS_START = 3 * height * width;
+
+		for (int y = 0; y < height; y++) {
+			int stride = y * width;
+			for (int x = 0; x < width; x++) {
 				Map<Direction, Integer> wallTypes = new EnumMap<>(Direction.class);
 				wallTypes.put(Direction.NORTH, (data.get(WALLS_NE_START + stride + x) & 0xF0) >> 4);
 				wallTypes.put(Direction.EAST, data.get(WALLS_NE_START + stride + x) & 0x0F);
@@ -50,9 +63,9 @@ public class DungeonMap extends DAXContent {
 			case NORTH:
 				return y > 0;
 			case EAST:
-				return x < 15;
+				return x < width - 1;
 			case SOUTH:
-				return y < 15;
+				return y < height - 1;
 			case WEST:
 				return x > 0;
 		}
@@ -60,11 +73,17 @@ public class DungeonMap extends DAXContent {
 	}
 
 	public boolean canOpenDoor(int x, int y, Direction d) {
+		if (x < 0 || x >= width || y < 0 || y >= height)
+			return false;
+
 		DungeonSquare square = map[x][y];
 		return square.isClosedDoor(d);
 	}
 
 	public boolean couldExit(int x, int y, Direction d) {
+		if (x < 0 || x >= width || y < 0 || y >= height)
+			return false;
+
 		DungeonSquare square = map[x][y];
 		int newX = x + d.getDeltaX();
 		int newY = y + d.getDeltaY();
@@ -134,22 +153,27 @@ public class DungeonMap extends DAXContent {
 	}
 
 	public int wallIndexAt(int x, int y, Direction d) {
-		if (x < 0 || x > 15 || y < 0 || y > 15)
+		if (x < 0 || x >= width || y < 0 || y >= height)
 			return 0;
 		return map[x][y].getWall(d);
 	}
 
 	public int doorFlagsAt(int x, int y, Direction d) {
-		if (x < 0 || x > 15 || y < 0 || y > 15)
+		if (x < 0 || x >= width || y < 0 || y >= height)
 			return 0;
 		return map[x][y].getDoorFlags(d);
 	}
 
 	public int squareInfoAt(int x, int y) {
+		if (x < 0 || x >= width || y < 0 || y >= height)
+			return 0;
 		return map[x][y].getSquareInfo();
 	}
 
 	public void openDoor(int x, int y, Direction d) {
+		if (x < 0 || x >= width || y < 0 || y >= height)
+			return;
+
 		DungeonSquare square = map[x][y];
 		if (square.isClosedDoor(d)) {
 			square.openDoor(d);
@@ -159,9 +183,9 @@ public class DungeonMap extends DAXContent {
 	}
 
 	public int[][] generateWallMap() {
-		int[][] result = new int[16][16];
-		for (int y = 0; y < 16; y++) {
-			for (int x = 0; x < 16; x++) {
+		int[][] result = new int[height][width];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				result[y][x] = 0;
 				if (wallIndexAt(x, y, Direction.NORTH) > 0)
 					result[y][x] += 1;
@@ -177,9 +201,9 @@ public class DungeonMap extends DAXContent {
 	}
 
 	public int[][] generateOverlandMap() {
-		int[][] result = new int[16][16];
-		for (int y = 0; y < 16; y++) {
-			for (int x = 0; x < 16; x++) {
+		int[][] result = new int[height][width];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				result[y][x] = wallIndexAt(x, y, Direction.NORTH) * 16 + wallIndexAt(x, y, Direction.EAST);
 			}
 		}
