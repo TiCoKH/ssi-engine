@@ -195,16 +195,25 @@ public class DAXPalette {
 		return new IndexColorModel(8, 256, r, g, b);
 	}
 
-	public static IndexColorModel binaryInvertedPalette() {
-		return binaryPaletteWith(COLOR_WHITE, COLOR_BLACK);
+	public static IndexColorModel toInvertedPalette(IndexColorModel cm) {
+		if (cm.getMapSize() == 2) {
+			return binaryPaletteWith(COLOR_WHITE, COLOR_BLACK);
+		}
+		return paletteWith(cm, COLOR_WHITE, COLOR_BLACK);
 	}
 
-	public static IndexColorModel binaryPaletteWithGreenFG() {
-		return binaryPaletteWith(COLOR_BLACK, COLOR_GREEN_BRIGHT);
+	public static IndexColorModel toPaletteWithGreenFG(IndexColorModel cm) {
+		if (cm.getMapSize() == 2) {
+			return binaryPaletteWith(COLOR_BLACK, COLOR_GREEN_BRIGHT);
+		}
+		return paletteWith(cm, COLOR_BLACK, COLOR_GREEN_BRIGHT);
 	}
 
-	public static IndexColorModel binaryPaletteWithMagentaFG() {
-		return binaryPaletteWith(COLOR_BLACK, COLOR_MAGENTA_BRIGHT);
+	public static IndexColorModel toPaletteWithMagentaFG(IndexColorModel cm) {
+		if (cm.getMapSize() == 2) {
+			return binaryPaletteWith(COLOR_BLACK, COLOR_MAGENTA_BRIGHT);
+		}
+		return paletteWith(cm, COLOR_BLACK, COLOR_MAGENTA_BRIGHT);
 	}
 
 	private static IndexColorModel binaryPaletteWith(Color bgColor, Color fgColor) {
@@ -213,5 +222,26 @@ public class DAXPalette {
 		byte[] b = new byte[] { (byte) bgColor.getBlue(), (byte) fgColor.getBlue() };
 
 		return new IndexColorModel(1, 2, r, g, b);
+	}
+
+	private static IndexColorModel paletteWith(IndexColorModel cm, Color bgColor, Color fgColor) {
+
+		byte[] r = new byte[cm.getMapSize()];
+		byte[] g = new byte[cm.getMapSize()];
+		byte[] b = new byte[cm.getMapSize()];
+
+		for (int i = 0; i < cm.getMapSize(); i++) {
+			r[i] = (byte) cm.getRed(i);
+			g[i] = (byte) cm.getGreen(i);
+			b[i] = (byte) cm.getBlue(i);
+		}
+		r[0x0] = (byte) bgColor.getRed();
+		g[0x0] = (byte) bgColor.getGreen();
+		b[0x0] = (byte) bgColor.getBlue();
+		r[0xF] = (byte) fgColor.getRed();
+		g[0xF] = (byte) fgColor.getGreen();
+		b[0xF] = (byte) fgColor.getBlue();
+
+		return new IndexColorModel(cm.getComponentSize(0), cm.getMapSize(), r, g, b, cm.getTransparentPixel());
 	}
 }

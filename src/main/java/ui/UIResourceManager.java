@@ -18,7 +18,6 @@ import javax.annotation.Nullable;
 
 import data.content.DAXImageContent;
 import data.content.DAXPalette;
-import data.content.MonocromeSymbols;
 import data.content.WallDef;
 
 public class UIResourceManager {
@@ -32,7 +31,7 @@ public class UIResourceManager {
 	private ExceptionHandler excHandler;
 	private UIScaler scaler;
 
-	private MonocromeSymbols originalFont;
+	private DAXImageContent originalFont;
 	private DAXImageContent originalMisc;
 	private DAXImageContent originalBorders;
 
@@ -119,22 +118,24 @@ public class UIResourceManager {
 
 	@Nonnull
 	private List<BufferedImage> createFont(@Nonnull FontType type) {
+		IndexColorModel cm = (IndexColorModel) originalFont.get(0).getColorModel();
+
 		IndexColorModel newCM;
 		switch (type) {
 			case NORMAL:
 			case PC_HEADING:
 			case SEL_PC:
 			case PC:
-				newCM = DAXPalette.binaryPaletteWithGreenFG();
+				newCM = DAXPalette.toPaletteWithGreenFG(cm);
 				break;
 			case GAME_NAME:
-				newCM = DAXPalette.binaryPaletteWithMagentaFG();
+				newCM = DAXPalette.toPaletteWithMagentaFG(cm);
 				break;
 			case INTENSE:
-				newCM = DAXPalette.binaryInvertedPalette();
+				newCM = DAXPalette.toInvertedPalette(cm);
 				break;
 			default:
-				newCM = (IndexColorModel) originalFont.get(0).getColorModel();
+				newCM = cm;
 				break;
 		}
 		return originalFont.stream() //
