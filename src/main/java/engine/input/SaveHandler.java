@@ -15,7 +15,7 @@ public class SaveHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		File savesPath = engine.getRes().getSavesPath();
+		File savesPath = engine.getSavesPath();
 		if (!savesPath.exists()) {
 			boolean result = savesPath.mkdirs();
 			if (!result) {

@@ -13,9 +13,9 @@ import java.awt.image.BufferedImage;
 import javax.annotation.Nonnull;
 
 import types.GoldboxString;
+import types.MenuType;
 import ui.BorderSymbols;
 import ui.FontType;
-import ui.Menu.MenuType;
 import ui.UIResources;
 import ui.UISettings;
 

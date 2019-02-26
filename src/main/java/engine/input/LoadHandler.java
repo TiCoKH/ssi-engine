@@ -14,14 +14,16 @@ public class LoadHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		File savesPath = engine.getRes().getSavesPath();
+		File savesPath = engine.getSavesPath();
 		File saveGame = new File(savesPath, "savegame.dat");
 		if (!saveGame.exists() && !saveGame.canRead()) {
 			System.err.println("Cant load");
 			return;
 		}
 
-		engine.setCurrentThread(() -> {
+		engine.setNextTask(() -> {
+			engine.clear();
+
 			try (FileChannel fc = FileChannel.open(saveGame.toPath(), READ)) {
 				VirtualMemory m = engine.getMemory();
 				m.loadFrom(fc);
@@ -32,6 +34,6 @@ public class LoadHandler implements InputHandler {
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
-		}, "LOAD");
+		});
 	}
 }

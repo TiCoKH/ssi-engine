@@ -4,46 +4,44 @@ import java.awt.EventQueue;
 
 import javax.swing.UIManager;
 
-import engine.Engine;
 import ui.DesktopFrame;
 
 public class Goldbox {
 
-	private static final String ARG_NO_SHOW_TITLE = "-noShowTitle";
+	private static final String ARG_NO_TITLE = "--no-title";
 
 	public static void main(String[] args) {
-		if (args.length != 1 && args.length != 2) {
+		if (args.length > 2) {
 			usageAndExit();
 		}
-		String dir = args[0];
+		String dir = args.length > 0 ? args[0] : null;
 		if (args.length == 2) {
-			if (!args[0].equals(ARG_NO_SHOW_TITLE) && !args[1].equals(ARG_NO_SHOW_TITLE)) {
+			if (!args[0].equals(ARG_NO_TITLE) && !args[1].equals(ARG_NO_TITLE)) {
 				usageAndExit();
-			} else if (args[0].equals(ARG_NO_SHOW_TITLE)) {
+			} else if (args[0].equals(ARG_NO_TITLE)) {
 				dir = args[1];
 			}
 		}
+
 		try {
 			UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");
-			Engine engine = new Engine(dir);
-			EventQueue.invokeLater(() -> {
-				new DesktopFrame(engine.getUi());
-				engine.start();
-				if (args.length == 2) {
-					engine.showStartMenu();
-				} else {
-					engine.showTitles();
-				}
-			});
 		} catch (Exception e) {
-			System.err.println("Failure to initialize engine. Quitting.");
 			e.printStackTrace(System.err);
-			System.exit(1);
 		}
+
+		String gameDir = dir;
+		EventQueue.invokeLater(() -> {
+			DesktopFrame ui = new DesktopFrame();
+			ui.show();
+
+			if (gameDir != null) {
+				ui.startGame(gameDir, args.length != 2);
+			}
+		});
 	}
 
 	private static void usageAndExit() {
-		System.err.println("Run with java -jar <engine jar> <directory> [-noShowTitle]");
+		System.err.println("Run with java -jar <engine jar> [<directory> [--no-title]]");
 		System.exit(1);
 	}
 }

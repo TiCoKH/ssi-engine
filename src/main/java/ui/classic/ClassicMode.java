@@ -1,5 +1,12 @@
 package ui.classic;
 
+import static data.content.DAXContentType.BACK;
+import static data.content.DAXContentType.BIGPIC;
+import static data.content.DAXContentType.PIC;
+import static data.content.DAXContentType.SPRIT;
+import static data.content.DAXContentType.TITLE;
+import static data.content.DAXContentType.WALLDEF;
+import static data.content.DAXContentType._8X8D;
 import static engine.InputAction.CONTINUE;
 import static engine.InputAction.INPUT_HANDLER;
 import static engine.InputAction.LOAD;
@@ -14,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -29,20 +37,32 @@ import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import common.FileMap;
+import data.content.DAXContentType;
+import data.content.DAXImageContent;
+import data.content.DungeonMap.VisibleWalls;
+import data.content.MonocromeSymbols;
+import data.content.WallDef;
 import engine.InputAction;
+import engine.ViewDungeonPosition;
+import engine.ViewOverlandPosition;
+import engine.ViewSpacePosition;
+import types.EngineStub;
 import types.GoldboxString;
+import types.MenuType;
+import types.UserInterface;
 import ui.DungeonResources;
+import ui.ExceptionHandler;
+import ui.FontType;
 import ui.GoldboxStringInput;
 import ui.Menu;
-import ui.Menu.MenuType;
 import ui.OverlandResources;
 import ui.SpaceResources;
-import ui.UICallback;
+import ui.UIResourceLoader;
 import ui.UIResources;
 import ui.UISettings;
-import ui.UIState;
 
-public class ClassicMode extends JPanel {
+public class ClassicMode extends JPanel implements UserInterface {
 	private static final String MENU_PREV = "__MENU_PREV";
 	private static final String MENU_NEXT = "__MENU_NEXT";
 	private static final String MENU_ACTION = "__MENU_ACTION";
@@ -73,29 +93,49 @@ public class ClassicMode extends JPanel {
 		KEY_MAPPING.put(InputAction.MOVE_SPACE_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
 	}
 
-	private transient UICallback callback;
+	private transient EngineStub stub;
+
+	private transient ExceptionHandler excHandler;
 
 	private transient Map<UIState, AbstractRenderer> renderers = new EnumMap<>(UIState.class);
 	private UIState currentState;
 
 	private boolean textNeedsProgressing = false;
 
+	private transient UIResourceLoader loader;
 	private transient UIResources resources;
 	private transient UISettings settings;
 
 	private transient ScheduledThreadPoolExecutor exec;
 	private transient ScheduledFuture<?> animationFuture;
 
+	private transient boolean running = false;
+
 	private transient GoldboxStringInput input = null;
 
-	public ClassicMode(@Nonnull UICallback callback, @Nonnull UIResources resources, @Nonnull UISettings settings) {
-		this.callback = callback;
-		this.resources = resources;
+	public ClassicMode(@Nonnull FileMap fileMap, @Nonnull EngineStub stub, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler)
+		throws IOException {
+
+		this.stub = stub;
 		this.settings = settings;
+		this.excHandler = excHandler;
+		this.loader = new UIResourceLoader(fileMap);
+
+		MonocromeSymbols font = loader.getFont();
+		Map<FontType, List<BufferedImage>> fontMap = new EnumMap<>(FontType.class);
+		fontMap.put(FontType.NORMAL, font.withGreenFG());
+		fontMap.put(FontType.INTENSE, font.withInvertedColors());
+		fontMap.put(FontType.SHORTCUT, font.toList());
+		fontMap.put(FontType.GAME_NAME, font.withMagentaFG());
+		fontMap.put(FontType.DAMAGE, fontMap.get(FontType.SHORTCUT));
+		fontMap.put(FontType.PC_HEADING, fontMap.get(FontType.NORMAL));
+		fontMap.put(FontType.SEL_PC, fontMap.get(FontType.NORMAL));
+		fontMap.put(FontType.PC, fontMap.get(FontType.NORMAL));
+		fontMap.put(FontType.FUEL, fontMap.get(FontType.GAME_NAME));
+		this.resources = new UIResources(fontMap, loader.getBorders().toList());
 
 		initRenderers();
 		initSurface();
-		initExecutorService();
 		resetInput();
 	}
 
@@ -114,25 +154,104 @@ public class ClassicMode extends JPanel {
 		setPreferredSize(new Dimension(zoom(320), zoom(200)));
 	}
 
-	private void initExecutorService() {
+	@Override
+	public void start(boolean showTitle) {
+		running = true;
+
 		exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
 		exec.setRemoveOnCancelPolicy(true);
+
+		Thread gameLoop = new Thread(() -> {
+			while (running) {
+				long start = System.currentTimeMillis();
+
+				advance();
+				repaint();
+
+				long end = System.currentTimeMillis();
+				if ((end - start) < 16) {
+					try {
+						Thread.sleep(16 - (end - start));
+					} catch (InterruptedException e) {
+						System.err.println("Game Loop was interrupted");
+					}
+				}
+			}
+		}, "Game Loop");
+		gameLoop.start();
+
+		stub.registerUI(this);
+		stub.start();
+
+		switchUIState(UIState.TITLE);
+		if (showTitle)
+			showTitles();
+		else
+			showStartMenu();
 	}
 
-	public void setUIState(@Nonnull UIState state) {
+	@Override
+	public void stop() {
+		running = false;
+		exec.shutdown();
+		stopPicAnimation();
+		exec.shutdownNow();
+		stub.stop();
+		stub.deregisterUI(this);
+	}
+
+	public void showTitles() {
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
+		getActionMap().put(CONTINUE, new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (animationFuture != null //
+					&& !animationFuture.isDone() //
+					&& animationFuture.cancel(false)) {
+
+					exec.execute(titleSwitcher);
+				}
+			}
+		});
+		showNextTitle(1);
+	}
+
+	private transient Runnable titleSwitcher = null;
+
+	private void showNextTitle(int titleId) {
+		loadPicture(titleId, TITLE);
+		if (titleId < 3) {
+			titleSwitcher = () -> showNextTitle(titleId + 1);
+		} else {
+			titleSwitcher = () -> showStartMenu();
+		}
+		animationFuture = exec.schedule(titleSwitcher, 5000, MILLISECONDS);
+	}
+
+	public void showStartMenu() {
+		showPicture(4, DAXContentType.TITLE);
+		stub.showStartMenu();
+	}
+
+	@Override
+	public void switchUIState(@Nonnull UIState state) {
 		this.currentState = state;
 	}
 
+	@Override
 	public void clear() {
 		setInputNone();
-		clearPics();
+		clearSprite();
 		clearText();
 		clearStatus();
 	}
 
-	public void clearPics() {
-		setPic(null);
-		clearSprite();
+	@Override
+	public void clearPictures() {
+		stopPicAnimation();
+		resources.setPic(null);
 	}
 
 	private void resetInput() {
@@ -144,21 +263,12 @@ public class ClassicMode extends JPanel {
 		mapToAction(QUIT);
 	}
 
+	@Override
 	public void setInputNone() {
 		resetInput();
 	}
 
-	public void setInputContinue() {
-		resetInput();
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
-		mapToAction(CONTINUE);
-	}
-
-	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems) {
-		setInputMenu(type, menuItems, null);
-	}
-
+	@Override
 	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
 		resetInput();
 
@@ -202,7 +312,7 @@ public class ClassicMode extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				resources.getMenu().ifPresent(m -> {
 					resources.setMenu(null);
-					callback.handleInput(m.getSelectedItem());
+					stub.handleInput(m.getSelectedItem());
 				});
 			}
 		});
@@ -210,6 +320,7 @@ public class ClassicMode extends JPanel {
 		resources.setMenu(new Menu(type, menuItems, description));
 	}
 
+	@Override
 	public void setInputNumber(int maxDigits) {
 		resetInput();
 		input = new GoldboxStringInput(INPUT_NUMBER, maxDigits);
@@ -231,6 +342,7 @@ public class ClassicMode extends JPanel {
 		mapInputBack();
 	}
 
+	@Override
 	public void setInputString(int maxLetters) {
 		resetInput();
 		input = new GoldboxStringInput(INPUT_STRING, maxLetters);
@@ -298,11 +410,12 @@ public class ClassicMode extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				clearStatus();
-				callback.handleInput(new InputAction(INPUT_HANDLER, input.toString(), -1));
+				stub.handleInput(new InputAction(INPUT_HANDLER, input.toString(), -1));
 			}
 		});
 	}
 
+	@Override
 	public void setInputStandard() {
 		resetInput();
 		switch (currentState) {
@@ -323,9 +436,7 @@ public class ClassicMode extends JPanel {
 					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
 					mapToAction(a);
 				});
-				resources.getSpaceResources().ifPresent(r -> {
-					resources.setStatusLine(r.getStatusLine());
-				});
+				resources.getSpaceResources().ifPresent(r -> resources.setStatusLine(r.getStatusLine()));
 				break;
 			default:
 				System.err.println("Unknown input for current ui state: " + currentState);
@@ -338,36 +449,80 @@ public class ClassicMode extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				resources.setMenu(null);
-				callback.handleInput(a);
+				stub.handleInput(a);
 			}
 		});
 	}
 
+	@Override
 	public void clearStatus() {
 		resources.setStatusLine(null);
 	}
 
+	@Override
 	public void setStatus(@Nonnull GoldboxString status) {
 		resources.setStatusLine(status);
 	}
 
-	public void setDungeonResources(@Nonnull DungeonResources dungeonResources) {
-		resources.setDungeonResources(dungeonResources);
+	@Override
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int decoId1, int decoId2,
+		int decoId3) {
+		try {
+			WallDef walls = loader.find(decoId1, WallDef.class, WALLDEF);
+
+			List<BufferedImage> wallSymbols = loader.findImage(decoId1, _8X8D).toList();
+
+			List<BufferedImage> backdrops = new ArrayList<>();
+			backdrops.add(loader.findImage(128 + decoId1, BACK).get(0));
+			backdrops.add(loader.findImage(decoId1, BACK).get(0));
+
+			resources.setDungeonResources(new DungeonResources(position, visibleWalls, walls, wallSymbols, backdrops));
+		} catch (IOException e) {
+			excHandler.handleException("Could not load dungeon decoration with block Id " + decoId1, e);
+		}
 	}
 
-	public void setOverlandResources(@Nonnull OverlandResources overlandResources) {
-		resources.setOverlandResources(overlandResources);
+	@Override
+	public void setOverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
+		try {
+			DAXImageContent map = loader.findImage(mapId, BIGPIC);
+			DAXImageContent cursor = loader.getOverlandCursor();
+			resources.setOverlandResources(new OverlandResources(position, map.get(0), cursor.get(0)));
+		} catch (NullPointerException | IOException e) {
+			excHandler.handleException("Could not load overland map with block Id " + mapId, e);
+		}
 	}
 
-	public void setSpaceResources(@Nonnull SpaceResources spaceResources) {
-		resources.setSpaceResources(spaceResources);
+	@Override
+	public void setSpaceResources(@Nonnull ViewSpacePosition position) {
+		try {
+			List<BufferedImage> symbols = loader.getSpaceSymbols().toList();
+			BufferedImage background = loader.getSpaceBackground().get(0);
+			resources.setSpaceResources(new SpaceResources(position, background, symbols));
+		} catch (IOException e) {
+			excHandler.handleException("Could not load space decoration", e);
+		}
 	}
 
-	public void setPic(@Nullable List<BufferedImage> pic) {
+	@Override
+	public void showPicture(int pictureId, @Nullable DAXContentType type) {
 		stopPicAnimation();
-		resources.setPic(pic);
-		if (pic != null && pic.size() > 1) {
+		loadPicture(pictureId, type);
+		if (resources.getPic().isPresent()) {
 			startPicAnimation();
+		}
+	}
+
+	private void loadPicture(int pictureId, @Nullable DAXContentType type) {
+		try {
+			DAXImageContent images = loader.findImage(pictureId, type);
+			if (images != null) {
+				resources.setPic(images.toList());
+			} else {
+				resources.setPic(null);
+			}
+		} catch (IOException e) {
+			excHandler.handleException("Could not load picture with block Id " + pictureId, e);
 		}
 	}
 
@@ -382,16 +537,26 @@ public class ClassicMode extends JPanel {
 		}
 	}
 
-	public void setSprite(@Nullable List<BufferedImage> sprite, @Nullable List<BufferedImage> pic, int index) {
-		stopPicAnimation();
-		resources.setPic(pic);
+	@Override
+	public void showSprite(int spriteId, int pictureId, int distance) {
+		clearSprite();
+		loadPicture(pictureId, PIC);
 		resources.getDungeonResources().ifPresent(r -> {
-			r.setSprite(sprite, index);
-			if (sprite != null && pic != null)
-				spriteReplacement(r);
+			try {
+				DAXImageContent sprite = loader.findImage(spriteId, SPRIT);
+				if (sprite != null) {
+					r.setSprite(sprite.toList(), distance);
+					if (resources.getPic().isPresent()) {
+						spriteReplacement(r);
+					}
+				}
+			} catch (IOException e) {
+				excHandler.handleException("Could not load sprite with block Id " + spriteId, e);
+			}
 		});
 	}
 
+	@Override
 	public void advanceSprite() {
 		resources.getDungeonResources().ifPresent(r -> {
 			r.advanceSprite();
@@ -409,15 +574,19 @@ public class ClassicMode extends JPanel {
 		}
 	}
 
+	@Override
 	public void clearSprite() {
-		setSprite(null, null, 0);
+		clearPictures();
+		resources.getDungeonResources().ifPresent(r -> r.setSprite(null, 0));
 	}
 
+	@Override
 	public void clearText() {
 		this.textNeedsProgressing = false;
 		resources.setCharList(null);
 	}
 
+	@Override
 	public void addText(GoldboxString text) {
 		List<Byte> newCharList = new ArrayList<>();
 
@@ -452,6 +621,7 @@ public class ClassicMode extends JPanel {
 		this.textNeedsProgressing = true;
 	}
 
+	@Override
 	public void addLineBreak() {
 		int lineWidth = renderers.get(currentState).getLineWidth();
 		int charCount = resources.getCharCount() % lineWidth;
@@ -463,11 +633,11 @@ public class ClassicMode extends JPanel {
 		this.textNeedsProgressing = true;
 	}
 
-	public void advance() {
+	private void advance() {
 		if (textNeedsProgressing) {
 			if (resources.hasCharStopReachedLimit()) {
 				textNeedsProgressing = false;
-				callback.textDisplayFinished();
+				stub.textDisplayFinished();
 			} else {
 				resources.incCharStop();
 			}

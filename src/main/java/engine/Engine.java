@@ -1,202 +1,108 @@
 package engine;
 
-import static data.content.DAXContentType.BACK;
-import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.ECL;
 import static data.content.DAXContentType.GEO;
-import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.SPRIT;
-import static data.content.DAXContentType.WALLDEF;
-import static data.content.DAXContentType._8X8D;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
-import static engine.InputAction.MAINMENU_ACTIONS;
-import static ui.Menu.MenuType.HORIZONTAL;
 
-import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import common.FileMap;
-import data.content.DAXContentType;
-import data.content.DAXImageContent;
+import data.ResourceLoader;
 import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
-import data.content.MonocromeSymbols;
-import data.content.WallDef;
 import types.CustomGoldboxString;
+import types.EngineStub;
 import types.GoldboxString;
-import ui.DungeonResources;
-import ui.FontType;
-import ui.Menu.MenuType;
-import ui.OverlandResources;
-import ui.SpaceResources;
-import ui.UICallback;
-import ui.UIResources;
-import ui.UISettings;
-import ui.UIState;
-import ui.classic.ClassicMode;
+import types.MenuType;
+import types.UserInterface;
+import types.UserInterface.UIState;
 
-public class Engine implements EngineCallback, UICallback {
-	private EngineResources res;
-	private ClassicMode ui;
+public class Engine implements EngineCallback, EngineStub {
+	private ResourceLoader res;
+	private UserInterface ui;
 
 	private VirtualMachine vm;
 	private VirtualMemory memory;
 
-	private boolean running = false;
-	private boolean abortCurrentThread = false;
+	private ExecutorService exec;
 
-	private Thread gameLoop = null;
-	private Thread currentThread = null;
-	private Thread nextThread = null;
+	private boolean abortCurrentThread = false;
 
 	private Optional<DungeonMap> currentMap = Optional.empty();
 	private VisibleWalls visibleWalls = new VisibleWalls();
 
-	private InputAction nextAction = null;
-
-	public Engine(String gameDir) throws IOException {
-		FileMap fm = new FileMap(gameDir);
-		this.res = new EngineResources(fm);
-
-		MonocromeSymbols font = res.getFont();
-		Map<FontType, List<BufferedImage>> fontMap = new EnumMap<>(FontType.class);
-		fontMap.put(FontType.NORMAL, font.withGreenFG());
-		fontMap.put(FontType.INTENSE, font.withInvertedColors());
-		fontMap.put(FontType.SHORTCUT, font.toList());
-		fontMap.put(FontType.GAME_NAME, font.withMagentaFG());
-		fontMap.put(FontType.DAMAGE, fontMap.get(FontType.SHORTCUT));
-		fontMap.put(FontType.PC_HEADING, fontMap.get(FontType.NORMAL));
-		fontMap.put(FontType.SEL_PC, fontMap.get(FontType.NORMAL));
-		fontMap.put(FontType.PC, fontMap.get(FontType.NORMAL));
-		fontMap.put(FontType.FUEL, fontMap.get(FontType.GAME_NAME));
-
-		UIResources uires = new UIResources(fontMap, res.getBorders().toList());
-		UISettings uicfg = new UISettings();
-		// TODO load settings
-
-		this.ui = new ClassicMode(this, uires, uicfg);
-
+	public Engine(@Nonnull FileMap fm) {
+		this.res = new ResourceLoader(fm);
 		this.vm = new VirtualMachine(this);
 		this.memory = vm.getMemory();
 	}
 
+	@Override
+	public void registerUI(@Nonnull UserInterface ui) {
+		this.ui = ui;
+	}
+
+	@Override
+	public void deregisterUI(@Nonnull UserInterface ui) {
+		this.ui = null;
+	}
+
+	@Override
 	public void start() {
-		running = true;
-
-		gameLoop = new Thread(() -> {
-			while (running) {
-				long start = System.currentTimeMillis();
-				if (nextAction != null) {
-					nextAction.getHandler().handle(this, nextAction);
-					nextAction = null;
-				}
-				if (currentThread != null && currentThread.isAlive() && nextThread != null) {
-					System.out.println("currentThread still alive, waiting...");
-				} else if (nextThread != null) {
-					currentThread = nextThread;
-					nextThread = null;
-					abortCurrentThread = false;
-					currentThread.start();
-				}
-
-				ui.advance();
-				ui.repaint();
-
-				long end = System.currentTimeMillis();
-				if ((end - start) < 16) {
-					try {
-						Thread.sleep(16 - (end - start));
-					} catch (InterruptedException e) {
-						System.err.println("Game Loop was interrupted");
-					}
-				}
-			}
-		}, "Game Loop");
-		gameLoop.start();
+		if (ui == null) {
+			throw new IllegalStateException("Cant start engine without a registered ui.");
+		}
+		exec = Executors.newFixedThreadPool(1);
 	}
 
+	@Override
 	public void stop() {
-		running = false;
-		vm.stopVM();
+		stopCurrentTask();
+		if (exec != null) {
+			exec.shutdown();
+			exec.shutdownNow();
+		}
 	}
 
 	@Override
-	public void clear() {
-		ui.clear();
-	}
-
-	@Override
-	public void clearPics() {
-		ui.clearPics();
-	}
-
-	private void stopCurrentThread() {
-		abortCurrentThread = true;
-		vm.stopVM();
-		continueCurrentThread();
-	}
-
-	public void setCurrentThread(Runnable r, String title) {
-		stopCurrentThread();
-		clear();
-		nextThread = new Thread(r, title);
-	}
-
-	public void showTitles() {
-		ui.setUIState(UIState.TITLE);
-		setCurrentThread(() -> {
-			synchronized (vm) {
-				try {
-					for (int i = 1; i < 4; i++) {
-						ui.setPic(res.findImage(i, DAXContentType.TITLE).toList());
-						ui.setInputContinue();
-						vm.wait(5000L);
-						if (abortCurrentThread) {
-							return;
-						}
-					}
-				} catch (IOException e) {
-					e.printStackTrace(System.err);
-				} catch (InterruptedException e) {
-				}
-				showStartMenu();
-			}
-		}, "Titles");
-	}
-
 	public void showStartMenu() {
-		ui.setUIState(UIState.TITLE);
-		setCurrentThread(() -> {
-			try {
-				ui.setPic(res.findImage(4, DAXContentType.TITLE).toList());
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
-			setMenu(HORIZONTAL, MAINMENU_ACTIONS, new CustomGoldboxString("BUCK ROGERS V1.2"));
+		setNextTask(() -> {
+			setMenu(MenuType.HORIZONTAL, InputAction.MAINMENU_ACTIONS, new CustomGoldboxString("BUCK ROGERS V1.2"));
 			if (abortCurrentThread) {
 				return;
 			}
 			clear();
 			memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
 			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18, false);
-		}, "Title Menu");
+		});
+	}
+
+	@Override
+	public void textDisplayFinished() {
+		// continue VM after all text is displayed
+		continueCurrentThread();
 	}
 
 	@Override
 	public void handleInput(InputAction action) {
-		this.nextAction = action;
+		action.getHandler().handle(this, action);
+	}
+
+	@Override
+	public void clear() {
+		ui.clear();
 	}
 
 	@Override
@@ -227,7 +133,8 @@ public class Engine implements EngineCallback, UICallback {
 		memory.setCurrentECL(id);
 		memory.setTriedToLeaveMap(false);
 		memory.setMovementBlock(0);
-		setCurrentThread(() -> {
+		setNextTask(() -> {
+			clear();
 			try {
 				delayCurrentThread();
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
@@ -248,14 +155,28 @@ public class Engine implements EngineCallback, UICallback {
 						return;
 					}
 					updatePosition();
-					clearPics();
 				}
 				clearSprite();
 				ui.setInputStandard();
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
-		}, "VM");
+		});
+	}
+
+	public void setNextTask(Runnable r) {
+		stopCurrentTask();
+
+		exec.submit(() -> {
+			abortCurrentThread = false;
+			r.run();
+		});
+	}
+
+	private void stopCurrentTask() {
+		abortCurrentThread = true;
+		vm.stopVM();
+		continueCurrentThread();
 	}
 
 	@Override
@@ -275,26 +196,10 @@ public class Engine implements EngineCallback, UICallback {
 	@Override
 	public void loadAreaDecoration(int id1, int id2, int id3) {
 		memory.setAreaDecoValues(id1, id2, id3);
-		try {
-			if (!currentMap.isPresent() && id1 == 1) {
-				List<BufferedImage> symbols = res.getSpaceSymbols().toList();
-
-				BufferedImage background = res.getSpaceBackground().get(0);
-
-				ui.setSpaceResources(new SpaceResources(memory, background, symbols));
-			} else if (currentMap.isPresent()) {
-				WallDef walls = res.find(id1, WallDef.class, WALLDEF);
-
-				List<BufferedImage> wallSymbols = res.findImage(id1, _8X8D).toList();
-
-				List<BufferedImage> backdrops = new ArrayList<>();
-				backdrops.add(res.findImage(128 + id1, BACK).get(0));
-				backdrops.add(res.findImage(id1, BACK).get(0));
-
-				ui.setDungeonResources(new DungeonResources(memory, visibleWalls, walls, wallSymbols, backdrops));
-			}
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
+		if (currentMap.isPresent()) {
+			ui.setDungeonResources(memory, visibleWalls, id1, id2, id3);
+		} else if (id1 == 1) {
+			ui.setSpaceResources(memory);
 		}
 		updateUIState();
 	}
@@ -310,49 +215,27 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
-	public void showSprite(int spriteId, int index, int picId) {
+	public void showSprite(int spriteId, int distance, int picId) {
 		if (currentMap.isPresent()) {
-			if (index > 0 && visibleWalls.getVisibleWall(CLOSE, FOWARD)[1] > 0) {
-				index = 0;
+			if (distance > 0 && visibleWalls.getVisibleWall(CLOSE, FOWARD)[1] > 0) {
+				distance = 0;
 			}
-			if (index > 1 && visibleWalls.getVisibleWall(MEDIUM, FOWARD)[2] > 0) {
-				index = 1;
+			if (distance > 1 && visibleWalls.getVisibleWall(MEDIUM, FOWARD)[2] > 0) {
+				distance = 1;
 			}
 		}
-		try {
-			DAXImageContent sprite = res.findImage(spriteId, SPRIT);
-			DAXImageContent pic = res.findImage(picId, PIC);
-			ui.setSprite(sprite.toList(), pic != null ? pic.toList() : null, index);
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-		}
+		ui.showSprite(spriteId, picId, distance);
 	}
 
 	@Override
 	public void showPicture(int id) {
 		if (id == 255 || id == -1) {
 			updatePosition();
-			clearPics();
+			clearSprite();
 			updateUIState();
 			return;
 		}
-		try {
-			DAXImageContent smallPic = res.findImage(id, PIC);
-			if (smallPic != null) {
-				ui.setPic(smallPic.toList());
-				updateUIState();
-				return;
-			}
-			DAXImageContent bigPic = res.findImage(id, BIGPIC);
-			if (bigPic != null) {
-				ui.setPic(bigPic.toList());
-				ui.setUIState(UIState.BIGPIC);
-				return;
-			}
-			ui.setPic(null);
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-		}
+		ui.showPicture(id, null);
 	}
 
 	@Override
@@ -364,22 +247,16 @@ public class Engine implements EngineCallback, UICallback {
 				showPicture(id);
 				break;
 			case 1:
-				ui.setUIState(UIState.BIGPIC);
+				ui.switchUIState(UIState.BIGPIC);
 				showPicture(id);
 				break;
 			case 3:
 				showPicture(id);
 				break;
 			case 4:
-				try {
-					DAXImageContent map = res.findImage(id, BIGPIC);
-					DAXImageContent cursor = res.getOverlandCursor();
-					ui.setOverlandResources(new OverlandResources(memory, map.get(0), cursor.get(0)));
-					ui.setUIState(UIState.OVERLAND);
-					memory.setAreaDecoValues(255, 127, 127);
-				} catch (IOException e) {
-					e.printStackTrace(System.err);
-				}
+				ui.setOverlandResources(memory, id);
+				ui.switchUIState(UIState.OVERLAND);
+				memory.setAreaDecoValues(255, 127, 127);
 				break;
 			default:
 				System.err.println("Unknown game state: " + gameState);
@@ -408,12 +285,6 @@ public class Engine implements EngineCallback, UICallback {
 	}
 
 	@Override
-	public void textDisplayFinished() {
-		// continue VM after all text is displayed
-		continueCurrentThread();
-	}
-
-	@Override
 	public void updatePosition() {
 		currentMap.ifPresent(m -> {
 			int x = memory.getDungeonX();
@@ -426,8 +297,8 @@ public class Engine implements EngineCallback, UICallback {
 		});
 	}
 
-	public void updateUIState() {
-		ui.setUIState(currentMap.map(m -> UIState.DUNGEON).orElse(memory.getAreaDecoValue(0) == 1 ? UIState.SPACE : UIState.STORY));
+	private void updateUIState() {
+		ui.switchUIState(currentMap.map(m -> UIState.DUNGEON).orElse(memory.getAreaDecoValue(0) == 1 ? UIState.SPACE : UIState.STORY));
 	}
 
 	@Override
@@ -453,12 +324,8 @@ public class Engine implements EngineCallback, UICallback {
 		}
 	}
 
-	public ClassicMode getUi() {
+	public UserInterface getUi() {
 		return ui;
-	}
-
-	public EngineResources getRes() {
-		return res;
 	}
 
 	public VirtualMachine getVirtualMachine() {
@@ -475,5 +342,18 @@ public class Engine implements EngineCallback, UICallback {
 
 	public boolean isAbortCurrentThread() {
 		return abortCurrentThread;
+	}
+
+	@Nonnull
+	public File getSavesPath() {
+		File parent = null;
+		if (System.getenv("XDG_DATA_DIR") != null) {
+			parent = new File(System.getenv("XDG_DATA_DIR"));
+		} else if (System.getProperty("user.home") != null) {
+			parent = new File(System.getProperty("user.home"), ".local" + File.separator + "share");
+		} else {
+			parent = new File(System.getProperty("user.dir"));
+		}
+		return new File(parent, "ssi-engine");
 	}
 }

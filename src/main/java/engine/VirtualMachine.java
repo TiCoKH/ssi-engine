@@ -4,7 +4,7 @@ import static engine.InputAction.CONTINUE_ACTION;
 import static engine.InputAction.CONTINUE_HANDLER;
 import static engine.InputAction.MENU_HANDLER;
 import static engine.InputAction.YES_NO_ACTIONS;
-import static ui.Menu.MenuType.HORIZONTAL;
+import static types.MenuType.HORIZONTAL;
 
 import java.util.Deque;
 import java.util.EnumMap;
@@ -348,7 +348,7 @@ public class VirtualMachine {
 			switch (inst.getArgument(0).valueAsInt()) {
 				case 0x2DCB:
 					engine.updatePosition();
-					engine.clearPics();
+					engine.clearSprite();
 					break;
 				default:
 			}

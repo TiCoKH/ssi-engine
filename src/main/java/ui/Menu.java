@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 
 import engine.InputAction;
 import types.GoldboxString;
+import types.MenuType;
 
 public class Menu {
 
@@ -69,9 +70,5 @@ public class Menu {
 			selection--;
 		else
 			selection = menuItems.size() - 1;
-	}
-
-	public enum MenuType {
-		HORIZONTAL, VERTICAL, PROGRAM;
 	}
 }

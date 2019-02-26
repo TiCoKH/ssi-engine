@@ -6,12 +6,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import types.GoldboxString;
-import ui.Menu.MenuType;
+import types.MenuType;
 
 public interface EngineCallback {
 	void clear();
-
-	void clearPics();
 
 	void setInputNumber(int maxDigits);
 

@@ -11,7 +11,7 @@ import data.ContentFile;
 import data.content.DAXContentType;
 import data.content.EclProgram;
 import types.GoldboxString;
-import ui.Menu.MenuType;
+import types.MenuType;
 
 public class VirtualMachineTest {
 
@@ -24,10 +24,6 @@ public class VirtualMachineTest {
 		VirtualMachine vm = new VirtualMachine(new EngineCallback() {
 			@Override
 			public void clear() {
-			}
-
-			@Override
-			public void clearPics() {
 			}
 
 			@Override

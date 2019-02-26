@@ -29,10 +29,9 @@ Running
 =======
 
 From the project directory run the following command:
-`java -jar ./target/engine-SNAPSHOT.jar <directory> [-noShowTitle]`
-where `<directory>` is the one in which the game data for
-Buck Rogers 1 resides and noShowTitle argument makes the engine
-skip the screens before the title menu.
+`java -jar ./target/engine-SNAPSHOT.jar [<directory> [--no-title]]`
+where `<directory>` is the one in which the game data for Buck Rogers 1 resides
+and the --no-title argument skips the screens before the title menu.
 
 In the title menu use
 

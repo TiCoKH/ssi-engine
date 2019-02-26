@@ -10,7 +10,9 @@ public class DungeonMovementHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		engine.setCurrentThread(() -> {
+		engine.setNextTask(() -> {
+			engine.clear();
+
 			VirtualMachine vm = engine.getVirtualMachine();
 			VirtualMemory mem = engine.getMemory();
 			DungeonMap map = engine.getDungeonMap();
@@ -42,8 +44,8 @@ public class DungeonMovementHandler implements InputHandler {
 				mem.setDungeonDir(mem.getDungeonDir().getRight());
 			}
 			engine.updatePosition();
-			engine.clearPics();
+			engine.clearSprite();
 			engine.getUi().setInputStandard();
-		}, "VM");
+		});
 	}
 }

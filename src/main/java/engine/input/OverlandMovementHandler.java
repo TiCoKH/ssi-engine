@@ -9,7 +9,9 @@ public class OverlandMovementHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, InputAction action) {
-		engine.setCurrentThread(() -> {
+		engine.setNextTask(() -> {
+			engine.clear();
+
 			VirtualMemory memory = engine.getMemory();
 
 			engine.getVirtualMachine().startMove();
@@ -40,6 +42,6 @@ public class OverlandMovementHandler implements InputHandler {
 			}
 
 			engine.getUi().setInputStandard();
-		}, "VM");
+		});
 	}
 }
