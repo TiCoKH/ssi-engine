@@ -8,6 +8,12 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import data.content.DungeonMap.VisibleWalls;
+import data.content.WallDef;
+import engine.ViewDungeonPosition;
+import engine.ViewOverlandPosition;
+import engine.ViewSpacePosition;
+import engine.ViewSpacePosition.Celestial;
 import types.GoldboxString;
 
 public class UIResources {
@@ -135,16 +141,18 @@ public class UIResources {
 		this.charStop = 0;
 	}
 
-	public void setDungeonResources(@Nonnull DungeonResources dungeonRes) {
-		this.dungeonResources = Optional.of(dungeonRes);
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull WallDef walls,
+		@Nonnull List<BufferedImage> wallSymbols, @Nonnull List<BufferedImage> backdrops) {
+
+		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, walls, wallSymbols, backdrops));
 	}
 
 	public void setMenu(@Nullable Menu menu) {
 		this.menu = Optional.ofNullable(menu);
 	}
 
-	public void setOverlandResources(@Nonnull OverlandResources overlandResources) {
-		this.overlandResources = Optional.of(overlandResources);
+	public void setOverlandResources(@Nonnull ViewOverlandPosition position, @Nonnull BufferedImage map, @Nonnull BufferedImage cursor) {
+		this.overlandResources = Optional.of(new OverlandResources(position, map, cursor));
 	}
 
 	public void setPic(@Nullable List<BufferedImage> pic) {
@@ -152,11 +160,187 @@ public class UIResources {
 		this.picIndex = 0;
 	}
 
-	public void setSpaceResources(@Nonnull SpaceResources spaceResources) {
-		this.spaceResources = Optional.of(spaceResources);
+	public void setSpaceResources(@Nonnull ViewSpacePosition position, @Nonnull BufferedImage background, @Nonnull List<BufferedImage> symbols) {
+		this.spaceResources = Optional.of(new SpaceResources(position, background, symbols));
 	}
 
 	public void setStatusLine(@Nullable GoldboxString statusLine) {
 		this.statusLine = Optional.ofNullable(statusLine);
+	}
+
+	public class DungeonResources {
+		private ViewDungeonPosition position;
+		private GoldboxString positionText;
+
+		private VisibleWalls visibleWalls;
+
+		private WallDef walls;
+		private List<BufferedImage> wallSymbols;
+
+		private List<BufferedImage> backdrops;
+
+		private Optional<List<BufferedImage>> sprite = Optional.empty();
+		private int spriteIndex = 0;
+
+		DungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull WallDef walls,
+			@Nonnull List<BufferedImage> wallSymbols, @Nonnull List<BufferedImage> backdrops) {
+
+			this.position = position;
+			this.positionText = new GoldboxStringPosition(position);
+			this.visibleWalls = visibleWalls;
+			this.walls = walls;
+			this.wallSymbols = wallSymbols;
+			this.backdrops = backdrops;
+		}
+
+		public void advanceSprite() {
+			if (spriteAdvancementPossible()) {
+				spriteIndex--;
+			}
+		}
+
+		@Nonnull
+		public BufferedImage getBackdrop() {
+			return backdrops.get(position.getBackdropIndex());
+		}
+
+		public GoldboxString getPositionText() {
+			return positionText;
+		}
+
+		@Nonnull
+		public Optional<BufferedImage> getSprite() {
+			return sprite.map(s -> s.get(spriteIndex));
+		}
+
+		@Nonnull
+		public VisibleWalls getVisibleWalls() {
+			return visibleWalls;
+		}
+
+		@Nonnull
+		public WallDef getWalls() {
+			return walls;
+		}
+
+		@Nonnull
+		public List<BufferedImage> getWallSymbols() {
+			return wallSymbols;
+		}
+
+		public void setSprite(@Nullable List<BufferedImage> sprite, int spriteIndex) {
+			this.sprite = Optional.ofNullable(sprite);
+			this.spriteIndex = spriteIndex;
+		}
+
+		public boolean spriteAdvancementPossible() {
+			return spriteIndex > 0;
+		}
+	}
+
+	public class OverlandResources {
+		private ViewOverlandPosition position;
+		private BufferedImage map;
+		private BufferedImage cursor;
+
+		OverlandResources(@Nonnull ViewOverlandPosition position, @Nonnull BufferedImage map, @Nonnull BufferedImage cursor) {
+			this.position = position;
+			this.map = map;
+			this.cursor = cursor;
+		}
+
+		public BufferedImage getCursor() {
+			return cursor;
+		}
+
+		public int getCursorX() {
+			return position.getOverlandX();
+		}
+
+		public int getCursorY() {
+			return position.getOverlandY();
+		}
+
+		public BufferedImage getMap() {
+			return map;
+		}
+	}
+
+	public class SpaceResources {
+		private ViewSpacePosition position;
+
+		private BufferedImage background;
+		private List<BufferedImage> symbols;
+
+		private GoldboxString statusLine;
+
+		SpaceResources(@Nonnull ViewSpacePosition position, @Nonnull BufferedImage background, @Nonnull List<BufferedImage> symbols) {
+			if (symbols.size() != 95) {
+				throw new IllegalArgumentException("space symbols does not contain 95 images.");
+			}
+			this.position = position;
+			this.background = background;
+			this.symbols = symbols;
+			this.statusLine = new GoldboxStringFuel(position);
+		}
+
+		@Nonnull
+		public BufferedImage getBackground() {
+			return background;
+		}
+
+		@Nonnull
+		public BufferedImage getSun() {
+			return symbols.get(0);
+		}
+
+		@Nonnull
+		public BufferedImage getCelestial(@Nonnull Celestial c) {
+			switch (c) {
+				case MERKUR:
+					// TODO 1-2
+					return symbols.get(2);
+				case VENUS:
+					// TODO 3-6
+					return symbols.get(3);
+				case EARTH:
+					// TODO 7-14
+					return symbols.get(7);
+				case MARS:
+					// TODO 15-30
+					return symbols.get(27);
+				case CERES:
+					// TODO 59-86
+					return symbols.get(59);
+				default:
+					// TODO 31-58
+					return symbols.get(40);
+			}
+		}
+
+		public int getCelestialX(@Nonnull Celestial c) {
+			return 17 + position.getCelestialX(c);
+		}
+
+		public int getCelestialY(@Nonnull Celestial c) {
+			return 1 + position.getCelestialY(c);
+		}
+
+		@Nonnull
+		public BufferedImage getShip() {
+			return symbols.get(87 + position.getSpaceDir().ordinal());
+		}
+
+		public int getShipX() {
+			return 17 + position.getSpaceX();
+		}
+
+		public int getShipY() {
+			return 1 + position.getSpaceY();
+		}
+
+		public GoldboxString getStatusLine() {
+			return statusLine;
+		}
 	}
 }

@@ -51,15 +51,13 @@ import types.EngineStub;
 import types.GoldboxString;
 import types.MenuType;
 import types.UserInterface;
-import ui.DungeonResources;
 import ui.ExceptionHandler;
 import ui.FontType;
 import ui.GoldboxStringInput;
 import ui.Menu;
-import ui.OverlandResources;
-import ui.SpaceResources;
 import ui.UIResourceLoader;
 import ui.UIResources;
+import ui.UIResources.DungeonResources;
 import ui.UISettings;
 
 public class ClassicMode extends JPanel implements UserInterface {
@@ -476,7 +474,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			backdrops.add(loader.findImage(128 + decoId1, BACK).get(0));
 			backdrops.add(loader.findImage(decoId1, BACK).get(0));
 
-			resources.setDungeonResources(new DungeonResources(position, visibleWalls, walls, wallSymbols, backdrops));
+			resources.setDungeonResources(position, visibleWalls, walls, wallSymbols, backdrops);
 		} catch (IOException e) {
 			excHandler.handleException("Could not load dungeon decoration with block Id " + decoId1, e);
 		}
@@ -487,7 +485,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		try {
 			DAXImageContent map = loader.findImage(mapId, BIGPIC);
 			DAXImageContent cursor = loader.getOverlandCursor();
-			resources.setOverlandResources(new OverlandResources(position, map.get(0), cursor.get(0)));
+			resources.setOverlandResources(position, map.get(0), cursor.get(0));
 		} catch (NullPointerException | IOException e) {
 			excHandler.handleException("Could not load overland map with block Id " + mapId, e);
 		}
@@ -498,7 +496,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		try {
 			List<BufferedImage> symbols = loader.getSpaceSymbols().toList();
 			BufferedImage background = loader.getSpaceBackground().get(0);
-			resources.setSpaceResources(new SpaceResources(position, background, symbols));
+			resources.setSpaceResources(position, background, symbols);
 		} catch (IOException e) {
 			excHandler.handleException("Could not load space decoration", e);
 		}
