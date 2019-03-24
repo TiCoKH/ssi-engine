@@ -45,6 +45,11 @@ public class UIResourceManager {
 	public UIResourceManager(@Nonnull UIResourceLoader loader, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler)
 		throws IOException {
 
+		settings.addPropertyChangeListener(e -> {
+			fonts.clear();
+			imageResources.clear();
+		});
+
 		this.loader = loader;
 		this.excHandler = excHandler;
 		this.scaler = new UIScaler(settings);

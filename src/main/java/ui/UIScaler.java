@@ -24,6 +24,7 @@ import common.scaler.xbrz.Scaler3x;
 import common.scaler.xbrz.Scaler4x;
 import common.scaler.xbrz.Scaler5x;
 import common.scaler.xbrz.ScalerConfig;
+import ui.UISettings.PropertyName;
 
 public class UIScaler {
 	private UISettings settings;
@@ -31,6 +32,10 @@ public class UIScaler {
 
 	public UIScaler(@Nonnull UISettings settings) {
 		this.settings = settings;
+		this.settings.addPropertyChangeListener(e -> {
+			if (e.getPropertyName() == PropertyName.ZOOM.name())
+				this.xBRZ = createXBRZScaler();
+		});
 		this.xBRZ = createXBRZScaler();
 	}
 

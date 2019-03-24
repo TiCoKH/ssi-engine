@@ -10,6 +10,9 @@ import engine.ViewOverlandPosition;
 import engine.ViewSpacePosition;
 
 public interface UserInterface {
+
+	void resize();
+
 	void start(boolean showTitles);
 
 	void stop();

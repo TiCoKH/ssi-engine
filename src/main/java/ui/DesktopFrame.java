@@ -16,6 +16,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
 
 import common.FileMap;
 import engine.Engine;
@@ -34,6 +35,10 @@ public class DesktopFrame implements ExceptionHandler {
 
 	public DesktopFrame() {
 		settings = new UISettings();
+		settings.addPropertyChangeListener(e -> {
+			ui.ifPresent(UserInterface::resize);
+			frame.pack();
+		});
 		initFrame();
 	}
 
@@ -69,6 +74,8 @@ public class DesktopFrame implements ExceptionHandler {
 	}
 
 	private JMenuBar mainMenu;
+	private JMenu scaleFactor;
+	private JMenu scaleMethod;
 	private JMenuItem resource;
 
 	private JMenuBar getMainMenu() {
@@ -83,6 +90,20 @@ public class DesktopFrame implements ExceptionHandler {
 				}
 			});
 
+			scaleFactor = new JMenu("Scale Factor");
+			for (int i = 2; i < 6; i++) {
+				scaleFactor.add(createScaleFactorItem(i));
+			}
+
+			scaleMethod = new JMenu("Scale Method");
+			for (ScaleMethod method : ScaleMethod.values()) {
+				scaleMethod.add(createScaleMethodItem(method));
+			}
+
+			JMenu options = new JMenu("Options");
+			options.add(scaleFactor);
+			options.add(scaleMethod);
+
 			JMenu debug = new JMenu("Debug");
 
 			resource = debug.add("Resource Viewer");
@@ -91,9 +112,35 @@ public class DesktopFrame implements ExceptionHandler {
 
 			mainMenu = new JMenuBar();
 			mainMenu.add(game);
+			mainMenu.add(options);
 			mainMenu.add(debug);
 		}
 		return mainMenu;
+	}
+
+	private JMenuItem createScaleFactorItem(int scale) {
+		JMenuItem item = new JRadioButtonMenuItem(scale + "x");
+		item.addActionListener(e -> {
+			for (int i = 0; i < scaleFactor.getItemCount(); i++)
+				((JRadioButtonMenuItem) scaleFactor.getItem(i)).setSelected(false);
+			item.setSelected(true);
+			settings.setZoom(scale);
+		});
+		item.setSelected(scale == settings.getZoom());
+		return item;
+
+	}
+
+	private JMenuItem createScaleMethodItem(ScaleMethod method) {
+		JMenuItem item = new JRadioButtonMenuItem(method.name());
+		item.addActionListener(e -> {
+			for (int i = 0; i < scaleMethod.getItemCount(); i++)
+				((JRadioButtonMenuItem) scaleMethod.getItem(i)).setSelected(false);
+			item.setSelected(true);
+			settings.setMethod(method);
+		});
+		item.setSelected(method == settings.getMethod());
+		return item;
 	}
 
 	private JLabel logo;

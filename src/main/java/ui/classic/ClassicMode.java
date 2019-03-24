@@ -126,7 +126,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private void initSurface() {
 		setDoubleBuffered(true);
+		resize();
+	}
+
+	@Override
+	public void resize() {
 		setPreferredSize(new Dimension(settings.zoom(320), settings.zoom(200)));
+		invalidate();
 	}
 
 	@Override
@@ -291,7 +297,6 @@ public class ClassicMode extends JPanel implements UserInterface {
 				});
 			}
 		});
-
 		resources.setMenu(new Menu(type, menuItems, description));
 	}
 
