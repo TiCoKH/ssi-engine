@@ -1,13 +1,17 @@
 package ui;
 
+import static data.content.DAXContentType.BACK;
+import static data.content.DAXContentType.SPRIT;
+import static data.content.DAXContentType._8X8D;
+
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.WallDef;
 import engine.ViewDungeonPosition;
@@ -17,10 +21,6 @@ import engine.ViewSpacePosition.Celestial;
 import types.GoldboxString;
 
 public class UIResources {
-
-	// Font and border symbols, always available
-	private Map<FontType, List<BufferedImage>> fonts;
-	private List<BufferedImage> borderSymbols;
 
 	// Elements to render 3D dungeons, only available in dungeons
 	private Optional<DungeonResources> dungeonResources = Optional.empty();
@@ -33,7 +33,7 @@ public class UIResources {
 
 	// The flavor picture(s), can be a small or big picture
 	// Also used for the title pictures
-	private Optional<List<BufferedImage>> pic = Optional.empty();
+	private Optional<ImageResource> pic = Optional.empty();
 	private int picIndex = 0;
 
 	// The story text
@@ -46,9 +46,10 @@ public class UIResources {
 	// a game menu
 	private Optional<Menu> menu = Optional.empty();
 
-	public UIResources(@Nonnull Map<FontType, List<BufferedImage>> fonts, @Nonnull List<BufferedImage> borderSymbols) {
-		this.fonts = fonts;
-		this.borderSymbols = borderSymbols;
+	private UIResourceManager resman;
+
+	public UIResources(@Nonnull UIResourceManager resman) {
+		this.resman = resman;
 	}
 
 	public void addChars(@Nonnull List<Byte> addedChars) {
@@ -59,9 +60,13 @@ public class UIResources {
 		}
 	}
 
+	public void clearPic() {
+		pic = Optional.empty();
+	}
+
 	@Nonnull
 	public List<BufferedImage> getBorderSymbols() {
-		return borderSymbols;
+		return resman.getBorders();
 	}
 
 	@Nonnull
@@ -83,8 +88,8 @@ public class UIResources {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getFont(FontType type) {
-		return fonts.get(type);
+	public List<BufferedImage> getFont(@Nonnull FontType type) {
+		return resman.getFont(type);
 	}
 
 	@Nonnull
@@ -99,7 +104,7 @@ public class UIResources {
 
 	@Nonnull
 	public Optional<BufferedImage> getPic() {
-		return pic.map(p -> p.get(picIndex));
+		return pic.map(p -> resman.getImageResource(p.getId(), p.getType()).get(picIndex));
 	}
 
 	@Nonnull
@@ -125,7 +130,7 @@ public class UIResources {
 
 	public void incPicIndex() {
 		pic.ifPresent(p -> {
-			if (picIndex + 1 < p.size())
+			if (picIndex + 1 < resman.getImageResource(p.getId(), p.getType()).size())
 				picIndex++;
 			else
 				picIndex = 0;
@@ -141,27 +146,25 @@ public class UIResources {
 		this.charStop = 0;
 	}
 
-	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull WallDef walls,
-		@Nonnull List<BufferedImage> wallSymbols, @Nonnull List<BufferedImage> backdrops) {
-
-		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, walls, wallSymbols, backdrops));
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int wallId, int backId) {
+		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, wallId, backId));
 	}
 
 	public void setMenu(@Nullable Menu menu) {
 		this.menu = Optional.ofNullable(menu);
 	}
 
-	public void setOverlandResources(@Nonnull ViewOverlandPosition position, @Nonnull BufferedImage map, @Nonnull BufferedImage cursor) {
-		this.overlandResources = Optional.of(new OverlandResources(position, map, cursor));
+	public void setOverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
+		this.overlandResources = Optional.of(new OverlandResources(position, mapId));
 	}
 
-	public void setPic(@Nullable List<BufferedImage> pic) {
-		this.pic = Optional.ofNullable(pic);
+	public void setPic(int id, @Nullable DAXContentType type) {
+		this.pic = Optional.of(new ImageResource(id, type));
 		this.picIndex = 0;
 	}
 
-	public void setSpaceResources(@Nonnull ViewSpacePosition position, @Nonnull BufferedImage background, @Nonnull List<BufferedImage> symbols) {
-		this.spaceResources = Optional.of(new SpaceResources(position, background, symbols));
+	public void setSpaceResources(@Nonnull ViewSpacePosition position) {
+		this.spaceResources = Optional.of(new SpaceResources(position));
 	}
 
 	public void setStatusLine(@Nullable GoldboxString statusLine) {
@@ -174,23 +177,18 @@ public class UIResources {
 
 		private VisibleWalls visibleWalls;
 
-		private WallDef walls;
-		private List<BufferedImage> wallSymbols;
+		private int wallsIds;
+		private int backId;
 
-		private List<BufferedImage> backdrops;
-
-		private Optional<List<BufferedImage>> sprite = Optional.empty();
+		private Optional<ImageResource> sprite = Optional.empty();
 		private int spriteIndex = 0;
 
-		DungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull WallDef walls,
-			@Nonnull List<BufferedImage> wallSymbols, @Nonnull List<BufferedImage> backdrops) {
-
+		DungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int wallsId, int backId) {
 			this.position = position;
 			this.positionText = new GoldboxStringPosition(position);
 			this.visibleWalls = visibleWalls;
-			this.walls = walls;
-			this.wallSymbols = wallSymbols;
-			this.backdrops = backdrops;
+			this.wallsIds = wallsId;
+			this.backId = backId;
 		}
 
 		public void advanceSprite() {
@@ -199,9 +197,15 @@ public class UIResources {
 			}
 		}
 
+		public void clearSprite() {
+			sprite = Optional.empty();
+		}
+
 		@Nonnull
 		public BufferedImage getBackdrop() {
-			return backdrops.get(position.getBackdropIndex());
+			if (position.getBackdropIndex() == 0)
+				return resman.getImageResource(128 + backId, BACK).get(0);
+			return resman.getImageResource(backId, BACK).get(0);
 		}
 
 		public GoldboxString getPositionText() {
@@ -210,7 +214,7 @@ public class UIResources {
 
 		@Nonnull
 		public Optional<BufferedImage> getSprite() {
-			return sprite.map(s -> s.get(spriteIndex));
+			return sprite.map(s -> resman.getImageResource(s.getId(), s.getType()).get(spriteIndex));
 		}
 
 		@Nonnull
@@ -219,17 +223,17 @@ public class UIResources {
 		}
 
 		@Nonnull
-		public WallDef getWalls() {
-			return walls;
+		public Optional<WallDef> getWalls() {
+			return Optional.ofNullable(resman.getWalldef(wallsIds));
 		}
 
 		@Nonnull
 		public List<BufferedImage> getWallSymbols() {
-			return wallSymbols;
+			return resman.getImageResource(wallsIds, _8X8D);
 		}
 
-		public void setSprite(@Nullable List<BufferedImage> sprite, int spriteIndex) {
-			this.sprite = Optional.ofNullable(sprite);
+		public void setSprite(int spriteId, int spriteIndex) {
+			this.sprite = Optional.of(new ImageResource(spriteId, SPRIT));
 			this.spriteIndex = spriteIndex;
 		}
 
@@ -240,17 +244,16 @@ public class UIResources {
 
 	public class OverlandResources {
 		private ViewOverlandPosition position;
-		private BufferedImage map;
-		private BufferedImage cursor;
+		private int mapId;
 
-		OverlandResources(@Nonnull ViewOverlandPosition position, @Nonnull BufferedImage map, @Nonnull BufferedImage cursor) {
+		OverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
 			this.position = position;
-			this.map = map;
-			this.cursor = cursor;
+			this.mapId = mapId;
 		}
 
+		@Nonnull
 		public BufferedImage getCursor() {
-			return cursor;
+			return resman.getOverlandCursor();
 		}
 
 		public int getCursorX() {
@@ -261,37 +264,29 @@ public class UIResources {
 			return position.getOverlandY();
 		}
 
+		@Nonnull
 		public BufferedImage getMap() {
-			return map;
+			return resman.getImageResource(mapId, null).get(0);
 		}
 	}
 
 	public class SpaceResources {
 		private ViewSpacePosition position;
-
-		private BufferedImage background;
-		private List<BufferedImage> symbols;
-
 		private GoldboxString statusLine;
 
-		SpaceResources(@Nonnull ViewSpacePosition position, @Nonnull BufferedImage background, @Nonnull List<BufferedImage> symbols) {
-			if (symbols.size() != 95) {
-				throw new IllegalArgumentException("space symbols does not contain 95 images.");
-			}
+		SpaceResources(@Nonnull ViewSpacePosition position) {
 			this.position = position;
-			this.background = background;
-			this.symbols = symbols;
 			this.statusLine = new GoldboxStringFuel(position);
 		}
 
 		@Nonnull
 		public BufferedImage getBackground() {
-			return background;
+			return resman.getSpaceBackground();
 		}
 
 		@Nonnull
 		public BufferedImage getSun() {
-			return symbols.get(0);
+			return resman.getSpaceSymbols().get(0);
 		}
 
 		@Nonnull
@@ -299,22 +294,22 @@ public class UIResources {
 			switch (c) {
 				case MERKUR:
 					// TODO 1-2
-					return symbols.get(2);
+					return resman.getSpaceSymbols().get(2);
 				case VENUS:
 					// TODO 3-6
-					return symbols.get(3);
+					return resman.getSpaceSymbols().get(3);
 				case EARTH:
 					// TODO 7-14
-					return symbols.get(7);
+					return resman.getSpaceSymbols().get(7);
 				case MARS:
 					// TODO 15-30
-					return symbols.get(27);
+					return resman.getSpaceSymbols().get(27);
 				case CERES:
 					// TODO 59-86
-					return symbols.get(59);
+					return resman.getSpaceSymbols().get(59);
 				default:
 					// TODO 31-58
-					return symbols.get(40);
+					return resman.getSpaceSymbols().get(40);
 			}
 		}
 
@@ -328,7 +323,7 @@ public class UIResources {
 
 		@Nonnull
 		public BufferedImage getShip() {
-			return symbols.get(87 + position.getSpaceDir().ordinal());
+			return resman.getSpaceSymbols().get(87 + position.getSpaceDir().ordinal());
 		}
 
 		public int getShipX() {

@@ -7,7 +7,6 @@ import static ui.FontType.NORMAL;
 import static ui.FontType.SHORTCUT;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import javax.annotation.Nonnull;
@@ -115,15 +114,6 @@ public abstract class AbstractRenderer {
 	}
 
 	protected void renderImage(@Nonnull Graphics2D g2d, @Nonnull BufferedImage image, int x, int y) {
-		Image scaled = image.getScaledInstance(zoom(image.getWidth()), zoom(image.getHeight()), 0);
-		g2d.drawImage(scaled, zoom8(x), zoom8(y), null);
-	}
-
-	protected int zoom(int pos) {
-		return settings.getZoom() * pos;
-	}
-
-	protected int zoom8(int pos) {
-		return settings.getZoom() * 8 * pos;
+		g2d.drawImage(image, settings.zoom8(x), settings.zoom8(y), null);
 	}
 }

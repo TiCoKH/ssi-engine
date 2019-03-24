@@ -11,8 +11,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public abstract class DAXImageContent extends DAXContent {
-	protected static final DAXImageContentConverter CONVERTER = new DAXImageContentConverter();;
-
 	protected final List<BufferedImage> images = new ArrayList<>();
 
 	public boolean contains(Object arg0) {

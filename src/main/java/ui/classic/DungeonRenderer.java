@@ -42,7 +42,10 @@ public class DungeonRenderer extends StoryRenderer {
 	private void renderDungeon(@Nonnull Graphics2D g2d) {
 		resources.getDungeonResources().ifPresent(r -> {
 			renderImage(g2d, r.getBackdrop(), 3, 3);
-			renderVisibleWalls(g2d, r.getVisibleWalls(), r.getWalls(), r.getWallSymbols());
+
+			r.getWalls().ifPresent(walls -> {
+				renderVisibleWalls(g2d, r.getVisibleWalls(), walls, r.getWallSymbols());
+			});
 
 			r.getSprite().ifPresent(sprite -> {
 				renderImage(g2d, sprite, 3, 3);
@@ -77,8 +80,7 @@ public class DungeonRenderer extends StoryRenderer {
 			int xBegin = xStart < 3 ? 3 - xStart : 0;
 			int xEnd = xStart + row.length > 13 ? 14 - xStart : row.length;
 			for (int x = xBegin; x < xEnd; x++) {
-				BufferedImage w = wallSymbols.get(row[x]);
-				renderImage(g2d, w, xStart + x, yStart + y);
+				renderImage(g2d, wallSymbols.get(row[x]), xStart + x, yStart + y);
 			}
 		}
 	}

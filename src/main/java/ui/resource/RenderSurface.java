@@ -28,15 +28,16 @@ import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
-import data.content.DAXImageContent;
 import data.content.WallDef;
-import ui.UIResourceLoader;
+import ui.FontType;
+import ui.ImageResource;
+import ui.UIResourceManager;
 import ui.UISettings;
 
 public class RenderSurface extends JPanel implements Scrollable {
 	private static final long serialVersionUID = -3126585855013388072L;
 
-	private transient UIResourceLoader loader;
+	private transient UIResourceManager resman;
 	private transient UISettings settings;
 
 	private transient Optional<Object> renderObject = Optional.empty();
@@ -44,76 +45,47 @@ public class RenderSurface extends JPanel implements Scrollable {
 	private transient ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
 
 	private int index = 0;
-	private boolean forward = true;
-	private boolean symbols = false;
 
-	public RenderSurface(@Nonnull UIResourceLoader loader, @Nonnull UISettings settings) {
-		this.loader = loader;
+	public RenderSurface(@Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
+		this.resman = resman;
 		this.settings = settings;
 
 		exec.scheduleWithFixedDelay(() -> {
-			int picCount = renderObject.map(o -> ((DAXImageContent) o).size()).orElse(1);
-			if (forward) {
-				if (index + 1 == picCount) {
-					index = 0;
+			ImageResource ir = renderObject //
+				.filter(o -> o instanceof ImageResource) //
+				.map(o -> (ImageResource) o) //
+				.filter(o -> o.getType() == PIC || o.getType() == SPRIT) //
+				.orElse(null);
+			if (ir != null) {
+				int picCount = resman.getImageResource(ir.getId(), ir.getType()).size();
+				if (ir.getType() == PIC) {
+					if (index + 1 == picCount) {
+						index = 0;
+					} else {
+						index++;
+					}
 				} else {
-					index++;
+					if (index == 0) {
+						index = picCount - 1;
+					} else {
+						index--;
+					}
 				}
-			} else {
-				if (index == 0) {
-					index = picCount - 1;
-				} else {
-					index--;
-				}
+				repaint();
 			}
-			repaint();
 		}, 500, 500, TimeUnit.MILLISECONDS);
 	}
 
 	public void changeRenderObject(@Nonnull RenderInfo info) throws IOException {
-		index = 0;
-		symbols = false;
-
-		if (info.getType() == null) {
-			DAXImageContent images;
-			if (info.getId() == 201) {
-				images = loader.getFont();
-			} else if (info.getId() == 201) {
-				images = loader.getMisc();
-			} else {
-				images = loader.findImage(info.getId(), _8X8D);
-			}
-			renderObject = Optional.ofNullable(images);
-			adaptSize(zoom8(16), zoom8(1 + images.size() / 16));
-			symbols = true;
-			return;
-		}
-		switch (info.getType()) {
-			case BIGPIC:
-			case BACK:
-			case PIC:
-			case SPRIT:
-			case TITLE:
-				DAXImageContent c = loader.findImage(info.getId(), info.getType());
-				renderObject = Optional.ofNullable(c);
-				forward = info.getType() == PIC;
-				if (info.getType() == SPRIT) {
-					index = renderObject.map(o -> 2).orElse(0);
-				}
-				if (c != null) {
-					BufferedImage image = c.get(0);
-					adaptSize(zoom(image.getWidth()), zoom(image.getHeight()));
-				}
-				break;
-			case WALLDEF:
-				WallResources wallRes = new WallResources();
-				wallRes.walls = loader.find(info.getId(), WallDef.class, WALLDEF);
-				wallRes.wallSymbols = loader.findImage(info.getId(), _8X8D).toList();
-				renderObject = Optional.ofNullable(wallRes);
-				adaptSize(zoom8(22), zoom8(11 * wallRes.walls.getWallCount()));
-				break;
-			default:
-				clearRenderObject();
+		if (info.getType() == WALLDEF) {
+			WallResources wallRes = new WallResources();
+			wallRes.walls = resman.getWalldef(info.getId());
+			wallRes.symbolsId = info.getId();
+			renderObject = Optional.of(wallRes);
+			adaptSize(settings.zoom8(22), settings.zoom8(11 * wallRes.walls.getWallCount()));
+		} else {
+			index = info.getType() == SPRIT ? 2 : 0;
+			renderObject = Optional.of(new ImageResource(info.getId(), info.getType()));
 		}
 	}
 
@@ -130,22 +102,27 @@ public class RenderSurface extends JPanel implements Scrollable {
 		g2d.clearRect(0, 0, getWidth(), getHeight());
 
 		renderObject.ifPresent(o -> {
-			if (o instanceof DAXImageContent && symbols) {
-				DAXImageContent ic = (DAXImageContent) o;
-				for (int i = 0; i < ic.size(); i++) {
-					BufferedImage image = ic.get(i);
-					int x = i % 16;
-					int y = i / 16;
-					g2d.drawImage(image.getScaledInstance(zoom(image.getWidth()), zoom(image.getHeight()), 0), zoom8(x), zoom8(y), null);
+			if (o instanceof ImageResource) {
+				ImageResource ir = (ImageResource) o;
+				if (ir.getType() == null) {
+					List<BufferedImage> images = null;
+					if (ir.getId() == 201)
+						images = resman.getFont(FontType.NORMAL);
+					else if (ir.getId() == 202)
+						images = resman.getMisc();
+					adaptSize(settings.zoom8(16), settings.zoom8(1 + images.size() / 16));
+					for (int i = 0; i < images.size(); i++) {
+						g2d.drawImage(images.get(i), settings.zoom8(i % 16), settings.zoom8(i / 16), null);
+					}
+				} else {
+					BufferedImage image = resman.getImageResource(ir.getId(), ir.getType()).get(index);
+					adaptSize(image.getWidth(), image.getHeight());
+					g2d.drawImage(image, 0, 0, null);
 				}
-			} else if (o instanceof DAXImageContent) {
-				DAXImageContent ic = (DAXImageContent) o;
-				BufferedImage image = ic.get(index);
-				g2d.drawImage(image.getScaledInstance(zoom(image.getWidth()), zoom(image.getHeight()), 0), 0, 0, null);
 			} else if (o instanceof WallResources) {
 				WallResources wallRes = (WallResources) o;
 				WallDef walls = wallRes.walls;
-				List<BufferedImage> wallSymbols = wallRes.wallSymbols;
+				List<BufferedImage> wallSymbols = resman.getImageResource(wallRes.symbolsId, _8X8D);
 
 				g2d.setBackground(Color.BLUE);
 				g2d.clearRect(0, 0, getWidth(), getHeight());
@@ -170,9 +147,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 		for (int y = 0; y < wallView.length; y++) {
 			int[] row = wallView[y];
 			for (int x = 0; x < row.length; x++) {
-				BufferedImage image = wallSymbols.get(row[x]);
-				g2d.drawImage(image.getScaledInstance(zoom(image.getWidth()), zoom(image.getHeight()), 0), zoom8(xStart + x),
-					zoom8(11 * wallIndex + yStart + y), null);
+				g2d.drawImage(wallSymbols.get(row[x]), settings.zoom8(xStart + x), settings.zoom8(11 * wallIndex + yStart + y), null);
 			}
 		}
 	}
@@ -189,7 +164,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	@Override
 	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-		return zoom8(1);
+		return settings.zoom8(1);
 	}
 
 	@Override
@@ -204,19 +179,11 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-		return zoom8(1);
-	}
-
-	protected int zoom(int pos) {
-		return settings.getZoom() * pos;
-	}
-
-	protected int zoom8(int pos) {
-		return settings.getZoom() * 8 * pos;
+		return settings.zoom8(1);
 	}
 
 	private static class WallResources {
 		WallDef walls;
-		List<BufferedImage> wallSymbols;
+		int symbolsId;
 	}
 }

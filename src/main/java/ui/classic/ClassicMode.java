@@ -1,12 +1,7 @@
 package ui.classic;
 
-import static data.content.DAXContentType.BACK;
-import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType.TITLE;
-import static data.content.DAXContentType.WALLDEF;
-import static data.content.DAXContentType._8X8D;
 import static engine.InputAction.CONTINUE;
 import static engine.InputAction.INPUT_HANDLER;
 import static engine.InputAction.LOAD;
@@ -20,7 +15,6 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -39,10 +33,7 @@ import javax.swing.KeyStroke;
 
 import common.FileMap;
 import data.content.DAXContentType;
-import data.content.DAXImageContent;
 import data.content.DungeonMap.VisibleWalls;
-import data.content.MonocromeSymbols;
-import data.content.WallDef;
 import engine.InputAction;
 import engine.ViewDungeonPosition;
 import engine.ViewOverlandPosition;
@@ -52,10 +43,10 @@ import types.GoldboxString;
 import types.MenuType;
 import types.UserInterface;
 import ui.ExceptionHandler;
-import ui.FontType;
 import ui.GoldboxStringInput;
 import ui.Menu;
 import ui.UIResourceLoader;
+import ui.UIResourceManager;
 import ui.UIResources;
 import ui.UIResources.DungeonResources;
 import ui.UISettings;
@@ -93,14 +84,11 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient EngineStub stub;
 
-	private transient ExceptionHandler excHandler;
-
 	private transient Map<UIState, AbstractRenderer> renderers = new EnumMap<>(UIState.class);
 	private UIState currentState;
 
 	private boolean textNeedsProgressing = false;
 
-	private transient UIResourceLoader loader;
 	private transient UIResources resources;
 	private transient UISettings settings;
 
@@ -116,21 +104,10 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		this.stub = stub;
 		this.settings = settings;
-		this.excHandler = excHandler;
-		this.loader = new UIResourceLoader(fileMap);
 
-		MonocromeSymbols font = loader.getFont();
-		Map<FontType, List<BufferedImage>> fontMap = new EnumMap<>(FontType.class);
-		fontMap.put(FontType.NORMAL, font.withGreenFG());
-		fontMap.put(FontType.INTENSE, font.withInvertedColors());
-		fontMap.put(FontType.SHORTCUT, font.toList());
-		fontMap.put(FontType.GAME_NAME, font.withMagentaFG());
-		fontMap.put(FontType.DAMAGE, fontMap.get(FontType.SHORTCUT));
-		fontMap.put(FontType.PC_HEADING, fontMap.get(FontType.NORMAL));
-		fontMap.put(FontType.SEL_PC, fontMap.get(FontType.NORMAL));
-		fontMap.put(FontType.PC, fontMap.get(FontType.NORMAL));
-		fontMap.put(FontType.FUEL, fontMap.get(FontType.GAME_NAME));
-		this.resources = new UIResources(fontMap, loader.getBorders().toList());
+		UIResourceLoader loader = new UIResourceLoader(fileMap);
+		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
+		this.resources = new UIResources(resman);
 
 		initRenderers();
 		initSurface();
@@ -149,7 +126,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private void initSurface() {
 		setDoubleBuffered(true);
-		setPreferredSize(new Dimension(zoom(320), zoom(200)));
+		setPreferredSize(new Dimension(settings.zoom(320), settings.zoom(200)));
 	}
 
 	@Override
@@ -219,7 +196,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient Runnable titleSwitcher = null;
 
 	private void showNextTitle(int titleId) {
-		loadPicture(titleId, TITLE);
+		resources.setPic(titleId, TITLE);
 		if (titleId < 3) {
 			titleSwitcher = () -> showNextTitle(titleId + 1);
 		} else {
@@ -249,7 +226,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void clearPictures() {
 		stopPicAnimation();
-		resources.setPic(null);
+		resources.clearPic();
 	}
 
 	private void resetInput() {
@@ -465,62 +442,26 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int decoId1, int decoId2,
 		int decoId3) {
-		try {
-			WallDef walls = loader.find(decoId1, WallDef.class, WALLDEF);
 
-			List<BufferedImage> wallSymbols = loader.findImage(decoId1, _8X8D).toList();
-
-			List<BufferedImage> backdrops = new ArrayList<>();
-			backdrops.add(loader.findImage(128 + decoId1, BACK).get(0));
-			backdrops.add(loader.findImage(decoId1, BACK).get(0));
-
-			resources.setDungeonResources(position, visibleWalls, walls, wallSymbols, backdrops);
-		} catch (IOException e) {
-			excHandler.handleException("Could not load dungeon decoration with block Id " + decoId1, e);
-		}
+		resources.setDungeonResources(position, visibleWalls, decoId1, decoId1);
 	}
 
 	@Override
 	public void setOverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
-		try {
-			DAXImageContent map = loader.findImage(mapId, BIGPIC);
-			DAXImageContent cursor = loader.getOverlandCursor();
-			resources.setOverlandResources(position, map.get(0), cursor.get(0));
-		} catch (NullPointerException | IOException e) {
-			excHandler.handleException("Could not load overland map with block Id " + mapId, e);
-		}
+		resources.setOverlandResources(position, mapId);
 	}
 
 	@Override
 	public void setSpaceResources(@Nonnull ViewSpacePosition position) {
-		try {
-			List<BufferedImage> symbols = loader.getSpaceSymbols().toList();
-			BufferedImage background = loader.getSpaceBackground().get(0);
-			resources.setSpaceResources(position, background, symbols);
-		} catch (IOException e) {
-			excHandler.handleException("Could not load space decoration", e);
-		}
+		resources.setSpaceResources(position);
 	}
 
 	@Override
 	public void showPicture(int pictureId, @Nullable DAXContentType type) {
 		stopPicAnimation();
-		loadPicture(pictureId, type);
+		resources.setPic(pictureId, type);
 		if (resources.getPic().isPresent()) {
 			startPicAnimation();
-		}
-	}
-
-	private void loadPicture(int pictureId, @Nullable DAXContentType type) {
-		try {
-			DAXImageContent images = loader.findImage(pictureId, type);
-			if (images != null) {
-				resources.setPic(images.toList());
-			} else {
-				resources.setPic(null);
-			}
-		} catch (IOException e) {
-			excHandler.handleException("Could not load picture with block Id " + pictureId, e);
 		}
 	}
 
@@ -538,18 +479,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void showSprite(int spriteId, int pictureId, int distance) {
 		clearSprite();
-		loadPicture(pictureId, PIC);
+		if (pictureId != 255)
+			resources.setPic(pictureId, PIC);
 		resources.getDungeonResources().ifPresent(r -> {
-			try {
-				DAXImageContent sprite = loader.findImage(spriteId, SPRIT);
-				if (sprite != null) {
-					r.setSprite(sprite.toList(), distance);
-					if (resources.getPic().isPresent()) {
-						spriteReplacement(r);
-					}
-				}
-			} catch (IOException e) {
-				excHandler.handleException("Could not load sprite with block Id " + spriteId, e);
+			if (spriteId != 255)
+				r.setSprite(spriteId, distance);
+			if (resources.getPic().isPresent()) {
+				spriteReplacement(r);
 			}
 		});
 	}
@@ -566,7 +502,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private void spriteReplacement(DungeonResources r) {
 		if (!r.spriteAdvancementPossible() && animationFuture == null) {
 			animationFuture = exec.schedule(() -> {
-				r.setSprite(null, 0);
+				r.clearSprite();
 				startPicAnimation();
 			}, 1000, MILLISECONDS);
 		}
@@ -575,7 +511,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void clearSprite() {
 		clearPictures();
-		resources.getDungeonResources().ifPresent(r -> r.setSprite(null, 0));
+		resources.getDungeonResources().ifPresent(DungeonResources::clearSprite);
 	}
 
 	@Override
@@ -648,12 +584,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setBackground(Color.BLACK);
-		g2d.clearRect(0, 0, zoom(320), zoom(200));
+		g2d.clearRect(0, 0, settings.zoom(320), settings.zoom(200));
 
 		renderers.get(currentState).render(g2d);
-	}
-
-	private int zoom(int pos) {
-		return settings.getZoom() * pos;
 	}
 }

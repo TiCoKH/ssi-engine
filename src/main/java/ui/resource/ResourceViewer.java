@@ -27,7 +27,9 @@ import javax.swing.tree.TreeNode;
 
 import common.FileMap;
 import data.content.DAXContentType;
+import ui.ExceptionHandler;
 import ui.UIResourceLoader;
+import ui.UIResourceManager;
 import ui.UISettings;
 
 public class ResourceViewer {
@@ -35,11 +37,11 @@ public class ResourceViewer {
 	private RenderSurface drawSurface;
 
 	private UIResourceLoader loader;
-	private UISettings settings;
 
-	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UISettings settings) throws IOException {
+	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler) throws IOException {
 		this.loader = new UIResourceLoader(fileMap);
-		this.settings = settings;
+		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
+		this.drawSurface = new RenderSurface(resman, settings);
 
 		initFrame();
 	}
@@ -68,8 +70,6 @@ public class ResourceViewer {
 		JScrollPane treeScroll = new JScrollPane(resourceTree);
 		treeScroll.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		treeScroll.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
-
-		drawSurface = new RenderSurface(loader, settings);
 
 		JScrollPane drawScroll = new JScrollPane(drawSurface);
 		drawScroll.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_AS_NEEDED);

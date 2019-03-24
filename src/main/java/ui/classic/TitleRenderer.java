@@ -1,7 +1,6 @@
 package ui.classic;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 
 import javax.annotation.Nonnull;
 
@@ -37,10 +36,9 @@ public class TitleRenderer extends AbstractRenderer {
 
 	private void renderTitle(@Nonnull Graphics2D g2d) {
 		resources.getPic().ifPresent(title -> {
-			int x = (320 - title.getWidth()) / 2;
-			int y = (200 - title.getHeight()) / 2;
-			Image scaled = title.getScaledInstance(zoom(title.getWidth()), zoom(title.getHeight()), 0);
-			g2d.drawImage(scaled, zoom(x), zoom(y), null);
+			int x = (settings.zoom(320) - title.getWidth(null)) / 2;
+			int y = (settings.zoom(200) - title.getHeight(null)) / 2;
+			g2d.drawImage(title, x, y, null);
 		});
 	}
 }

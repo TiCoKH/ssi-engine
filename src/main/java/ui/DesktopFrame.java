@@ -126,7 +126,7 @@ public class DesktopFrame implements ExceptionHandler {
 			FileMap fm = new FileMap(dir);
 			Engine engine = new Engine(fm);
 			ui = Optional.of(new ClassicMode(fm, engine, settings, this));
-			resourceUi = new ResourceViewer(fm, settings);
+			resourceUi = new ResourceViewer(fm, settings, this);
 			resource.setEnabled(true);
 		} catch (Exception e) {
 			handleException("Error creating game display", e);

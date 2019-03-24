@@ -6,8 +6,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -22,17 +20,5 @@ public class MonocromeSymbols extends DAXImageContent {
 			image.setData(r);
 			images.add(image);
 		}
-	}
-
-	public List<BufferedImage> withGreenFG() {
-		return images.stream().map(CONVERTER::withGreenFG).collect(Collectors.toList());
-	}
-
-	public List<BufferedImage> withMagentaFG() {
-		return images.stream().map(CONVERTER::withMagentaFG).collect(Collectors.toList());
-	}
-
-	public List<BufferedImage> withInvertedColors() {
-		return images.stream().map(CONVERTER::withInvertedColors).collect(Collectors.toList());
 	}
 }
