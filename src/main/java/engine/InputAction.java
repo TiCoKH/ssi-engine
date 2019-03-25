@@ -15,7 +15,6 @@ import engine.input.InputNumberStringHandler;
 import engine.input.LoadHandler;
 import engine.input.MenuHandler;
 import engine.input.OverlandMovementHandler;
-import engine.input.QuitHandler;
 import engine.input.SaveHandler;
 import engine.input.SpaceMovementHandler;
 import types.CustomGoldboxString;
@@ -40,7 +39,6 @@ public class InputAction {
 
 	public static final InputAction LOAD = new InputAction(new LoadHandler());
 	public static final InputAction SAVE = new InputAction(new SaveHandler());
-	public static final InputAction QUIT = new InputAction(new QuitHandler());
 
 	public static final InputAction MOVE_FORWARD = new InputAction(DUNGEON_MOVEMENT_HANDLER);
 	public static final InputAction TURN_LEFT = new InputAction(DUNGEON_MOVEMENT_HANDLER);

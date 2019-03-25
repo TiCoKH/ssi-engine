@@ -1,12 +1,25 @@
 package ui;
 
-import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
+import static javax.swing.KeyStroke.getKeyStroke;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -35,6 +48,7 @@ public class DesktopFrame implements ExceptionHandler {
 
 	public DesktopFrame() {
 		settings = new UISettings();
+		loadSettings();
 		settings.addPropertyChangeListener(e -> {
 			ui.ifPresent(UserInterface::resize);
 			frame.pack();
@@ -67,10 +81,20 @@ public class DesktopFrame implements ExceptionHandler {
 
 	private void initFrame() {
 		this.frame = new JFrame("SSI");
-		this.frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.frame.setLocationByPlatform(true);
 		this.frame.setJMenuBar(getMainMenu());
 		this.frame.add(getLogo(), BorderLayout.CENTER);
+		this.frame.addWindowListener(new DesktopWindowAdapter());
+
+		JComponent root = this.frame.getRootPane();
+		root.getInputMap(WHEN_IN_FOCUSED_WINDOW).put(getKeyStroke(VK_Q, CTRL_DOWN_MASK), "QUIT");
+		root.getActionMap().put("QUIT", new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				quit();
+			}
+		});
 	}
 
 	private JMenuBar mainMenu;
@@ -88,6 +112,14 @@ public class DesktopFrame implements ExceptionHandler {
 				if (result == JFileChooser.APPROVE_OPTION) {
 					startGame(getChooser().getSelectedFile().getAbsolutePath(), true);
 				}
+			});
+
+			game.addSeparator();
+
+			JMenuItem quit = game.add("Quit");
+			quit.setMnemonic(VK_Q);
+			quit.addActionListener(ev -> {
+				quit();
 			});
 
 			scaleFactor = new JMenu("Scale Factor");
@@ -184,5 +216,60 @@ public class DesktopFrame implements ExceptionHandler {
 	public void handleException(@Nonnull String title, @Nonnull Exception e) {
 		e.printStackTrace(System.err);
 		JOptionPane.showMessageDialog(frame, e.getMessage(), title, JOptionPane.ERROR_MESSAGE);
+	}
+
+	private void quit() {
+		ui.ifPresent(UserInterface::stop);
+		saveSettings();
+		System.exit(0);
+	}
+
+	private void loadSettings() {
+		File cofigPath = getConfigPath();
+		File config = new File(cofigPath, "uisettings.properties");
+		if (config.exists() && config.canRead()) {
+			try (FileChannel fc = FileChannel.open(config.toPath(), READ)) {
+				settings.readFrom(fc);
+			} catch (IOException e) {
+				handleException("Error reading settings file", e);
+			}
+		}
+	}
+
+	private void saveSettings() {
+		File cofigPath = getConfigPath();
+		if (!cofigPath.exists()) {
+			boolean result = cofigPath.mkdirs();
+			if (!result) {
+				JOptionPane.showMessageDialog(frame, "Directory couldn't be created.", "Error writing settings file", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+		}
+		File config = new File(cofigPath, "uisettings.properties");
+		try (FileChannel fc = FileChannel.open(config.toPath(), CREATE, WRITE, TRUNCATE_EXISTING);) {
+			settings.writeTo(fc);
+		} catch (IOException e) {
+			handleException("Error writing settings file", e);
+		}
+	}
+
+	@Nonnull
+	private File getConfigPath() {
+		File parent = null;
+		if (System.getenv("XDG_CONFIG_DIR") != null) {
+			parent = new File(System.getenv("XDG_CONFIG_DIR"));
+		} else if (System.getProperty("user.home") != null) {
+			parent = new File(System.getProperty("user.home"), ".config");
+		} else {
+			parent = new File(System.getProperty("user.dir"));
+		}
+		return new File(parent, "ssi-engine");
+	}
+
+	private final class DesktopWindowAdapter extends WindowAdapter {
+		@Override
+		public void windowClosing(WindowEvent e) {
+			quit();
+		}
 	}
 }

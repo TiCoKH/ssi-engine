@@ -5,7 +5,6 @@ import static data.content.DAXContentType.TITLE;
 import static engine.InputAction.CONTINUE;
 import static engine.InputAction.INPUT_HANDLER;
 import static engine.InputAction.LOAD;
-import static engine.InputAction.QUIT;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.awt.Color;
@@ -64,7 +63,6 @@ public class ClassicMode extends JPanel implements UserInterface {
 		KEY_MAPPING = new HashMap<>();
 		KEY_MAPPING.put(InputAction.LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
 		KEY_MAPPING.put(InputAction.SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-		KEY_MAPPING.put(InputAction.QUIT, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 
 		KEY_MAPPING.put(InputAction.MOVE_FORWARD, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
 		KEY_MAPPING.put(InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
@@ -238,10 +236,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private void resetInput() {
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(LOAD), LOAD);
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(QUIT), QUIT);
 		getActionMap().clear();
 		mapToAction(LOAD);
-		mapToAction(QUIT);
 	}
 
 	@Override

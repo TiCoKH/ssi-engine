@@ -1,10 +1,18 @@
 package ui;
 
 import static ui.ScaleMethod.NONE;
+import static ui.UISettings.PropertyName.METHOD;
+import static ui.UISettings.PropertyName.ZOOM;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -18,6 +26,37 @@ public class UISettings {
 	public UISettings() {
 		zoom = 4;
 		method = NONE;
+	}
+
+	public void readFrom(@Nonnull FileChannel c) throws IOException {
+		InputStream in = Channels.newInputStream(c);
+		try {
+			Properties p = new Properties();
+			p.load(in);
+			try {
+				zoom = Integer.parseUnsignedInt(p.getOrDefault(ZOOM.name(), "4").toString());
+			} catch (NumberFormatException e) {
+				zoom = 4;
+			}
+			try {
+				method = ScaleMethod.valueOf(p.getOrDefault(METHOD.name(), NONE.name()).toString());
+			} catch (IllegalArgumentException e) {
+				method = NONE;
+			}
+		} finally {
+			in.close();
+		}
+	}
+
+	public void writeTo(@Nonnull FileChannel c) throws IOException {
+		Writer w = Channels.newWriter(c, "ISO-8859-1");
+		try {
+			w.write(String.format("%s = %d%n", ZOOM.name(), getZoom()));
+			w.write(String.format("%s = %s%n", METHOD.name(), getMethod().name()));
+			w.flush();
+		} finally {
+			w.close();
+		}
 	}
 
 	@Nonnull
