@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import common.ByteBufferWrapper;
 
 public class DAXPalette {
-	public static final Color COLOR_TRANSPARENT = new Color(0x67F79F);
+	public static final Color COLOR_TRANSPARENT = new Color(0xff000000);
 	public static final Color COLOR_GREY = new Color(0x525252);
 
 	private static final Color COLOR_BLACK = new Color(0x000000);
