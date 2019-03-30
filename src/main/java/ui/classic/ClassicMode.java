@@ -46,6 +46,7 @@ import ui.ExceptionHandler;
 import ui.GoldboxStringInput;
 import ui.ImageResource;
 import ui.Menu;
+import ui.UIResourceConfiguration;
 import ui.UIResourceLoader;
 import ui.UIResourceManager;
 import ui.UIResources;
@@ -99,13 +100,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient GoldboxStringInput input = null;
 
-	public ClassicMode(@Nonnull FileMap fileMap, @Nonnull EngineStub stub, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler)
-		throws IOException {
+	public ClassicMode(@Nonnull FileMap fileMap, @Nonnull EngineStub stub, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
+		@Nonnull ExceptionHandler excHandler) throws IOException {
 
 		this.stub = stub;
 		this.settings = settings;
 
-		UIResourceLoader loader = new UIResourceLoader(fileMap);
+		UIResourceLoader loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
 		this.resources = new UIResources(resman);
 

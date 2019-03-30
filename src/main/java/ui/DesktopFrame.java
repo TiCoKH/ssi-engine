@@ -42,6 +42,7 @@ public class DesktopFrame implements ExceptionHandler {
 
 	private ResourceViewer resourceUi;
 
+	private UIResourceConfiguration config;
 	private UISettings settings;
 
 	private Optional<UserInterface> ui = Optional.empty();
@@ -66,6 +67,7 @@ public class DesktopFrame implements ExceptionHandler {
 		ui.ifPresent(uiValue -> {
 			uiValue.stop();
 			this.frame.remove((JComponent) uiValue);
+			this.frame.setTitle("SSI");
 			this.frame.add(getLogo(), BorderLayout.CENTER);
 			this.frame.pack();
 		});
@@ -73,6 +75,7 @@ public class DesktopFrame implements ExceptionHandler {
 		init(gameDir);
 		ui.ifPresent(uiValue -> {
 			this.frame.remove(getLogo());
+			this.frame.setTitle(config.getGameName());
 			this.frame.add((JComponent) uiValue, BorderLayout.CENTER);
 			this.frame.pack();
 			uiValue.start(showTitles);
@@ -204,8 +207,9 @@ public class DesktopFrame implements ExceptionHandler {
 		try {
 			FileMap fm = new FileMap(dir);
 			Engine engine = new Engine(fm);
-			ui = Optional.of(new ClassicMode(fm, engine, settings, this));
-			resourceUi = new ResourceViewer(fm, settings, this);
+			config = new UIResourceConfiguration(fm);
+			ui = Optional.of(new ClassicMode(fm, engine, config, settings, this));
+			resourceUi = new ResourceViewer(fm, config, settings, this);
 			resource.setEnabled(true);
 		} catch (Exception e) {
 			handleException("Error creating game display", e);

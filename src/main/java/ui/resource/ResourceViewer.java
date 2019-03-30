@@ -29,6 +29,7 @@ import data.content.DAXContentType;
 import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.ImageResource;
+import ui.UIResourceConfiguration;
 import ui.UIResourceLoader;
 import ui.UIResourceManager;
 import ui.UISettings;
@@ -39,8 +40,9 @@ public class ResourceViewer {
 
 	private UIResourceLoader loader;
 
-	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler) throws IOException {
-		this.loader = new UIResourceLoader(fileMap);
+	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
+		@Nonnull ExceptionHandler excHandler) throws IOException {
+		this.loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
 		this.drawSurface = new RenderSurface(resman, settings);
 

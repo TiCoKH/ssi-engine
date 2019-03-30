@@ -33,8 +33,11 @@ public class UIResourceLoader extends ResourceLoader {
 		imageTypes.put(TITLE, VGAImage.class);
 	}
 
-	public UIResourceLoader(@Nonnull FileMap fileMap) {
+	private UIResourceConfiguration config;
+
+	public UIResourceLoader(@Nonnull FileMap fileMap, @Nonnull UIResourceConfiguration config) throws IOException {
 		super(fileMap);
+		this.config = config;
 	}
 
 	@Nonnull
