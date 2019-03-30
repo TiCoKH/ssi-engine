@@ -11,8 +11,6 @@ public class WallDef extends DAXContent {
 	private WallDisplay[] walls;
 
 	public WallDef(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
-		data.rewind();
-
 		int setCount = data.remaining() / 156;
 		walls = new WallDisplay[setCount];
 		for (int i = 0; i < setCount; i++) {

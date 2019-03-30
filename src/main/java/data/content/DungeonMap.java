@@ -18,7 +18,6 @@ public class DungeonMap extends DAXContent {
 	private DungeonSquare[][] map;
 
 	public DungeonMap(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
-		data.rewind();
 		int geoId = data.getUnsignedShort();
 		if (geoId != 4353) {
 			throw new IllegalArgumentException("data is not a valid geo dungeon map");
