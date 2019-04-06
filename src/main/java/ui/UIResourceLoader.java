@@ -57,7 +57,10 @@ public class UIResourceLoader extends ResourceLoader {
 
 	@Nonnull
 	public DAXImageContent getMisc() throws IOException {
-		return load("8X8D1.DAX", 202, _8X8D);
+		StringTokenizer st = new StringTokenizer(config.getMisc(), ",");
+		String archive = st.nextToken();
+		int blockId = Integer.parseUnsignedInt(st.nextToken());
+		return load(archive, blockId, _8X8D);
 	}
 
 	@Nonnull
