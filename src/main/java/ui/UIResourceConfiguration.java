@@ -20,6 +20,8 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_SPRITE = "sprite.format";
 	private static final String CONFIG_FORMAT_TITLE = "title.format";
 
+	private static final String CONFIG_FONT_LOCATION = "font";
+
 	public UIResourceConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
 	}
@@ -63,5 +65,9 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 			default:
 				throw new IllegalArgumentException("Format " + key + " is unknown.");
 		}
+	}
+
+	public String getFont() {
+		return getProperty(CONFIG_FONT_LOCATION);
 	}
 }

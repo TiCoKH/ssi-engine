@@ -4,15 +4,23 @@ import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType._8X8D;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
+import java.util.Optional;
+import java.util.StringTokenizer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import common.ByteBufferWrapper;
 import common.FileMap;
 import data.ResourceLoader;
 import data.content.DAXContentType;
 import data.content.DAXImageContent;
+import data.content.MonocromeLargeSymbols;
 import data.content.MonocromeSymbols;
 
 public class UIResourceLoader extends ResourceLoader {
@@ -24,8 +32,27 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
-	public MonocromeSymbols getFont() throws IOException {
-		return load("8X8D1.DAX", 201, MonocromeSymbols.class, _8X8D);
+	public DAXImageContent getFont() throws IOException {
+		String font = config.getFont();
+		if (font.contains(",")) {
+			StringTokenizer st = new StringTokenizer(font, ",");
+			String archive = st.nextToken();
+			int blockId = Integer.parseUnsignedInt(st.nextToken());
+			if (blockId == 201) {
+				return load(archive, blockId, MonocromeSymbols.class, _8X8D);
+			} else {
+				return load(archive, blockId, _8X8D);
+			}
+		}
+		Optional<File> fontFile = toFile(font);
+		if (fontFile.isPresent()) {
+			try (FileChannel c = FileChannel.open(fontFile.get().toPath(), StandardOpenOption.READ)) {
+				ByteBufferWrapper buf = ByteBufferWrapper.allocateLE((int) c.size()).readFrom(c);
+				return new MonocromeLargeSymbols(buf.rewind(), _8X8D);
+			}
+		} else {
+			throw new FileNotFoundException(font + " wasnt found in the game dir.");
+		}
 	}
 
 	@Nonnull

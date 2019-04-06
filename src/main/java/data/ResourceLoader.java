@@ -75,4 +75,8 @@ public class ResourceLoader {
 		}
 		return files.get(name);
 	}
+
+	public Optional<File> toFile(String nameUC) {
+		return fileMap.toFile(nameUC);
+	}
 }
