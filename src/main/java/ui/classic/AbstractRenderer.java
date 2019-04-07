@@ -1,6 +1,5 @@
 package ui.classic;
 
-import static ui.BorderSymbols.EM;
 import static ui.FontType.GAME_NAME;
 import static ui.FontType.INTENSE;
 import static ui.FontType.NORMAL;
@@ -13,8 +12,8 @@ import javax.annotation.Nonnull;
 
 import types.GoldboxString;
 import types.MenuType;
-import ui.BorderSymbols;
 import ui.FontType;
+import ui.UIFrame;
 import ui.UIResources;
 import ui.UISettings;
 
@@ -23,9 +22,12 @@ public abstract class AbstractRenderer {
 	protected UIResources resources;
 	protected UISettings settings;
 
-	public AbstractRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings) {
+	private FrameRenderer frameRenderer;
+
+	public AbstractRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
 		this.resources = resources;
 		this.settings = settings;
+		this.frameRenderer = frameRenderer;
 	}
 
 	public abstract int getLineWidth();
@@ -36,17 +38,8 @@ public abstract class AbstractRenderer {
 
 	public abstract void render(@Nonnull Graphics2D g2d);
 
-	protected void renderBorders(@Nonnull Graphics2D g2d, @Nonnull ClassicBorders layout) {
-		for (int y = 0; y < 24; y++) {
-			BorderSymbols[] row = layout.getSymbols()[y];
-			for (int x = 0; x < 40; x++) {
-				if (x >= row.length || row[x] == EM) {
-					continue;
-				}
-				BufferedImage s = resources.getBorderSymbols().get(row[x].getIndex());
-				renderImage(g2d, s, x, y);
-			}
-		}
+	protected void renderFrame(@Nonnull Graphics2D g2d, @Nonnull UIFrame layout) {
+		frameRenderer.render(g2d, layout);
 	}
 
 	protected void renderChar(@Nonnull Graphics2D g2d, int x, int y, byte c, @Nonnull FontType textFont) {

@@ -67,7 +67,7 @@ public class UIResources {
 
 	@Nonnull
 	public List<BufferedImage> getBorderSymbols() {
-		return resman.getBorders();
+		return resman.getFrames();
 	}
 
 	@Nonnull

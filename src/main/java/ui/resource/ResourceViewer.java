@@ -29,6 +29,7 @@ import data.content.DAXContentType;
 import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.ImageResource;
+import ui.UIFrame;
 import ui.UIResourceConfiguration;
 import ui.UIResourceLoader;
 import ui.UIResourceManager;
@@ -38,13 +39,17 @@ public class ResourceViewer {
 	private JFrame frame;
 	private RenderSurface drawSurface;
 
+	private UIResourceConfiguration config;
 	private UIResourceLoader loader;
 
 	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
 		@Nonnull ExceptionHandler excHandler) throws IOException {
+
+		this.config = config;
 		this.loader = new UIResourceLoader(fileMap, config);
+
 		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
-		this.drawSurface = new RenderSurface(resman, settings);
+		this.drawSurface = new RenderSurface(config, resman, settings);
 
 		initFrame();
 	}
@@ -85,6 +90,7 @@ public class ResourceViewer {
 
 		initChildren(root, "FONT", 201);
 		initChildren(root, "MISC", 202);
+		initFrameChildren(root);
 		initChildren(root, BIGPIC);
 		initChildren(root, BACK);
 		initChildren(root, PIC);
@@ -121,6 +127,20 @@ public class ResourceViewer {
 			}
 			root.insert(parent, root.getChildCount());
 		}
+	}
+
+	private void initFrameChildren(MutableTreeNode root) {
+		MutableTreeNode parent = new DefaultMutableTreeNode("FRAME");
+		for (UIFrame f : UIFrame.values()) {
+			if (f != UIFrame.NONE && (f != UIFrame.SPACE || isSpaceFrameUsed()))
+				parent.insert(new DefaultMutableTreeNode(f), parent.getChildCount());
+		}
+		root.insert(parent, root.getChildCount());
+	}
+
+	private boolean isSpaceFrameUsed() {
+		return !config.getInnerFrameHorizontal(UIFrame.SPACE).isEmpty() //
+			&& !config.getInnerFrameVertical(UIFrame.SPACE).isEmpty();
 	}
 
 	public void show() {

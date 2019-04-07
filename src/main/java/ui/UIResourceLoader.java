@@ -64,8 +64,14 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
-	public DAXImageContent getBorders() throws IOException {
-		return load("BORDERS.DAX", 0, _8X8D);
+	public DAXImageContent getFrames() throws IOException {
+		if (config.getFrameLocation().equals("MISC")) {
+			return getMisc();
+		}
+		StringTokenizer st = new StringTokenizer(config.getFrameLocation(), ",");
+		String archive = st.nextToken();
+		int blockId = Integer.parseUnsignedInt(st.nextToken());
+		return load(archive, blockId, _8X8D);
 	}
 
 	@Nonnull

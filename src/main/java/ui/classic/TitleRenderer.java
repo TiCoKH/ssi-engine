@@ -1,5 +1,7 @@
 package ui.classic;
 
+import static ui.UIFrame.NONE;
+
 import java.awt.Graphics2D;
 
 import javax.annotation.Nonnull;
@@ -9,8 +11,8 @@ import ui.UISettings;
 
 public class TitleRenderer extends AbstractRenderer {
 
-	public TitleRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings) {
-		super(resources, settings);
+	public TitleRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+		super(resources, settings, frameRenderer);
 	}
 
 	@Override
@@ -30,6 +32,7 @@ public class TitleRenderer extends AbstractRenderer {
 
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
+		renderFrame(g2d, NONE);
 		renderTitle(g2d);
 		renderMenuOrTextStatus(g2d);
 	}

@@ -1,6 +1,6 @@
 package ui.classic;
 
-import static ui.classic.ClassicBorders.SPACE;
+import static ui.UIFrame.SPACE;
 
 import java.awt.Graphics2D;
 
@@ -13,8 +13,8 @@ import ui.UISettings;
 public class SpaceTravelRenderer extends StoryRenderer {
 	protected static final int TEXT_LINE_WIDTH = 15;
 
-	public SpaceTravelRenderer(@Nonnull UIResources resources, @Nonnull UISettings setting) {
-		super(resources, setting);
+	public SpaceTravelRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+		super(resources, settings, frameRenderer);
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class SpaceTravelRenderer extends StoryRenderer {
 
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
-		renderBorders(g2d, SPACE);
+		renderFrame(g2d, SPACE);
 		renderSpace(g2d);
 		renderPicture(g2d, 3);
 		renderMenuOrTextStatus(g2d);

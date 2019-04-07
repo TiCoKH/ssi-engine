@@ -1,6 +1,6 @@
 package ui.classic;
 
-import static ui.classic.ClassicBorders.GAME;
+import static ui.UIFrame.GAME;
 
 import java.awt.Graphics2D;
 
@@ -14,8 +14,8 @@ public class StoryRenderer extends AbstractRenderer {
 	protected static final int TEXT_START_Y = 17;
 	protected static final int TEXT_LINE_WIDTH = 38;
 
-	public StoryRenderer(@Nonnull UIResources resources, @Nonnull UISettings setting) {
-		super(resources, setting);
+	public StoryRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+		super(resources, settings, frameRenderer);
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class StoryRenderer extends AbstractRenderer {
 
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
-		renderBorders(g2d, GAME);
+		renderFrame(g2d, GAME);
 		renderPicture(g2d, 3);
 		renderMenuOrTextStatus(g2d);
 	}

@@ -1,7 +1,7 @@
 package ui.classic;
 
 import static ui.FontType.NORMAL;
-import static ui.classic.ClassicBorders.GAME;
+import static ui.UIFrame.GAME;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -23,13 +23,13 @@ public class DungeonRenderer extends StoryRenderer {
 	private static final int[] WALL_START_Y = { 7, 6, 4, 6, 4, 3, 6, 4, 3 };
 	private static final int[] WALL_WIDTH = { 2, 3, 7, 2, 3, 0, 2, 3, 0 };
 
-	public DungeonRenderer(@Nonnull UIResources resources, @Nonnull UISettings setting) {
-		super(resources, setting);
+	public DungeonRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+		super(resources, settings, frameRenderer);
 	}
 
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
-		renderBorders(g2d, GAME);
+		renderFrame(g2d, GAME);
 		renderMenuOrTextStatus(g2d);
 		if (resources.getPic().isPresent() && !resources.preferSprite()) {
 			renderPicture(g2d, 3);

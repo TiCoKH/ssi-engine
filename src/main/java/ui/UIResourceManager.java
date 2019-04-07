@@ -22,8 +22,8 @@ import data.content.WallDef;
 
 public class UIResourceManager {
 	private static final ImageResource INTERNAL_ID_MISC = new ImageResource(1000, null);
-	private static final ImageResource INTERNAL_ID_BORDERS = new ImageResource(2000, null);
-	private static final ImageResource INTERNAL_ID_OVERLAND_CURSORD = new ImageResource(3000, null);
+	private static final ImageResource INTERNAL_ID_FRAMES = new ImageResource(2000, null);
+	private static final ImageResource INTERNAL_ID_OVERLAND_CURSOR = new ImageResource(3000, null);
 
 	private static final BufferedImage BROKEN = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_BINARY);
 
@@ -33,7 +33,7 @@ public class UIResourceManager {
 
 	private DAXImageContent originalFont;
 	private DAXImageContent originalMisc;
-	private DAXImageContent originalBorders;
+	private DAXImageContent originalFrames;
 
 	private Map<FontType, List<BufferedImage>> fonts = new EnumMap<>(FontType.class);
 	private Map<ImageResource, List<BufferedImage>> imageResources = new HashMap<>();
@@ -53,7 +53,7 @@ public class UIResourceManager {
 
 		this.originalFont = loader.getFont();
 		this.originalMisc = loader.getMisc();
-		this.originalBorders = loader.getBorders();
+		this.originalFrames = loader.getFrames();
 	}
 
 	@Nonnull
@@ -67,14 +67,14 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getBorders() {
-		return getOrCreateResource(INTERNAL_ID_BORDERS, originalBorders);
+	public List<BufferedImage> getFrames() {
+		return getOrCreateResource(INTERNAL_ID_FRAMES, originalFrames);
 	}
 
 	@Nonnull
 	public BufferedImage getOverlandCursor() {
 		try {
-			return getOrCreateResource(INTERNAL_ID_OVERLAND_CURSORD, loader.getOverlandCursor()).get(0);
+			return getOrCreateResource(INTERNAL_ID_OVERLAND_CURSOR, loader.getOverlandCursor()).get(0);
 		} catch (IOException e) {
 			excHandler.handleException("Error reading the overland cursor", e);
 		}

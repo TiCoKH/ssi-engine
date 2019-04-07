@@ -7,7 +7,6 @@ import static engine.InputAction.INPUT_HANDLER;
 import static engine.InputAction.LOAD;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -86,6 +85,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient EngineStub stub;
 
 	private transient Map<UIState, AbstractRenderer> renderers = new EnumMap<>(UIState.class);
+	private transient FrameRenderer frameRenderer;
 	private UIState currentState;
 
 	private boolean textNeedsProgressing = false;
@@ -108,6 +108,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		UIResourceLoader loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
+		this.frameRenderer = new FrameRenderer(config, resman, settings);
 		this.resources = new UIResources(resman);
 
 		initRenderers();
@@ -117,12 +118,12 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private void initRenderers() {
 		renderers.clear();
-		renderers.put(UIState.TITLE, new TitleRenderer(resources, settings));
-		renderers.put(UIState.STORY, new StoryRenderer(resources, settings));
-		renderers.put(UIState.BIGPIC, new BigPicRenderer(resources, settings));
-		renderers.put(UIState.DUNGEON, new DungeonRenderer(resources, settings));
-		renderers.put(UIState.OVERLAND, new OverlandMapRenderer(resources, settings));
-		renderers.put(UIState.SPACE, new SpaceTravelRenderer(resources, settings));
+		renderers.put(UIState.TITLE, new TitleRenderer(resources, settings, frameRenderer));
+		renderers.put(UIState.STORY, new StoryRenderer(resources, settings, frameRenderer));
+		renderers.put(UIState.BIGPIC, new BigPicRenderer(resources, settings, frameRenderer));
+		renderers.put(UIState.DUNGEON, new DungeonRenderer(resources, settings, frameRenderer));
+		renderers.put(UIState.OVERLAND, new OverlandMapRenderer(resources, settings, frameRenderer));
+		renderers.put(UIState.SPACE, new SpaceTravelRenderer(resources, settings, frameRenderer));
 	}
 
 	private void initSurface() {
@@ -586,10 +587,6 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
 
-		Graphics2D g2d = (Graphics2D) g;
-		g2d.setBackground(Color.BLACK);
-		g2d.clearRect(0, 0, settings.zoom(320), settings.zoom(200));
-
-		renderers.get(currentState).render(g2d);
+		renderers.get(currentState).render((Graphics2D) g);
 	}
 }

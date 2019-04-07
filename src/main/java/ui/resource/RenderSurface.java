@@ -29,14 +29,20 @@ import data.content.WallDef;
 import ui.DungeonResource;
 import ui.FontType;
 import ui.ImageResource;
+import ui.UIFrame;
+import ui.UIResourceConfiguration;
 import ui.UIResourceManager;
 import ui.UISettings;
+import ui.classic.FrameRenderer;
 
 public class RenderSurface extends JPanel implements Scrollable {
 	private static final long serialVersionUID = -3126585855013388072L;
 
+	private transient UIResourceConfiguration config;
 	private transient UIResourceManager resman;
 	private transient UISettings settings;
+
+	private transient FrameRenderer frameRenderer;
 
 	private transient Optional<Object> renderObject = Optional.empty();
 
@@ -44,9 +50,11 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	private int index = 0;
 
-	public RenderSurface(@Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
+	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
+		this.config = config;
 		this.resman = resman;
 		this.settings = settings;
+		this.frameRenderer = new FrameRenderer(config, resman, settings);
 
 		exec.scheduleWithFixedDelay(() -> {
 			ImageResource ir = renderObject //
@@ -79,6 +87,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 			changeRenderObject((ImageResource) o);
 		else if (o instanceof DungeonResource)
 			changeRenderObject((DungeonResource) o);
+		else if (o instanceof UIFrame)
+			changeRenderObject((UIFrame) o);
 		else
 			clearRenderObject();
 	}
@@ -92,6 +102,11 @@ public class RenderSurface extends JPanel implements Scrollable {
 		WallDef walls = resman.getWallResource(dr);
 		renderObject = Optional.of(dr);
 		adaptSize(settings.zoom8(22), settings.zoom8(11 * walls.getWallCount()));
+	}
+
+	public void changeRenderObject(@Nonnull UIFrame frame) {
+		renderObject = Optional.of(frame);
+		adaptSize(settings.zoom8(40), settings.zoom8(25));
 	}
 
 	public void clearRenderObject() {
@@ -144,6 +159,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, MEDIUM, RIGHT), i, 18, 1);
 					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, CLOSE, RIGHT), i, 20, 0);
 				}
+			} else if (o instanceof UIFrame) {
+				frameRenderer.render(g2d, (UIFrame) o);
 			}
 		});
 	}

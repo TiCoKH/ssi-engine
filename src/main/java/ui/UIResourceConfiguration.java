@@ -11,6 +11,8 @@ import data.content.TLBTILEBlock;
 import data.content.VGADependentImages;
 import data.content.VGAImage;
 import types.GameResourceConfiguration;
+import ui.FrameType.BackgroundType;
+import ui.FrameType.PortraitType;
 
 public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_8X8D = "8x8d.format";
@@ -22,6 +24,23 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	private static final String CONFIG_FONT_LOCATION = "font";
 	private static final String CONFIG_MISC_LOCATION = "misc";
+
+	private static final String CONFIG_FRAME_START = "frames.";
+	private static final String CONFIG_FRAME_TYPE = CONFIG_FRAME_START + "type";
+	private static final String CONFIG_FRAME_LOCATION = CONFIG_FRAME_START + "location";
+	private static final String CONFIG_FRAME_BACKGROUND_TYPE = CONFIG_FRAME_START + "background.type";
+	private static final String CONFIG_FRAME_BACKGROUND = CONFIG_FRAME_START + "background";
+	private static final String CONFIG_OUTER_FRAME_TOP = "outer.top";
+	private static final String CONFIG_OUTER_FRAME_BOTTOM = "outer.bottom";
+	private static final String CONFIG_OUTER_FRAME_LEFT = "outer.left";
+	private static final String CONFIG_OUTER_FRAME_RIGHT = "outer.right";
+	private static final String CONFIG_INNER_FRAME_H = "horizontal.separator";
+	private static final String CONFIG_INNER_FRAME_V = "vertical.separator";
+	private static final String CONFIG_FRAME_PORTRAIT_TYPE = CONFIG_FRAME_START + "portrait.type";
+	private static final String CONFIG_PORTRAIT_TOP = CONFIG_FRAME_START + "portrait.top";
+	private static final String CONFIG_PORTRAIT_BOTTOM = CONFIG_FRAME_START + "portrait.bottom";
+	private static final String CONFIG_PORTRAIT_LEFT = CONFIG_FRAME_START + "portrait.left";
+	private static final String CONFIG_PORTRAIT_RIGHT = CONFIG_FRAME_START + "portrait.right";
 
 	public UIResourceConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
@@ -74,5 +93,69 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	public String getMisc() {
 		return getProperty(CONFIG_MISC_LOCATION);
+	}
+
+	public FrameType getFrameType() {
+		return FrameType.valueOf(getProperty(CONFIG_FRAME_TYPE));
+	}
+
+	public String getFrameLocation() {
+		return getProperty(CONFIG_FRAME_LOCATION);
+	}
+
+	public String getOuterFrameTop(UIFrame frame) {
+		return getFrameIndexes(frame, CONFIG_OUTER_FRAME_TOP);
+	}
+
+	public String getOuterFrameBottom(UIFrame frame) {
+		return getFrameIndexes(frame, CONFIG_OUTER_FRAME_BOTTOM);
+	}
+
+	public String getOuterFrameLeft(UIFrame frame) {
+		return getFrameIndexes(frame, CONFIG_OUTER_FRAME_LEFT);
+	}
+
+	public String getOuterFrameRight(UIFrame frame) {
+		return getFrameIndexes(frame, CONFIG_OUTER_FRAME_RIGHT);
+	}
+
+	public String getInnerFrameHorizontal(UIFrame frame) {
+		return getFrameIndexes(frame, CONFIG_INNER_FRAME_H);
+	}
+
+	public String getInnerFrameVertical(UIFrame frame) {
+		return getFrameIndexes(frame, CONFIG_INNER_FRAME_V);
+	}
+
+	private String getFrameIndexes(UIFrame frame, String framePart) {
+		return getProperty(CONFIG_FRAME_START + frame.name() + "." + framePart, "");
+	}
+
+	public BackgroundType getBackgroundType() {
+		return BackgroundType.valueOf(getProperty(CONFIG_FRAME_BACKGROUND_TYPE));
+	}
+
+	public String getBackground() {
+		return getProperty(CONFIG_FRAME_BACKGROUND, "");
+	}
+
+	public PortraitType getPortraitType() {
+		return PortraitType.valueOf(getProperty(CONFIG_FRAME_PORTRAIT_TYPE));
+	}
+
+	public String getPortraitTop() {
+		return getProperty(CONFIG_PORTRAIT_TOP, "");
+	}
+
+	public String getPortraitBottom() {
+		return getProperty(CONFIG_PORTRAIT_BOTTOM, "");
+	}
+
+	public String getPortraitLeft() {
+		return getProperty(CONFIG_PORTRAIT_LEFT, "");
+	}
+
+	public String getPortraitRight() {
+		return getProperty(CONFIG_PORTRAIT_RIGHT, "");
 	}
 }

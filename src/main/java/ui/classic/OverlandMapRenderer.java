@@ -1,6 +1,6 @@
 package ui.classic;
 
-import static ui.classic.ClassicBorders.BIGPIC;
+import static ui.UIFrame.BIGPIC;
 
 import java.awt.Graphics2D;
 
@@ -11,13 +11,13 @@ import ui.UISettings;
 
 public class OverlandMapRenderer extends StoryRenderer {
 
-	public OverlandMapRenderer(@Nonnull UIResources resources, @Nonnull UISettings setting) {
-		super(resources, setting);
+	public OverlandMapRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+		super(resources, settings, frameRenderer);
 	}
 
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
-		renderBorders(g2d, BIGPIC);
+		renderFrame(g2d, BIGPIC);
 		renderMap(g2d);
 		renderMenuOrTextStatus(g2d);
 	}
