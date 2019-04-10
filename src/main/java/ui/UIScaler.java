@@ -52,7 +52,7 @@ public class UIScaler {
 			image.getRGB(0, 0, srcWidth, srcHeight, src, 0, srcWidth);
 
 			int[] target = new int[targetWidth * targetHeight];
-			xBRZ.scaleImage(src, target, srcWidth, srcHeight, 0, srcWidth);
+			xBRZ.scaleImage(src, target, srcWidth, srcHeight, 0, srcHeight);
 
 			scaled.setRGB(0, 0, targetWidth, targetHeight, target, 0, targetWidth);
 		} else {
