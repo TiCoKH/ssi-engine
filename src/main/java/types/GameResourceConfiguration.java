@@ -59,6 +59,10 @@ public class GameResourceConfiguration {
 		return gameName;
 	}
 
+	public boolean isUsingFeature(GameFeature feature) {
+		return Boolean.parseBoolean(getProperty("uses." + feature.name(), "false"));
+	}
+
 	public String getProperty(String key) {
 		return gameProperties.getProperty(key);
 	}
