@@ -44,27 +44,17 @@ public class UIResourceLoader extends ResourceLoader {
 
 	@Nonnull
 	public DAXImageContent getMisc() throws IOException {
-		return load("8X8D1.DAX", 202, VGAImage.class, _8X8D);
+		return load("8X8D1.DAX", 202, _8X8D);
 	}
 
 	@Nonnull
 	public DAXImageContent getBorders() throws IOException {
-		return load("BORDERS.DAX", 0, VGAImage.class, _8X8D);
+		return load("BORDERS.DAX", 0, _8X8D);
 	}
 
 	@Nonnull
 	public DAXImageContent getOverlandCursor() throws IOException {
-		return load("CURSOR.DAX", 1, VGAImage.class, _8X8D);
-	}
-
-	@Nonnull
-	public DAXImageContent getSpaceSymbols() throws IOException {
-		return load("8X8D0.DAX", 1, VGAImage.class, _8X8D);
-	}
-
-	@Nonnull
-	public DAXImageContent getSpaceBackground() throws IOException {
-		return load("SHIPS.DAX", 128, VGAImage.class, BIGPIC);
+		return load("CURSOR.DAX", 1, _8X8D);
 	}
 
 	@Nullable
@@ -86,5 +76,10 @@ public class UIResourceLoader extends ResourceLoader {
 			return null;
 		}
 		return find(id, imageTypes.get(type), type);
+	}
+
+	@Nonnull
+	protected DAXImageContent load(@Nonnull String name, int blockId, @Nonnull DAXContentType type) throws IOException {
+		return load(name).getById(blockId, imageTypes.get(type), type);
 	}
 }

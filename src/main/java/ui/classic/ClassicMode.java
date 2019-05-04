@@ -43,6 +43,7 @@ import types.MenuType;
 import types.UserInterface;
 import ui.ExceptionHandler;
 import ui.GoldboxStringInput;
+import ui.ImageResource;
 import ui.Menu;
 import ui.UIResourceLoader;
 import ui.UIResourceManager;
@@ -200,7 +201,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient Runnable titleSwitcher = null;
 
 	private void showNextTitle(int titleId) {
-		resources.setPic(titleId, TITLE);
+		resources.setPic(new ImageResource(titleId, TITLE));
 		if (titleId < 3) {
 			titleSwitcher = () -> showNextTitle(titleId + 1);
 		} else {
@@ -210,7 +211,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	public void showStartMenu() {
-		showPicture(4, DAXContentType.TITLE);
+		resources.setPic(new ImageResource(4, DAXContentType.TITLE));
 		stub.showStartMenu();
 	}
 
@@ -460,7 +461,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void showPicture(int pictureId, @Nullable DAXContentType type) {
 		stopPicAnimation();
-		resources.setPic(pictureId, type);
+		resources.setPic(new ImageResource(pictureId, type));
 		if (resources.getPic().isPresent()) {
 			startPicAnimation();
 		}
@@ -481,7 +482,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void showSprite(int spriteId, int pictureId, int distance) {
 		clearSprite();
 		if (pictureId != 255)
-			resources.setPic(pictureId, PIC);
+			resources.setPic(new ImageResource(pictureId, PIC));
 		resources.getDungeonResources().ifPresent(r -> {
 			if (spriteId != 255)
 				r.setSprite(spriteId, distance);

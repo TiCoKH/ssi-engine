@@ -25,8 +25,6 @@ public class UIResourceManager {
 	private static final ImageResource INTERNAL_ID_MISC = new ImageResource(1000, null);
 	private static final ImageResource INTERNAL_ID_BORDERS = new ImageResource(2000, null);
 	private static final ImageResource INTERNAL_ID_OVERLAND_CURSORD = new ImageResource(3000, null);
-	private static final ImageResource INTERNAL_ID_SPACE_BACKGROUND = new ImageResource(4000, null);
-	private static final ImageResource INTERNAL_ID_SPACE_SYMBOLS = new ImageResource(5000, null);
 
 	private static final BufferedImage BROKEN = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_BINARY);
 
@@ -85,28 +83,8 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getSpaceSymbols() {
-		try {
-			return getOrCreateResource(INTERNAL_ID_SPACE_SYMBOLS, loader.getSpaceSymbols());
-		} catch (IOException e) {
-			excHandler.handleException("Error reading the space symbols", e);
-		}
-
-		List<BufferedImage> brokenResult = new ArrayList<>();
-		for (int i = 0; i < 95; i++) {
-			brokenResult.add(BROKEN);
-		}
-		return brokenResult;
-	}
-
-	@Nonnull
-	public BufferedImage getSpaceBackground() {
-		try {
-			return getOrCreateResource(INTERNAL_ID_SPACE_BACKGROUND, loader.getSpaceBackground()).get(0);
-		} catch (IOException e) {
-			excHandler.handleException("Error reading the Space background", e);
-		}
-		return BROKEN;
+	public List<BufferedImage> getImageResource(ImageResource r) {
+		return getOrCreateResource(r);
 	}
 
 	@Nonnull
@@ -167,7 +145,12 @@ public class UIResourceManager {
 	@Nonnull
 	private List<BufferedImage> createResource(@Nonnull ImageResource r) {
 		try {
-			DAXImageContent content = loader.findImage(r.getId(), r.getType());
+			DAXImageContent content;
+			if (r.getFilename().isPresent()) {
+				content = loader.load(r.getFilename().get(), r.getId(), r.getType());
+			} else {
+				content = loader.findImage(r.getId(), r.getType());
+			}
 			if (content != null) {
 				return scale(content);
 			}

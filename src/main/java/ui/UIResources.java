@@ -3,15 +3,17 @@ package ui;
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.SPRIT;
 import static data.content.DAXContentType._8X8D;
+import static ui.ImageResource.SPACE_BACKGROUND;
+import static ui.ImageResource.SPACE_SYMBOLS;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.WallDef;
 import engine.ViewDungeonPosition;
@@ -104,7 +106,7 @@ public class UIResources {
 
 	@Nonnull
 	public Optional<BufferedImage> getPic() {
-		return pic.map(p -> resman.getImageResource(p.getId(), p.getType()).get(picIndex));
+		return pic.map(p -> resman.getImageResource(p).get(picIndex));
 	}
 
 	@Nonnull
@@ -130,7 +132,7 @@ public class UIResources {
 
 	public void incPicIndex() {
 		pic.ifPresent(p -> {
-			if (picIndex + 1 < resman.getImageResource(p.getId(), p.getType()).size())
+			if (picIndex + 1 < resman.getImageResource(p).size())
 				picIndex++;
 			else
 				picIndex = 0;
@@ -158,8 +160,8 @@ public class UIResources {
 		this.overlandResources = Optional.of(new OverlandResources(position, mapId));
 	}
 
-	public void setPic(int id, @Nullable DAXContentType type) {
-		this.pic = Optional.of(new ImageResource(id, type));
+	public void setPic(@Nonnull ImageResource r) {
+		this.pic = Optional.of(r);
 		this.picIndex = 0;
 	}
 
@@ -178,7 +180,7 @@ public class UIResources {
 		private VisibleWalls visibleWalls;
 
 		private int wallsIds;
-		private int backId;
+		private List<ImageResource> back;
 
 		private Optional<ImageResource> sprite = Optional.empty();
 		private int spriteIndex = 0;
@@ -188,7 +190,7 @@ public class UIResources {
 			this.positionText = new GoldboxStringPosition(position);
 			this.visibleWalls = visibleWalls;
 			this.wallsIds = wallsId;
-			this.backId = backId;
+			this.back = Arrays.asList(new ImageResource(128 + backId, BACK), new ImageResource(backId, BACK));
 		}
 
 		public void advanceSprite() {
@@ -203,9 +205,7 @@ public class UIResources {
 
 		@Nonnull
 		public BufferedImage getBackdrop() {
-			if (position.getBackdropIndex() == 0)
-				return resman.getImageResource(128 + backId, BACK).get(0);
-			return resman.getImageResource(backId, BACK).get(0);
+			return resman.getImageResource(back.get(position.getBackdropIndex())).get(0);
 		}
 
 		public GoldboxString getPositionText() {
@@ -214,7 +214,7 @@ public class UIResources {
 
 		@Nonnull
 		public Optional<BufferedImage> getSprite() {
-			return sprite.map(s -> resman.getImageResource(s.getId(), s.getType()).get(spriteIndex));
+			return sprite.map(s -> resman.getImageResource(s).get(spriteIndex));
 		}
 
 		@Nonnull
@@ -244,11 +244,11 @@ public class UIResources {
 
 	public class OverlandResources {
 		private ViewOverlandPosition position;
-		private int mapId;
+		private ImageResource map;
 
 		OverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
 			this.position = position;
-			this.mapId = mapId;
+			this.map = new ImageResource(mapId, null);
 		}
 
 		@Nonnull
@@ -266,7 +266,7 @@ public class UIResources {
 
 		@Nonnull
 		public BufferedImage getMap() {
-			return resman.getImageResource(mapId, null).get(0);
+			return resman.getImageResource(map).get(0);
 		}
 	}
 
@@ -281,12 +281,12 @@ public class UIResources {
 
 		@Nonnull
 		public BufferedImage getBackground() {
-			return resman.getSpaceBackground();
+			return resman.getImageResource(SPACE_BACKGROUND).get(0);
 		}
 
 		@Nonnull
 		public BufferedImage getSun() {
-			return resman.getSpaceSymbols().get(0);
+			return resman.getImageResource(SPACE_SYMBOLS).get(0);
 		}
 
 		@Nonnull
@@ -294,22 +294,22 @@ public class UIResources {
 			switch (c) {
 				case MERKUR:
 					// TODO 1-2
-					return resman.getSpaceSymbols().get(2);
+					return resman.getImageResource(SPACE_SYMBOLS).get(2);
 				case VENUS:
 					// TODO 3-6
-					return resman.getSpaceSymbols().get(3);
+					return resman.getImageResource(SPACE_SYMBOLS).get(3);
 				case EARTH:
 					// TODO 7-14
-					return resman.getSpaceSymbols().get(7);
+					return resman.getImageResource(SPACE_SYMBOLS).get(7);
 				case MARS:
 					// TODO 15-30
-					return resman.getSpaceSymbols().get(27);
+					return resman.getImageResource(SPACE_SYMBOLS).get(27);
 				case CERES:
 					// TODO 59-86
-					return resman.getSpaceSymbols().get(59);
+					return resman.getImageResource(SPACE_SYMBOLS).get(59);
 				default:
 					// TODO 31-58
-					return resman.getSpaceSymbols().get(40);
+					return resman.getImageResource(SPACE_SYMBOLS).get(40);
 			}
 		}
 
@@ -323,7 +323,7 @@ public class UIResources {
 
 		@Nonnull
 		public BufferedImage getShip() {
-			return resman.getSpaceSymbols().get(87 + position.getSpaceDir().ordinal());
+			return resman.getImageResource(SPACE_SYMBOLS).get(87 + position.getSpaceDir().ordinal());
 		}
 
 		public int getShipX() {

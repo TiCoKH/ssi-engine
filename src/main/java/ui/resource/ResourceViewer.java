@@ -17,7 +17,6 @@ import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
@@ -28,6 +27,7 @@ import javax.swing.tree.TreeNode;
 import common.FileMap;
 import data.content.DAXContentType;
 import ui.ExceptionHandler;
+import ui.ImageResource;
 import ui.UIResourceLoader;
 import ui.UIResourceManager;
 import ui.UISettings;
@@ -53,17 +53,8 @@ public class ResourceViewer {
 		resourceTree.setShowsRootHandles(false);
 		resourceTree.addTreeSelectionListener(ev -> {
 			DefaultMutableTreeNode sel = (DefaultMutableTreeNode) ev.getPath().getLastPathComponent();
-			if (sel.getUserObject() instanceof RenderInfo) {
-				try {
-					drawSurface.changeRenderObject((RenderInfo) sel.getUserObject());
-					frame.pack();
-				} catch (IOException e) {
-					e.printStackTrace(System.err);
-					JOptionPane.showMessageDialog(frame, e.getMessage(), "Error loading resource", JOptionPane.ERROR_MESSAGE);
-				}
-			} else {
-				drawSurface.clearRenderObject();
-			}
+			drawSurface.changeRenderObject(sel.getUserObject());
+			frame.pack();
 			drawSurface.repaint();
 		});
 
@@ -96,7 +87,7 @@ public class ResourceViewer {
 		initChildren(root, PIC);
 		initChildren(root, SPRIT);
 		initChildren(root, TITLE);
-		initChildren(root, WALLDEF);
+		initWallChildren(root);
 
 		return root;
 	}
@@ -106,7 +97,7 @@ public class ResourceViewer {
 		if (!ids.isEmpty()) {
 			MutableTreeNode parent = new DefaultMutableTreeNode(type.name());
 			for (Integer id : ids) {
-				parent.insert(new DefaultMutableTreeNode(new RenderInfo(type, id)), parent.getChildCount());
+				parent.insert(new DefaultMutableTreeNode(new ImageResource(id, type)), parent.getChildCount());
 			}
 			root.insert(parent, root.getChildCount());
 		}
@@ -114,8 +105,19 @@ public class ResourceViewer {
 
 	private void initChildren(MutableTreeNode root, String name, int id) {
 		MutableTreeNode parent = new DefaultMutableTreeNode(name);
-		parent.insert(new DefaultMutableTreeNode(new RenderInfo(null, id)), parent.getChildCount());
+		parent.insert(new DefaultMutableTreeNode(new ImageResource(id, null)), parent.getChildCount());
 		root.insert(parent, root.getChildCount());
+	}
+
+	private void initWallChildren(MutableTreeNode root) throws IOException {
+		Set<Integer> ids = new TreeSet<>(loader.idsFor(WALLDEF));
+		if (!ids.isEmpty()) {
+			MutableTreeNode parent = new DefaultMutableTreeNode(WALLDEF.name());
+			for (Integer id : ids) {
+				parent.insert(new DefaultMutableTreeNode(new RenderInfo(WALLDEF, id)), parent.getChildCount());
+			}
+			root.insert(parent, root.getChildCount());
+		}
 	}
 
 	public void show() {

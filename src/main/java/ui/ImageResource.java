@@ -1,5 +1,7 @@
 package ui;
 
+import static data.content.DAXContentType.BIGPIC;
+import static data.content.DAXContentType._8X8D;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
@@ -11,6 +13,9 @@ import javax.annotation.Nullable;
 import data.content.DAXContentType;
 
 public class ImageResource {
+	public static final ImageResource SPACE_SYMBOLS = new ImageResource("8X8D0.DAX", 1, _8X8D);
+	public static final ImageResource SPACE_BACKGROUND = new ImageResource("SHIPS.DAX", 128, BIGPIC);
+
 	private Optional<String> filename;
 	private final int id;
 	private final DAXContentType type;
@@ -58,6 +63,6 @@ public class ImageResource {
 
 	@Override
 	public String toString() {
-		return "ImageResource [filename=" + filename.orElse("") + ", id=" + id + ", type=" + type + "]";
+		return filename.map(fn -> fn + ", ").orElse("") + id;
 	}
 }
