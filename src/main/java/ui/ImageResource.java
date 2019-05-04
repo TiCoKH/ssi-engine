@@ -1,18 +1,34 @@
 package ui;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import data.content.DAXContentType;
 
 public class ImageResource {
+	private Optional<String> filename;
 	private final int id;
 	private final DAXContentType type;
 
 	public ImageResource(int id, @Nullable DAXContentType type) {
+		this.filename = Optional.empty();
 		this.id = id;
 		this.type = type;
+	}
+
+	public ImageResource(@Nonnull String filename, int id, @Nonnull DAXContentType type) {
+		this.filename = Optional.of(filename);
+		this.id = id;
+		this.type = requireNonNull(type);
+	}
+
+	public Optional<String> getFilename() {
+		return filename;
 	}
 
 	public int getId() {
@@ -33,16 +49,15 @@ public class ImageResource {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null || !(obj instanceof ImageResource)) {
+		if (!(obj instanceof ImageResource)) {
 			return false;
 		}
 		ImageResource other = (ImageResource) obj;
-		return id == other.id && type == other.type;
+		return filename.equals(other.filename) && id == other.id && type == other.type;
 	}
 
 	@Override
 	public String toString() {
-		return "ImageResource [id=" + id + ", type=" + type + "]";
+		return "ImageResource [filename=" + filename.orElse("") + ", id=" + id + ", type=" + type + "]";
 	}
-
 }
