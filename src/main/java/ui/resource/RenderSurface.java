@@ -27,9 +27,11 @@ import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
+import data.content.DAXContentType;
 import ui.DungeonResource;
 import ui.DungeonWall;
 import ui.FontType;
+import ui.ImageCompositeResource;
 import ui.ImageResource;
 import ui.UIFrame;
 import ui.UIResourceConfiguration;
@@ -94,8 +96,13 @@ public class RenderSurface extends JPanel implements Scrollable {
 	}
 
 	public void changeRenderObject(@Nonnull ImageResource ir) {
-		index = ir.getType() == SPRIT ? 2 : 0;
-		renderObject = Optional.of(ir);
+		if (ir.getType() == DAXContentType.TITLE) {
+			index = 0;
+			renderObject = Optional.of(new ImageCompositeResource(ir));
+		} else {
+			index = ir.getType() == SPRIT ? 2 : 0;
+			renderObject = Optional.of(ir);
+		}
 	}
 
 	public void changeRenderObject(@Nonnull DungeonResource dr) {

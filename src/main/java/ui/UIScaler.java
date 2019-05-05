@@ -1,5 +1,12 @@
 package ui;
 
+import static data.content.DAXContentType.BIGPIC;
+import static data.content.DAXContentType.BODY;
+import static data.content.DAXContentType.HEAD;
+import static data.content.DAXContentType.PIC;
+import static data.content.DAXContentType.TITLE;
+import static data.content.ImageContentProperties.X_OFFSET;
+import static data.content.ImageContentProperties.Y_OFFSET;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
@@ -8,6 +15,7 @@ import static ui.ScaleMethod.BILINEAR;
 import static ui.ScaleMethod.XBRZ;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -15,8 +23,10 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import common.scaler.xbrz.Scaler;
 import common.scaler.xbrz.Scaler2x;
@@ -24,6 +34,8 @@ import common.scaler.xbrz.Scaler3x;
 import common.scaler.xbrz.Scaler4x;
 import common.scaler.xbrz.Scaler5x;
 import common.scaler.xbrz.ScalerConfig;
+import data.content.DAXContentType;
+import data.content.ImageContentProperties;
 import ui.UISettings.PropertyName;
 
 public class UIScaler {
@@ -70,18 +82,57 @@ public class UIScaler {
 	}
 
 	@Nonnull
-	private static BufferedImage createTarget(@Nonnull BufferedImage source, int targetWidth, int targetHeight) {
+	public BufferedImage scaleComposite(@Nonnull DAXContentType type, @Nonnull List<BufferedImage> images, List<Point> offsets) {
+		int width = 0, height = 0;
+		if (type == TITLE) {
+			width = 320;
+			height = 200;
+		} else if (type == BIGPIC) {
+			width = 304;
+			height = 120;
+		} else if (type == PIC || type == BODY || type == HEAD) {
+			width = height = 88;
+		}
+		BufferedImage composite = createTarget(null, width, height);
+		Graphics2D g2d = composite.createGraphics();
+
+		boolean useExternalOffsets = images.size() == 1 || images.stream().noneMatch(UIScaler::isOffsetNotZero);
+		for (int i = 0; i < images.size(); i++) {
+			BufferedImage image = images.get(i);
+			if (useExternalOffsets) {
+				Point offset = offsets.get(i);
+				g2d.drawImage(image, (int) offset.getX(), (int) offset.getY(), null);
+			} else {
+				int xStart = Math.abs((int) image.getProperty(X_OFFSET.name()));
+				int yStart = Math.abs((int) image.getProperty(Y_OFFSET.name()));
+				g2d.drawImage(image, xStart, yStart, null);
+			}
+		}
+		return scale(composite);
+	}
+
+	private static boolean isOffsetNotZero(@Nonnull BufferedImage image) {
+		int xStart = (int) image.getProperty(X_OFFSET.name());
+		int yStart = (int) image.getProperty(Y_OFFSET.name());
+		return xStart != 0 || yStart != 0;
+	}
+
+	@Nonnull
+	private static BufferedImage createTarget(@Nullable BufferedImage source, int targetWidth, int targetHeight) {
 		ColorModel cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, //
 			0xff0000, 0x00ff00, 0x0000ff, 0xff000000, true, DataBuffer.TYPE_INT);
 		WritableRaster r = cm.createCompatibleWritableRaster(targetWidth, targetHeight);
 
 		// Copy properties from source
-		Hashtable<String, Object> props = null;
-		String[] names = source.getPropertyNames();
-		if (names != null) {
-			props = new Hashtable<>();
+		Hashtable<String, Object> props = new Hashtable<>();
+		if (source != null && source.getPropertyNames() != null) {
+			String[] names = source.getPropertyNames();
 			for (int i = 0; i < names.length; i++) {
 				props.put(names[i], source.getProperty(names[i]));
+			}
+		} else {
+			for (ImageContentProperties p : ImageContentProperties.values()) {
+				props.put(p.name(), 0);
 			}
 		}
 

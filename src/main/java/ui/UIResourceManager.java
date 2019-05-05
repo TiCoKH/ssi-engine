@@ -1,5 +1,6 @@
 package ui;
 
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -140,12 +142,24 @@ public class UIResourceManager {
 	@Nonnull
 	private List<BufferedImage> createResource(@Nonnull ImageResource r) {
 		try {
-			DAXImageContent content;
-			if (r.getFilename().isPresent()) {
-				content = loader.load(r.getFilename().get(), r.getId(), r.getType());
-			} else {
-				content = loader.findImage(r.getId(), r.getType());
+			if (r instanceof ImageCompositeResource) {
+				ImageCompositeResource cr = (ImageCompositeResource) r;
+
+				List<BufferedImage> allContent = new ArrayList<>();
+				List<Point> allOffsets = new ArrayList<>();
+				for (int i = 0; i < cr.getLength(); i++) {
+					DAXImageContent content = loadResource(cr.get(i));
+					if (content != null) {
+						allContent.addAll(content.toList());
+						allOffsets.add(cr.getOffset(i));
+					}
+				}
+				List<BufferedImage> result = new ArrayList<BufferedImage>();
+				result.add(scaler.scaleComposite(cr.getType(), allContent, allOffsets));
+				return result;
 			}
+
+			DAXImageContent content = loadResource(r);
 			if (content != null) {
 				return scale(content);
 			}
@@ -156,6 +170,14 @@ public class UIResourceManager {
 		List<BufferedImage> brokenResult = new ArrayList<>();
 		brokenResult.add(BROKEN);
 		return brokenResult;
+	}
+
+	private DAXImageContent loadResource(@Nonnull ImageResource r) throws IOException {
+		Optional<String> fn = r.getFilename();
+		if (fn.isPresent()) {
+			return loader.load(fn.get(), r.getId(), r.getType());
+		}
+		return loader.findImage(r.getId(), r.getType());
 	}
 
 	@Nonnull

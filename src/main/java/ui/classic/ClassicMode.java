@@ -43,6 +43,7 @@ import types.UserInterface;
 import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.GoldboxStringInput;
+import ui.ImageCompositeResource;
 import ui.ImageResource;
 import ui.Menu;
 import ui.UIResourceConfiguration;
@@ -90,6 +91,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private boolean textNeedsProgressing = false;
 
+	private transient UIResourceConfiguration config;
 	private transient UIResources resources;
 	private transient UISettings settings;
 
@@ -104,6 +106,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		@Nonnull ExceptionHandler excHandler) throws IOException {
 
 		this.stub = stub;
+		this.config = config;
 		this.settings = settings;
 
 		UIResourceLoader loader = new UIResourceLoader(fileMap, config);
@@ -204,8 +207,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient Runnable titleSwitcher = null;
 
 	private void showNextTitle(int titleId) {
-		resources.setPic(new ImageResource(titleId, TITLE));
-		if (titleId < 3) {
+		resources.setPic(createTitleResource(titleId));
+		if (titleId < config.getTitleCount() - 1) {
 			titleSwitcher = () -> showNextTitle(titleId + 1);
 		} else {
 			titleSwitcher = () -> showStartMenu();
@@ -214,8 +217,34 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	public void showStartMenu() {
-		resources.setPic(new ImageResource(4, DAXContentType.TITLE));
+		resources.setPic(createTitleResource(config.getTitleCount()));
 		stub.showStartMenu();
+	}
+
+	private ImageResource createTitleResource(int index) {
+		String[] indexes = config.getTitle(index).split(",");
+		int i = 0, x1 = 0, y1 = 0;
+
+		int id1 = Integer.parseInt(indexes[i++]);
+		if (i < indexes.length && indexes[i].startsWith("+")) {
+			x1 = Integer.parseInt(indexes[i++].substring(1));
+			y1 = Integer.parseInt(indexes[i++].substring(1));
+		}
+		if (i < indexes.length) {
+			int x2 = 0, y2 = 0;
+
+			int id2 = Integer.parseInt(indexes[i++]);
+			if (i < indexes.length && indexes[i].startsWith("+")) {
+				x2 = Integer.parseInt(indexes[i++].substring(1));
+				y2 = Integer.parseInt(indexes[i++].substring(1));
+			}
+			return new ImageCompositeResource( //
+				new ImageResource(id1, TITLE), x1, y1, //
+				new ImageResource(id2, TITLE), x2, y2);
+		} else {
+			return new ImageCompositeResource( //
+				new ImageResource(id1, TITLE), x1, y1);
+		}
 	}
 
 	@Override

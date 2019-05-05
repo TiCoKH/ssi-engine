@@ -43,6 +43,8 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_PORTRAIT_LEFT = CONFIG_FRAME_START + "portrait.left";
 	private static final String CONFIG_PORTRAIT_RIGHT = CONFIG_FRAME_START + "portrait.right";
 
+	private static final String CONFIG_TITLE_COUNT = "title.count";
+
 	public UIResourceConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
 	}
@@ -161,5 +163,13 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	public String getPortraitRight() {
 		return getProperty(CONFIG_PORTRAIT_RIGHT, "");
+	}
+
+	public int getTitleCount() {
+		return Integer.parseInt(getProperty(CONFIG_TITLE_COUNT, ""));
+	}
+
+	public String getTitle(int index) {
+		return getProperty(String.format("title.%d", index), "");
 	}
 }
