@@ -1,5 +1,6 @@
 package ui.classic;
 
+import static data.content.DAXPalette.COLOR_GAME_STATIC;
 import static data.content.ImageContentProperties.X_OFFSET;
 import static data.content.ImageContentProperties.Y_OFFSET;
 import static ui.FontType.NORMAL;
@@ -17,6 +18,7 @@ import data.content.WallDef.WallPlacement;
 import types.GoldboxString;
 import ui.DungeonWall;
 import ui.UIResources;
+import ui.UIResources.DungeonResources;
 import ui.UISettings;
 
 public class DungeonRenderer extends StoryRenderer {
@@ -44,7 +46,7 @@ public class DungeonRenderer extends StoryRenderer {
 
 	private void renderDungeon(@Nonnull Graphics2D g2d) {
 		resources.getDungeonResources().ifPresent(r -> {
-			renderImage(g2d, r.getBackdrop(), 3, 3);
+			renderBackdrop(g2d, r);
 
 			renderVisibleWalls(g2d, r.getVisibleWalls(), r.getWalls());
 
@@ -56,6 +58,35 @@ public class DungeonRenderer extends StoryRenderer {
 				g2d.drawImage(sprite, x, y, null);
 			});
 		});
+	}
+
+	private void renderBackdrop(@Nonnull Graphics2D g2d, @Nonnull DungeonResources res) {
+		switch (res.getBackdropMode()) {
+			case COLOR:
+				g2d.setBackground(COLOR_GAME_STATIC[res.isOutside() ? res.getSkyColorOutdoors() : res.getSkyColorIndoors()]);
+				g2d.clearRect(settings.zoom8(3), settings.zoom8(3), settings.zoom8(11), settings.zoom(43));
+				g2d.setBackground(COLOR_GAME_STATIC[15]);
+				g2d.clearRect(settings.zoom8(3), settings.zoom(67), settings.zoom8(11), settings.zoom(1));
+				g2d.setBackground(COLOR_GAME_STATIC[7]);
+				g2d.clearRect(settings.zoom8(3), settings.zoom(68), settings.zoom8(11), settings.zoom(2));
+				g2d.setBackground(COLOR_GAME_STATIC[6]);
+				g2d.clearRect(settings.zoom8(3), settings.zoom(70), settings.zoom8(11), settings.zoom(42));
+				break;
+			case SKY:
+				renderImage(g2d, res.getBackdrop(2), 3, 8);
+				g2d.setBackground(COLOR_GAME_STATIC[res.isOutside() ? res.getSkyColorOutdoors() : res.getSkyColorIndoors()]);
+				g2d.clearRect(settings.zoom8(3), settings.zoom8(3), settings.zoom8(11), settings.zoom(44));
+				g2d.setBackground(COLOR_GAME_STATIC[7]);
+				g2d.clearRect(settings.zoom8(3), settings.zoom(69), settings.zoom8(11), settings.zoom(2));
+				break;
+			case SKYGRND:
+				break;
+			case SPACE:
+				renderImage(g2d, res.getBackdrop(res.isOutside() ? 0 : 1), 3, 3);
+				break;
+			case GEO2:
+				break;
+		}
 	}
 
 	private void renderVisibleWalls(Graphics2D g2d, VisibleWalls vwalls, List<DungeonWall> walls) {

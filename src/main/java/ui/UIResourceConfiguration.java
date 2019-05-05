@@ -45,6 +45,8 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	private static final String CONFIG_TITLE_COUNT = "title.count";
 
+	private static final String MODE_BACKDROP = "back.mode";
+
 	public UIResourceConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
 	}
@@ -171,5 +173,9 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	public String getTitle(int index) {
 		return getProperty(String.format("title.%d", index), "");
+	}
+
+	public BackdropMode getBackdropMode() {
+		return BackdropMode.valueOf(getProperty(MODE_BACKDROP));
 	}
 }

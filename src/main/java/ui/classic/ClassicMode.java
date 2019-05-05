@@ -112,7 +112,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		UIResourceLoader loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
 		this.frameRenderer = new FrameRenderer(config, resman, settings);
-		this.resources = new UIResources(resman);
+		this.resources = new UIResources(config, resman);
 
 		initRenderers();
 		initSurface();

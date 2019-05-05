@@ -2,6 +2,9 @@ package ui;
 
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.SPRIT;
+import static ui.ImageResource.SKY_CLOUD;
+import static ui.ImageResource.SKY_STREET;
+import static ui.ImageResource.SKY_SUN;
 import static ui.ImageResource.SPACE_BACKGROUND;
 import static ui.ImageResource.SPACE_SYMBOLS;
 
@@ -21,6 +24,9 @@ import engine.ViewSpacePosition.Celestial;
 import types.GoldboxString;
 
 public class UIResources {
+	private static final int[] SKY_COLOURS = new int[] { //
+		0x00, 0x0F, 0x04, 0x0B, 0x0D, 0x02, 0x09, 0x0E, 0x00, 0x0F, 0x04, 0x0B, 0x0D, 0x02, 0x09, 0x0E //
+	};
 
 	// Elements to render 3D dungeons, only available in dungeons
 	private Optional<DungeonResources> dungeonResources = Optional.empty();
@@ -46,9 +52,11 @@ public class UIResources {
 	// a game menu
 	private Optional<Menu> menu = Optional.empty();
 
+	private UIResourceConfiguration config;
 	private UIResourceManager resman;
 
-	public UIResources(@Nonnull UIResourceManager resman) {
+	public UIResources(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman) {
+		this.config = config;
 		this.resman = resman;
 	}
 
@@ -188,7 +196,29 @@ public class UIResources {
 			this.positionText = new GoldboxStringPosition(position);
 			this.visibleWalls = visibleWalls;
 			this.res = res;
-			this.back = Arrays.asList(new ImageResource(128 + res.getId1(), BACK), new ImageResource(res.getId1(), BACK));
+			initBackgrounds();
+		}
+
+		private void initBackgrounds() {
+			switch (getBackdropMode()) {
+				case COLOR:
+					// no image resources
+					break;
+				case SKY:
+					this.back = Arrays.asList(SKY_CLOUD, SKY_SUN, SKY_STREET);
+					break;
+				case SKYGRND:
+					// TODO
+					break;
+				case SPACE:
+					this.back = Arrays.asList( //
+						new ImageResource(128 + res.getId1(), BACK), //
+						new ImageResource(res.getId1(), BACK));
+					break;
+				case GEO2:
+					// TODO
+					break;
+			}
 		}
 
 		public void advanceSprite() {
@@ -202,12 +232,29 @@ public class UIResources {
 		}
 
 		@Nonnull
-		public BufferedImage getBackdrop() {
-			return resman.getImageResource(back.get(position.getBackdropIndex())).get(0);
+		public BackdropMode getBackdropMode() {
+			return config.getBackdropMode();
+		}
+
+		@Nonnull
+		public BufferedImage getBackdrop(int index) {
+			return resman.getImageResource(back.get(index)).get(0);
+		}
+
+		public boolean isOutside() {
+			return position.getBackdropIndex() == 0;
 		}
 
 		public GoldboxString getPositionText() {
 			return positionText;
+		}
+
+		public int getSkyColorOutdoors() {
+			return SKY_COLOURS[position.getSkyColorOutdoors()];
+		}
+
+		public int getSkyColorIndoors() {
+			return SKY_COLOURS[position.getSkyColorIndoors()];
 		}
 
 		@Nonnull

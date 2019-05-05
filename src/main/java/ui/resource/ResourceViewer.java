@@ -15,7 +15,9 @@ import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
 import static types.GameFeature.BODY_HEAD;
 
 import java.awt.BorderLayout;
+import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,7 +31,10 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 import common.FileMap;
+import data.ContentFile;
+import data.DAXFile;
 import data.content.DAXContentType;
+import ui.BackdropMode;
 import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.ImageResource;
@@ -96,7 +101,15 @@ public class ResourceViewer {
 		initChildren(root, "MISC", 202);
 		initFrameChildren(root);
 		initChildren(root, BIGPIC);
-		initChildren(root, BACK);
+		BackdropMode mode = config.getBackdropMode();
+		if (BackdropMode.SPACE.equals(mode) //
+			|| BackdropMode.GEO2.equals(mode) //
+			|| BackdropMode.SKYGRND.equals(mode))
+			initChildren(root, BACK);
+		if (BackdropMode.SKY.equals(mode))
+			initSkyChildren(root);
+		if (BackdropMode.SKYGRND.equals(mode))
+			initSkyGroundChildren(root);
 		if (config.isUsingFeature(BODY_HEAD)) {
 			initChildren(root, BODY);
 			initChildren(root, HEAD);
@@ -144,6 +157,28 @@ public class ResourceViewer {
 		for (UIFrame f : UIFrame.values()) {
 			if (f != UIFrame.NONE && (f != UIFrame.SPACE || isSpaceFrameUsed()))
 				parent.insert(new DefaultMutableTreeNode(f), parent.getChildCount());
+		}
+		root.insert(parent, root.getChildCount());
+	}
+
+	private void initSkyChildren(MutableTreeNode root) {
+		MutableTreeNode parent = new DefaultMutableTreeNode("SKY");
+		parent.insert(new DefaultMutableTreeNode(ImageResource.SKY_CLOUD), parent.getChildCount());
+		parent.insert(new DefaultMutableTreeNode(ImageResource.SKY_SUN), parent.getChildCount());
+		parent.insert(new DefaultMutableTreeNode(ImageResource.SKY_STREET), parent.getChildCount());
+		root.insert(parent, root.getChildCount());
+	}
+
+	private void initSkyGroundChildren(MutableTreeNode root) throws IOException {
+		MutableTreeNode parent = new DefaultMutableTreeNode("SKYGRND");
+		Optional<File> skygrndFile = loader.toFile("SKYGRND.DAX");
+		if (skygrndFile.isPresent()) {
+			Optional<ContentFile> cf = DAXFile.create(skygrndFile.get());
+			if (cf.isPresent()) {
+				for (int id : cf.get().getIds()) {
+					parent.insert(new DefaultMutableTreeNode(new ImageResource("SKYGRND.DAX", id, _8X8D)), parent.getChildCount());
+				}
+			}
 		}
 		root.insert(parent, root.getChildCount());
 	}

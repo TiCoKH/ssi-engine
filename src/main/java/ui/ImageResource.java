@@ -1,5 +1,6 @@
 package ui;
 
+import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType._8X8D;
 import static java.util.Objects.requireNonNull;
@@ -15,6 +16,10 @@ import data.content.DAXContentType;
 public class ImageResource {
 	public static final ImageResource SPACE_SYMBOLS = new ImageResource("8X8D0.DAX", 1, _8X8D);
 	public static final ImageResource SPACE_BACKGROUND = new ImageResource("SHIPS.DAX", 128, BIGPIC);
+
+	public static final ImageResource SKY_CLOUD = new ImageResource("SKY.DAX", 250, BACK);
+	public static final ImageResource SKY_SUN = new ImageResource("SKY.DAX", 251, BACK);
+	public static final ImageResource SKY_STREET = new ImageResource("SKY.DAX", 252, BACK);
 
 	private Optional<String> filename;
 	private final int id;
