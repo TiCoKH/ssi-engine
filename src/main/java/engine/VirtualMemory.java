@@ -23,6 +23,8 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_LAST_DUNGEON_Y = 0x4BF1;
 	public static final int MEMLOC_LAST_ECL = 0x4BF2;
 	public static final int MEMLOC_ENGINE_CONF_GAME_SPEED = 0x4BFC;
+	public static final int MEMLOC_SKY_COLOR_OUTDOORS = 0x4BFD;
+	public static final int MEMLOC_SKY_COLOR_INDOORS = 0x4BFE;
 	public static final int MEMLOC_MED_SUPPLIES = 0x4C63;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_EXTENDED_DUNGEON_X = 0x4CFD;
@@ -238,6 +240,16 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setGameSpeed(int gameSpeed) {
 		mem.put(MEMLOC_ENGINE_CONF_GAME_SPEED, (byte) gameSpeed);
+	}
+
+	@Override
+	public int getSkyColorOutdoors() {
+		return mem.getUnsigned(MEMLOC_SKY_COLOR_OUTDOORS);
+	}
+
+	@Override
+	public int getSkyColorIndoors() {
+		return mem.getUnsigned(MEMLOC_SKY_COLOR_INDOORS);
 	}
 
 	public int getMedSupplies() {
