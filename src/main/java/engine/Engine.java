@@ -31,6 +31,7 @@ import types.UserInterface.UIState;
 
 public class Engine implements EngineCallback, EngineStub {
 	private ResourceLoader res;
+	private EngineConfiguration cfg;
 	private UserInterface ui;
 
 	private VirtualMachine vm;
@@ -43,9 +44,10 @@ public class Engine implements EngineCallback, EngineStub {
 	private Optional<DungeonMap> currentMap = Optional.empty();
 	private VisibleWalls visibleWalls = new VisibleWalls();
 
-	public Engine(@Nonnull FileMap fm) {
+	public Engine(@Nonnull FileMap fm) throws Exception {
 		this.res = new ResourceLoader(fm);
-		this.memory = new VirtualMemory();
+		this.cfg = new EngineConfiguration(fm);
+		this.memory = new VirtualMemory(cfg);
 		this.vm = new VirtualMachine(this, this.memory);
 	}
 

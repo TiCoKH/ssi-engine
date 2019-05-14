@@ -1,12 +1,12 @@
 package engine;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.Assume;
 import org.junit.Test;
 
+import common.FileMap;
 import data.ContentFile;
 import data.content.DAXContentType;
 import data.content.EclProgram;
@@ -16,9 +16,12 @@ import types.MenuType;
 public class VirtualMachineTest {
 
 	@Test
-	public void test() throws IOException {
+	public void test() throws Exception {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/ECL1.DAX");
 		Assume.assumeTrue(f.exists());
+
+		FileMap fm = new FileMap(f.getParent());
+		EngineConfiguration cfg = new EngineConfiguration(fm);
 
 		ContentFile ecls = ContentFile.create(f).get();
 		VirtualMachine vm = new VirtualMachine(new EngineCallback() {
@@ -85,7 +88,7 @@ public class VirtualMachineTest {
 			@Override
 			public void delayCurrentThread() {
 			}
-		}, new VirtualMemory());
+		}, new VirtualMemory(cfg));
 		vm.newEcl(ecls.getById(16, EclProgram.class, DAXContentType.ECL));
 		System.out.println("Init:");
 		vm.startInit();

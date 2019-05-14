@@ -3,6 +3,8 @@ package engine;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
+import javax.annotation.Nonnull;
+
 import common.ByteBufferWrapper;
 import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
@@ -58,7 +60,11 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private int menuChoice;
 	private GoldboxString input;
 
-	public VirtualMemory() {
+	private EngineConfiguration cfg;
+
+	public VirtualMemory(@Nonnull EngineConfiguration cfg) {
+		this.cfg = cfg;
+
 		mem = ByteBufferWrapper.allocateLE(0x10000);
 
 		// set intial locations
