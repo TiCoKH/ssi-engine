@@ -29,9 +29,6 @@ public class InputAction {
 	public static final InputHandler MENU_HANDLER = new MenuHandler();
 	public static final InputHandler INPUT_HANDLER = new InputNumberStringHandler();
 
-	private static final InputAction GAME = new InputAction(MENU_HANDLER, "GAME", 0);
-	private static final InputAction DEMO = new InputAction(MENU_HANDLER, "DEMO", 1);
-
 	private static final InputAction YES = new InputAction(MENU_HANDLER, "YES", 0);
 	private static final InputAction NO = new InputAction(MENU_HANDLER, "NO", 1);
 
@@ -55,7 +52,6 @@ public class InputAction {
 	public static final InputAction MOVE_SPACE_RIGHT = new InputAction(SPACE_MOVEMENT_HANDLER);
 	public static final InputAction MOVE_SPACE_DOWN = new InputAction(SPACE_MOVEMENT_HANDLER);
 
-	public static final List<InputAction> MAINMENU_ACTIONS = ImmutableList.of(GAME, DEMO);
 	public static final List<InputAction> YES_NO_ACTIONS = ImmutableList.of(YES, NO);
 	public static final List<InputAction> DUNGEON_MOVEMENT = ImmutableList.of(MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, TURN_AROUND, SAVE);
 	public static final List<InputAction> OVERLAND_MOVEMENT = ImmutableList.of(MOVE_OVERLAND_UP, MOVE_OVERLAND_LEFT, MOVE_OVERLAND_RIGHT,

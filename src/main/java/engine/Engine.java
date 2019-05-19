@@ -12,9 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.google.common.base.Strings;
 
 import common.FileMap;
 import data.ResourceLoader;
@@ -81,13 +85,23 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void showStartMenu() {
 		setNextTask(() -> {
-			setMenu(MenuType.HORIZONTAL, InputAction.MAINMENU_ACTIONS, new CustomGoldboxString("BUCK ROGERS V1.2"));
+			List<String> menu = Stream.of("GAME", "DEMO", "START").filter(e -> !Strings.isNullOrEmpty(cfg.getMainMenuEntry(e)))
+				.collect(Collectors.toList());
+			setMenu(MenuType.HORIZONTAL,
+				menu.stream().map(e -> new InputAction(InputAction.MENU_HANDLER, e, menu.indexOf(e))).collect(Collectors.toList()),
+				new CustomGoldboxString(cfg.getMainMenuName()));
 			if (abortCurrentThread) {
 				return;
 			}
 			clear();
 			memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
-			loadEcl(memory.getMenuChoice() == 0 ? 16 : 18, false);
+			String menuItem = cfg.getMainMenuEntry(menu.get(memory.getMenuChoice()));
+			try {
+				int ecl = Integer.parseInt(menuItem);
+				loadEcl(ecl, false);
+			} catch (NumberFormatException e) {
+				// TODO in FRUA the entry is not a number
+			}
 		});
 	}
 
