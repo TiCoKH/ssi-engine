@@ -5,6 +5,7 @@ import static engine.InputAction.CONTINUE_HANDLER;
 import static engine.InputAction.MENU_HANDLER;
 import static engine.InputAction.YES_NO_ACTIONS;
 import static types.MenuType.HORIZONTAL;
+import static types.MenuType.VERTICAL;
 
 import java.util.Deque;
 import java.util.EnumMap;
@@ -236,7 +237,11 @@ public class VirtualMachine {
 			compareResult = r1 && r2 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.MENU_VERTICAL, inst -> {
-
+			engine.setMenu(VERTICAL, //
+				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
+					.collect(Collectors.toList()),
+				stringValue(inst.getArgument(1)));
+			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.IF_EQUALS, inst -> {
 			EclInstruction next = EclInstruction.parseNext(eclCode);
