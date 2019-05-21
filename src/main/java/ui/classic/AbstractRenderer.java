@@ -88,6 +88,19 @@ public abstract class AbstractRenderer {
 					}
 					break;
 				case VERTICAL:
+					menu.getDescription().ifPresent(desc -> {
+						for (int pos = 0; pos < desc.getLength(); pos++) {
+							renderChar(g2d, 1 + pos, 17, desc.getChar(pos), NORMAL);
+						}
+					});
+					int firstLine = menu.getDescription().map(desc -> 18).orElse(17);
+					for (int i = 0; i < menu.getItemCount(); i++) {
+						GoldboxString menuName = menu.getMenuItem(i);
+						for (int pos = 0; pos < menuName.getLength(); pos++) {
+							renderChar(g2d, 1 + pos, firstLine + i, menuName.getChar(pos),
+								menu.isSelected(i) ? INTENSE : pos == 0 ? SHORTCUT : NORMAL);
+						}
+					}
 					break;
 				case PROGRAM:
 					break;
