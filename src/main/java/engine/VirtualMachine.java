@@ -33,7 +33,7 @@ public class VirtualMachine {
 
 	private EngineCallback engine;
 
-	private VirtualMemory memory = new VirtualMemory();
+	private VirtualMemory memory;
 	private Deque<Integer> gosubStack = new ConcurrentLinkedDeque<>();
 	private int compareResult = 0;
 	private Random rnd = new Random();
@@ -51,8 +51,9 @@ public class VirtualMachine {
 	private EclInstruction onRestInterruption;
 	private EclInstruction onInit;
 
-	public VirtualMachine(EngineCallback engine) {
+	public VirtualMachine(EngineCallback engine, VirtualMemory memory) {
 		this.engine = engine;
+		this.memory = memory;
 		initImpl();
 	}
 

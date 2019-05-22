@@ -45,8 +45,8 @@ public class Engine implements EngineCallback, EngineStub {
 
 	public Engine(@Nonnull FileMap fm) {
 		this.res = new ResourceLoader(fm);
-		this.vm = new VirtualMachine(this);
-		this.memory = vm.getMemory();
+		this.memory = new VirtualMemory();
+		this.vm = new VirtualMachine(this, this.memory);
 	}
 
 	@Override
