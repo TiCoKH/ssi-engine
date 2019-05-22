@@ -170,7 +170,10 @@ public class VirtualMachine {
 			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(1)) - intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.DIVIDE, inst -> {
-			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) / intValue(inst.getArgument(1)));
+			int arg1 = intValue(inst.getArgument(0));
+			int arg2 = intValue(inst.getArgument(1));
+			memory.writeMemInt(inst.getArgument(2), arg1 / arg2);
+			memory.setDivisionModulo(arg1 % arg2);
 		});
 		IMPL.put(EclOpCode.MULTIPLY, inst -> {
 			memory.writeMemInt(inst.getArgument(2), intValue(inst.getArgument(0)) * intValue(inst.getArgument(1)));
