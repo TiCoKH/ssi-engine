@@ -129,7 +129,7 @@ public class EclArgument {
 	@Override
 	public String toString() {
 		if (isMemAddress()) {
-			return type + ":0x" + Integer.toHexString(valueAsInt()).toUpperCase();
+			return String.format("%d:0x%04X", type, valueAsInt());
 		}
 		if (type == 0x80) {
 			return type + ":\"" + value.toString() + '"';
