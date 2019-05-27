@@ -1,5 +1,7 @@
 package ui.classic;
 
+import static data.content.DAXContentType.BODY;
+import static data.content.DAXContentType.HEAD;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.TITLE;
 import static engine.InputAction.CONTINUE;
@@ -491,6 +493,16 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void showPicture(int headId, int bodyId) {
+		stopPicAnimation();
+		ImageResource res = new ImageCompositeResource( //
+			new ImageResource(headId, HEAD), 0, 0, //
+			new ImageResource(bodyId, BODY), 0, 40 //
+		);
+		resources.setPic(res);
+	}
+
+	@Override
 	public void showPicture(int pictureId, @Nullable DAXContentType type) {
 		stopPicAnimation();
 		resources.setPic(new ImageResource(pictureId, type));
@@ -511,10 +523,28 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void showSprite(int spriteId, int headId, int bodyId, int distance) {
+		ImageResource res = new ImageCompositeResource( //
+			new ImageResource(headId, HEAD), 0, 0, //
+			new ImageResource(bodyId, BODY), 0, 40 //
+		);
+		showSprite(spriteId, res, distance);
+	}
+
+	@Override
 	public void showSprite(int spriteId, int pictureId, int distance) {
-		clearSprite();
+		ImageResource res = null;
 		if (pictureId != 255)
-			resources.setPic(new ImageResource(pictureId, PIC));
+			res = new ImageResource(pictureId, PIC);
+		showSprite(spriteId, res, distance);
+	}
+
+	private void showSprite(int spriteId, @Nullable ImageResource picture, int distance) {
+		clearSprite();
+		if (picture != null)
+			resources.setPic(picture);
+		else
+			resources.clearPic();
 		resources.getDungeonResources().ifPresent(r -> {
 			if (spriteId != 255)
 				r.setSprite(spriteId, distance);

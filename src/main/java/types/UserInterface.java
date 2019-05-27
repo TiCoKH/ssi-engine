@@ -27,9 +27,13 @@ public interface UserInterface {
 
 	void clearText();
 
+	void showPicture(int headId, int bodyId);
+
 	void showPicture(int id, DAXContentType type);
 
 	void clearPictures();
+
+	void showSprite(int spriteId, int headId, int bodyId, int distance);
 
 	void showSprite(int spriteId, int picId, int distance);
 
