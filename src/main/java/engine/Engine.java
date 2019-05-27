@@ -5,6 +5,7 @@ import static data.content.DAXContentType.GEO;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
+import static types.GameFeature.BODY_HEAD;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,6 +155,8 @@ public class Engine implements EngineCallback, EngineStub {
 		memory.setCurrentECL(id);
 		memory.setTriedToLeaveMap(false);
 		memory.setMovementBlock(0);
+		if (cfg.isUsingFeature(BODY_HEAD))
+			memory.setPictureHeadId(255);
 		setNextTask(() -> {
 			clear();
 			try {
@@ -245,7 +248,10 @@ public class Engine implements EngineCallback, EngineStub {
 				distance = 1;
 			}
 		}
-		ui.showSprite(spriteId, picId, distance);
+		if (cfg.isUsingFeature(BODY_HEAD) && memory.getPictureHeadId() != 255)
+			ui.showSprite(spriteId, memory.getPictureHeadId(), picId, distance);
+		else
+			ui.showSprite(spriteId, picId, distance);
 		return distance;
 	}
 
@@ -257,7 +263,10 @@ public class Engine implements EngineCallback, EngineStub {
 			updateUIState();
 			return;
 		}
-		ui.showPicture(id, null);
+		if (cfg.isUsingFeature(BODY_HEAD) && memory.getPictureHeadId() != 255)
+			ui.showPicture(memory.getPictureHeadId(), id);
+		else
+			ui.showPicture(id, null);
 	}
 
 	@Override
