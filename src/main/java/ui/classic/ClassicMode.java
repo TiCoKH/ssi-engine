@@ -1,5 +1,6 @@
 package ui.classic;
 
+import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.BODY;
 import static data.content.DAXContentType.HEAD;
 import static data.content.DAXContentType.PIC;
@@ -94,6 +95,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private boolean textNeedsProgressing = false;
 
 	private transient UIResourceConfiguration config;
+	private transient UIResourceLoader loader;
 	private transient UIResources resources;
 	private transient UISettings settings;
 
@@ -111,7 +113,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		this.config = config;
 		this.settings = settings;
 
-		UIResourceLoader loader = new UIResourceLoader(fileMap, config);
+		this.loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
 		this.frameRenderer = new FrameRenderer(config, resman, settings);
 		this.resources = new UIResources(config, resman);
@@ -505,9 +507,35 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void showPicture(int pictureId, @Nullable DAXContentType type) {
 		stopPicAnimation();
-		resources.setPic(new ImageResource(pictureId, type));
+		if (type == null) {
+			try {
+				if (loader.idsFor(PIC).contains(pictureId)) {
+					type = PIC;
+				} else if (loader.idsFor(BIGPIC).contains(pictureId)) {
+					type = BIGPIC;
+				}
+			} catch (IOException e) {
+			}
+		}
+		if (type != null) {
+			resources.setPic(new ImageResource(pictureId, type));
+			updateUIStateForPictureType(type);
+		} else {
+			resources.clearPic();
+		}
 		if (resources.getPic().isPresent()) {
 			startPicAnimation();
+		}
+	}
+
+	private void updateUIStateForPictureType(@Nonnull DAXContentType type) {
+		if (PIC.equals(type)) {
+			switchUIState( //
+				resources.getDungeonResources().isPresent() ? UIState.DUNGEON : //
+					resources.getSpaceResources().isPresent() ? UIState.SPACE : //
+						UIState.STORY);
+		} else if (BIGPIC.equals(type)) {
+			switchUIState(UIState.BIGPIC);
 		}
 	}
 
