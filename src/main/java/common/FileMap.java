@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 public class FileMap {
+	private static final List<String> SUBDIRS = Arrays.asList("DISK1", "DISK2", "DISK3");
+
 	private Map<String, String> namesMap = new HashMap<>();
 
 	private String gameDir;
@@ -18,8 +21,17 @@ public class FileMap {
 	public FileMap(@Nonnull String gameDir) {
 		this.gameDir = gameDir;
 
-		String[] filenames = new File(gameDir).list((dir, name) -> new File(dir, name).isFile());
-		namesMap.putAll(Arrays.asList(filenames).stream().collect(Collectors.toMap(name -> name.toUpperCase(), name -> name)));
+		File gameDirFile = new File(gameDir);
+
+		Stream.of(gameDirFile.listFiles()).forEach(f -> {
+			if (f.isFile()) {
+				namesMap.put(f.getName().toUpperCase(), f.getName());
+			}
+			if (f.isDirectory() && SUBDIRS.contains(f.getName().toUpperCase())) {
+				String[] subnames = f.list((dir, name) -> new File(dir, name).isFile());
+				namesMap.putAll(Stream.of(subnames).collect(Collectors.toMap(String::toUpperCase, name -> f.getName() + File.separator + name)));
+			}
+		});
 	}
 
 	@Nonnull
