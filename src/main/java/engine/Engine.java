@@ -385,6 +385,7 @@ public class Engine implements EngineCallback, EngineStub {
 		} else {
 			parent = new File(System.getProperty("user.dir"));
 		}
-		return new File(parent, "ssi-engine");
+		parent = new File(parent, "ssi-engine");
+		return new File(parent, cfg.getGameName());
 	}
 }
