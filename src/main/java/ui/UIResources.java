@@ -2,7 +2,6 @@ package ui;
 
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.SPRIT;
-import static data.content.DAXContentType._8X8D;
 import static ui.ImageResource.SPACE_BACKGROUND;
 import static ui.ImageResource.SPACE_SYMBOLS;
 
@@ -148,8 +147,8 @@ public class UIResources {
 		this.charStop = 0;
 	}
 
-	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int wallId, int backId) {
-		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, wallId, backId));
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull DungeonResource res) {
+		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, res));
 	}
 
 	public void setMenu(@Nullable Menu menu) {
@@ -179,18 +178,18 @@ public class UIResources {
 
 		private VisibleWalls visibleWalls;
 
-		private int wallsIds;
+		private DungeonResource res;
 		private List<ImageResource> back;
 
 		private Optional<ImageResource> sprite = Optional.empty();
 		private int spriteIndex = 0;
 
-		DungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int wallsId, int backId) {
+		DungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull DungeonResource res) {
 			this.position = position;
 			this.positionText = new GoldboxStringPosition(position);
 			this.visibleWalls = visibleWalls;
-			this.wallsIds = wallsId;
-			this.back = Arrays.asList(new ImageResource(128 + backId, BACK), new ImageResource(backId, BACK));
+			this.res = res;
+			this.back = Arrays.asList(new ImageResource(128 + res.getId1(), BACK), new ImageResource(res.getId1(), BACK));
 		}
 
 		public void advanceSprite() {
@@ -224,12 +223,12 @@ public class UIResources {
 
 		@Nonnull
 		public Optional<WallDef> getWalls() {
-			return Optional.ofNullable(resman.getWalldef(wallsIds));
+			return Optional.ofNullable(resman.getWallResource(res));
 		}
 
 		@Nonnull
 		public List<BufferedImage> getWallSymbols() {
-			return resman.getImageResource(wallsIds, _8X8D);
+			return resman.getImageResource(res);
 		}
 
 		public void setSprite(int spriteId, int spriteIndex) {

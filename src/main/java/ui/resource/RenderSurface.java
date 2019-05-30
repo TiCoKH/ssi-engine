@@ -2,7 +2,6 @@ package ui.resource;
 
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
-import static data.content.DAXContentType._8X8D;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.FAR;
 import static data.content.WallDef.WallDistance.MEDIUM;
@@ -27,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
 import data.content.WallDef;
+import ui.DungeonResource;
 import ui.FontType;
 import ui.ImageResource;
 import ui.UIResourceManager;
@@ -77,8 +77,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 	public void changeRenderObject(@Nonnull Object o) {
 		if (o instanceof ImageResource)
 			changeRenderObject((ImageResource) o);
-		else if (o instanceof RenderInfo)
-			changeRenderObject((RenderInfo) o);
+		else if (o instanceof DungeonResource)
+			changeRenderObject((DungeonResource) o);
 		else
 			clearRenderObject();
 	}
@@ -88,12 +88,10 @@ public class RenderSurface extends JPanel implements Scrollable {
 		renderObject = Optional.of(ir);
 	}
 
-	public void changeRenderObject(@Nonnull RenderInfo info) {
-		WallResources wallRes = new WallResources();
-		wallRes.walls = resman.getWalldef(info.getId());
-		wallRes.symbolsId = info.getId();
-		renderObject = Optional.of(wallRes);
-		adaptSize(settings.zoom8(22), settings.zoom8(11 * wallRes.walls.getWallCount()));
+	public void changeRenderObject(@Nonnull DungeonResource dr) {
+		WallDef walls = resman.getWallResource(dr);
+		renderObject = Optional.of(dr);
+		adaptSize(settings.zoom8(22), settings.zoom8(11 * walls.getWallCount()));
 	}
 
 	public void clearRenderObject() {
@@ -126,15 +124,15 @@ public class RenderSurface extends JPanel implements Scrollable {
 					adaptSize(image.getWidth(), image.getHeight());
 					g2d.drawImage(image, 0, 0, null);
 				}
-			} else if (o instanceof WallResources) {
-				WallResources wallRes = (WallResources) o;
-				WallDef walls = wallRes.walls;
-				List<BufferedImage> wallSymbols = resman.getImageResource(wallRes.symbolsId, _8X8D);
+			} else if (o instanceof DungeonResource) {
+				DungeonResource res = (DungeonResource) o;
+				WallDef walls = resman.getWallResource(res);
+				List<BufferedImage> wallSymbols = resman.getImageResource(res);
 
 				g2d.setBackground(Color.BLUE);
 				g2d.clearRect(0, 0, getWidth(), getHeight());
 
-				for (int i = 0; i < wallRes.walls.getWallCount(); i++) {
+				for (int i = 0; i < walls.getWallCount(); i++) {
 					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, CLOSE, LEFT), i, 0, 0);
 					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, CLOSE, FOWARD), i, 2, 1);
 					drawWallView(g2d, wallSymbols, walls.getWallDisplay(i, MEDIUM, LEFT), i, 9, 1);
@@ -187,10 +185,5 @@ public class RenderSurface extends JPanel implements Scrollable {
 	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return settings.zoom8(1);
-	}
-
-	private static class WallResources {
-		WallDef walls;
-		int symbolsId;
 	}
 }

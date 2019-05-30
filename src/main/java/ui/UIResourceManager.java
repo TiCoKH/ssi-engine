@@ -1,6 +1,7 @@
 package ui;
 
 import static data.content.DAXContentType.WALLDEF;
+import static data.content.DAXContentType._8X8D;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import data.content.DAXContentType;
 import data.content.DAXImageContent;
 import data.content.DAXPalette;
 import data.content.MonocromeSymbols;
@@ -88,17 +88,17 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getImageResource(int id, @Nullable DAXContentType type) {
-		return getOrCreateResource(new ImageResource(id, type));
+	public List<BufferedImage> getImageResource(@Nonnull DungeonResource r) {
+		return getOrCreateResource(new ImageResource(r.getId1(), _8X8D));
 	}
 
 	@Nullable
-	public WallDef getWalldef(int id) {
-		return walldefs.computeIfAbsent(id, x -> {
+	public WallDef getWallResource(@Nonnull DungeonResource r) {
+		return walldefs.computeIfAbsent(r.getId1(), x -> {
 			try {
-				return loader.find(id, WallDef.class, WALLDEF);
+				return loader.find(x, WallDef.class, WALLDEF);
 			} catch (IOException e) {
-				excHandler.handleException("Error reading WallDef " + id, e);
+				excHandler.handleException("Error reading WallDef for " + r, e);
 			}
 			return null;
 		});

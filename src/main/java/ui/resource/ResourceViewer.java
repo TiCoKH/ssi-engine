@@ -26,6 +26,7 @@ import javax.swing.tree.TreeNode;
 
 import common.FileMap;
 import data.content.DAXContentType;
+import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.ImageResource;
 import ui.UIResourceLoader;
@@ -114,7 +115,7 @@ public class ResourceViewer {
 		if (!ids.isEmpty()) {
 			MutableTreeNode parent = new DefaultMutableTreeNode(WALLDEF.name());
 			for (Integer id : ids) {
-				parent.insert(new DefaultMutableTreeNode(new RenderInfo(WALLDEF, id)), parent.getChildCount());
+				parent.insert(new DefaultMutableTreeNode(new DungeonResource(id)), parent.getChildCount());
 			}
 			root.insert(parent, root.getChildCount());
 		}

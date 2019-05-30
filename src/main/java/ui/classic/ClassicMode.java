@@ -41,6 +41,7 @@ import types.EngineStub;
 import types.GoldboxString;
 import types.MenuType;
 import types.UserInterface;
+import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.GoldboxStringInput;
 import ui.ImageResource;
@@ -445,7 +446,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, int decoId1, int decoId2,
 		int decoId3) {
 
-		resources.setDungeonResources(position, visibleWalls, decoId1, decoId1);
+		resources.setDungeonResources(position, visibleWalls, new DungeonResource(decoId1, decoId2, decoId3));
 	}
 
 	@Override
