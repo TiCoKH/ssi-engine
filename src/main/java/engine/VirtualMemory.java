@@ -17,6 +17,7 @@ import static engine.EngineAddress.PICTURE_HEAD_ID;
 import static engine.EngineAddress.SKY_COLOR_INDOORS;
 import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
 import static engine.EngineAddress.TRIED_TO_LEAVE_MAP;
+import static types.GameFeature.EXTENDED_DUNGEON;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -314,6 +315,9 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	@Override
 	public int getExtendedDungeonX() {
+		if (!cfg.isUsingFeature(EXTENDED_DUNGEON)) {
+			return 255;
+		}
 		return mem.getUnsigned(MEMLOC_EXTENDED_DUNGEON_X);
 	}
 
