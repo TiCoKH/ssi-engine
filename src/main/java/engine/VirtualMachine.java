@@ -4,11 +4,16 @@ import static engine.InputAction.CONTINUE_ACTION;
 import static engine.InputAction.CONTINUE_HANDLER;
 import static engine.InputAction.MENU_HANDLER;
 import static engine.InputAction.YES_NO_ACTIONS;
+import static engine.opcodes.EclOpCode.CALL;
+import static engine.opcodes.EclOpCode.GOSUB;
+import static engine.opcodes.EclOpCode.GOTO;
 import static types.MenuType.HORIZONTAL;
 import static types.MenuType.VERTICAL;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -119,11 +124,49 @@ public class VirtualMachine {
 	}
 
 	private void exec(EclInstruction in, boolean execute) {
-		System.out
-			.println(Integer.toHexString(eclCodeBaseAddress + in.getPosition()).toUpperCase() + ":" + in.toString() + (execute ? "" : " (SKIPPED)"));
+		System.out.println(toString(in, execute));
 		if (execute) {
 			IMPL.get(in.getOpCode()).accept(in);
 		}
+	}
+
+	private String toString(EclInstruction in, boolean execute) {
+		EclOpCode op = in.getOpCode();
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("0x%04X", eclCodeBaseAddress + in.getPosition()));
+		sb.append(": ");
+		if (op.hasDestAddress()) {
+			EclArgument arg = in.getArgument(op.getArgIndexDestAddress());
+			sb.append(arg.toString());
+			sb.append(" = ");
+		}
+		sb.append(op);
+		sb.append("(");
+		List<String> args = new ArrayList<>();
+		for (int i = 0; i < in.getArguments().length; i++) {
+			if (op.hasDestAddress() && op.getArgIndexDestAddress() == i) {
+				args.add("*");
+				continue;
+			}
+			EclArgument arg = in.getArgument(i);
+			if (arg.isMemAddress() && op != GOTO && op != GOSUB && op != CALL)
+				if (arg.isStringValue())
+					args.add(arg.toString() + "{=" + stringValue(arg) + "}");
+				else
+					args.add(arg.toString() + "{=" + intValue(arg) + "}");
+			else
+				args.add(arg.toString());
+		}
+		sb.append(String.join(", ", args));
+		sb.append(")");
+		if (in.getOpCode().hasDynArgs()) {
+			sb.append("(");
+			sb.append(String.join(", ", in.getDynArgs().stream().map(EclArgument::toString).collect(Collectors.toList())));
+			sb.append(")");
+		}
+		if (!execute)
+			sb.append(" (SKIPPED)");
+		return sb.toString();
 	}
 
 	private void goTo(EclArgument a) {
