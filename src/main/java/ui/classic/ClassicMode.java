@@ -489,16 +489,19 @@ public class ClassicMode extends JPanel implements UserInterface {
 		int decoId3) {
 
 		resources.setDungeonResources(position, visibleWalls, new DungeonResource(decoId1, decoId2, decoId3));
+		switchUIState(UIState.DUNGEON);
 	}
 
 	@Override
 	public void setOverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
 		resources.setOverlandResources(position, mapId);
+		switchUIState(UIState.OVERLAND);
 	}
 
 	@Override
 	public void setSpaceResources(@Nonnull ViewSpacePosition position) {
 		resources.setSpaceResources(position);
+		switchUIState(UIState.SPACE);
 	}
 
 	@Override
@@ -529,6 +532,9 @@ public class ClassicMode extends JPanel implements UserInterface {
 			updateUIStateForPictureType(type);
 		} else {
 			resources.clearPic();
+			resources.getDungeonResources().ifPresent(r -> switchUIState(UIState.DUNGEON));
+			resources.getOverlandResources().ifPresent(r -> switchUIState(UIState.OVERLAND));
+			resources.getSpaceResources().ifPresent(r -> switchUIState(UIState.SPACE));
 		}
 		if (resources.getPic().isPresent()) {
 			startPicAnimation();
