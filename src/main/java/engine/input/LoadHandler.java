@@ -22,7 +22,7 @@ public class LoadHandler implements InputHandler {
 		}
 
 		engine.setNextTask(() -> {
-			engine.clear();
+			engine.getUi().clearAll();
 
 			try (FileChannel fc = FileChannel.open(saveGame.toPath(), READ)) {
 				VirtualMemory m = engine.getMemory();

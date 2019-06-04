@@ -158,7 +158,10 @@ public class Engine implements EngineCallback, EngineStub {
 		if (cfg.isUsingFeature(BODY_HEAD))
 			memory.setPictureHeadId(255);
 		setNextTask(() -> {
-			clear();
+			if (fromVM)
+				ui.clearAll();
+			else
+				clear();
 			try {
 				delayCurrentThread();
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
