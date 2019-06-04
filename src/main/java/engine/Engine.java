@@ -1,7 +1,9 @@
 package engine;
 
+import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.ECL;
 import static data.content.DAXContentType.GEO;
+import static data.content.DAXContentType.PIC;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
@@ -263,7 +265,6 @@ public class Engine implements EngineCallback, EngineStub {
 		if (id == 255 || id == -1) {
 			updatePosition();
 			clearSprite();
-			updateUIState();
 			return;
 		}
 		if (cfg.isUsingFeature(BODY_HEAD) && memory.getPictureHeadId() != 255)
@@ -277,19 +278,16 @@ public class Engine implements EngineCallback, EngineStub {
 		switch (gameState) {
 			case 0:
 			case 2:
-				updateUIState();
-				showPicture(id);
+				ui.showPicture(id, null);
 				break;
 			case 1:
-				ui.switchUIState(UIState.BIGPIC);
-				showPicture(id);
+				ui.showPicture(id, BIGPIC);
 				break;
 			case 3:
-				showPicture(id);
+				ui.showPicture(id, PIC);
 				break;
 			case 4:
 				ui.setOverlandResources(memory, id);
-				ui.switchUIState(UIState.OVERLAND);
 				memory.setAreaDecoValues(255, 127, 127);
 				break;
 			default:
