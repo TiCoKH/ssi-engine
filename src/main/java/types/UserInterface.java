@@ -21,6 +21,8 @@ public interface UserInterface {
 
 	void clear();
 
+	void clearAll();
+
 	void addText(GoldboxString str);
 
 	void addLineBreak();

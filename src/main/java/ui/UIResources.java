@@ -60,6 +60,18 @@ public class UIResources {
 		this.resman = resman;
 	}
 
+	public void reset() {
+		dungeonResources = Optional.empty();
+		overlandResources = Optional.empty();
+		spaceResources = Optional.empty();
+		pic = Optional.empty();
+		picIndex = 0;
+		charList = Optional.empty();
+		charStop = 0;
+		statusLine = Optional.empty();
+		menu = Optional.empty();
+	}
+
 	public void addChars(@Nonnull List<Byte> addedChars) {
 		if (charList.isPresent()) {
 			charList.get().addAll(addedChars);

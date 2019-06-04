@@ -265,6 +265,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void clearAll() {
+		setInputNone();
+		resources.reset();
+		switchUIState(UIState.STORY);
+	}
+
+	@Override
 	public void clearPictures() {
 		stopPicAnimation();
 		resources.clearPic();
