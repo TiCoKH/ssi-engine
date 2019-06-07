@@ -1,8 +1,10 @@
 package engine;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import common.FileMap;
 import engine.opcodes.EclOpCode;
@@ -14,6 +16,7 @@ public class EngineConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_MAIN_NAME = CONFIG_MAIN_PREFIX + "name";
 	private static final String CONFIG_CODE_BASE = "code.base";
 	private static final String CONFIG_ADDRESS_PREFIX = "address.";
+	private static final String CONFIG_OVERLAND_MAP_IDS = "overland.map";
 
 	public EngineConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
@@ -57,5 +60,9 @@ public class EngineConfiguration extends GameResourceConfiguration {
 
 	public int getEngineAddress(EngineAddress address) {
 		return Integer.parseInt(getProperty(CONFIG_ADDRESS_PREFIX + address.name(), "0"), 16);
+	}
+
+	public List<Integer> getOverlandMapIds() {
+		return Stream.of(getProperty(CONFIG_OVERLAND_MAP_IDS, "0").split(",")).map(Integer::parseInt).collect(Collectors.toList());
 	}
 }
