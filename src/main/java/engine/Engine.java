@@ -269,6 +269,8 @@ public class Engine implements EngineCallback, EngineStub {
 		}
 		if (cfg.isUsingFeature(BODY_HEAD) && memory.getPictureHeadId() != 255)
 			ui.showPicture(memory.getPictureHeadId(), id);
+		else if (!currentMap.isPresent() && cfg.getOverlandMapIds().contains(id))
+			ui.setOverlandResources(memory, id);
 		else
 			ui.showPicture(id, null);
 	}
