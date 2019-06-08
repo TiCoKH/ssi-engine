@@ -76,12 +76,36 @@ public class UIResourceManager {
 
 	@Nonnull
 	public BufferedImage getOverlandCursor() {
-		try {
-			return getOrCreateResource(INTERNAL_ID_OVERLAND_CURSOR, loader.getOverlandCursor()).get(0);
-		} catch (IOException e) {
-			excHandler.handleException("Error reading the overland cursor", e);
+		if (!imageResources.containsKey(INTERNAL_ID_OVERLAND_CURSOR)) {
+			List<BufferedImage> cursor = null;
+			try {
+				DAXImageContent content = loader.getOverlandCursor();
+				if (content != null) {
+					cursor = scale(content);
+				}
+			} catch (IOException e) {
+				excHandler.handleException("Error reading the overland cursor", e);
+			}
+			if (cursor == null) {
+				BufferedImage cursorImage = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_BINARY);
+				cursorImage.setRGB(0, 0, 8, 8, new int[] { //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+					0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, //
+				}, 0, 8);
+				cursorImage = scaler.scale(cursorImage);
+				cursor = new ArrayList<>();
+				cursor.add(cursorImage);
+			}
+			imageResources.put(INTERNAL_ID_OVERLAND_CURSOR, cursor);
 		}
-		return BROKEN;
+		return imageResources.get(INTERNAL_ID_OVERLAND_CURSOR).get(0);
+
 	}
 
 	@Nonnull

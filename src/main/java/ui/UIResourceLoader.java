@@ -76,9 +76,14 @@ public class UIResourceLoader extends ResourceLoader {
 		return load(archive, blockId, _8X8D);
 	}
 
-	@Nonnull
+	@Nullable
 	public DAXImageContent getOverlandCursor() throws IOException {
-		return load("CURSOR.DAX", 1, _8X8D);
+		if (toFile("CURSOR.DAX").isPresent())
+			return load("CURSOR.DAX", 1, _8X8D);
+		else if (idsFor(_8X8D).contains(204)) {
+			return findImage(204, _8X8D);
+		}
+		return null;
 	}
 
 	@Nullable
