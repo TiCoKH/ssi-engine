@@ -8,6 +8,7 @@ import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
 import static types.GameFeature.BODY_HEAD;
+import static types.GameFeature.INTERACTIVE_OVERLAND;
 
 import java.io.File;
 import java.io.IOException;
@@ -142,6 +143,7 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
+		updateOverlandCityCursor();
 		ui.setInputMenu(type, menuItems, description);
 		pauseCurrentThread();
 	}
@@ -327,6 +329,30 @@ public class Engine implements EngineCallback, EngineStub {
 
 			m.visibleWallsAt(visibleWalls, x, y, d);
 		});
+	}
+
+	private static final int[] OVERLAND_CITY_X = { //
+		0x03, 0x0B, 0x14, 0x0A, 0x1C, 0x13, 0x25, 0x14, //
+		0x1D, 0x1E, 0x18, 0x24, 0x1B, 0x1C, 0x02, 0x0B, //
+		0x18, 0x1C, 0x1C, 0x20, 0x12, 0x0F, 0x08, 0x0F, //
+		0x13, 0x14, 0x18, 0x18, 0x19, 0x1E, 0x24, 0x21, 0x0E //
+	};
+
+	private static final int[] OVERLAND_CITY_Y = { //
+		0x0E, 0x07, 0x0A, 0x03, 0x09, 0x03, 0x00, 0x01, //
+		0x0C, 0x0E, 0x02, 0x04, 0x01, 0x07, 0x0B, 0x0C, //
+		0x09, 0x0B, 0x08, 0x08, 0x07, 0x05, 0x05, 0x02, //
+		0x01, 0x01, 0x02, 0x01, 0x02, 0x03, 0x01, 0x00, 0x00 //
+	};
+
+	public void updateOverlandCityCursor() {
+		if (cfg.isUsingFeature(INTERACTIVE_OVERLAND)) {
+			int city = memory.getOverlandCity();
+			if (city >= 0 && city <= 32) {
+				memory.setOverlandX(OVERLAND_CITY_X[city]);
+				memory.setOverlandY(OVERLAND_CITY_Y[city]);
+			}
+		}
 	}
 
 	@Override
