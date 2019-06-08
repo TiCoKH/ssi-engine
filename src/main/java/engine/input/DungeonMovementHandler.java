@@ -25,12 +25,18 @@ public class DungeonMovementHandler implements InputHandler {
 					return;
 				}
 				engine.updatePosition();
-				if (mem.getMovementBlock() < 255 && map.canMove(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir())) {
-					mem.setLastDungeonX(mem.getDungeonX());
-					mem.setLastDungeonY(mem.getDungeonY());
-					mem.setDungeonX(mem.getDungeonX() + mem.getDungeonDir().getDeltaX());
-					mem.setDungeonY(mem.getDungeonY() + mem.getDungeonDir().getDeltaY());
-					engine.updatePosition();
+				if (mem.getMovementBlock() < 255) {
+					if (map.canOpenDoor(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir())) {
+						// TODO let the party open the door
+						map.openDoor(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir());
+					}
+					if (map.canMove(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir())) {
+						mem.setLastDungeonX(mem.getDungeonX());
+						mem.setLastDungeonY(mem.getDungeonY());
+						mem.setDungeonX(mem.getDungeonX() + mem.getDungeonDir().getDeltaX());
+						mem.setDungeonY(mem.getDungeonY() + mem.getDungeonDir().getDeltaY());
+						engine.updatePosition();
+					}
 				}
 				vm.startSearchLocation();
 				if (engine.isAbortCurrentThread()) {
