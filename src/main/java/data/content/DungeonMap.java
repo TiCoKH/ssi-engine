@@ -43,7 +43,7 @@ public class DungeonMap extends DAXContent {
 
 	public boolean canMove(int x, int y, Direction d) {
 		DungeonSquare square = map[x][y];
-		if (square.getWall(d) > 0 && !square.isDoor(d)) {
+		if (square.getWall(d) > 0 && (!square.isDoor(d) || square.isClosedDoor(d))) {
 			return false;
 		}
 		switch (d) {
@@ -57,6 +57,11 @@ public class DungeonMap extends DAXContent {
 				return x > 0;
 		}
 		return false;
+	}
+
+	public boolean canOpenDoor(int x, int y, Direction d) {
+		DungeonSquare square = map[x][y];
+		return square.isClosedDoor(d);
 	}
 
 	public boolean couldExit(int x, int y, Direction d) {
@@ -128,14 +133,23 @@ public class DungeonMap extends DAXContent {
 			wallIndexAt(x + 2 * o.getDeltaX() + 3 * o.getRight().getDeltaX(), y + 2 * o.getDeltaY() + 3 * o.getRight().getDeltaY(), o);
 	}
 
-	public int wallIndexAt(int x, int y, Direction o) {
+	public int wallIndexAt(int x, int y, Direction d) {
 		if (x < 0 || x > 15 || y < 0 || y > 15)
 			return 0;
-		return map[x][y].getWall(o);
+		return map[x][y].getWall(d);
 	}
 
 	public int squareInfoAt(int x, int y) {
 		return map[x][y].getSquareInfo();
+	}
+
+	public void openDoor(int x, int y, Direction d) {
+		DungeonSquare square = map[x][y];
+		if (square.isClosedDoor(d)) {
+			square.openDoor(d);
+			DungeonSquare squareRev = map[x + d.getDeltaX()][y + d.getDeltaY()];
+			squareRev.openDoor(d.getReverse());
+		}
 	}
 
 	private static class DungeonSquare {
@@ -161,8 +175,16 @@ public class DungeonMap extends DAXContent {
 			return doorFlags.get(d) > 0;
 		}
 
+		private boolean isClosedDoor(Direction d) {
+			return doorFlags.get(d) > 1;
+		}
+
 		private boolean isBashableDoor(Direction d) {
-			return doorFlags.get(d) == 3;
+			return doorFlags.get(d) == 2;
+		}
+
+		private void openDoor(Direction d) {
+			doorFlags.put(d, 1);
 		}
 	}
 
