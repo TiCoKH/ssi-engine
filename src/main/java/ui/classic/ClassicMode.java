@@ -55,6 +55,7 @@ import ui.UIResourceManager;
 import ui.UIResources;
 import ui.UIResources.DungeonResources;
 import ui.UISettings;
+import ui.UIState;
 
 public class ClassicMode extends JPanel implements UserInterface {
 	private static final String MENU_PREV = "__MENU_PREV";
@@ -251,7 +252,6 @@ public class ClassicMode extends JPanel implements UserInterface {
 		}
 	}
 
-	@Override
 	public void switchUIState(@Nonnull UIState state) {
 		this.currentState = state;
 	}

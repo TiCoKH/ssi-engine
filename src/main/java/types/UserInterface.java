@@ -17,8 +17,6 @@ public interface UserInterface {
 
 	void stop();
 
-	void switchUIState(UIState title);
-
 	void clear();
 
 	void clearAll();
@@ -62,8 +60,4 @@ public interface UserInterface {
 	void setInputNumber(int maxDigits);
 
 	void setInputString(int maxLetters);
-
-	public enum UIState {
-		TITLE, STORY, BIGPIC, DUNGEON, OVERLAND, SPACE
-	}
 }
