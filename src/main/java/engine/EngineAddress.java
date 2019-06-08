@@ -9,6 +9,7 @@ public enum EngineAddress {
 	SKY_COLOR_OUTDOORS, //
 	SKY_COLOR_INDOORS, //
 	SAVED_TEMP_START, //
+	OVERLAND_CITY, //
 	SEL_PC_START, //
 	COMBAT_RESULT, //
 	MOVEMENT_BLOCK, //

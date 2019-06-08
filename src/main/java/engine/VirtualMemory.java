@@ -11,6 +11,7 @@ import static engine.EngineAddress.LAST_ECL;
 import static engine.EngineAddress.MAP_SQUARE_INFO;
 import static engine.EngineAddress.MAP_WALL_TYPE;
 import static engine.EngineAddress.MOVEMENT_BLOCK;
+import static engine.EngineAddress.OVERLAND_CITY;
 import static engine.EngineAddress.OVERLAND_X;
 import static engine.EngineAddress.OVERLAND_Y;
 import static engine.EngineAddress.PICTURE_HEAD_ID;
@@ -49,6 +50,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static int MEMLOC_SKY_COLOR_OUTDOORS;
 	private static int MEMLOC_SKY_COLOR_INDOORS;
 	public static final int MEMLOC_MED_SUPPLIES = 0x4C63;
+	public static int MEMLOC_OVERLAND_CITY;
 	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
 	public static final int MEMLOC_EXTENDED_DUNGEON_X = 0x4CFD;
 	public static final int MEMLOC_EXTENDED_DUNGEON_Y = 0x4CFE;
@@ -97,6 +99,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_LAST_ECL = cfg.getEngineAddress(LAST_ECL);
 		MEMLOC_SKY_COLOR_OUTDOORS = cfg.getEngineAddress(SKY_COLOR_OUTDOORS);
 		MEMLOC_SKY_COLOR_INDOORS = cfg.getEngineAddress(SKY_COLOR_INDOORS);
+		MEMLOC_OVERLAND_CITY = cfg.getEngineAddress(OVERLAND_CITY);
 		MEMLOC_COMBAT_RESULT = cfg.getEngineAddress(COMBAT_RESULT);
 		MEMLOC_MOVEMENT_BLOCK = cfg.getEngineAddress(MOVEMENT_BLOCK);
 		MEMLOC_TRIED_TO_LEAVE_MAP = cfg.getEngineAddress(TRIED_TO_LEAVE_MAP);
@@ -316,6 +319,10 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setMedSupplies(int medSupplies) {
 		mem.put(MEMLOC_MED_SUPPLIES, (byte) medSupplies);
+	}
+
+	public int getOverlandCity() {
+		return mem.getUnsigned(MEMLOC_OVERLAND_CITY);
 	}
 
 	public int getForLoopCount() {
