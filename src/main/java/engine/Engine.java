@@ -35,7 +35,6 @@ import types.EngineStub;
 import types.GoldboxString;
 import types.MenuType;
 import types.UserInterface;
-import types.UserInterface.UIState;
 
 public class Engine implements EngineCallback, EngineStub {
 	private ResourceLoader res;
@@ -230,7 +229,6 @@ public class Engine implements EngineCallback, EngineStub {
 		} else if (id1 == 1) {
 			ui.setSpaceResources(memory);
 		}
-		updateUIState();
 	}
 
 	@Override
@@ -329,10 +327,6 @@ public class Engine implements EngineCallback, EngineStub {
 
 			m.visibleWallsAt(visibleWalls, x, y, d);
 		});
-	}
-
-	private void updateUIState() {
-		ui.switchUIState(currentMap.map(m -> UIState.DUNGEON).orElse(memory.getAreaDecoValue(0) == 1 ? UIState.SPACE : UIState.STORY));
 	}
 
 	@Override
