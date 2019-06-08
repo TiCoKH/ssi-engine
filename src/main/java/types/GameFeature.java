@@ -2,5 +2,6 @@ package types;
 
 public enum GameFeature {
 	BODY_HEAD, //
-	EXTENDED_DUNGEON;
+	EXTENDED_DUNGEON, //
+	INTERACTIVE_OVERLAND;
 }
