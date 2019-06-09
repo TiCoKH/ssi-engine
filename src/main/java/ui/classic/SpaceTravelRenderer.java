@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 
 import javax.annotation.Nonnull;
 
-import engine.ViewSpacePosition.Celestial;
+import shared.ViewSpacePosition.Celestial;
 import ui.UIResources;
 import ui.UISettings;
 

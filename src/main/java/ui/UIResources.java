@@ -17,11 +17,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import data.content.DungeonMap.VisibleWalls;
-import engine.ViewDungeonPosition;
-import engine.ViewOverlandPosition;
-import engine.ViewSpacePosition;
-import engine.ViewSpacePosition.Celestial;
 import shared.GoldboxString;
+import shared.ViewDungeonPosition;
+import shared.ViewOverlandPosition;
+import shared.ViewSpacePosition;
+import shared.ViewSpacePosition.Celestial;
 
 public class UIResources {
 	private static final int[] SKY_COLOURS = new int[] { //

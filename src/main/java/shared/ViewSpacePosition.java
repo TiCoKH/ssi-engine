@@ -1,4 +1,4 @@
-package engine;
+package shared;
 
 public interface ViewSpacePosition {
 	int getCelestialX(Celestial c);

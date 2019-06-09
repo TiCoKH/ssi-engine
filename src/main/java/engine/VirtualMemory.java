@@ -32,6 +32,9 @@ import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
 import shared.GoldboxString;
+import shared.ViewDungeonPosition;
+import shared.ViewOverlandPosition;
+import shared.ViewSpacePosition;
 
 public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition {
 	public static final int MEMLOC_CURRENT_ECL = 0x0000;

@@ -5,9 +5,6 @@ import java.util.List;
 import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
 import engine.InputAction;
-import engine.ViewDungeonPosition;
-import engine.ViewOverlandPosition;
-import engine.ViewSpacePosition;
 
 public interface UserInterface {
 

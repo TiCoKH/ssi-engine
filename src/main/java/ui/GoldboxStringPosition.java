@@ -3,8 +3,8 @@ package ui;
 import javax.annotation.Nonnull;
 
 import data.content.DungeonMap.Direction;
-import engine.ViewDungeonPosition;
 import shared.CustomGoldboxString;
+import shared.ViewDungeonPosition;
 
 public class GoldboxStringPosition extends CustomGoldboxString {
 

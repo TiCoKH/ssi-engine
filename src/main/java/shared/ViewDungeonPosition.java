@@ -1,4 +1,4 @@
-package engine;
+package shared;
 
 import data.content.DungeonMap.Direction;
 
