@@ -1,4 +1,4 @@
-package types;
+package shared;
 
 public enum GameFeature {
 	BODY_HEAD, //

@@ -10,8 +10,8 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import engine.InputAction;
-import types.GoldboxString;
-import types.MenuType;
+import shared.GoldboxString;
+import shared.MenuType;
 
 public class Menu {
 

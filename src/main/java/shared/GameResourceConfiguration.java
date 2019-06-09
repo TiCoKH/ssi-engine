@@ -1,4 +1,4 @@
-package types;
+package shared;
 
 import java.io.File;
 import java.io.InputStream;

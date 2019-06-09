@@ -12,7 +12,7 @@ import static data.content.DAXContentType._8X8D;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
-import static types.GameFeature.BODY_HEAD;
+import static shared.GameFeature.BODY_HEAD;
 
 import java.awt.BorderLayout;
 import java.io.File;

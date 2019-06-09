@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
-import types.GoldboxString;
+import shared.GoldboxString;
 import ui.DungeonWall;
 import ui.UIResources;
 import ui.UIResources.DungeonResources;

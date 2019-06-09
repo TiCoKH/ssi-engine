@@ -21,7 +21,7 @@ import engine.ViewDungeonPosition;
 import engine.ViewOverlandPosition;
 import engine.ViewSpacePosition;
 import engine.ViewSpacePosition.Celestial;
-import types.GoldboxString;
+import shared.GoldboxString;
 
 public class UIResources {
 	private static final int[] SKY_COLOURS = new int[] { //

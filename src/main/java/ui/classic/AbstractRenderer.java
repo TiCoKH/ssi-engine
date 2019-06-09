@@ -10,8 +10,8 @@ import java.awt.image.BufferedImage;
 
 import javax.annotation.Nonnull;
 
-import types.GoldboxString;
-import types.MenuType;
+import shared.GoldboxString;
+import shared.MenuType;
 import ui.FontType;
 import ui.UIFrame;
 import ui.UIResources;

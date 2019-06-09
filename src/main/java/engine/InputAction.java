@@ -17,8 +17,8 @@ import engine.input.MenuHandler;
 import engine.input.OverlandMovementHandler;
 import engine.input.SaveHandler;
 import engine.input.SpaceMovementHandler;
-import types.CustomGoldboxString;
-import types.GoldboxString;
+import shared.CustomGoldboxString;
+import shared.GoldboxString;
 
 public class InputAction {
 	private static final InputHandler DUNGEON_MOVEMENT_HANDLER = new DungeonMovementHandler();

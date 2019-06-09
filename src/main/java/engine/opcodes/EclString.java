@@ -1,7 +1,7 @@
 package engine.opcodes;
 
 import common.ByteBufferWrapper;
-import types.GoldboxString;
+import shared.GoldboxString;
 
 public class EclString extends GoldboxString {
 	private ByteBufferWrapper content;

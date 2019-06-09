@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import data.content.DungeonMap.Direction;
 import engine.ViewDungeonPosition;
-import types.CustomGoldboxString;
+import shared.CustomGoldboxString;
 
 public class GoldboxStringPosition extends CustomGoldboxString {
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import types.CustomGoldboxString;
+import shared.CustomGoldboxString;
 
 public class GoldboxStringInput extends CustomGoldboxString {
 

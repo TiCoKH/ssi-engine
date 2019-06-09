@@ -20,7 +20,7 @@ import static engine.EngineAddress.SKY_COLOR_INDOORS;
 import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
 import static engine.EngineAddress.TEMP_START;
 import static engine.EngineAddress.TRIED_TO_LEAVE_MAP;
-import static types.GameFeature.EXTENDED_DUNGEON;
+import static shared.GameFeature.EXTENDED_DUNGEON;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -31,7 +31,7 @@ import common.ByteBufferWrapper;
 import data.content.DungeonMap.Direction;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclString;
-import types.GoldboxString;
+import shared.GoldboxString;
 
 public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition {
 	public static final int MEMLOC_CURRENT_ECL = 0x0000;

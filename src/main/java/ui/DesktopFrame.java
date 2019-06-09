@@ -33,7 +33,7 @@ import javax.swing.JRadioButtonMenuItem;
 
 import common.FileMap;
 import engine.Engine;
-import types.UserInterface;
+import shared.UserInterface;
 import ui.classic.ClassicMode;
 import ui.resource.ResourceViewer;
 

@@ -7,8 +7,8 @@ import static data.content.DAXContentType.PIC;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
-import static types.GameFeature.BODY_HEAD;
-import static types.GameFeature.INTERACTIVE_OVERLAND;
+import static shared.GameFeature.BODY_HEAD;
+import static shared.GameFeature.INTERACTIVE_OVERLAND;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +31,11 @@ import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
 import engine.opcodes.EclInstruction;
-import types.CustomGoldboxString;
-import types.EngineStub;
-import types.GoldboxString;
-import types.MenuType;
-import types.UserInterface;
+import shared.CustomGoldboxString;
+import shared.EngineStub;
+import shared.GoldboxString;
+import shared.MenuType;
+import shared.UserInterface;
 
 public class Engine implements EngineCallback, EngineStub {
 	private ResourceLoader res;

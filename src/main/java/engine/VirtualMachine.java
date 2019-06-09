@@ -7,8 +7,8 @@ import static engine.InputAction.YES_NO_ACTIONS;
 import static engine.opcodes.EclOpCode.CALL;
 import static engine.opcodes.EclOpCode.GOSUB;
 import static engine.opcodes.EclOpCode.GOTO;
-import static types.MenuType.HORIZONTAL;
-import static types.MenuType.VERTICAL;
+import static shared.MenuType.HORIZONTAL;
+import static shared.MenuType.VERTICAL;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -27,8 +27,8 @@ import data.content.EclProgram;
 import engine.opcodes.EclArgument;
 import engine.opcodes.EclInstruction;
 import engine.opcodes.EclOpCode;
-import types.CustomGoldboxString;
-import types.GoldboxString;
+import shared.CustomGoldboxString;
+import shared.GoldboxString;
 
 public class VirtualMachine {
 	private static final EclArgument SELECTED_PLAYER_NAME = new EclArgument(1, 3, 0x7C00);

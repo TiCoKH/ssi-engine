@@ -5,8 +5,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import types.GoldboxString;
-import types.MenuType;
+import shared.GoldboxString;
+import shared.MenuType;
 
 public interface EngineCallback {
 	void clear();

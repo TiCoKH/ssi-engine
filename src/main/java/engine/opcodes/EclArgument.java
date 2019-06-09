@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import common.ByteBufferWrapper;
-import types.GoldboxString;
+import shared.GoldboxString;
 
 public class EclArgument {
 	private int type;

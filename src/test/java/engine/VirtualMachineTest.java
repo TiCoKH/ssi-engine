@@ -10,8 +10,8 @@ import common.FileMap;
 import data.ContentFile;
 import data.content.DAXContentType;
 import data.content.EclProgram;
-import types.GoldboxString;
-import types.MenuType;
+import shared.GoldboxString;
+import shared.MenuType;
 
 public class VirtualMachineTest {
 

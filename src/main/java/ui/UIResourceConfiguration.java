@@ -10,7 +10,7 @@ import data.content.ExtendedEGAImage;
 import data.content.TLBTILEBlock;
 import data.content.VGADependentImages;
 import data.content.VGAImage;
-import types.GameResourceConfiguration;
+import shared.GameResourceConfiguration;
 import ui.FrameType.BackgroundType;
 import ui.FrameType.PortraitType;
 

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import common.FileMap;
 import engine.opcodes.EclOpCode;
-import types.GameResourceConfiguration;
+import shared.GameResourceConfiguration;
 
 public class EngineConfiguration extends GameResourceConfiguration {
 
