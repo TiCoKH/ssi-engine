@@ -1,7 +1,5 @@
 package shared;
 
-import engine.InputAction;
-
 public interface EngineStub {
 	void registerUI(UserInterface ui);
 
@@ -11,9 +9,13 @@ public interface EngineStub {
 
 	void stop();
 
+	void loadGame();
+
 	void showStartMenu();
 
 	void textDisplayFinished();
 
 	void handleInput(InputAction action);
+
+	void handleInput(String input);
 }

@@ -1,9 +1,9 @@
 package engine;
 
-import static engine.InputAction.CONTINUE_ACTION;
-import static engine.InputAction.CONTINUE_HANDLER;
-import static engine.InputAction.MENU_HANDLER;
-import static engine.InputAction.YES_NO_ACTIONS;
+import static engine.EngineInputAction.CONTINUE_ACTION;
+import static engine.EngineInputAction.CONTINUE_HANDLER;
+import static engine.EngineInputAction.MENU_HANDLER;
+import static engine.EngineInputAction.YES_NO_ACTIONS;
 import static engine.opcodes.EclOpCode.CALL;
 import static engine.opcodes.EclOpCode.GOSUB;
 import static engine.opcodes.EclOpCode.GOTO;
@@ -288,7 +288,7 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.MENU_VERTICAL, inst -> {
 			engine.setMenu(VERTICAL, //
-				inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
+				inst.getDynArgs().stream().map(arg -> new EngineInputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
 					.collect(Collectors.toList()),
 				stringValue(inst.getArgument(1)));
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
@@ -421,10 +421,10 @@ public class VirtualMachine {
 				engine.setMenu(HORIZONTAL, CONTINUE_ACTION, null);
 
 				engine.setMenu(HORIZONTAL, ImmutableList.of( //
-					new InputAction(MENU_HANDLER, "COMBAT", 0), //
-					new InputAction(MENU_HANDLER, "WAIT", 1), //
-					new InputAction(MENU_HANDLER, "FLEE", 2), //
-					distance != 0 ? new InputAction(MENU_HANDLER, "ADVANCE", 3) : new InputAction(MENU_HANDLER, "PARLAY", 4) //
+					new EngineInputAction(MENU_HANDLER, "COMBAT", 0), //
+					new EngineInputAction(MENU_HANDLER, "WAIT", 1), //
+					new EngineInputAction(MENU_HANDLER, "FLEE", 2), //
+					distance != 0 ? new EngineInputAction(MENU_HANDLER, "ADVANCE", 3) : new EngineInputAction(MENU_HANDLER, "PARLAY", 4) //
 				), null);
 
 				int enc_move_min = intValue(inst.getArgument(12));
@@ -510,11 +510,11 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
 			if (inst.getDynArgs().size() == 1) {
 				engine.setMenu(HORIZONTAL, ImmutableList.of( //
-					new InputAction(CONTINUE_HANDLER, stringValue(inst.getDynArgs().get(0)), -1) //
+					new EngineInputAction(CONTINUE_HANDLER, stringValue(inst.getDynArgs().get(0)), -1) //
 				), null);
 			} else {
 				engine.setMenu(HORIZONTAL, //
-					inst.getDynArgs().stream().map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
+					inst.getDynArgs().stream().map(arg -> new EngineInputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
 						.collect(Collectors.toList()),
 					null);
 				memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
@@ -522,11 +522,11 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.PARLAY, inst -> {
 			engine.setMenu(HORIZONTAL, ImmutableList.of( //
-				new InputAction(MENU_HANDLER, "HAUGHTY", 0), //
-				new InputAction(MENU_HANDLER, "SLY", 1), //
-				new InputAction(MENU_HANDLER, "NICE", 2), //
-				new InputAction(MENU_HANDLER, "MEEK", 3), //
-				new InputAction(MENU_HANDLER, "ABUSIVE", 4) //
+				new EngineInputAction(MENU_HANDLER, "HAUGHTY", 0), //
+				new EngineInputAction(MENU_HANDLER, "SLY", 1), //
+				new EngineInputAction(MENU_HANDLER, "NICE", 2), //
+				new EngineInputAction(MENU_HANDLER, "MEEK", 3), //
+				new EngineInputAction(MENU_HANDLER, "ABUSIVE", 4) //
 			), null);
 			memory.writeMemInt(inst.getArgument(5), intValue(inst.getArgument(memory.getMenuChoice())));
 		});
@@ -580,7 +580,8 @@ public class VirtualMachine {
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
 			engine.addText(new CustomGoldboxString("WHAT DO YOU DO?"), false);
 			engine.setMenu(HORIZONTAL, inst.getDynArgs().stream()
-				.map(arg -> new InputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg))).collect(Collectors.toList()), null);
+				.map(arg -> new EngineInputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg))).collect(Collectors.toList()),
+				null);
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});
 		IMPL.put(EclOpCode.FIND_ITEM, inst -> {

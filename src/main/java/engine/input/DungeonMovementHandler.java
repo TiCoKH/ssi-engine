@@ -2,14 +2,15 @@ package engine.input;
 
 import data.content.DungeonMap;
 import engine.Engine;
-import engine.InputAction;
+import engine.EngineInputAction;
 import engine.VirtualMachine;
 import engine.VirtualMemory;
+import shared.InputAction;
 
 public class DungeonMovementHandler implements InputHandler {
 
 	@Override
-	public void handle(Engine engine, InputAction action) {
+	public void handle(Engine engine, EngineInputAction action) {
 		engine.setNextTask(() -> {
 			engine.clear();
 
@@ -17,7 +18,7 @@ public class DungeonMovementHandler implements InputHandler {
 			VirtualMemory mem = engine.getMemory();
 			DungeonMap map = engine.getDungeonMap();
 
-			if (InputAction.MOVE_FORWARD == action) {
+			if (InputAction.FORWARD_UP == action.getName()) {
 				mem.setTriedToLeaveMap(map.couldExit(mem.getDungeonX(), mem.getDungeonY(), mem.getDungeonDir()));
 				mem.setMovementBlock(0);
 				vm.startMove();
@@ -42,16 +43,16 @@ public class DungeonMovementHandler implements InputHandler {
 				if (engine.isAbortCurrentThread()) {
 					return;
 				}
-			} else if (InputAction.TURN_AROUND == action) {
+			} else if (InputAction.UTURN_DOWN == action.getName()) {
 				mem.setDungeonDir(mem.getDungeonDir().getReverse());
-			} else if (InputAction.TURN_LEFT == action) {
+			} else if (InputAction.TURN_LEFT == action.getName()) {
 				mem.setDungeonDir(mem.getDungeonDir().getLeft());
-			} else if (InputAction.TURN_RIGHT == action) {
+			} else if (InputAction.TURN_RIGHT == action.getName()) {
 				mem.setDungeonDir(mem.getDungeonDir().getRight());
 			}
 			engine.updatePosition();
 			engine.clearSprite();
-			engine.getUi().setInputStandard();
+			engine.setInputStandard(null);
 		});
 	}
 }

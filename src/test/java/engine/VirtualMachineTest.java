@@ -11,6 +11,7 @@ import data.ContentFile;
 import data.content.DAXContentType;
 import data.content.EclProgram;
 import shared.GoldboxString;
+import shared.InputAction;
 import shared.MenuType;
 
 public class VirtualMachineTest {

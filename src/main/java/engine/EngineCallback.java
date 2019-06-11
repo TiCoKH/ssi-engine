@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import shared.GoldboxString;
+import shared.InputAction;
 import shared.MenuType;
 
 public interface EngineCallback {

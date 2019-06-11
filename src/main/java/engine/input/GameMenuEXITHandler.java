@@ -3,11 +3,11 @@ package engine.input;
 import engine.Engine;
 import engine.EngineInputAction;
 
-public class ContinueHandler implements InputHandler {
+public class GameMenuEXITHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, EngineInputAction action) {
-		engine.getUi().setInputNone();
-		engine.continueCurrentThread();
+		engine.setShowGameMenu(true);
+		engine.setInputStandard(null);
 	}
 }

@@ -1,8 +1,8 @@
 package engine.input;
 
 import engine.Engine;
-import engine.InputAction;
+import engine.EngineInputAction;
 
 public interface InputHandler {
-	void handle(Engine engine, InputAction action);
+	void handle(Engine engine, EngineInputAction action);
 }

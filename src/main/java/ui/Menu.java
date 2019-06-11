@@ -2,22 +2,20 @@ package ui;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import engine.InputAction;
 import shared.GoldboxString;
+import shared.InputAction;
 import shared.MenuType;
 
 public class Menu {
 
 	private MenuType type;
 	private List<InputAction> menu;
-	private List<GoldboxString> menuItems;
 
 	private Optional<GoldboxString> description = Optional.empty();
 
@@ -26,7 +24,6 @@ public class Menu {
 	public Menu(@Nonnull MenuType type, @Nonnull List<InputAction> menu, @Nullable GoldboxString description) {
 		this.type = type;
 		this.menu = ImmutableList.copyOf(menu);
-		this.menuItems = menu.stream().filter(a -> a.getName().isPresent()).map(a -> a.getName().get()).collect(Collectors.toList());
 		this.description = Optional.ofNullable(description);
 	}
 
@@ -35,11 +32,11 @@ public class Menu {
 	}
 
 	public int getItemCount() {
-		return menuItems.size();
+		return menu.size();
 	}
 
 	public GoldboxString getMenuItem(int index) {
-		return menuItems.get(index);
+		return menu.get(index).getName();
 	}
 
 	public int getSelectedIndex() {
@@ -59,7 +56,7 @@ public class Menu {
 	}
 
 	public void next() {
-		if (selection + 1 < menuItems.size())
+		if (selection + 1 < menu.size())
 			selection++;
 		else
 			selection = 0;
@@ -69,6 +66,10 @@ public class Menu {
 		if (selection - 1 >= 0)
 			selection--;
 		else
-			selection = menuItems.size() - 1;
+			selection = menu.size() - 1;
+	}
+
+	public void setSelectedItem(InputAction selected) {
+		selection = menu.indexOf(selected);
 	}
 }

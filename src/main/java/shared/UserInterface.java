@@ -4,7 +4,6 @@ import java.util.List;
 
 import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
-import engine.InputAction;
 
 public interface UserInterface {
 
@@ -50,9 +49,7 @@ public interface UserInterface {
 
 	void setInputNone();
 
-	void setInputStandard();
-
-	void setInputMenu(MenuType type, List<InputAction> menuItems, GoldboxString description);
+	void setInputMenu(MenuType type, List<InputAction> menuItems, GoldboxString description, InputAction selected);
 
 	void setInputNumber(int maxDigits);
 

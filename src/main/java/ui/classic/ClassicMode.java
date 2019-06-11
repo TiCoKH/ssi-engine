@@ -5,10 +5,8 @@ import static data.content.DAXContentType.BODY;
 import static data.content.DAXContentType.HEAD;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.TITLE;
-import static engine.InputAction.CONTINUE;
-import static engine.InputAction.INPUT_HANDLER;
-import static engine.InputAction.LOAD;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static shared.InputAction.LOAD;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -25,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,9 +34,9 @@ import javax.swing.KeyStroke;
 import common.FileMap;
 import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
-import engine.InputAction;
 import shared.EngineStub;
 import shared.GoldboxString;
+import shared.InputAction;
 import shared.MenuType;
 import shared.UserInterface;
 import shared.ViewDungeonPosition;
@@ -65,26 +64,15 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private static final String INPUT_NUMBER = "INPUT NUMBER: ";
 	private static final String INPUT_STRING = "INPUT STRING: ";
 
-	private static final Map<InputAction, KeyStroke> KEY_MAPPING;
+	private static final Map<GoldboxString, KeyStroke> KEY_MAPPING;
 	static {
 		KEY_MAPPING = new HashMap<>();
 		KEY_MAPPING.put(InputAction.LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
 		KEY_MAPPING.put(InputAction.SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-
-		KEY_MAPPING.put(InputAction.MOVE_FORWARD, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
+		KEY_MAPPING.put(InputAction.FORWARD_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
 		KEY_MAPPING.put(InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
 		KEY_MAPPING.put(InputAction.TURN_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
-		KEY_MAPPING.put(InputAction.TURN_AROUND, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
-
-		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
-		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
-		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
-		KEY_MAPPING.put(InputAction.MOVE_OVERLAND_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
-
-		KEY_MAPPING.put(InputAction.MOVE_SPACE_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
-		KEY_MAPPING.put(InputAction.MOVE_SPACE_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
-		KEY_MAPPING.put(InputAction.MOVE_SPACE_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
-		KEY_MAPPING.put(InputAction.MOVE_SPACE_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+		KEY_MAPPING.put(InputAction.UTURN_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
 	}
 
 	private transient EngineStub stub;
@@ -192,9 +180,9 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	public void showTitles() {
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), CONTINUE);
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), CONTINUE);
-		getActionMap().put(CONTINUE, new AbstractAction() {
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "CONTINUE");
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "CONTINUE");
+		getActionMap().put("CONTINUE", new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -281,7 +269,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(LOAD), LOAD);
 		getActionMap().clear();
-		mapToAction(LOAD);
+		getActionMap().put(LOAD, new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				stub.loadGame();
+			}
+		});
 	}
 
 	@Override
@@ -290,15 +284,18 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
+	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description,
+		@Nullable InputAction selected) {
+
 		resetInput();
 
-		if (menuItems.size() > 1) {
-			menuItems.stream().filter(a -> a.getName().isPresent()).forEach(a -> {
-				KeyStroke k = KeyStroke.getKeyStroke(Character.toLowerCase(a.getName().get().toString().charAt(0)));
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
-				mapToAction(a);
-			});
+		List<InputAction> namedMenuItems = menuItems.stream().filter(a -> a.getName().getLength() > 0).collect(Collectors.toList());
+		namedMenuItems.stream().forEach(a -> {
+			KeyStroke k = KeyStroke.getKeyStroke(Character.toLowerCase(a.getName().toString().charAt(0)));
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
+			mapToAction(a);
+		});
+		if (namedMenuItems.size() > 1) {
 			if (type == MenuType.HORIZONTAL) {
 				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), MENU_PREV);
 				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), MENU_PREV);
@@ -325,6 +322,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 				}
 			});
 		}
+
+		menuItems.stream().filter(a -> a.getName().getLength() == 0).forEach(a -> {
+			KeyStroke k = KEY_MAPPING.get(a.getName());
+			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
+			mapToAction(a);
+		});
+
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), MENU_ACTION);
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), MENU_ACTION);
 		getActionMap().put(MENU_ACTION, new AbstractAction() {
@@ -337,7 +341,10 @@ public class ClassicMode extends JPanel implements UserInterface {
 				});
 			}
 		});
-		resources.setMenu(new Menu(type, menuItems, description));
+		Menu menu = new Menu(type, namedMenuItems, description);
+		if (selected != null)
+			menu.setSelectedItem(selected);
+		resources.setMenu(menu);
 	}
 
 	@Override
@@ -430,37 +437,9 @@ public class ClassicMode extends JPanel implements UserInterface {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				clearStatus();
-				stub.handleInput(new InputAction(INPUT_HANDLER, input.toString(), -1));
+				stub.handleInput(input.toString());
 			}
 		});
-	}
-
-	@Override
-	public void setInputStandard() {
-		resetInput();
-		switch (currentState) {
-			case DUNGEON:
-				InputAction.DUNGEON_MOVEMENT.stream().forEach(a -> {
-					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
-					mapToAction(a);
-				});
-				break;
-			case OVERLAND:
-				InputAction.OVERLAND_MOVEMENT.stream().forEach(a -> {
-					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
-					mapToAction(a);
-				});
-				break;
-			case SPACE:
-				InputAction.SPACE_MOVEMENT.stream().forEach(a -> {
-					getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(a), a);
-					mapToAction(a);
-				});
-				resources.getSpaceResources().ifPresent(r -> resources.setStatusLine(r.getStatusLine()));
-				break;
-			default:
-				System.err.println("Unknown input for current ui state: " + currentState);
-		}
 	}
 
 	private void mapToAction(@Nonnull InputAction a) {

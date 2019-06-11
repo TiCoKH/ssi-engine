@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import engine.Engine;
-import engine.InputAction;
+import engine.EngineInputAction;
 
 public class SaveHandler implements InputHandler {
 
 	@Override
-	public void handle(Engine engine, InputAction action) {
+	public void handle(Engine engine, EngineInputAction action) {
 		File savesPath = engine.getSavesPath();
 		if (!savesPath.exists()) {
 			boolean result = savesPath.mkdirs();
@@ -35,5 +35,6 @@ public class SaveHandler implements InputHandler {
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
+		engine.setInputStandard(null);
 	}
 }

@@ -7,11 +7,18 @@ import static data.content.DAXContentType.PIC;
 import static data.content.WallDef.WallDistance.CLOSE;
 import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
+import static engine.EngineInputAction.GAME_MENU_ACTIONS;
+import static engine.EngineInputAction.MAIN_MENU_HANDLER;
+import static engine.EngineInputAction.MOVEMENT_ACTIONS;
+import static engine.EngineInputAction.MOVEMENT_HANDLER;
+import static java.nio.file.StandardOpenOption.READ;
 import static shared.GameFeature.BODY_HEAD;
 import static shared.GameFeature.INTERACTIVE_OVERLAND;
+import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -30,10 +37,12 @@ import data.content.DungeonMap;
 import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
 import data.content.EclProgram;
+import engine.input.MovementHandler;
 import engine.opcodes.EclInstruction;
 import shared.CustomGoldboxString;
 import shared.EngineStub;
 import shared.GoldboxString;
+import shared.InputAction;
 import shared.MenuType;
 import shared.UserInterface;
 
@@ -48,6 +57,8 @@ public class Engine implements EngineCallback, EngineStub {
 	private ExecutorService exec;
 
 	private boolean abortCurrentThread = false;
+	private boolean showGameMenu = true;
+	private InputAction currentMenuItem;
 
 	private Optional<DungeonMap> currentMap = Optional.empty();
 	private VisibleWalls visibleWalls = new VisibleWalls();
@@ -93,23 +104,15 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void showStartMenu() {
 		setNextTask(() -> {
-			List<String> menu = Stream.of("GAME", "DEMO", "START").filter(e -> !Strings.isNullOrEmpty(cfg.getMainMenuEntry(e)))
+			List<String> menu = Stream.of("GAME", "DEMO", "START", "DEBUG").filter(e -> !Strings.isNullOrEmpty(cfg.getMainMenuEntry(e)))
 				.collect(Collectors.toList());
 			setMenu(MenuType.HORIZONTAL,
-				menu.stream().map(e -> new InputAction(InputAction.MENU_HANDLER, e, menu.indexOf(e))).collect(Collectors.toList()),
+				menu.stream().map(e -> new EngineInputAction(MAIN_MENU_HANDLER, e, menu.indexOf(e))).collect(Collectors.toList()),
 				new CustomGoldboxString(cfg.getMainMenuName()));
 			if (abortCurrentThread) {
 				return;
 			}
 			clear();
-			memory.setGameSpeed(memory.getMenuChoice() == 0 ? 4 : 9);
-			String menuItem = cfg.getMainMenuEntry(menu.get(memory.getMenuChoice()));
-			try {
-				int ecl = Integer.parseInt(menuItem);
-				loadEcl(ecl, false);
-			} catch (NumberFormatException e) {
-				// TODO in FRUA the entry is not a number
-			}
 		});
 	}
 
@@ -121,7 +124,15 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void handleInput(InputAction action) {
-		action.getHandler().handle(this, action);
+		EngineInputAction eAction = (EngineInputAction) action;
+		eAction.getHandler().handle(this, eAction);
+	}
+
+	@Override
+	public void handleInput(String input) {
+		memory.setInput(new CustomGoldboxString(input));
+		ui.setInputNone();
+		continueCurrentThread();
 	}
 
 	@Override
@@ -141,11 +152,49 @@ public class Engine implements EngineCallback, EngineStub {
 		pauseCurrentThread();
 	}
 
+	public void setShowGameMenu(boolean showGameMenu) {
+		this.showGameMenu = showGameMenu;
+	}
+
+	public void setInputStandard(@Nullable InputAction action) {
+		if (action != null)
+			this.currentMenuItem = action;
+		if (showGameMenu) {
+			ui.setInputMenu(HORIZONTAL, GAME_MENU_ACTIONS, null, this.currentMenuItem);
+		} else {
+			ui.setInputMenu(HORIZONTAL, MOVEMENT_ACTIONS, new CustomGoldboxString("(USE W, S, A, D TO MOVE)"), null);
+		}
+	}
+
 	@Override
 	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
 		updateOverlandCityCursor();
-		ui.setInputMenu(type, menuItems, description);
+		ui.setInputMenu(type, menuItems, description, null);
 		pauseCurrentThread();
+	}
+
+	@Override
+	public void loadGame() {
+		File savesPath = getSavesPath();
+		File saveGame = new File(savesPath, "savegame.dat");
+		if (!saveGame.exists() && !saveGame.canRead()) {
+			System.err.println("Cant load");
+			return;
+		}
+
+		setNextTask(() -> {
+			getUi().clearAll();
+
+			try (FileChannel fc = FileChannel.open(saveGame.toPath(), READ)) {
+				memory.loadFrom(fc);
+				loadArea(memory.getAreaValue(0), memory.getAreaValue(1), memory.getAreaValue(2));
+				loadAreaDecoration(memory.getAreaDecoValue(0), memory.getAreaDecoValue(1), memory.getAreaDecoValue(2));
+				loadEcl(memory.getCurrentECL(), false);
+				System.out.println("Game loaded");
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
+			}
+		});
 	}
 
 	@Override
@@ -187,7 +236,9 @@ public class Engine implements EngineCallback, EngineStub {
 					updatePosition();
 				}
 				clearSprite();
-				ui.setInputStandard();
+				this.currentMenuItem = null;
+				setShowGameMenu(true);
+				setInputStandard(null);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
@@ -228,8 +279,10 @@ public class Engine implements EngineCallback, EngineStub {
 		memory.setAreaDecoValues(id1, id2, id3);
 		if (currentMap.isPresent()) {
 			ui.setDungeonResources(memory, visibleWalls, id1, id2, id3);
+			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.DUNGEON);
 		} else if (id1 == 1) {
 			ui.setSpaceResources(memory);
+			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.SPACE);
 		}
 	}
 
@@ -267,12 +320,14 @@ public class Engine implements EngineCallback, EngineStub {
 			clearSprite();
 			return;
 		}
-		if (cfg.isUsingFeature(BODY_HEAD) && memory.getPictureHeadId() != 255)
+		if (cfg.isUsingFeature(BODY_HEAD) && memory.getPictureHeadId() != 255) {
 			ui.showPicture(memory.getPictureHeadId(), id);
-		else if (!currentMap.isPresent() && cfg.getOverlandMapIds().contains(id))
+		} else if (!currentMap.isPresent() && cfg.getOverlandMapIds().contains(id)) {
 			ui.setOverlandResources(memory, id);
-		else
+			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.OVERLAND);
+		} else {
 			ui.showPicture(id, null);
+		}
 	}
 
 	@Override
@@ -290,6 +345,7 @@ public class Engine implements EngineCallback, EngineStub {
 				break;
 			case 4:
 				ui.setOverlandResources(memory, id);
+				MOVEMENT_HANDLER.setMode(MovementHandler.Mode.OVERLAND);
 				memory.setAreaDecoValues(255, 127, 127);
 				break;
 			default:
@@ -392,6 +448,10 @@ public class Engine implements EngineCallback, EngineStub {
 
 	public DungeonMap getDungeonMap() {
 		return currentMap.get();
+	}
+
+	public EngineConfiguration getConfig() {
+		return cfg;
 	}
 
 	public boolean isAbortCurrentThread() {

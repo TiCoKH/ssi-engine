@@ -2,13 +2,14 @@ package engine.input;
 
 import common.MathUtil;
 import engine.Engine;
-import engine.InputAction;
+import engine.EngineInputAction;
 import engine.VirtualMemory;
+import shared.InputAction;
 
 public class SpaceMovementHandler implements InputHandler {
 
 	@Override
-	public void handle(Engine engine, InputAction action) {
+	public void handle(Engine engine, EngineInputAction action) {
 		engine.setNextTask(() -> {
 			engine.clear();
 
@@ -22,13 +23,13 @@ public class SpaceMovementHandler implements InputHandler {
 			int x = memory.getSpaceX();
 			int y = memory.getSpaceY();
 			int newX = x, newY = y;
-			if (InputAction.MOVE_SPACE_UP == action) {
+			if (InputAction.FORWARD_UP == action.getName()) {
 				newY = y - 1;
-			} else if (InputAction.MOVE_SPACE_DOWN == action) {
+			} else if (InputAction.UTURN_DOWN == action.getName()) {
 				newY = y + 1;
-			} else if (InputAction.MOVE_SPACE_LEFT == action) {
+			} else if (InputAction.TURN_LEFT == action.getName()) {
 				newX = x - 1;
-			} else if (InputAction.MOVE_SPACE_RIGHT == action) {
+			} else if (InputAction.TURN_RIGHT == action.getName()) {
 				newX = x + 1;
 			}
 			// Not moving into the sun
@@ -46,7 +47,7 @@ public class SpaceMovementHandler implements InputHandler {
 				return;
 			}
 
-			engine.getUi().setInputStandard();
+			engine.setInputStandard(null);
 		});
 	}
 }
