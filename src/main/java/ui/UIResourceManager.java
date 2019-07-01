@@ -28,6 +28,7 @@ public class UIResourceManager {
 
 	private static final BufferedImage BROKEN = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_BINARY);
 
+	private UIResourceConfiguration config;
 	private UIResourceLoader loader;
 	private ExceptionHandler excHandler;
 	private UIScaler scaler;
@@ -40,16 +41,19 @@ public class UIResourceManager {
 	private Map<FontType, List<BufferedImage>> fonts = new EnumMap<>(FontType.class);
 	private Map<ImageResource, List<BufferedImage>> imageResources = new HashMap<>();
 	private Map<DungeonResource, List<DungeonWall>> walls = new HashMap<>();
+	private Map<DungeonMapResource, BufferedImage> maps = new HashMap<>();
 
-	public UIResourceManager(@Nonnull UIResourceLoader loader, @Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler)
-		throws IOException {
+	public UIResourceManager(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceLoader loader, @Nonnull UISettings settings,
+		@Nonnull ExceptionHandler excHandler) throws IOException {
 
 		settings.addPropertyChangeListener(e -> {
 			fonts.clear();
 			imageResources.clear();
 			walls.clear();
+			maps.clear();
 		});
 
+		this.config = config;
 		this.loader = loader;
 		this.excHandler = excHandler;
 		this.scaler = new UIScaler(settings);
@@ -105,11 +109,15 @@ public class UIResourceManager {
 			imageResources.put(INTERNAL_ID_OVERLAND_CURSOR, cursor);
 		}
 		return imageResources.get(INTERNAL_ID_OVERLAND_CURSOR).get(0);
-
 	}
 
 	@Nonnull
-	public List<BufferedImage> getImageResource(ImageResource r) {
+	public BufferedImage getMapResource(@Nonnull DungeonMapResource r) {
+		return getOrCreateResource(r);
+	}
+
+	@Nonnull
+	public List<BufferedImage> getImageResource(@Nonnull ImageResource r) {
 		return getOrCreateResource(r);
 	}
 
@@ -134,6 +142,11 @@ public class UIResourceManager {
 	@Nonnull
 	private List<DungeonWall> getOrCreateResource(@Nonnull DungeonResource r) {
 		return walls.computeIfAbsent(r, this::createWalls);
+	}
+
+	@Nonnull
+	private BufferedImage getOrCreateResource(@Nonnull DungeonMapResource r) {
+		return maps.computeIfAbsent(r, this::createMap);
 	}
 
 	@Nonnull
@@ -218,6 +231,26 @@ public class UIResourceManager {
 			return new ArrayList<>();
 		});
 		return originalWallRes.stream().map(this::scale).collect(Collectors.toList());
+	}
+
+	private BufferedImage createMap(@Nonnull DungeonMapResource r) {
+		DungeonMapBuilder builder = new DungeonMapBuilder(config, loader);
+		builder.withMap(r.getMap());
+
+		Optional<DungeonResource> res = r.getRes();
+		if (res.isPresent()) {
+			DungeonResource dres = res.get();
+			builder.withWMapDecoIds(dres.getId1(), dres.getId2(), dres.getId3());
+		} else {
+			builder.withoutMapDecoIds();
+		}
+
+		try {
+			return scaler.scale(builder.build());
+		} catch (IOException e) {
+			excHandler.handleException("Error creating map image", e);
+			return BROKEN;
+		}
 	}
 
 	@Nonnull

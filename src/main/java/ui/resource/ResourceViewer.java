@@ -57,7 +57,7 @@ public class ResourceViewer {
 		this.config = config;
 		this.loader = new UIResourceLoader(fileMap, config);
 
-		UIResourceManager resman = new UIResourceManager(loader, settings, excHandler);
+		UIResourceManager resman = new UIResourceManager(config, loader, settings, excHandler);
 		this.drawSurface = new RenderSurface(config, resman, settings);
 
 		initFrame();

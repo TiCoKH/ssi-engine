@@ -46,17 +46,21 @@ public class DungeonRenderer extends StoryRenderer {
 
 	private void renderDungeon(@Nonnull Graphics2D g2d) {
 		resources.getDungeonResources().ifPresent(r -> {
-			renderBackdrop(g2d, r);
 
-			r.getVisibleWalls().ifPresent(vw -> renderVisibleWalls(g2d, vw, r.getWalls()));
+			if (r.isShowAreaMap()) {
+				r.getMap().ifPresent(map -> renderMap(g2d, r, map));
+			} else {
+				renderBackdrop(g2d, r);
+				r.getVisibleWalls().ifPresent(vw -> renderVisibleWalls(g2d, vw, r.getWalls()));
 
-			r.getSprite().ifPresent(sprite -> {
-				int xOffset = Math.abs((int) sprite.getProperty(X_OFFSET.name()));
-				int yOffset = Math.abs((int) sprite.getProperty(Y_OFFSET.name()));
-				int x = settings.zoom8(3) + settings.zoom(xOffset);
-				int y = settings.zoom8(3) + settings.zoom(yOffset);
-				g2d.drawImage(sprite, x, y, null);
-			});
+				r.getSprite().ifPresent(sprite -> {
+					int xOffset = Math.abs((int) sprite.getProperty(X_OFFSET.name()));
+					int yOffset = Math.abs((int) sprite.getProperty(Y_OFFSET.name()));
+					int x = settings.zoom8(3) + settings.zoom(xOffset);
+					int y = settings.zoom8(3) + settings.zoom(yOffset);
+					g2d.drawImage(sprite, x, y, null);
+				});
+			}
 		});
 	}
 
@@ -122,6 +126,23 @@ public class DungeonRenderer extends StoryRenderer {
 			wallView = wall.getFarFiller();
 			g2d.drawImage(wallView, settings.zoom8(xStart + 1), settings.zoom8(yStart) + settings.zoom(maxHeight) - wallView.getHeight(), null);
 		}
+	}
+
+	private void renderMap(Graphics2D g2d, @Nonnull DungeonResources res, BufferedImage map) {
+		g2d.clipRect(settings.zoom8(3), settings.zoom8(3), settings.zoom8(11), settings.zoom8(11));
+
+		int posX = res.getPositionX();
+		int posY = res.getPositionY();
+
+		int startX = posX > 4 ? posX >= (res.getMapWidth() - 5) ? 14 - res.getMapWidth() : 8 - posX : 3;
+		int startY = posY > 4 ? posY >= (res.getMapHeight() - 5) ? 14 - res.getMapHeight() : 8 - posY : 3;
+		renderImage(g2d, map, startX, startY);
+
+		int arrowX = posX > 4 ? posX >= (res.getMapWidth() - 5) ? 8 + posX - (res.getMapWidth() - 6) : 8 : 3 + posX;
+		int arrowY = posY > 4 ? posY >= (res.getMapHeight() - 5) ? 8 + posY - (res.getMapHeight() - 6) : 8 : 3 + posY;
+		renderImage(g2d, res.getMapArrow(), arrowX, arrowY);
+
+		g2d.setClip(null);
 	}
 
 	private void renderPosition(@Nonnull Graphics2D g2d) {

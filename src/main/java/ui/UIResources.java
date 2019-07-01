@@ -16,6 +16,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
 import shared.GoldboxString;
 import shared.ViewDungeonPosition;
@@ -113,6 +114,11 @@ public class UIResources {
 	}
 
 	@Nonnull
+	public List<BufferedImage> getMisc() {
+		return resman.getMisc();
+	}
+
+	@Nonnull
 	public Optional<Menu> getMenu() {
 		return menu;
 	}
@@ -198,7 +204,7 @@ public class UIResources {
 		private GoldboxString positionText;
 
 		private Optional<VisibleWalls> visibleWalls;
-		private Optional<int[][]> map;
+		private Optional<DungeonMapResource> map;
 
 		private DungeonResource res;
 		private List<ImageResource> back;
@@ -206,14 +212,22 @@ public class UIResources {
 		private Optional<ImageResource> sprite = Optional.empty();
 		private int spriteIndex = 0;
 
+		private boolean showAreaMap;
+
 		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
 			@Nonnull DungeonResource res) {
 
 			this.position = position;
 			this.positionText = new GoldboxStringPosition(position);
 			this.visibleWalls = Optional.ofNullable(visibleWalls);
-			this.map = Optional.ofNullable(map);
 			this.res = res;
+
+			if (map != null)
+				this.map = Optional.of(new DungeonMapResource(map, canShowDungeon() ? null : res));
+			else
+				this.map = Optional.empty();
+			this.showAreaMap = !canShowDungeon();
+
 			initBackgrounds();
 		}
 
@@ -245,6 +259,14 @@ public class UIResources {
 			}
 		}
 
+		public boolean canShowDungeon() {
+			return visibleWalls.isPresent();
+		}
+
+		public boolean canShowAreaMap() {
+			return map.isPresent();
+		}
+
 		public void clearSprite() {
 			sprite = Optional.empty();
 		}
@@ -263,13 +285,47 @@ public class UIResources {
 			return position.getBackdropIndex() == 0;
 		}
 
+		public boolean isShowAreaMap() {
+			return showAreaMap;
+		}
+
 		@Nonnull
-		public Optional<int[][]> getMap() {
-			return map;
+		public Optional<BufferedImage> getMap() {
+			return map.map(m -> resman.getMapResource(m));
+		}
+
+		public BufferedImage getMapArrow() {
+			return getMisc().get(config.getMiscArrowIndex() + getPositionDirection().ordinal());
+		}
+
+		public int getMapWidth() {
+			return map.map(DungeonMapResource::getMapWidth).orElse(0);
+		}
+
+		public int getMapHeight() {
+			return map.map(DungeonMapResource::getMapHeight).orElse(0);
 		}
 
 		public GoldboxString getPositionText() {
 			return positionText;
+		}
+
+		public int getPositionX() {
+			if (position.getExtendedDungeonX() != 255) {
+				return position.getExtendedDungeonX();
+			}
+			return position.getDungeonX();
+		}
+
+		public int getPositionY() {
+			if (position.getExtendedDungeonX() != 255) {
+				return position.getExtendedDungeonY();
+			}
+			return position.getDungeonY();
+		}
+
+		public Direction getPositionDirection() {
+			return position.getDungeonDir();
 		}
 
 		public int getSkyColorOutdoors() {
@@ -302,6 +358,12 @@ public class UIResources {
 
 		public boolean spriteAdvancementPossible() {
 			return spriteIndex > 0;
+		}
+
+		public void toggleShowAreaMap() {
+			if (showAreaMap && visibleWalls.isPresent() || !showAreaMap && map.isPresent()) {
+				showAreaMap = !showAreaMap;
+			}
 		}
 	}
 
