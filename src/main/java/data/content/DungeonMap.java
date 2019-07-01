@@ -152,6 +152,24 @@ public class DungeonMap extends DAXContent {
 		}
 	}
 
+	public int[][] generateWallMap() {
+		int[][] result = new int[16][16];
+		for (int y = 0; y < 16; y++) {
+			for (int x = 0; x < 16; x++) {
+				result[y][x] = 0;
+				if (wallIndexAt(x, y, Direction.NORTH) > 0)
+					result[y][x] += 1;
+				if (wallIndexAt(x, y, Direction.EAST) > 0)
+					result[y][x] += 2;
+				if (wallIndexAt(x, y, Direction.SOUTH) > 0)
+					result[y][x] += 4;
+				if (wallIndexAt(x, y, Direction.WEST) > 0)
+					result[y][x] += 8;
+			}
+		}
+		return result;
+	}
+
 	private static class DungeonSquare {
 		private Map<Direction, Integer> wallTypes;
 		private Map<Direction, Integer> doorFlags;
