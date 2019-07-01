@@ -25,6 +25,8 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	private static final String CONFIG_FONT_LOCATION = "font";
 	private static final String CONFIG_MISC_LOCATION = "misc";
+	private static final String CONFIG_MISC_ARROW_INDEX = "misc.arrow";
+	private static final String CONFIG_MISC_AREA_MAP_INDEX = "misc.area";
 
 	private static final String CONFIG_FRAME_START = "frames.";
 	private static final String CONFIG_FRAME_TYPE = CONFIG_FRAME_START + "type";
@@ -101,6 +103,14 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	public String getMisc() {
 		return getProperty(CONFIG_MISC_LOCATION);
+	}
+
+	public int getMiscArrowIndex() {
+		return Integer.parseInt(getProperty(CONFIG_MISC_ARROW_INDEX, ""));
+	}
+
+	public int getMiscAreaMapIndex() {
+		return Integer.parseInt(getProperty(CONFIG_MISC_AREA_MAP_INDEX, ""));
 	}
 
 	public FrameType getFrameType() {
