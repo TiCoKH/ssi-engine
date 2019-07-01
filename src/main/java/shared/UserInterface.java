@@ -58,4 +58,6 @@ public interface UserInterface {
 	void setInputNumber(int maxDigits);
 
 	void setInputString(int maxLetters);
+
+	void switchDungeonAreaMap();
 }

@@ -663,6 +663,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void switchDungeonAreaMap() {
+		resources.getDungeonResources().ifPresent(r -> {
+			r.toggleShowAreaMap();
+		});
+	}
+
+	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
 
