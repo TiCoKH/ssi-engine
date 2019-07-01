@@ -7,8 +7,7 @@ public class GameMenuAREAHandler implements InputHandler {
 
 	@Override
 	public void handle(Engine engine, EngineInputAction action) {
-		// TODO Auto-generated method stub
-
+		engine.getUi().switchDungeonAreaMap();
+		engine.setInputStandard(EngineInputAction.AREA);
 	}
-
 }
