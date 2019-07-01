@@ -2,6 +2,9 @@ package shared;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
 
@@ -41,7 +44,8 @@ public interface UserInterface {
 
 	void setStatus(GoldboxString status);
 
-	void setDungeonResources(ViewDungeonPosition position, VisibleWalls visibleWalls, int decoId1, int decoId2, int decoId3);
+	void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map, int decoId1,
+		int decoId2, int decoId3);
 
 	void setOverlandResources(ViewOverlandPosition position, int mapId);
 

@@ -278,7 +278,7 @@ public class Engine implements EngineCallback, EngineStub {
 	public void loadAreaDecoration(int id1, int id2, int id3) {
 		memory.setAreaDecoValues(id1, id2, id3);
 		if (currentMap.isPresent()) {
-			ui.setDungeonResources(memory, visibleWalls, id1, id2, id3);
+			ui.setDungeonResources(memory, visibleWalls, currentMap.get().generateWallMap(), id1, id2, id3);
 			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.DUNGEON);
 		} else if (id1 == 1) {
 			ui.setSpaceResources(memory);

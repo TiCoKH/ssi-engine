@@ -48,7 +48,7 @@ public class DungeonRenderer extends StoryRenderer {
 		resources.getDungeonResources().ifPresent(r -> {
 			renderBackdrop(g2d, r);
 
-			renderVisibleWalls(g2d, r.getVisibleWalls(), r.getWalls());
+			r.getVisibleWalls().ifPresent(vw -> renderVisibleWalls(g2d, vw, r.getWalls()));
 
 			r.getSprite().ifPresent(sprite -> {
 				int xOffset = Math.abs((int) sprite.getProperty(X_OFFSET.name()));

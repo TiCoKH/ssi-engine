@@ -166,8 +166,10 @@ public class UIResources {
 		this.charStop = 0;
 	}
 
-	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull DungeonResource res) {
-		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, res));
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
+		@Nonnull DungeonResource res) {
+
+		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, map, res));
 	}
 
 	public void setMenu(@Nullable Menu menu) {
@@ -195,7 +197,8 @@ public class UIResources {
 		private ViewDungeonPosition position;
 		private GoldboxString positionText;
 
-		private VisibleWalls visibleWalls;
+		private Optional<VisibleWalls> visibleWalls;
+		private Optional<int[][]> map;
 
 		private DungeonResource res;
 		private List<ImageResource> back;
@@ -203,10 +206,13 @@ public class UIResources {
 		private Optional<ImageResource> sprite = Optional.empty();
 		private int spriteIndex = 0;
 
-		DungeonResources(@Nonnull ViewDungeonPosition position, @Nonnull VisibleWalls visibleWalls, @Nonnull DungeonResource res) {
+		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
+			@Nonnull DungeonResource res) {
+
 			this.position = position;
 			this.positionText = new GoldboxStringPosition(position);
-			this.visibleWalls = visibleWalls;
+			this.visibleWalls = Optional.ofNullable(visibleWalls);
+			this.map = Optional.ofNullable(map);
 			this.res = res;
 			initBackgrounds();
 		}
@@ -257,6 +263,11 @@ public class UIResources {
 			return position.getBackdropIndex() == 0;
 		}
 
+		@Nonnull
+		public Optional<int[][]> getMap() {
+			return map;
+		}
+
 		public GoldboxString getPositionText() {
 			return positionText;
 		}
@@ -275,7 +286,7 @@ public class UIResources {
 		}
 
 		@Nonnull
-		public VisibleWalls getVisibleWalls() {
+		public Optional<VisibleWalls> getVisibleWalls() {
 			return visibleWalls;
 		}
 
