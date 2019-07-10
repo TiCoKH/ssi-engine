@@ -13,6 +13,7 @@ public enum EngineAddress {
 	SEL_PC_START, //
 	COMBAT_RESULT, //
 	MOVEMENT_BLOCK, //
+	SEARCH_FLAGS, //
 	TRIED_TO_LEAVE_MAP, //
 	PICTURE_HEAD_ID, //
 	DIVISION_MODULO, //

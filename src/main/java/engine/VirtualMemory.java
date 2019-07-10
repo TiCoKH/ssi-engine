@@ -16,6 +16,7 @@ import static engine.EngineAddress.OVERLAND_X;
 import static engine.EngineAddress.OVERLAND_Y;
 import static engine.EngineAddress.PICTURE_HEAD_ID;
 import static engine.EngineAddress.SAVED_TEMP_START;
+import static engine.EngineAddress.SEARCH_FLAGS;
 import static engine.EngineAddress.SKY_COLOR_INDOORS;
 import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
 import static engine.EngineAddress.TEMP_START;
@@ -72,6 +73,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_LASER_WEAPONS = 0x4D4A;
 	private static int MEMLOC_COMBAT_RESULT;
 	private static int MEMLOC_MOVEMENT_BLOCK;
+	private static int MEMLOC_SEARCH_FLAGS;
 	private static int MEMLOC_TRIED_TO_LEAVE_MAP;
 	private static int MEMLOC_PICTURE_HEAD_ID;
 	private static int MEMLOC_DIVISION_MODULO;
@@ -105,6 +107,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_OVERLAND_CITY = cfg.getEngineAddress(OVERLAND_CITY);
 		MEMLOC_COMBAT_RESULT = cfg.getEngineAddress(COMBAT_RESULT);
 		MEMLOC_MOVEMENT_BLOCK = cfg.getEngineAddress(MOVEMENT_BLOCK);
+		MEMLOC_SEARCH_FLAGS = cfg.getEngineAddress(SEARCH_FLAGS);
 		MEMLOC_TRIED_TO_LEAVE_MAP = cfg.getEngineAddress(TRIED_TO_LEAVE_MAP);
 		MEMLOC_PICTURE_HEAD_ID = cfg.getEngineAddress(PICTURE_HEAD_ID);
 		MEMLOC_DIVISION_MODULO = cfg.getEngineAddress(DIVISION_MODULO);
@@ -476,6 +479,22 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setMovementBlock(int movementBlock) {
 		mem.put(MEMLOC_MOVEMENT_BLOCK, (byte) movementBlock);
+	}
+
+	public int getSearchFlags() {
+		return mem.getUnsigned(MEMLOC_SEARCH_FLAGS);
+	}
+
+	public void setSearchFlagsToggleSearchMode() {
+		mem.put(MEMLOC_SEARCH_FLAGS, (byte) (getSearchFlags() ^ 1));
+	}
+
+	public void setSearchFlagsTurnLookModeOn() {
+		mem.put(MEMLOC_SEARCH_FLAGS, (byte) (getSearchFlags() | 2));
+	}
+
+	public void setSearchFlagsTurnLookModeOff() {
+		mem.put(MEMLOC_SEARCH_FLAGS, (byte) (getSearchFlags() & 1));
 	}
 
 	public boolean getTriedToLeaveMap() {
