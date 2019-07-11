@@ -12,12 +12,14 @@ public class GoldboxStringPosition extends CustomGoldboxString {
 	private int x;
 	private int y;
 	private Direction dir;
+	private boolean searchActive;
 
 	public GoldboxStringPosition(@Nonnull ViewDungeonPosition position) {
 		super(createPositionString(position));
 		this.position = position;
 
 		this.dir = position.getDungeonDir();
+		this.searchActive = position.getSearchFlagsIsSearchActive();
 
 		if (position.getExtendedDungeonX() != 255) {
 			this.x = position.getExtendedDungeonX();
@@ -32,6 +34,7 @@ public class GoldboxStringPosition extends CustomGoldboxString {
 	public byte getChar(int index) {
 		if (index == 0) {
 			Direction newDir = position.getDungeonDir();
+			boolean newSearchActive = position.getSearchFlagsIsSearchActive();
 
 			int newX, newY;
 			if (position.getExtendedDungeonX() != 255) {
@@ -41,9 +44,10 @@ public class GoldboxStringPosition extends CustomGoldboxString {
 				newX = position.getDungeonX();
 				newY = position.getDungeonY();
 			}
-			if (dir != newDir || x != newX || y != newY) {
+			if (dir != newDir || x != newX || y != newY || searchActive != newSearchActive) {
 				setText(createPositionString(position));
 				dir = newDir;
+				searchActive = newSearchActive;
 				x = newX;
 				y = newY;
 			}
@@ -52,9 +56,21 @@ public class GoldboxStringPosition extends CustomGoldboxString {
 	}
 
 	private static String createPositionString(@Nonnull ViewDungeonPosition position) {
+		StringBuilder sb = new StringBuilder();
 		if (position.getExtendedDungeonX() != 255) {
-			return position.getExtendedDungeonX() + "," + position.getExtendedDungeonY() + " " + position.getDungeonDir().name().charAt(0);
+			sb.append(position.getExtendedDungeonX());
+			sb.append(",");
+			sb.append(position.getExtendedDungeonY());
+		} else {
+			sb.append(position.getDungeonX());
+			sb.append(",");
+			sb.append(position.getDungeonY());
 		}
-		return position.getDungeonX() + "," + position.getDungeonY() + " " + position.getDungeonDir().name().charAt(0);
+		sb.append(" ");
+		sb.append(position.getDungeonDir().name().charAt(0));
+		if (position.getSearchFlagsIsSearchActive()) {
+			sb.append(" SEARCH");
+		}
+		return sb.toString();
 	}
 }
