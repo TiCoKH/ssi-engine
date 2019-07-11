@@ -18,4 +18,6 @@ public interface ViewDungeonPosition {
 	Direction getDungeonDir();
 
 	int getBackdropIndex();
+
+	boolean getSearchFlagsIsSearchActive();
 }

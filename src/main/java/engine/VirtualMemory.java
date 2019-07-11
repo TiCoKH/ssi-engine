@@ -485,6 +485,11 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		return mem.getUnsigned(MEMLOC_SEARCH_FLAGS);
 	}
 
+	@Override
+	public boolean getSearchFlagsIsSearchActive() {
+		return (getSearchFlags() & 1) > 0;
+	}
+
 	public void setSearchFlagsToggleSearchMode() {
 		mem.put(MEMLOC_SEARCH_FLAGS, (byte) (getSearchFlags() ^ 1));
 	}
