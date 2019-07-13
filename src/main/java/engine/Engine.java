@@ -14,6 +14,7 @@ import static engine.EngineInputAction.MOVEMENT_HANDLER;
 import static java.nio.file.StandardOpenOption.READ;
 import static shared.GameFeature.BODY_HEAD;
 import static shared.GameFeature.INTERACTIVE_OVERLAND;
+import static shared.GameFeature.OVERLAND_DUNGEON;
 import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
@@ -278,7 +279,10 @@ public class Engine implements EngineCallback, EngineStub {
 	public void loadAreaDecoration(int id1, int id2, int id3) {
 		memory.setAreaDecoValues(id1, id2, id3);
 		if (currentMap.isPresent()) {
-			ui.setDungeonResources(memory, visibleWalls, currentMap.get().generateWallMap(), id1, id2, id3);
+			DungeonMap map = currentMap.get();
+			VisibleWalls vWalls = isOverlandDungeon() ? null : visibleWalls;
+			int[][] mapData = isOverlandDungeon() ? map.generateOverlandMap() : map.generateWallMap();
+			ui.setDungeonResources(memory, vWalls, mapData, id1, id2, id3);
 			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.DUNGEON);
 		} else if (id1 == 1) {
 			ui.setSpaceResources(memory);
@@ -383,8 +387,19 @@ public class Engine implements EngineCallback, EngineStub {
 			memory.setWallType(m.wallIndexAt(x, y, d));
 			memory.setSquareInfo(m.squareInfoAt(x, y));
 
+			if (isOverlandDungeon()) {
+				memory.setDoorFlags(m.doorFlagsAt(x, y, d));
+				memory.setOverlandX(x);
+				memory.setOverlandY(y);
+				memory.setOverlandDir(d);
+			}
+
 			m.visibleWallsAt(visibleWalls, x, y, d);
 		});
+	}
+
+	private boolean isOverlandDungeon() {
+		return cfg.isUsingFeature(OVERLAND_DUNGEON) && memory.getDungeonValue() == 0;
 	}
 
 	private static final int[] OVERLAND_CITY_X = { //
