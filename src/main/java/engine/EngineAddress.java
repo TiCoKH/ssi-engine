@@ -4,6 +4,7 @@ public enum EngineAddress {
 	OVERLAND_DIR, //
 	OVERLAND_X, //
 	OVERLAND_Y, //
+	DUNGEON_VALUE, //
 	LAST_DUNGEON_X, //
 	LAST_DUNGEON_Y, //
 	LAST_ECL, //

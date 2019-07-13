@@ -3,6 +3,7 @@ package engine;
 import static engine.EngineAddress.COMBAT_RESULT;
 import static engine.EngineAddress.DIVISION_MODULO;
 import static engine.EngineAddress.DUNGEON_DIR;
+import static engine.EngineAddress.DUNGEON_VALUE;
 import static engine.EngineAddress.DUNGEON_X;
 import static engine.EngineAddress.DUNGEON_Y;
 import static engine.EngineAddress.LAST_DUNGEON_X;
@@ -49,6 +50,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static int MEMLOC_OVERLAND_DIR;
 	private static int MEMLOC_OVERLAND_X;
 	private static int MEMLOC_OVERLAND_Y;
+	private static int MEMLOC_DUNGEON_VALUE;
 	private static int MEMLOC_LAST_DUNGEON_X;
 	private static int MEMLOC_LAST_DUNGEON_Y;
 	private static int MEMLOC_LAST_ECL;
@@ -102,6 +104,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_OVERLAND_DIR = cfg.getEngineAddress(OVERLAND_DIR);
 		MEMLOC_OVERLAND_X = cfg.getEngineAddress(OVERLAND_X);
 		MEMLOC_OVERLAND_Y = cfg.getEngineAddress(OVERLAND_Y);
+		MEMLOC_DUNGEON_VALUE = cfg.getEngineAddress(DUNGEON_VALUE);
 		MEMLOC_LAST_DUNGEON_X = cfg.getEngineAddress(LAST_DUNGEON_X);
 		MEMLOC_LAST_DUNGEON_Y = cfg.getEngineAddress(LAST_DUNGEON_Y);
 		MEMLOC_LAST_ECL = cfg.getEngineAddress(LAST_ECL);
@@ -287,6 +290,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setOverlandY(int overlandY) {
 		mem.put(MEMLOC_OVERLAND_Y, (byte) overlandY);
+	}
+
+	public int getDungeonValue() {
+		return mem.getUnsigned(MEMLOC_DUNGEON_VALUE);
+	}
+
+	public void setDungeonValue(int dungeonValue) {
+		mem.put(MEMLOC_DUNGEON_VALUE, (byte) dungeonValue);
 	}
 
 	public int getLastDungeonX() {
