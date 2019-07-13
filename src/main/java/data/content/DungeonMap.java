@@ -170,6 +170,16 @@ public class DungeonMap extends DAXContent {
 		return result;
 	}
 
+	public int[][] generateOverlandMap() {
+		int[][] result = new int[16][16];
+		for (int y = 0; y < 16; y++) {
+			for (int x = 0; x < 16; x++) {
+				result[y][x] = wallIndexAt(x, y, Direction.NORTH) * 16 + wallIndexAt(x, y, Direction.EAST);
+			}
+		}
+		return result;
+	}
+
 	private static class DungeonSquare {
 		private Map<Direction, Integer> wallTypes;
 		private Map<Direction, Integer> doorFlags;
