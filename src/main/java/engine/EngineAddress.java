@@ -1,6 +1,7 @@
 package engine;
 
 public enum EngineAddress {
+	OVERLAND_DIR, //
 	OVERLAND_X, //
 	OVERLAND_Y, //
 	LAST_DUNGEON_X, //

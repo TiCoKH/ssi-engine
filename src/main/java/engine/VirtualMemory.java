@@ -12,6 +12,7 @@ import static engine.EngineAddress.MAP_SQUARE_INFO;
 import static engine.EngineAddress.MAP_WALL_TYPE;
 import static engine.EngineAddress.MOVEMENT_BLOCK;
 import static engine.EngineAddress.OVERLAND_CITY;
+import static engine.EngineAddress.OVERLAND_DIR;
 import static engine.EngineAddress.OVERLAND_X;
 import static engine.EngineAddress.OVERLAND_Y;
 import static engine.EngineAddress.PICTURE_HEAD_ID;
@@ -45,6 +46,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_SPACE_X = 0x4BBE;
 	public static final int MEMLOC_SPACE_Y = 0x4BBF;
 	public static final int MEMLOC_SPACE_DIR = 0x4BC0;
+	private static int MEMLOC_OVERLAND_DIR;
 	private static int MEMLOC_OVERLAND_X;
 	private static int MEMLOC_OVERLAND_Y;
 	private static int MEMLOC_LAST_DUNGEON_X;
@@ -97,6 +99,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 		mem = ByteBufferWrapper.allocateLE(0x10000);
 
+		MEMLOC_OVERLAND_DIR = cfg.getEngineAddress(OVERLAND_DIR);
 		MEMLOC_OVERLAND_X = cfg.getEngineAddress(OVERLAND_X);
 		MEMLOC_OVERLAND_Y = cfg.getEngineAddress(OVERLAND_Y);
 		MEMLOC_LAST_DUNGEON_X = cfg.getEngineAddress(LAST_DUNGEON_X);
@@ -257,6 +260,15 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setSpaceDir(SpaceDirection spaceDir) {
 		mem.put(MEMLOC_SPACE_DIR, (byte) spaceDir.ordinal());
+	}
+
+	@Override
+	public Direction getOverlandDir() {
+		return Direction.withId(mem.getUnsigned(MEMLOC_OVERLAND_DIR));
+	}
+
+	public void setOverlandDir(Direction overlandDir) {
+		mem.put(MEMLOC_OVERLAND_DIR, (byte) overlandDir.ordinal());
 	}
 
 	@Override
