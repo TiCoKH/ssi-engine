@@ -554,9 +554,10 @@ public class VirtualMachine {
 					engine.clearSprite();
 					break;
 				case 0x0002: // PoD
-				case 0xC01E: // PoR, CotAB
+				case 0xC01E: // PoR, CotAB, GttSF
 					memory.setDungeonX((memory.getDungeonX() + memory.getDungeonDir().getDeltaX()) & 0xF);
 					memory.setDungeonY((memory.getDungeonY() + memory.getDungeonDir().getDeltaY()) & 0xF);
+					engine.updatePosition();
 					break;
 				default:
 			}
