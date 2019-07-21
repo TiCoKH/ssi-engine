@@ -12,6 +12,7 @@ public enum EngineAddress {
 	SKY_COLOR_INDOORS, //
 	SAVED_TEMP_START, //
 	OVERLAND_CITY, //
+	FOR_LOOP_COUNT, //
 	SEL_PC_START, //
 	COMBAT_RESULT, //
 	MOVEMENT_BLOCK, //

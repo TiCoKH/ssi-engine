@@ -6,6 +6,7 @@ import static engine.EngineAddress.DUNGEON_DIR;
 import static engine.EngineAddress.DUNGEON_VALUE;
 import static engine.EngineAddress.DUNGEON_X;
 import static engine.EngineAddress.DUNGEON_Y;
+import static engine.EngineAddress.FOR_LOOP_COUNT;
 import static engine.EngineAddress.LAST_DUNGEON_X;
 import static engine.EngineAddress.LAST_DUNGEON_Y;
 import static engine.EngineAddress.LAST_ECL;
@@ -56,7 +57,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static int MEMLOC_SKY_COLOR_INDOORS;
 	public static final int MEMLOC_MED_SUPPLIES = 0x4C63;
 	public static int MEMLOC_OVERLAND_CITY;
-	public static final int MEMLOC_FOR_LOOP_COUNT = 0x4CF6;
+	public static int MEMLOC_FOR_LOOP_COUNT;
 	public static final int MEMLOC_EXTENDED_DUNGEON_X = 0x4CFD;
 	public static final int MEMLOC_EXTENDED_DUNGEON_Y = 0x4CFE;
 	public static final int MEMLOC_HULL = 0x4D16;
@@ -112,6 +113,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_SKY_COLOR_OUTDOORS = cfg.getEngineAddress(SKY_COLOR_OUTDOORS);
 		MEMLOC_SKY_COLOR_INDOORS = cfg.getEngineAddress(SKY_COLOR_INDOORS);
 		MEMLOC_OVERLAND_CITY = cfg.getEngineAddress(OVERLAND_CITY);
+		MEMLOC_FOR_LOOP_COUNT = cfg.getEngineAddress(FOR_LOOP_COUNT);
 		MEMLOC_COMBAT_RESULT = cfg.getEngineAddress(COMBAT_RESULT);
 		MEMLOC_MOVEMENT_BLOCK = cfg.getEngineAddress(MOVEMENT_BLOCK);
 		MEMLOC_SEARCH_FLAGS = cfg.getEngineAddress(SEARCH_FLAGS);
