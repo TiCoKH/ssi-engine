@@ -139,6 +139,12 @@ public class DungeonMap extends DAXContent {
 		return map[x][y].getWall(d);
 	}
 
+	public int doorFlagsAt(int x, int y, Direction d) {
+		if (x < 0 || x > 15 || y < 0 || y > 15)
+			return 0;
+		return map[x][y].getDoorFlags(d);
+	}
+
 	public int squareInfoAt(int x, int y) {
 		return map[x][y].getSquareInfo();
 	}
@@ -197,6 +203,10 @@ public class DungeonMap extends DAXContent {
 
 		private int getSquareInfo() {
 			return squareInfo;
+		}
+
+		private int getDoorFlags(Direction d) {
+			return doorFlags.get(d);
 		}
 
 		private boolean isDoor(Direction d) {
