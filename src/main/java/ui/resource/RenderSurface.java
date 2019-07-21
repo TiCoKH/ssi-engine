@@ -2,6 +2,7 @@ package ui.resource;
 
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
+import static data.content.DAXContentType._8X8D;
 import static data.content.ImageContentProperties.X_OFFSET;
 import static data.content.ImageContentProperties.Y_OFFSET;
 import static data.content.WallDef.WallDistance.CLOSE;
@@ -139,12 +140,14 @@ public class RenderSurface extends JPanel implements Scrollable {
 		renderObject.ifPresent(o -> {
 			if (o instanceof ImageResource) {
 				ImageResource ir = (ImageResource) o;
-				if (ir.getType() == null) {
+				if (ir.getType() == null || ir.getType() == _8X8D) {
 					List<BufferedImage> images = null;
 					if (ir.getId() == 201)
 						images = resman.getFont(FontType.NORMAL);
 					else if (ir.getId() == 202)
 						images = resman.getMisc();
+					else
+						images = resman.getImageResource(ir);
 					adaptSize(settings.zoom8(16), settings.zoom8(1 + images.size() / 16));
 					for (int i = 0; i < images.size(); i++) {
 						g2d.drawImage(images.get(i), settings.zoom8(i % 16), settings.zoom8(i / 16), null);

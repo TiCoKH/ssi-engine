@@ -103,6 +103,8 @@ public class ResourceViewer {
 
 		initChildren(root, "FONT", 201);
 		initChildren(root, "MISC", 202);
+		if (!loader.idsFor(WALLDEF).isEmpty())
+			initChildren(root, _8X8D);
 		initFrameChildren(root);
 		initChildren(root, BIGPIC);
 		BackdropMode mode = config.getBackdropMode();
