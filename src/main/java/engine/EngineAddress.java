@@ -13,6 +13,7 @@ public enum EngineAddress {
 	SAVED_TEMP_START, //
 	OVERLAND_CITY, //
 	FOR_LOOP_COUNT, //
+	DOOR_FLAGS, //
 	SEL_PC_START, //
 	COMBAT_RESULT, //
 	MOVEMENT_BLOCK, //
