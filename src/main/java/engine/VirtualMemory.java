@@ -40,9 +40,6 @@ import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
 
 public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition {
-	public static final int MEMLOC_CURRENT_ECL = 0x0000;
-	public static final int MEMLOC_AREA_START = 0x0001;
-	public static final int MEMLOC_AREA_DECO_START = 0x0004;
 	public static final int MEMLOC_CELESTIAL_POS_START = 0x4B85;
 	public static final int MEMLOC_SPACE_X = 0x4BBE;
 	public static final int MEMLOC_SPACE_Y = 0x4BBF;
@@ -86,6 +83,10 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static int MEMLOC_DUNGEON_DIR;
 	private static int MEMLOC_MAP_WALL_TYPE;
 	private static int MEMLOC_MAP_SQUARE_INFO;
+
+	public static final int MEMLOC_CURRENT_ECL = 0xFFF0;
+	public static final int MEMLOC_AREA_START = 0xFFF1;
+	public static final int MEMLOC_AREA_DECO_START = 0xFFF4;
 
 	private static final int[] CELESTIAL_INITIAL_X = new int[] { 12, 12, 9, 9, 21, 18, 12, 6, 2, 4, 8, 14, 20 };
 	private static final int[] CELESTIAL_INITIAL_Y = new int[] { 10, 9, 8, 15, 11, 17, 20, 18, 13, 3, 1, 1, 7 };
