@@ -3,6 +3,7 @@ package ui.resource;
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.BIGPIC;
 import static data.content.DAXContentType.BODY;
+import static data.content.DAXContentType.GEO;
 import static data.content.DAXContentType.HEAD;
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;
@@ -34,7 +35,10 @@ import common.FileMap;
 import data.ContentFile;
 import data.DAXFile;
 import data.content.DAXContentType;
+import data.content.DungeonMap;
+import shared.GameFeature;
 import ui.BackdropMode;
+import ui.DungeonMapResource;
 import ui.DungeonResource;
 import ui.ExceptionHandler;
 import ui.ImageResource;
@@ -114,6 +118,7 @@ public class ResourceViewer {
 			initChildren(root, BODY);
 			initChildren(root, HEAD);
 		}
+		initGeoChildren(root);
 		initChildren(root, PIC);
 		initChildren(root, SPRIT);
 		initChildren(root, TITLE);
@@ -179,6 +184,23 @@ public class ResourceViewer {
 					parent.insert(new DefaultMutableTreeNode(new ImageResource("SKYGRND.DAX", id, _8X8D)), parent.getChildCount());
 				}
 			}
+		}
+		root.insert(parent, root.getChildCount());
+	}
+
+	private void initGeoChildren(MutableTreeNode root) throws IOException {
+		Set<Integer> ids = new TreeSet<>(loader.idsFor(GEO));
+
+		MutableTreeNode parent = new DefaultMutableTreeNode(GEO.name());
+		for (Integer id : ids) {
+			DungeonMap dungeon = loader.find(id, DungeonMap.class, GEO);
+			if (config.isUsingFeature(GameFeature.OVERLAND_DUNGEON) && id >= 21 && id <= 26)
+				parent.insert(new DefaultMutableTreeNode( //
+					new DungeonMapResource(dungeon.generateOverlandMap(), //
+						new DungeonResource(18, 2 * id + 8, 2 * id + 9))),
+					parent.getChildCount());
+			else
+				parent.insert(new DefaultMutableTreeNode(new DungeonMapResource(dungeon.generateWallMap())), parent.getChildCount());
 		}
 		root.insert(parent, root.getChildCount());
 	}

@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
 import data.content.DAXContentType;
+import ui.DungeonMapResource;
 import ui.DungeonResource;
 import ui.DungeonWall;
 import ui.FontType;
@@ -89,6 +90,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 			changeRenderObject((ImageResource) o);
 		else if (o instanceof DungeonResource)
 			changeRenderObject((DungeonResource) o);
+		else if (o instanceof DungeonMapResource)
+			changeRenderObject((DungeonMapResource) o);
 		else if (o instanceof UIFrame)
 			changeRenderObject((UIFrame) o);
 		else
@@ -114,6 +117,11 @@ public class RenderSurface extends JPanel implements Scrollable {
 	public void changeRenderObject(@Nonnull UIFrame frame) {
 		renderObject = Optional.of(frame);
 		adaptSize(settings.zoom8(40), settings.zoom8(25));
+	}
+
+	public void changeRenderObject(@Nonnull DungeonMapResource mr) {
+		renderObject = Optional.of(mr);
+		adaptSize(settings.zoom8(mr.getMapWidth()), settings.zoom8(mr.getMapHeight()));
 	}
 
 	public void clearRenderObject() {
@@ -170,6 +178,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 					drawWallView(g2d, wall.getWallViewFor(CLOSE, RIGHT), i, 20, 0, 88);
 					i++;
 				}
+			} else if (o instanceof DungeonMapResource) {
+				g2d.drawImage(resman.getMapResource((DungeonMapResource) o), 0, 0, null);
 			} else if (o instanceof UIFrame) {
 				frameRenderer.render(g2d, (UIFrame) o);
 			}
