@@ -194,8 +194,11 @@ public class RenderSurface extends JPanel implements Scrollable {
 	}
 
 	private void adaptSize(int width, int height) {
-		setMinimumSize(new Dimension(width, height));
-		setPreferredSize(new Dimension(width, height));
+		Dimension d = getMinimumSize();
+		int newWidth = width > d.width ? width : d.width;
+		int newHeight = height > d.height ? height : d.height;
+		setMinimumSize(new Dimension(newWidth, newHeight));
+		setPreferredSize(new Dimension(newWidth, newHeight));
 	}
 
 	@Override
