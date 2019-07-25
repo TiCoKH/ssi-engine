@@ -59,7 +59,6 @@ import common.ByteBufferWrapper;
 import common.FileMap;
 import data.ResourceLoader;
 import data.content.EclProgram;
-import engine.EngineAddress;
 import engine.EngineConfiguration;
 import engine.VirtualMemory;
 import engine.opcodes.EclArgument;
@@ -154,9 +153,8 @@ public class Decompiler {
 		base = cfg.getCodeBase();
 		EclInstruction.configOpCodes(cfg.getOpCodes());
 
-		for (EngineAddress address : EngineAddress.values()) {
-			KNOWN_ADRESSES.put(cfg.getEngineAddress(address), address.name());
-		}
+		KNOWN_ADRESSES.putAll(cfg.getEngineAdresses());
+
 		int savedTempStart = cfg.getEngineAddress(SAVED_TEMP_START);
 		for (int i = savedTempStart; i < savedTempStart + 0x20; i++) {
 			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));

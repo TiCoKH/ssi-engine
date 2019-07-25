@@ -2,8 +2,10 @@ package shared;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import common.FileMap;
 import common.MD5Util;
@@ -69,5 +71,9 @@ public class GameResourceConfiguration {
 
 	public String getProperty(String key, String defaultValue) {
 		return gameProperties.getProperty(key, defaultValue);
+	}
+
+	public List<String> findProperties(String propStart) {
+		return gameProperties.keySet().stream().map(k -> (String) k).filter(k -> k != null && k.startsWith(propStart)).collect(Collectors.toList());
 	}
 }

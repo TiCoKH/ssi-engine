@@ -62,6 +62,11 @@ public class EngineConfiguration extends GameResourceConfiguration {
 		return Integer.parseInt(getProperty(CONFIG_ADDRESS_PREFIX + address.name(), "0"), 16);
 	}
 
+	public Map<Integer, String> getEngineAdresses() {
+		return findProperties(CONFIG_ADDRESS_PREFIX).stream()
+			.collect(Collectors.toMap(k -> Integer.parseInt(getProperty(k), 16), k -> k.substring(CONFIG_ADDRESS_PREFIX.length())));
+	}
+
 	public List<Integer> getOverlandMapIds() {
 		return Stream.of(getProperty(CONFIG_OVERLAND_MAP_IDS, "0").split(",")).map(Integer::parseInt).collect(Collectors.toList());
 	}
