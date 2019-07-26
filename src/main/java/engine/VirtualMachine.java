@@ -79,7 +79,6 @@ public class VirtualMachine {
 
 		gosubStack.clear();
 		compareResult = 0;
-		memory.clearTemps();
 	}
 
 	public void startMove() {

@@ -206,17 +206,21 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	public void loadEcl(int id, boolean fromVM) {
-		memory.setLastECL(memory.getCurrentECL());
-		memory.setCurrentECL(id);
-		memory.setTriedToLeaveMap(false);
-		memory.setMovementBlock(0);
-		if (cfg.isUsingFeature(BODY_HEAD))
-			memory.setPictureHeadId(255);
 		setNextTask(() -> {
+			memory.setLastECL(memory.getCurrentECL());
+			memory.setCurrentECL(id);
+			memory.setTriedToLeaveMap(false);
+			memory.setMovementBlock(0);
+			if (fromVM)
+				memory.clearTemps();
+			if (cfg.isUsingFeature(BODY_HEAD))
+				memory.setPictureHeadId(255);
+
 			if (fromVM)
 				ui.clearAll();
 			else
 				clear();
+
 			try {
 				delayCurrentThread();
 				EclProgram ecl = res.find(id, EclProgram.class, ECL);
