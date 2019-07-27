@@ -222,11 +222,9 @@ public class UIResourceManager {
 		List<DungeonWall> originalWallRes = originalWalls.computeIfAbsent(r, res -> {
 			try {
 				DungeonWallSetBuilder builder = new DungeonWallSetBuilder(loader);
-				return builder //
-					.withWallDecoIds(res.getId1(), res.getId2(), res.getId3()) //
-					.build();
+				return builder.withWallDecoIds(res.getIds()[0], res.getIds()[1], res.getIds()[2]).build();
 			} catch (IOException e) {
-				excHandler.handleException("Error reading WallDefs " + res.getId1() + ", " + res.getId2() + ", " + res.getId3(), e);
+				excHandler.handleException("Error reading WallDefs " + res.getIds(), e);
 			}
 			return new ArrayList<>();
 		});
@@ -240,7 +238,7 @@ public class UIResourceManager {
 		Optional<DungeonResource> res = r.getRes();
 		if (res.isPresent()) {
 			DungeonResource dres = res.get();
-			builder.withWMapDecoIds(dres.getId1(), dres.getId2(), dres.getId3());
+			builder.withWMapDecoIds(dres.getIds()[0], dres.getIds()[1], dres.getIds()[2]);
 		} else {
 			builder.withoutMapDecoIds();
 		}

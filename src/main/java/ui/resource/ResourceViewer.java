@@ -206,7 +206,7 @@ public class ResourceViewer {
 			if (config.isUsingFeature(OVERLAND_DUNGEON) && id >= 21 && id <= 26)
 				parent.insert(new DefaultMutableTreeNode( //
 					new DungeonMapResource(dungeon.generateOverlandMap(), //
-						new DungeonResource(18, 2 * id + 8, 2 * id + 9))),
+						new DungeonResource(new int[] { 18, 2 * id + 8, 2 * id + 9 }))),
 					parent.getChildCount());
 			else
 				parent.insert(new DefaultMutableTreeNode(new DungeonMapResource(dungeon.generateWallMap())), parent.getChildCount());

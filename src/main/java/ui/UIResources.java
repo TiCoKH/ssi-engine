@@ -244,8 +244,8 @@ public class UIResources {
 					break;
 				case SPACE:
 					this.back = Arrays.asList( //
-						new ImageResource(128 + res.getId1(), BACK), //
-						new ImageResource(res.getId1(), BACK));
+						new ImageResource(128 + res.getIds()[0], BACK), //
+						new ImageResource(res.getIds()[0], BACK));
 					break;
 				case GEO2:
 					// TODO

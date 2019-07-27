@@ -292,7 +292,13 @@ public class Engine implements EngineCallback, EngineStub {
 			DungeonMap map = currentMap.get();
 			VisibleWalls vWalls = isOverlandDungeon() ? null : visibleWalls;
 			int[][] mapData = isOverlandDungeon() ? map.generateOverlandMap() : map.generateWallMap();
-			ui.setDungeonResources(memory, vWalls, mapData, id1, id2, id3);
+			int[] decoIds = new int[] { id1, id2, id3 };
+			if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
+				decoIds = new int[7];
+				System.arraycopy(((DungeonMap2) map).getDecoIds(), 0, decoIds, 0, 6);
+				decoIds[6] = id1;
+			}
+			ui.setDungeonResources(memory, vWalls, mapData, decoIds);
 			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.DUNGEON);
 		} else if (id1 == 1) {
 			ui.setSpaceResources(memory);

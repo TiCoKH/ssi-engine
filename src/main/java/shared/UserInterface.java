@@ -44,8 +44,7 @@ public interface UserInterface {
 
 	void setStatus(GoldboxString status);
 
-	void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map, int decoId1,
-		int decoId2, int decoId3);
+	void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map, int[] decoIds);
 
 	void setOverlandResources(ViewOverlandPosition position, int mapId);
 

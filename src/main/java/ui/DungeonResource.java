@@ -1,35 +1,28 @@
 package ui;
 
-import java.util.Objects;
+import java.util.Arrays;
 
 public class DungeonResource {
-	private int id1, id2, id3;
+	private int[] ids;
 
 	public DungeonResource(int id1) {
-		this(id1, 127, 127);
+		this(new int[]{ id1, 127, 127});
 	}
 
-	public DungeonResource(int id1, int id2, int id3) {
-		this.id1 = id1;
-		this.id2 = id2;
-		this.id3 = id3;
+	public DungeonResource(int[] ids) {
+		this.ids = ids;
 	}
 
-	public int getId1() {
-		return id1;
-	}
-
-	public int getId2() {
-		return id2;
-	}
-
-	public int getId3() {
-		return id3;
+	public int[] getIds() {
+		return ids;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id1, id2, id3);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(ids);
+		return result;
 	}
 
 	@Override
@@ -41,13 +34,13 @@ public class DungeonResource {
 			return false;
 		}
 		DungeonResource other = (DungeonResource) obj;
-		return id1 == other.id1 && id2 == other.id2 && id3 == other.id3;
+		return Arrays.equals(ids, other.ids);
 	}
 
 	@Override
 	public String toString() {
-		if (id2 == 127 && id3 == 127)
-			return Integer.toString(id1);
-		return Integer.toString(id1) + ", " + Integer.toString(id2) + ", " + Integer.toString(id3);
+		if (ids[1] == 127 && ids[2] == 127)
+			return Integer.toString(ids[0]);
+		return Arrays.toString(ids);
 	}
 }
