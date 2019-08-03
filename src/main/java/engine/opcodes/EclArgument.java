@@ -25,6 +25,10 @@ public class EclArgument {
 				int value = eclBlock.getUnsigned();
 				return new EclArgument(type, 2, value);
 			}
+			case 4: {
+				int value = eclBlock.getInt();
+				return new EclArgument(type, 4, value);
+			}
 			case 1:
 			case 2:
 			case 3:
