@@ -304,6 +304,7 @@ public class Engine implements EngineCallback, EngineStub {
 			ui.setSpaceResources(memory);
 			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.SPACE);
 		}
+		updatePosition();
 	}
 
 	@Override
