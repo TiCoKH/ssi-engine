@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableList;
+
 import data.content.DAXImageContent;
 import data.content.DAXPalette;
 import data.content.WallDef;
@@ -27,6 +29,7 @@ public class UIResourceManager {
 	private static final ImageResource INTERNAL_ID_OVERLAND_CURSOR = new ImageResource(3000, null);
 
 	private static final BufferedImage BROKEN = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_BINARY);
+	private static final List<BufferedImage> BROKEN_List = ImmutableList.of(BROKEN);
 
 	private UIResourceConfiguration config;
 	private UIResourceLoader loader;
@@ -128,25 +131,50 @@ public class UIResourceManager {
 
 	@Nonnull
 	private List<BufferedImage> getOrCreateResource(@Nonnull ImageResource r) {
-		return imageResources.computeIfAbsent(r, this::createResource);
+		if (!imageResources.containsKey(r)) {
+			synchronized (imageResources) {
+				if (!imageResources.containsKey(r)) {
+					imageResources.put(r, createResource(r));
+				}
+			}
+		}
+		return imageResources.get(r);
 	}
 
 	@Nonnull
 	private List<BufferedImage> getOrCreateResource(@Nonnull ImageResource r, @Nonnull DAXImageContent content) {
 		if (!imageResources.containsKey(r)) {
-			imageResources.put(r, scale(content));
+			synchronized (imageResources) {
+				if (!imageResources.containsKey(r)) {
+					imageResources.put(r, scale(content));
+				}
+			}
 		}
 		return imageResources.get(r);
 	}
 
 	@Nonnull
 	private List<DungeonWall> getOrCreateResource(@Nonnull DungeonResource r) {
-		return walls.computeIfAbsent(r, this::createWalls);
+		if (!walls.containsKey(r)) {
+			synchronized (walls) {
+				if (!walls.containsKey(r)) {
+					walls.put(r, createWalls(r));
+				}
+			}
+		}
+		return walls.get(r);
 	}
 
 	@Nonnull
 	private BufferedImage getOrCreateResource(@Nonnull DungeonMapResource r) {
-		return maps.computeIfAbsent(r, this::createMap);
+		if (!maps.containsKey(r)) {
+			synchronized (maps) {
+				if (!maps.containsKey(r)) {
+					maps.put(r, createMap(r));
+				}
+			}
+		}
+		return maps.get(r);
 	}
 
 	@Nonnull
@@ -204,9 +232,7 @@ public class UIResourceManager {
 			excHandler.handleException("Error reading " + r, e);
 		}
 
-		List<BufferedImage> brokenResult = new ArrayList<>();
-		brokenResult.add(BROKEN);
-		return brokenResult;
+		return BROKEN_List;
 	}
 
 	private DAXImageContent loadResource(@Nonnull ImageResource r) throws IOException {
