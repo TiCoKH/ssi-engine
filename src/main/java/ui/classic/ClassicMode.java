@@ -464,23 +464,37 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void setNoResources() {
+		switchUIState(UIState.STORY);
+		resources.clearDungeonResources();
+		resources.clearOverlandResources();
+		resources.clearSpaceResources();
+	}
+
+	@Override
 	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
 		int[] decoIds) {
 
 		resources.setDungeonResources(position, visibleWalls, map, new DungeonResource(decoIds));
 		switchUIState(UIState.DUNGEON);
+		resources.clearOverlandResources();
+		resources.clearSpaceResources();
 	}
 
 	@Override
 	public void setOverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
 		resources.setOverlandResources(position, mapId);
 		switchUIState(UIState.OVERLAND);
+		resources.clearDungeonResources();
+		resources.clearSpaceResources();
 	}
 
 	@Override
 	public void setSpaceResources(@Nonnull ViewSpacePosition position) {
 		resources.setSpaceResources(position);
 		switchUIState(UIState.SPACE);
+		resources.clearDungeonResources();
+		resources.clearOverlandResources();
 	}
 
 	@Override

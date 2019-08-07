@@ -62,15 +62,27 @@ public class UIResources {
 	}
 
 	public void reset() {
-		dungeonResources = Optional.empty();
-		overlandResources = Optional.empty();
-		spaceResources = Optional.empty();
+		clearDungeonResources();
+		clearOverlandResources();
+		clearSpaceResources();
 		pic = Optional.empty();
 		picIndex = 0;
 		charList = Optional.empty();
 		charStop = 0;
 		statusLine = Optional.empty();
 		menu = Optional.empty();
+	}
+
+	public void clearDungeonResources() {
+		dungeonResources = Optional.empty();
+	}
+
+	public void clearOverlandResources() {
+		overlandResources = Optional.empty();
+	}
+
+	public void clearSpaceResources() {
+		spaceResources = Optional.empty();
 	}
 
 	public void addChars(@Nonnull List<Byte> addedChars) {
