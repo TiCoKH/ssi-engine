@@ -216,10 +216,7 @@ public class Engine implements EngineCallback, EngineStub {
 			if (cfg.isUsingFeature(BODY_HEAD))
 				memory.setPictureHeadId(255);
 
-			if (fromVM)
-				ui.clearAll();
-			else
-				clear();
+			clear();
 
 			try {
 				delayCurrentThread();
@@ -282,6 +279,9 @@ public class Engine implements EngineCallback, EngineStub {
 			}
 		} else {
 			currentMap = Optional.empty();
+		}
+		if (!currentMap.isPresent()) {
+			ui.setNoResources();
 		}
 	}
 
