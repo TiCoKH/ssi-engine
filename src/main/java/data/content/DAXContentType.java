@@ -8,7 +8,7 @@ public enum DAXContentType {
 	ECL("ECL[0-9]?\\.(DAX|GLB)"), //
 	GEO("GEO[0-9]?\\.(DAX|GLB)"), //
 	HEAD("HEAD[1-9]?\\.DAX"), //
-	PIC("PIC[1-9ABCDEF]?\\.(DAX|TLB)"), //
+	PIC("PIC[1-9ABCDEF]?A?\\.(DAX|TLB)"), //
 	SPRIT("SPRIT[1-9]?\\.(DAX|TLB)"), //
 	TITLE("TITLE\\.(DAX|TLB)"), //
 	WALLDEF("WALLDEF[1-9]?\\.DAX");
