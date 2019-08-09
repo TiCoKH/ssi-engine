@@ -4,8 +4,8 @@ About
 This project tries to create an engine that can play all
 SSI Goldbox game series including content created by FRUA.
 
-At the moment of this writing only Buck Rogers: Countdown to Doomsday
-will show something.
+All games except FRUA are plyable to a varyng degree. All games are still
+missing party handling and combat mechanics as big features.
 
 Most information of the inner workings of these games has been retrieved from
 
@@ -30,7 +30,7 @@ Running
 
 From the project directory run the following command:
 `java -jar ./target/engine-SNAPSHOT.jar [<directory> [--no-title]]`
-where `<directory>` is the one in which the game data for Buck Rogers 1 resides
+where `<directory>` contains the game data from any of the SSI goldbox games
 and the --no-title argument skips the screens before the title menu.
 
 In the title menu use
