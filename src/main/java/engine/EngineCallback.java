@@ -30,6 +30,8 @@ public interface EngineCallback {
 
 	void addText(GoldboxString str, boolean clear);
 
+	void addRunicText(GoldboxString str);
+
 	void addNewline();
 
 	void loadEcl(int id);

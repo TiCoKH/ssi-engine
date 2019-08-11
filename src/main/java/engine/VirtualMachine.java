@@ -627,7 +627,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.PRINT_RUNES, inst -> {
-
+			engine.addRunicText(memory.readMemString(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.COPY_PROTECTION, inst -> {
 

@@ -60,6 +60,10 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void addRunicText(GoldboxString str) {
+			}
+
+			@Override
 			public void addNewline() {
 			}
 

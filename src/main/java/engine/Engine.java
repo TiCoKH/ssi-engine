@@ -66,6 +66,8 @@ public class Engine implements EngineCallback, EngineStub {
 	private Optional<DungeonMap> currentMap = Optional.empty();
 	private VisibleWalls visibleWalls = new VisibleWalls();
 
+	private boolean showRunicText = false;
+
 	public Engine(@Nonnull FileMap fm) throws Exception {
 		this.res = new ResourceLoader(fm);
 		this.cfg = new EngineConfiguration(fm);
@@ -264,21 +266,35 @@ public class Engine implements EngineCallback, EngineStub {
 		continueCurrentThread();
 	}
 
+	private void loadDungeonMap(int id) {
+		try {
+			if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
+				currentMap = Optional.ofNullable(res.find(id, DungeonMap2.class, GEO));
+			} else {
+				currentMap = Optional.ofNullable(res.find(id, DungeonMap.class, GEO));
+			}
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+		}
+	}
+
+	public void cleaDungeonMap() {
+		currentMap = Optional.empty();
+	}
+
 	@Override
 	public void loadArea(int id1, int id2, int id3) {
 		memory.setAreaValues(id1, id2, id3);
-		if (id1 != 127 && id1 != 255) {
-			try {
-				if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
-					currentMap = Optional.ofNullable(res.find(id1, DungeonMap2.class, GEO));
-				} else {
-					currentMap = Optional.ofNullable(res.find(id1, DungeonMap.class, GEO));
-				}
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
+		if (id1 == 0 && id2 == 0 && id3 == 0) {
+			loadDungeonMap(0);
+		} else if (id1 != 127 && id1 != 255 && (id2 == 2 || id2 == 127 || id2 == 255)) {
+			loadDungeonMap(id1);
+		} else if (id1 == 255 && (id2 == 16 || id2 == 2)) {
+			showRunicText = id2 == 16;
+			if (showRunicText)
+				ui.setPortraitFrameVisible(false);
 		} else {
-			currentMap = Optional.empty();
+			cleaDungeonMap();
 		}
 		if (!currentMap.isPresent()) {
 			ui.setNoResources();
@@ -298,6 +314,7 @@ public class Engine implements EngineCallback, EngineStub {
 				System.arraycopy(((DungeonMap2) map).getDecoIds(), 0, decoIds, 0, 6);
 				decoIds[6] = id1;
 			}
+			ui.setPortraitFrameVisible(true);
 			ui.setDungeonResources(memory, vWalls, mapData, decoIds);
 			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.DUNGEON);
 		} else if (id1 == 1) {
@@ -387,11 +404,20 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
+	public void addRunicText(GoldboxString str) {
+		ui.addRunicText(str);
+	}
+
+	@Override
 	public void addNewline() {
-		synchronized (vm) {
-			ui.addLineBreak();
-			// pause VM until all text is displayed
-			pauseCurrentThread();
+		if (showRunicText) {
+			ui.addRunicText(new CustomGoldboxString(""));
+		} else {
+			synchronized (vm) {
+				ui.addLineBreak();
+				// pause VM until all text is displayed
+				pauseCurrentThread();
+			}
 		}
 	}
 
