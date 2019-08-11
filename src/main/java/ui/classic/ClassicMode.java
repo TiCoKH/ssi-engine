@@ -654,6 +654,11 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void addRunicText(GoldboxString text) {
+		resources.getDungeonResources().ifPresent(r -> r.addRunicText(text));
+	}
+
+	@Override
 	public void addLineBreak() {
 		int lineWidth = renderers.get(currentState).getLineWidth();
 		int charCount = resources.getCharCount() % lineWidth;
@@ -681,6 +686,11 @@ public class ClassicMode extends JPanel implements UserInterface {
 		resources.getDungeonResources().ifPresent(r -> {
 			r.toggleShowAreaMap();
 		});
+	}
+
+	@Override
+	public void setPortraitFrameVisible(boolean enabled) {
+		frameRenderer.setPortraitShown(enabled);
 	}
 
 	@Override

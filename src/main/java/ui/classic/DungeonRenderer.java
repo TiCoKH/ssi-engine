@@ -4,11 +4,13 @@ import static data.content.DAXPalette.COLOR_GAME_STATIC;
 import static data.content.ImageContentProperties.X_OFFSET;
 import static data.content.ImageContentProperties.Y_OFFSET;
 import static ui.FontType.NORMAL;
+import static ui.FontType.SHORTCUT;
 import static ui.UIFrame.GAME;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
@@ -36,7 +38,10 @@ public class DungeonRenderer extends StoryRenderer {
 	public void render(@Nonnull Graphics2D g2d) {
 		renderFrame(g2d, GAME);
 		renderMenuOrTextStatus(g2d);
-		if (resources.getPic().isPresent() && !resources.preferSprite()) {
+		Optional<DungeonResources> r = resources.getDungeonResources();
+		if (r.isPresent() && r.get().isShowRunicText()) {
+			renderRunicText(g2d, r.get());
+		} else if (resources.getPic().isPresent() && !resources.preferSprite()) {
 			renderPicture(g2d, 3);
 		} else {
 			renderDungeon(g2d);
@@ -143,6 +148,17 @@ public class DungeonRenderer extends StoryRenderer {
 		renderImage(g2d, res.getMapArrow(), arrowX, arrowY);
 
 		g2d.setClip(null);
+	}
+
+	private void renderRunicText(@Nonnull Graphics2D g2d, @Nonnull DungeonResources res) {
+		for (int i = 0; i < res.getRunicTextCount(); i++) {
+			int xStart = i == 0 ? 2 : 1;
+			int yStart = 5;
+			GoldboxString runicText = res.getRunicText(i);
+			for (int j = 0; j < runicText.getLength(); j++) {
+				renderChar(g2d, xStart + j, yStart + i, (byte) (runicText.getChar(j) + 1), SHORTCUT);
+			}
+		}
 	}
 
 	private void renderPosition(@Nonnull Graphics2D g2d) {

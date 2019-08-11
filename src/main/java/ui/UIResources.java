@@ -9,6 +9,7 @@ import static ui.ImageResource.SPACE_BACKGROUND;
 import static ui.ImageResource.SPACE_SYMBOLS;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -226,6 +227,9 @@ public class UIResources {
 
 		private boolean showAreaMap;
 
+		// runic text in Pool of Radiance
+		private List<GoldboxString> runicText = new ArrayList<>();
+
 		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
 			@Nonnull DungeonResource res) {
 
@@ -263,6 +267,22 @@ public class UIResources {
 					// TODO
 					break;
 			}
+		}
+
+		public void addRunicText(GoldboxString text) {
+			runicText.add(text);
+		}
+
+		public boolean isShowRunicText() {
+			return !runicText.isEmpty();
+		}
+
+		public GoldboxString getRunicText(int index) {
+			return runicText.get(index);
+		}
+
+		public int getRunicTextCount() {
+			return runicText.size();
 		}
 
 		public void advanceSprite() {

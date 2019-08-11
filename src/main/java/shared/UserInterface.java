@@ -22,6 +22,8 @@ public interface UserInterface {
 
 	void addText(GoldboxString str);
 
+	void addRunicText(GoldboxString text);
+
 	void addLineBreak();
 
 	void clearText();
@@ -61,4 +63,6 @@ public interface UserInterface {
 	void setInputString(int maxLetters);
 
 	void switchDungeonAreaMap();
+
+	void setPortraitFrameVisible(boolean enabled);
 }
