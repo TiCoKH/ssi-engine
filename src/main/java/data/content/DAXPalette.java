@@ -13,6 +13,7 @@ public class DAXPalette {
 	public static final Color COLOR_TRANSPARENT = new Color(0xff000000);
 	public static final Color COLOR_GREY = new Color(0x525252);
 	public static final Color COLOR_MAGENTA_BRIGHT = new Color(0xFF55FF);
+	public static final Color COLOR_WHITE = new Color(0xFFFFFF);
 
 	private static final Color COLOR_BLACK = new Color(0x000000);
 	private static final Color COLOR_BLUE = new Color(0x0000AA);
@@ -28,7 +29,6 @@ public class DAXPalette {
 	private static final Color COLOR_CYAN_BRIGHT = new Color(0x55FFFF);
 	private static final Color COLOR_RED_BRIGHT = new Color(0xFF5555);
 	private static final Color COLOR_YELLOW_BRIGHT = new Color(0xFFFF55);
-	private static final Color COLOR_WHITE = new Color(0xFFFFFF);
 
 	public static final Color[] COLOR_GAME_STATIC = { COLOR_BLACK, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 	private static final Color[] COLOR_SPRITE_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_BLACK, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
@@ -201,37 +201,37 @@ public class DAXPalette {
 		return new IndexColorModel(8, 256, r, g, b);
 	}
 
-	public static IndexColorModel toInvertedPalette(IndexColorModel cm) {
-		if (cm.getMapSize() == 2) {
-			return binaryPaletteWith(COLOR_WHITE, COLOR_BLACK);
+	public static IndexColorModel toInvertedPalette(@Nullable IndexColorModel cm) {
+		if (cm == null || cm.getMapSize() == 2) {
+			return binaryPaletteWith(COLOR_WHITE, COLOR_BLACK, -1);
 		}
 		return paletteWith(cm, COLOR_WHITE, COLOR_BLACK);
 	}
 
-	public static IndexColorModel toPaletteWithGreenFG(IndexColorModel cm) {
-		if (cm.getMapSize() == 2) {
-			return binaryPaletteWith(COLOR_BLACK, COLOR_GREEN_BRIGHT);
-		}
-		return paletteWith(cm, COLOR_BLACK, COLOR_GREEN_BRIGHT);
+	public static IndexColorModel toPaletteWithGreenFG(@Nullable IndexColorModel cm) {
+		return toPaletteWithFG(cm, COLOR_GREEN_BRIGHT);
 	}
 
-	public static IndexColorModel toPaletteWithMagentaFG(IndexColorModel cm) {
-		if (cm.getMapSize() == 2) {
-			return binaryPaletteWith(COLOR_BLACK, COLOR_MAGENTA_BRIGHT);
-		}
-		return paletteWith(cm, COLOR_BLACK, COLOR_MAGENTA_BRIGHT);
+	public static IndexColorModel toPaletteWithMagentaFG(@Nullable IndexColorModel cm) {
+		return toPaletteWithFG(cm, COLOR_MAGENTA_BRIGHT);
 	}
 
-	private static IndexColorModel binaryPaletteWith(Color bgColor, Color fgColor) {
+	public static IndexColorModel toPaletteWithFG(@Nullable IndexColorModel cm, @Nonnull Color fgColor) {
+		if (cm == null || cm.getMapSize() == 2) {
+			return binaryPaletteWith(COLOR_BLACK, fgColor, 0);
+		}
+		return paletteWith(cm, COLOR_BLACK, fgColor);
+	}
+
+	private static IndexColorModel binaryPaletteWith(@Nonnull Color bgColor, @Nonnull Color fgColor, int trans) {
 		byte[] r = new byte[] { (byte) bgColor.getRed(), (byte) fgColor.getRed() };
 		byte[] g = new byte[] { (byte) bgColor.getGreen(), (byte) fgColor.getGreen() };
 		byte[] b = new byte[] { (byte) bgColor.getBlue(), (byte) fgColor.getBlue() };
 
-		return new IndexColorModel(1, 2, r, g, b);
+		return new IndexColorModel(1, 2, r, g, b, trans);
 	}
 
-	private static IndexColorModel paletteWith(IndexColorModel cm, Color bgColor, Color fgColor) {
-
+	private static IndexColorModel paletteWith(@Nonnull IndexColorModel cm, @Nonnull Color bgColor, @Nonnull Color fgColor) {
 		byte[] r = new byte[cm.getMapSize()];
 		byte[] g = new byte[cm.getMapSize()];
 		byte[] b = new byte[cm.getMapSize()];

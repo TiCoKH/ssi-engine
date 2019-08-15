@@ -1,9 +1,8 @@
 package data.content;
 
-import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import common.ByteBufferWrapper;
 public class MonocromeLargeSymbols extends DAXImageContent {
 
 	public MonocromeLargeSymbols(ByteBufferWrapper data, DAXContentType type) {
+		IndexColorModel cm = DAXPalette.toPaletteWithFG(null, DAXPalette.COLOR_WHITE);
 		for (int i = 0; i < data.capacity() / 12; i++) {
 			// font is 8x12, shown as 8x8; some rows are skipped
 			ByteBufferWrapper glyph = ByteBufferWrapper.allocateLE(8);
@@ -32,10 +32,9 @@ public class MonocromeLargeSymbols extends DAXImageContent {
 			data.get();
 			data.get();
 
-			WritableRaster r = Raster.createPackedRaster(new DataBufferByte(glyph.array(), 8), 8, 8, 1, null);
-			BufferedImage image = new BufferedImage(8, 8, TYPE_BYTE_BINARY);
-			image.setData(r);
-			images.add(image);
+			DataBufferByte db = new DataBufferByte(glyph.array(), 8);
+			WritableRaster r = Raster.createPackedRaster(db, 8, 8, 1, null);
+			images.add(new BufferedImage(cm, r, false, null));
 		}
 
 		// game font uses ascii ordering, not the one ECL strings needs
