@@ -11,24 +11,22 @@ import common.ByteBufferWrapper;
 
 public class DAXPalette {
 	public static final Color COLOR_TRANSPARENT = new Color(0xff000000);
-	public static final Color COLOR_GREY = new Color(0x525252);
+	public static final Color COLOR_BLACK = new Color(0x000000);
+	public static final Color COLOR_BLUE = new Color(0x0000AA);
+	public static final Color COLOR_GREEN = new Color(0x00AA00);
+	public static final Color COLOR_CYAN = new Color(0x00AAAA);
+	public static final Color COLOR_RED = new Color(0xAA0000);
+	public static final Color COLOR_MAGENTA = new Color(0xAA00AA);
+	public static final Color COLOR_BROWN = new Color(0xAA5500);
+	public static final Color COLOR_GREY_LIGHT = new Color(0xAAAAAA);
+	public static final Color COLOR_GREY_DARK = new Color(0x555555);
+	public static final Color COLOR_BLUE_BRIGHT = new Color(0x5555FF);
+	public static final Color COLOR_GREEN_BRIGHT = new Color(0x55FF55);
+	public static final Color COLOR_CYAN_BRIGHT = new Color(0x55FFFF);
+	public static final Color COLOR_RED_BRIGHT = new Color(0xFF5555);
 	public static final Color COLOR_MAGENTA_BRIGHT = new Color(0xFF55FF);
+	public static final Color COLOR_YELLOW_BRIGHT = new Color(0xFFFF55);
 	public static final Color COLOR_WHITE = new Color(0xFFFFFF);
-
-	private static final Color COLOR_BLACK = new Color(0x000000);
-	private static final Color COLOR_BLUE = new Color(0x0000AA);
-	private static final Color COLOR_GREEN = new Color(0x00AA00);
-	private static final Color COLOR_CYAN = new Color(0x00AAAA);
-	private static final Color COLOR_RED = new Color(0xAA0000);
-	private static final Color COLOR_MAGENTA = new Color(0xAA00AA);
-	private static final Color COLOR_BROWN = new Color(0xAA5500);
-	private static final Color COLOR_GREY_LIGHT = new Color(0xAAAAAA);
-	private static final Color COLOR_GREY_DARK = new Color(0x555555);
-	private static final Color COLOR_BLUE_BRIGHT = new Color(0x5555FF);
-	private static final Color COLOR_GREEN_BRIGHT = new Color(0x55FF55);
-	private static final Color COLOR_CYAN_BRIGHT = new Color(0x55FFFF);
-	private static final Color COLOR_RED_BRIGHT = new Color(0xFF5555);
-	private static final Color COLOR_YELLOW_BRIGHT = new Color(0xFFFF55);
 
 	public static final Color[] COLOR_GAME_STATIC = { COLOR_BLACK, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 	private static final Color[] COLOR_SPRITE_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_BLACK, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
