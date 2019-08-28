@@ -3,8 +3,7 @@ package ui.classic;
 import static data.content.DAXPalette.COLOR_GAME_STATIC;
 import static data.content.ImageContentProperties.X_OFFSET;
 import static data.content.ImageContentProperties.Y_OFFSET;
-import static ui.FontType.NORMAL;
-import static ui.FontType.SHORTCUT;
+import static shared.FontColor.NORMAL;
 import static ui.UIFrame.GAME;
 
 import java.awt.Graphics2D;
@@ -151,14 +150,7 @@ public class DungeonRenderer extends StoryRenderer {
 	}
 
 	private void renderRunicText(@Nonnull Graphics2D g2d, @Nonnull DungeonResources res) {
-		for (int i = 0; i < res.getRunicTextCount(); i++) {
-			int xStart = i == 0 ? 2 : 1;
-			int yStart = 5;
-			GoldboxString runicText = res.getRunicText(i);
-			for (int j = 0; j < runicText.getLength(); j++) {
-				renderChar(g2d, xStart + j, yStart + i, (byte) (runicText.getChar(j) + 1), SHORTCUT);
-			}
-		}
+		renderText(g2d, res.getRunicText(), 1, 5, 11, -1, Optional.empty(), 1);
 	}
 
 	private void renderPosition(@Nonnull Graphics2D g2d) {

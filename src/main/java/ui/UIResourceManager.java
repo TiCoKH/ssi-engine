@@ -1,8 +1,15 @@
 package ui;
 
+import static shared.FontColor.INTENSE;
+import static ui.FrameType.FRAME;
+
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -22,6 +29,8 @@ import data.content.DAXPalette;
 import data.content.WallDef;
 import data.content.WallDef.WallDistance;
 import data.content.WallDef.WallPlacement;
+import shared.FontColor;
+import shared.GameFeature;
 
 public class UIResourceManager {
 	private static final ImageResource INTERNAL_ID_MISC = new ImageResource(1000, null);
@@ -41,7 +50,7 @@ public class UIResourceManager {
 	private DAXImageContent originalFrames;
 	private Map<DungeonResource, List<DungeonWall>> originalWalls = new HashMap<>();
 
-	private Map<FontType, List<BufferedImage>> fonts = new EnumMap<>(FontType.class);
+	private Map<FontColor, List<BufferedImage>> fonts = new EnumMap<>(FontColor.class);
 	private Map<ImageResource, List<BufferedImage>> imageResources = new HashMap<>();
 	private Map<DungeonResource, List<DungeonWall>> walls = new HashMap<>();
 	private Map<DungeonMapResource, BufferedImage> maps = new HashMap<>();
@@ -67,7 +76,7 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getFont(@Nonnull FontType type) {
+	public List<BufferedImage> getFont(@Nonnull FontColor type) {
 		return fonts.computeIfAbsent(type, this::createFont);
 	}
 
@@ -178,30 +187,35 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	private List<BufferedImage> createFont(@Nonnull FontType type) {
+	private List<BufferedImage> createFont(@Nonnull FontColor type) {
 		IndexColorModel cm = (IndexColorModel) originalFont.get(0).getColorModel();
 
-		IndexColorModel newCM;
-		switch (type) {
-			case NORMAL:
-			case PC_HEADING:
-			case SEL_PC:
-			case PC:
-				newCM = DAXPalette.toPaletteWithGreenFG(cm);
-				break;
-			case GAME_NAME:
-				newCM = DAXPalette.toPaletteWithMagentaFG(cm);
-				break;
-			case INTENSE:
-				newCM = DAXPalette.toInvertedPalette(cm);
-				break;
-			default:
-				newCM = cm;
-				break;
-		}
-		return originalFont.stream() //
+		Color textColor = FRAME.equals(config.getFrameType()) ? //
+			type.getFrameFontColor() : type.getFontColor();
+		IndexColorModel newCM = type == INTENSE ? //
+			DAXPalette.toInvertedPalette(cm) : DAXPalette.toPaletteWithFG(cm, textColor);
+
+		List<BufferedImage> scaledFont = originalFont.stream() //
 			.map(c -> scaler.scale(new BufferedImage(newCM, c.getRaster(), false, null))) //
 			.collect(Collectors.toList());
+		if (config.isUsingFeature(GameFeature.SPECIAL_CHARS_NOT_FROM_FONT)) {
+			scaledFont.add(createScaledGlyphFrom(config.getFontUmlautAe(), newCM));
+			scaledFont.add(createScaledGlyphFrom(config.getFontUmlautOe(), newCM));
+			scaledFont.add(createScaledGlyphFrom(config.getFontUmlautUe(), newCM));
+			scaledFont.add(createScaledGlyphFrom(config.getFontSharpSz(), newCM));
+		}
+		return scaledFont;
+	}
+
+	private BufferedImage createScaledGlyphFrom(String umlaut, IndexColorModel cm) {
+		byte[] data = new byte[8];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) Integer.parseInt(umlaut.substring(2 * i, 2 * i + 2), 16);
+		}
+		DataBufferByte db = new DataBufferByte(data, 8);
+		WritableRaster r = Raster.createPackedRaster(db, 8, 8, 1, null);
+		BufferedImage unscaledGlyph = new BufferedImage(cm, r, false, null);
+		return scaler.scale(unscaledGlyph);
 	}
 
 	@Nonnull

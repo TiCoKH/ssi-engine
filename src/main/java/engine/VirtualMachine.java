@@ -1,7 +1,6 @@
 package engine;
 
 import static engine.EngineInputAction.CONTINUE_ACTION;
-import static engine.EngineInputAction.CONTINUE_HANDLER;
 import static engine.EngineInputAction.MENU_HANDLER;
 import static engine.EngineInputAction.YES_NO_ACTIONS;
 import static engine.opcodes.EclOpCode.CALL;
@@ -286,8 +285,8 @@ public class VirtualMachine {
 			compareResult = r1 && r2 ? 0 : 1;
 		});
 		IMPL.put(EclOpCode.MENU_VERTICAL, inst -> {
-			engine.setMenu(VERTICAL, //
-				inst.getDynArgs().stream().map(arg -> new EngineInputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
+			engine.setECLMenu(VERTICAL, //
+				inst.getDynArgs().stream().map(EclArgument::valueAsString) //
 					.collect(Collectors.toList()),
 				stringValue(inst.getArgument(1)));
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
@@ -508,12 +507,11 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.MENU_HORIZONTAL, inst -> {
 			if (inst.getDynArgs().size() == 1) {
-				engine.setMenu(HORIZONTAL, ImmutableList.of( //
-					new EngineInputAction(CONTINUE_HANDLER, stringValue(inst.getDynArgs().get(0)), -1) //
-				), null);
+				engine.setECLMenu(HORIZONTAL, //
+					ImmutableList.of(stringValue(inst.getDynArgs().get(0))), null);
 			} else {
-				engine.setMenu(HORIZONTAL, //
-					inst.getDynArgs().stream().map(arg -> new EngineInputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg)))
+				engine.setECLMenu(HORIZONTAL, //
+					inst.getDynArgs().stream().map(EclArgument::valueAsString) //
 						.collect(Collectors.toList()),
 					null);
 				memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
@@ -579,8 +577,9 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.SELECT_ACTION, inst -> {
 			engine.addText(new CustomGoldboxString("WHAT DO YOU DO?"), false);
-			engine.setMenu(HORIZONTAL, inst.getDynArgs().stream()
-				.map(arg -> new EngineInputAction(MENU_HANDLER, arg.valueAsString(), inst.getDynArgs().indexOf(arg))).collect(Collectors.toList()),
+			engine.setECLMenu(HORIZONTAL, //
+				inst.getDynArgs().stream().map(EclArgument::valueAsString) //
+					.collect(Collectors.toList()),
 				null);
 			memory.writeMemInt(inst.getArgument(0), memory.getMenuChoice());
 		});

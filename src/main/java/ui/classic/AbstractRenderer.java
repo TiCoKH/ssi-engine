@@ -1,18 +1,25 @@
 package ui.classic;
 
-import static ui.FontType.GAME_NAME;
-import static ui.FontType.INTENSE;
-import static ui.FontType.NORMAL;
-import static ui.FontType.SHORTCUT;
+import static shared.FontColor.GAME_NAME;
+import static shared.FontColor.INTENSE;
+import static shared.FontColor.NORMAL;
+import static shared.FontColor.SHORTCUT;
+import static shared.GoldboxStringPart.PartType.COLOR;
+import static shared.GoldboxStringPart.PartType.LINE_BREAK;
+import static shared.GoldboxStringPart.PartType.SPACE;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import shared.FontColor;
 import shared.GoldboxString;
+import shared.GoldboxStringPart;
 import shared.MenuType;
-import ui.FontType;
+import ui.StoryText;
 import ui.UIFrame;
 import ui.UIResources;
 import ui.UISettings;
@@ -42,22 +49,53 @@ public abstract class AbstractRenderer {
 		frameRenderer.render(g2d, layout);
 	}
 
-	protected void renderChar(@Nonnull Graphics2D g2d, int x, int y, byte c, @Nonnull FontType textFont) {
+	protected void renderChar(@Nonnull Graphics2D g2d, int x, int y, int c, @Nonnull FontColor textFont) {
 		BufferedImage ci = resources.getFont(textFont).get(c);
 		renderImage(g2d, ci, x, y);
 	}
 
 	protected void renderText(@Nonnull Graphics2D g2d) {
-		resources.getCharList().ifPresent(text -> {
-			int charStop = resources.getCharStop();
-			if (!text.isEmpty() && charStop != 0) {
-				for (int pos = 0; pos < charStop; pos++) {
-					int x = getTextStartX() + (pos % getLineWidth());
-					int y = getTextStartY() + (pos / getLineWidth());
-					renderChar(g2d, x, y, text.get(pos), NORMAL);
-				}
+		StoryText st = resources.getStoryText();
+		st.getTextList().ifPresent(
+			text -> renderText(g2d, text, getTextStartX(), getTextStartY(), getLineWidth(), st.getCharStop(), st.getDefaultTextColor(), 0));
+	}
+
+	protected int renderText(@Nonnull Graphics2D g2d, List<GoldboxStringPart> text, int startX, int StartY, int lineLength, int charStop,
+		Optional<FontColor> initialColor, int initialOffset) {
+
+		int line = 0;
+		int pos = initialOffset;
+		int index = 0;
+		int renderCount = 0;
+		Optional<FontColor> fc = initialColor;
+		while (index < text.size() && (charStop == -1 || renderCount < charStop)) {
+			GoldboxStringPart tp = text.get(index++);
+			if (COLOR.equals(tp.getType())) {
+				fc = tp.getFontColor();
+				continue;
 			}
-		});
+			if (LINE_BREAK.equals(tp.getType()) || tp.getLength() > lineLength - pos) {
+				line++;
+				pos = 0;
+			}
+			if (SPACE.equals(tp.getType()) && pos == 0) {
+				continue;
+			}
+			int i = 0;
+			while ((charStop == -1 || renderCount < charStop) && i < tp.getLength()) {
+				int x = startX + pos;
+				int y = StartY + line;
+				int c = tp.getChar(i++);
+				FontColor fontColor = tp.getFontColor().orElse(fc.orElse(NORMAL));
+				if (c < 0) {
+					c += resources.getFont(fontColor).size();
+				}
+				renderChar(g2d, x, y, c, fontColor);
+				renderCount++;
+				pos++;
+			}
+		}
+		return line;
 	}
 
 	protected void renderStatus(@Nonnull Graphics2D g2d) {

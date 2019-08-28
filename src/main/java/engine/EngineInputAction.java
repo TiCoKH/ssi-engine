@@ -6,7 +6,6 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
-import engine.input.ContinueHandler;
 import engine.input.GameMenuAREAHandler;
 import engine.input.GameMenuEXITHandler;
 import engine.input.GameMenuLOOKHandler;
@@ -23,7 +22,6 @@ import shared.InputAction;
 
 public class EngineInputAction implements InputAction {
 	static final MovementHandler MOVEMENT_HANDLER = new MovementHandler();
-	static final InputHandler CONTINUE_HANDLER = new ContinueHandler();
 	static final InputHandler MENU_HANDLER = new MenuHandler();
 	static final InputHandler MAIN_MENU_HANDLER = new MainMenuHandler();
 
@@ -36,7 +34,7 @@ public class EngineInputAction implements InputAction {
 	private static final EngineInputAction YES = new EngineInputAction(MENU_HANDLER, "YES", 0);
 	private static final EngineInputAction NO = new EngineInputAction(MENU_HANDLER, "NO", 1);
 
-	private static final EngineInputAction CONTINUE = new EngineInputAction(CONTINUE_HANDLER, "PRESS BUTTON OR RETURN TO CONTINUE", 0);
+	private static final EngineInputAction CONTINUE = new EngineInputAction(MENU_HANDLER, "PRESS BUTTON OR RETURN TO CONTINUE", 0);
 
 	private static final EngineInputAction DO_SAVE = new EngineInputAction(new SaveHandler(), SAVE);
 

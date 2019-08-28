@@ -17,9 +17,13 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableList;
+
 import data.content.DungeonMap.Direction;
 import data.content.DungeonMap.VisibleWalls;
+import shared.FontColor;
 import shared.GoldboxString;
+import shared.GoldboxStringPart;
 import shared.ViewDungeonPosition;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
@@ -45,8 +49,7 @@ public class UIResources {
 	private int picIndex = 0;
 
 	// The story text
-	private Optional<List<Byte>> charList = Optional.empty();
-	private int charStop = 0;
+	private StoryText storyText = new StoryText();
 
 	// the status text
 	private Optional<GoldboxString> statusLine = Optional.empty();
@@ -68,8 +71,7 @@ public class UIResources {
 		clearSpaceResources();
 		pic = Optional.empty();
 		picIndex = 0;
-		charList = Optional.empty();
-		charStop = 0;
+		storyText.resetText();
 		statusLine = Optional.empty();
 		menu = Optional.empty();
 	}
@@ -86,34 +88,8 @@ public class UIResources {
 		spaceResources = Optional.empty();
 	}
 
-	public void addChars(@Nonnull List<Byte> addedChars) {
-		if (charList.isPresent()) {
-			charList.get().addAll(addedChars);
-		} else {
-			setCharList(addedChars);
-		}
-	}
-
 	public void clearPic() {
 		pic = Optional.empty();
-	}
-
-	@Nonnull
-	public List<BufferedImage> getBorderSymbols() {
-		return resman.getFrames();
-	}
-
-	@Nonnull
-	public Optional<List<Byte>> getCharList() {
-		return charList;
-	}
-
-	public int getCharCount() {
-		return charList.map(List::size).orElse(0);
-	}
-
-	public int getCharStop() {
-		return charStop;
 	}
 
 	@Nonnull
@@ -122,7 +98,7 @@ public class UIResources {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getFont(@Nonnull FontType type) {
+	public List<BufferedImage> getFont(@Nonnull FontColor type) {
 		return resman.getFont(type);
 	}
 
@@ -156,15 +132,8 @@ public class UIResources {
 		return statusLine;
 	}
 
-	public boolean hasCharStopReachedLimit() {
-		return charList.map(cl -> charStop == cl.size()).orElse(true);
-	}
-
-	public void incCharStop() {
-		charList.ifPresent(cl -> {
-			if (charStop < cl.size())
-				charStop++;
-		});
+	public StoryText getStoryText() {
+		return storyText;
 	}
 
 	public void incPicIndex() {
@@ -178,11 +147,6 @@ public class UIResources {
 
 	public boolean preferSprite() {
 		return dungeonResources.map(r -> r.getSprite().map(s -> true).orElse(false)).orElse(false);
-	}
-
-	public void setCharList(@Nullable List<Byte> charList) {
-		this.charList = Optional.ofNullable(charList);
-		this.charStop = 0;
 	}
 
 	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
@@ -228,7 +192,7 @@ public class UIResources {
 		private boolean showAreaMap;
 
 		// runic text in Pool of Radiance
-		private List<GoldboxString> runicText = new ArrayList<>();
+		private List<GoldboxStringPart> runicText = new ArrayList<>();
 
 		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
 			@Nonnull DungeonResource res) {
@@ -269,7 +233,7 @@ public class UIResources {
 			}
 		}
 
-		public void addRunicText(GoldboxString text) {
+		public void addRunicText(GoldboxStringPart text) {
 			runicText.add(text);
 		}
 
@@ -277,12 +241,9 @@ public class UIResources {
 			return !runicText.isEmpty();
 		}
 
-		public GoldboxString getRunicText(int index) {
-			return runicText.get(index);
-		}
-
-		public int getRunicTextCount() {
-			return runicText.size();
+		@Nonnull
+		public List<GoldboxStringPart> getRunicText() {
+			return ImmutableList.copyOf(runicText);
 		}
 
 		public void advanceSprite() {

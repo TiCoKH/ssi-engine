@@ -24,6 +24,10 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_TITLE = "title.format";
 
 	private static final String CONFIG_FONT_LOCATION = "font";
+	private static final String CONFIG_FONT_UMLAUT_AE = "font.umlaut.ae";
+	private static final String CONFIG_FONT_UMLAUT_OE = "font.umlaut.oe";
+	private static final String CONFIG_FONT_UMLAUT_UE = "font.umlaut.ue";
+	private static final String CONFIG_FONT_SHARP_SZ = "font.sharp.sz";
 	private static final String CONFIG_MISC_LOCATION = "misc";
 	private static final String CONFIG_MISC_ARROW_INDEX = "misc.arrow";
 	private static final String CONFIG_MISC_AREA_MAP_INDEX = "misc.area";
@@ -99,6 +103,22 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	public String getFont() {
 		return getProperty(CONFIG_FONT_LOCATION);
+	}
+
+	public String getFontUmlautAe() {
+		return getProperty(CONFIG_FONT_UMLAUT_AE);
+	}
+
+	public String getFontUmlautOe() {
+		return getProperty(CONFIG_FONT_UMLAUT_OE);
+	}
+
+	public String getFontUmlautUe() {
+		return getProperty(CONFIG_FONT_UMLAUT_UE);
+	}
+
+	public String getFontSharpSz() {
+		return getProperty(CONFIG_FONT_SHARP_SZ);
 	}
 
 	public String getMisc() {

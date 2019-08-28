@@ -16,6 +16,8 @@ public interface EngineCallback {
 
 	void setInputString(int maxLetters);
 
+	void setECLMenu(@Nonnull MenuType type, @Nonnull List<GoldboxString> menuItems, @Nullable GoldboxString description);
+
 	void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description);
 
 	void advanceSprite();

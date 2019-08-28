@@ -20,13 +20,9 @@ public interface UserInterface {
 
 	void clearAll();
 
-	void addText(GoldboxString str);
+	void addText(boolean withClear, List<GoldboxStringPart> text);
 
-	void addRunicText(GoldboxString text);
-
-	void addLineBreak();
-
-	void clearText();
+	void addRunicText(GoldboxStringPart text);
 
 	void showPicture(int headId, int bodyId);
 

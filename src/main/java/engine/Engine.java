@@ -9,13 +9,19 @@ import static data.content.WallDef.WallDistance.MEDIUM;
 import static data.content.WallDef.WallPlacement.FOWARD;
 import static engine.EngineInputAction.GAME_MENU_ACTIONS;
 import static engine.EngineInputAction.MAIN_MENU_HANDLER;
+import static engine.EngineInputAction.MENU_HANDLER;
 import static engine.EngineInputAction.MOVEMENT_ACTIONS;
 import static engine.EngineInputAction.MOVEMENT_HANDLER;
+import static engine.text.SpecialCharType.SHARP_S;
+import static engine.text.SpecialCharType.UMLAUT_A;
+import static engine.text.SpecialCharType.UMLAUT_O;
+import static engine.text.SpecialCharType.UMLAUT_U;
 import static java.nio.file.StandardOpenOption.READ;
 import static shared.GameFeature.BODY_HEAD;
 import static shared.GameFeature.FLEXIBLE_DUNGEON_SIZE;
 import static shared.GameFeature.INTERACTIVE_OVERLAND;
 import static shared.GameFeature.OVERLAND_DUNGEON;
+import static shared.GameFeature.SPECIAL_CHARS_NOT_FROM_FONT;
 import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
@@ -32,6 +38,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 import common.FileMap;
 import data.ResourceLoader;
@@ -42,9 +49,11 @@ import data.content.DungeonMap2;
 import data.content.EclProgram;
 import engine.input.MovementHandler;
 import engine.opcodes.EclInstruction;
+import engine.text.GoldboxStringPartFactory;
 import shared.CustomGoldboxString;
 import shared.EngineStub;
 import shared.GoldboxString;
+import shared.GoldboxStringPart;
 import shared.InputAction;
 import shared.MenuType;
 import shared.UserInterface;
@@ -66,6 +75,8 @@ public class Engine implements EngineCallback, EngineStub {
 	private Optional<DungeonMap> currentMap = Optional.empty();
 	private VisibleWalls visibleWalls = new VisibleWalls();
 
+	private GoldboxStringPartFactory stringPartFactory;
+
 	private boolean showRunicText = false;
 
 	public Engine(@Nonnull FileMap fm) throws Exception {
@@ -77,6 +88,11 @@ public class Engine implements EngineCallback, EngineStub {
 
 		this.memory = new VirtualMemory(cfg);
 		this.vm = new VirtualMachine(this, this.memory, cfg.getCodeBase());
+		if (cfg.isUsingFeature(SPECIAL_CHARS_NOT_FROM_FONT))
+			this.stringPartFactory = new GoldboxStringPartFactory(cfg.getSpecialChar(UMLAUT_A), cfg.getSpecialChar(UMLAUT_O),
+				cfg.getSpecialChar(UMLAUT_U), cfg.getSpecialChar(SHARP_S));
+		else
+			this.stringPartFactory = new GoldboxStringPartFactory();
 	}
 
 	@Override
@@ -172,8 +188,17 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
+	public void setECLMenu(MenuType type, List<GoldboxString> menuItems, GoldboxString description) {
 		updateOverlandCityCursor();
+		List<InputAction> actions = menuItems.stream()
+			.map(s -> new EngineInputAction(MENU_HANDLER, this.stringPartFactory.fromMenu(s), menuItems.indexOf(s))) //
+			.collect(Collectors.toList());
+		ui.setInputMenu(type, actions, description, null);
+		pauseCurrentThread();
+	}
+
+	@Override
+	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
 		ui.setInputMenu(type, menuItems, description, null);
 		pauseCurrentThread();
 	}
@@ -394,10 +419,11 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void addText(GoldboxString str, boolean clear) {
 		synchronized (vm) {
-			if (clear) {
-				ui.clearText();
+			List<GoldboxStringPart> text = this.stringPartFactory.from(str);
+			if (cfg.getEngineAddress(EngineAddress.TEXT_COLOR) != 0) {
+				text.add(0, this.stringPartFactory.fromTextColor(memory.getTextColor()));
 			}
-			ui.addText(str);
+			ui.addText(clear, text);
 			// pause VM until all text is displayed
 			pauseCurrentThread();
 		}
@@ -405,16 +431,16 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void addRunicText(GoldboxString str) {
-		ui.addRunicText(str);
+		ui.addRunicText(this.stringPartFactory.fromRunicText(str));
 	}
 
 	@Override
 	public void addNewline() {
 		if (showRunicText) {
-			ui.addRunicText(new CustomGoldboxString(""));
+			ui.addRunicText(this.stringPartFactory.createLineBreak());
 		} else {
 			synchronized (vm) {
-				ui.addLineBreak();
+				ui.addText(false, ImmutableList.of(this.stringPartFactory.createLineBreak()));
 				// pause VM until all text is displayed
 				pauseCurrentThread();
 			}

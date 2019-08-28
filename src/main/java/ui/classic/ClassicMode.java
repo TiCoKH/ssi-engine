@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,7 @@ import data.content.DAXContentType;
 import data.content.DungeonMap.VisibleWalls;
 import shared.EngineStub;
 import shared.GoldboxString;
+import shared.GoldboxStringPart;
 import shared.InputAction;
 import shared.MenuType;
 import shared.UserInterface;
@@ -48,6 +48,7 @@ import ui.GoldboxStringInput;
 import ui.ImageCompositeResource;
 import ui.ImageResource;
 import ui.Menu;
+import ui.StoryText;
 import ui.UIResourceConfiguration;
 import ui.UIResourceLoader;
 import ui.UIResourceManager;
@@ -612,71 +613,32 @@ public class ClassicMode extends JPanel implements UserInterface {
 		resources.getDungeonResources().ifPresent(DungeonResources::clearSprite);
 	}
 
-	@Override
 	public void clearText() {
 		this.textNeedsProgressing = false;
-		resources.setCharList(null);
+		resources.getStoryText().resetText();
 	}
 
 	@Override
-	public void addText(GoldboxString text) {
-		List<Byte> newCharList = new ArrayList<>();
-
-		int lineWidth = renderers.get(currentState).getLineWidth();
-		int wordStart = 0;
-		int charCount = resources.getCharCount() % lineWidth;
-		for (int i = 0; i < text.getLength(); i++) {
-			boolean endOfText = i + 1 == text.getLength();
-			if (text.getChar(i) == ' ' || endOfText) {
-				// Space is not part of the word, last char is.
-				int wordLength = (i - wordStart) + (endOfText ? 1 : 0);
-				if (charCount + wordLength > lineWidth) {
-					for (int j = charCount; j < lineWidth; j++) {
-						newCharList.add((byte) 0x20);
-					}
-					charCount = 0;
-				}
-				for (int j = wordStart; j < wordStart + wordLength; j++) {
-					newCharList.add(text.getChar(j));
-				}
-				wordStart = i + 1;
-				charCount += wordLength;
-				if (charCount < lineWidth && !endOfText) {
-					newCharList.add((byte) 0x20);
-					charCount++;
-				} else {
-					charCount = 0;
-				}
-			}
-		}
-		resources.addChars(newCharList);
+	public void addText(boolean withclear, List<GoldboxStringPart> text) {
+		StoryText st = resources.getStoryText();
+		if (withclear)
+			st.clearScreen();
+		st.addText(text);
 		this.textNeedsProgressing = true;
 	}
 
 	@Override
-	public void addRunicText(GoldboxString text) {
+	public void addRunicText(GoldboxStringPart text) {
 		resources.getDungeonResources().ifPresent(r -> r.addRunicText(text));
-	}
-
-	@Override
-	public void addLineBreak() {
-		int lineWidth = renderers.get(currentState).getLineWidth();
-		int charCount = resources.getCharCount() % lineWidth;
-		List<Byte> newCharList = new ArrayList<>();
-		for (int i = charCount; i < lineWidth; i++) {
-			newCharList.add((byte) 0x20);
-		}
-		resources.addChars(newCharList);
-		this.textNeedsProgressing = true;
 	}
 
 	private void advance() {
 		if (textNeedsProgressing) {
-			if (resources.hasCharStopReachedLimit()) {
+			if (resources.getStoryText().hasCharStopReachedLimit()) {
 				textNeedsProgressing = false;
 				stub.textDisplayFinished();
 			} else {
-				resources.incCharStop();
+				resources.getStoryText().incCharStop();
 			}
 		}
 	}

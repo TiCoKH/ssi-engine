@@ -29,10 +29,10 @@ import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
 import data.content.DAXContentType;
+import shared.FontColor;
 import ui.DungeonMapResource;
 import ui.DungeonResource;
 import ui.DungeonWall;
-import ui.FontType;
 import ui.ImageCompositeResource;
 import ui.ImageResource;
 import ui.UIFrame;
@@ -143,7 +143,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 				if (ir.getType() == null || ir.getType() == _8X8D) {
 					List<BufferedImage> images = null;
 					if (ir.getId() == 201)
-						images = resman.getFont(FontType.NORMAL);
+						images = resman.getFont(FontColor.NORMAL);
 					else if (ir.getId() == 202)
 						images = resman.getMisc();
 					else

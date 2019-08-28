@@ -39,6 +39,10 @@ public class VirtualMachineTest {
 			}
 
 			@Override
+			public void setECLMenu(MenuType type, List<GoldboxString> menuItems, GoldboxString description) {
+			}
+
+			@Override
 			public void setMenu(MenuType type, List<InputAction> menuItems, GoldboxString description) {
 			}
 
