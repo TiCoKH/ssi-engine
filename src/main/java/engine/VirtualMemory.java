@@ -24,6 +24,7 @@ import static engine.EngineAddress.SEARCH_FLAGS;
 import static engine.EngineAddress.SKY_COLOR_INDOORS;
 import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
 import static engine.EngineAddress.TEMP_START;
+import static engine.EngineAddress.TEXT_COLOR;
 import static engine.EngineAddress.TRIED_TO_LEAVE_MAP;
 import static shared.GameFeature.EXTENDED_DUNGEON;
 
@@ -81,6 +82,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static int MEMLOC_TRIED_TO_LEAVE_MAP;
 	private static int MEMLOC_PICTURE_HEAD_ID;
 	private static int MEMLOC_DIVISION_MODULO;
+	private static int MEMLOC_TEXT_COLOR;
 	private static int MEMLOC_DUNGEON_X;
 	private static int MEMLOC_DUNGEON_Y;
 	private static int MEMLOC_DUNGEON_DIR;
@@ -123,6 +125,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_TRIED_TO_LEAVE_MAP = cfg.getEngineAddress(TRIED_TO_LEAVE_MAP);
 		MEMLOC_PICTURE_HEAD_ID = cfg.getEngineAddress(PICTURE_HEAD_ID);
 		MEMLOC_DIVISION_MODULO = cfg.getEngineAddress(DIVISION_MODULO);
+		MEMLOC_TEXT_COLOR = cfg.getEngineAddress(TEXT_COLOR);
 		MEMLOC_DUNGEON_X = cfg.getEngineAddress(DUNGEON_X);
 		MEMLOC_DUNGEON_Y = cfg.getEngineAddress(DUNGEON_Y);
 		MEMLOC_DUNGEON_DIR = cfg.getEngineAddress(DUNGEON_DIR);
@@ -561,6 +564,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setDivisionModulo(int divisionModulo) {
 		mem.put(MEMLOC_DIVISION_MODULO, (byte) divisionModulo);
+	}
+
+	public int getTextColor() {
+		return mem.getUnsigned(MEMLOC_TEXT_COLOR);
+	}
+
+	public void setTextColor(int textColor) {
+		mem.put(MEMLOC_TEXT_COLOR, (byte) textColor);
 	}
 
 	@Override

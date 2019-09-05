@@ -22,6 +22,7 @@ public enum EngineAddress {
 	PICTURE_HEAD_ID, //
 	DIVISION_MODULO, //
 	TEMP_START, //
+	TEXT_COLOR, //
 	DUNGEON_X, //
 	DUNGEON_Y, //
 	DUNGEON_DIR, //
