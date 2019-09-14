@@ -1,8 +1,10 @@
 package ui;
 
-import static ui.ScaleMethod.NONE;
 import static ui.UISettings.PropertyName.METHOD;
+import static ui.UISettings.PropertyName.TEXT_SPEED;
 import static ui.UISettings.PropertyName.ZOOM;
+import static ui.UISettings.ScaleMethod.NONE;
+import static ui.UISettings.TextSpeed.INSTANT;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -20,12 +22,14 @@ import javax.annotation.Nonnull;
 public class UISettings {
 	private int zoom;
 	private ScaleMethod method;
+	private TextSpeed textSpeed;
 
 	private Set<PropertyChangeListener> listeners = new HashSet<>();
 
 	public UISettings() {
 		zoom = 4;
 		method = NONE;
+		textSpeed = INSTANT;
 	}
 
 	public void readFrom(@Nonnull FileChannel c) throws IOException {
@@ -43,6 +47,11 @@ public class UISettings {
 			} catch (IllegalArgumentException e) {
 				method = NONE;
 			}
+			try {
+				textSpeed = TextSpeed.valueOf(p.getOrDefault(TEXT_SPEED.name(), INSTANT.name()).toString());
+			} catch (IllegalArgumentException e) {
+				textSpeed = INSTANT;
+			}
 		} finally {
 			in.close();
 		}
@@ -53,6 +62,7 @@ public class UISettings {
 		try {
 			w.write(String.format("%s = %d%n", ZOOM.name(), getZoom()));
 			w.write(String.format("%s = %s%n", METHOD.name(), getMethod().name()));
+			w.write(String.format("%s = %s%n", TEXT_SPEED.name(), getTextSpeed().name()));
 			w.flush();
 		} finally {
 			w.close();
@@ -68,6 +78,14 @@ public class UISettings {
 		ScaleMethod old = getMethod();
 		this.method = method;
 		firePropertyChange(PropertyName.METHOD, old, method);
+	}
+
+	public TextSpeed getTextSpeed() {
+		return textSpeed;
+	}
+
+	public void setTextSpeed(TextSpeed textSpeed) {
+		this.textSpeed = textSpeed;
 	}
 
 	public int getZoom() {
@@ -104,6 +122,14 @@ public class UISettings {
 	}
 
 	public enum PropertyName {
-		ZOOM, METHOD;
+		ZOOM, METHOD, TEXT_SPEED;
+	}
+
+	public enum ScaleMethod {
+		NONE, BILINEAR, BICUBIC, XBRZ;
+	}
+
+	public enum TextSpeed {
+		SLOW, FAST, INSTANT;
 	}
 }

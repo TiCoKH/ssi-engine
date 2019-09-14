@@ -34,6 +34,8 @@ import javax.swing.JRadioButtonMenuItem;
 import common.FileMap;
 import engine.Engine;
 import shared.UserInterface;
+import ui.UISettings.ScaleMethod;
+import ui.UISettings.TextSpeed;
 import ui.classic.ClassicMode;
 import ui.resource.ResourceViewer;
 
@@ -103,6 +105,7 @@ public class DesktopFrame implements ExceptionHandler {
 	private JMenuBar mainMenu;
 	private JMenu scaleFactor;
 	private JMenu scaleMethod;
+	private JMenu textSpeed;
 	private JMenuItem resource;
 
 	private JMenuBar getMainMenu() {
@@ -135,9 +138,15 @@ public class DesktopFrame implements ExceptionHandler {
 				scaleMethod.add(createScaleMethodItem(method));
 			}
 
+			textSpeed = new JMenu("Text Speed");
+			for (TextSpeed speed : TextSpeed.values()) {
+				textSpeed.add(createTextSpeedItem(speed));
+			}
+
 			JMenu options = new JMenu("Options");
 			options.add(scaleFactor);
 			options.add(scaleMethod);
+			options.add(textSpeed);
 
 			JMenu debug = new JMenu("Debug");
 
@@ -175,6 +184,18 @@ public class DesktopFrame implements ExceptionHandler {
 			settings.setMethod(method);
 		});
 		item.setSelected(method == settings.getMethod());
+		return item;
+	}
+
+	private JMenuItem createTextSpeedItem(TextSpeed speed) {
+		JMenuItem item = new JRadioButtonMenuItem(speed.name());
+		item.addActionListener(e -> {
+			for (int i = 0; i < textSpeed.getItemCount(); i++)
+				((JRadioButtonMenuItem) textSpeed.getItem(i)).setSelected(false);
+			item.setSelected(true);
+			settings.setTextSpeed(speed);
+		});
+		item.setSelected(speed == settings.getTextSpeed());
 		return item;
 	}
 

@@ -10,9 +10,9 @@ import static data.content.ImageContentProperties.Y_OFFSET;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static ui.ScaleMethod.BICUBIC;
-import static ui.ScaleMethod.BILINEAR;
-import static ui.ScaleMethod.XBRZ;
+import static ui.UISettings.ScaleMethod.BICUBIC;
+import static ui.UISettings.ScaleMethod.BILINEAR;
+import static ui.UISettings.ScaleMethod.XBRZ;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
