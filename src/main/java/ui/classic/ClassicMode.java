@@ -638,7 +638,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 				textNeedsProgressing = false;
 				stub.textDisplayFinished();
 			} else {
-				resources.getStoryText().incCharStop();
+				resources.getStoryText().incCharStop(settings.getTextSpeed());
 			}
 		}
 	}

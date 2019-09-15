@@ -1,6 +1,7 @@
 package ui;
 
 import static shared.GoldboxStringPart.PartType.COLOR;
+import static shared.GoldboxStringPart.PartType.TEXT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 
 import shared.FontColor;
 import shared.GoldboxStringPart;
+import ui.UISettings.TextSpeed;
 
 public class StoryText {
 	private List<GoldboxStringPart> textList = new ArrayList<>();
@@ -60,8 +62,41 @@ public class StoryText {
 		return charStop >= charCount;
 	}
 
-	public void incCharStop() {
-		charStop++;
+	public void incCharStop(TextSpeed textSpeed) {
+		switch (textSpeed) {
+			case SLOW:
+				charStop++;
+				break;
+			case FAST:
+				int count = 0;
+				int index = 0;
+				GoldboxStringPart part = textList.get(index);
+				while (count < charStop && index < textList.size()) {
+					if (part.getType().isDisplayable()) {
+						count += part.getLength();
+					}
+					part = textList.get(++index);
+				}
+				if (part != null && TEXT.equals(part.getType())) {
+					charStop = count + part.getLength();
+				} else {
+					for (int i = index; i < textList.size(); i++) {
+						part = textList.get(i);
+						if (part.getType().isDisplayable()) {
+							count += part.getLength();
+						}
+						if (TEXT.equals(part.getType())) {
+							charStop = count;
+							break;
+						}
+						index++;
+					}
+					charStop = count;
+				}
+				break;
+			case INSTANT:
+				charStop = charCount;
+		}
 	}
 
 	private void updateCharCount() {
