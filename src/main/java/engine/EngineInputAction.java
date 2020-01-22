@@ -12,8 +12,8 @@ import engine.input.GameMenuLOOKHandler;
 import engine.input.GameMenuMOVEHandler;
 import engine.input.GameMenuSEARCHHandler;
 import engine.input.InputHandler;
-import engine.input.MainMenuHandler;
 import engine.input.MenuHandler;
+import engine.input.ModeMenuHandler;
 import engine.input.MovementHandler;
 import engine.input.SaveHandler;
 import shared.CustomGoldboxString;
@@ -23,7 +23,7 @@ import shared.InputAction;
 public class EngineInputAction implements InputAction {
 	static final MovementHandler MOVEMENT_HANDLER = new MovementHandler();
 	static final InputHandler MENU_HANDLER = new MenuHandler();
-	static final InputHandler MAIN_MENU_HANDLER = new MainMenuHandler();
+	static final InputHandler MODE_MENU_HANDLER = new ModeMenuHandler();
 
 	static final InputHandler GAME_MENU_MOVE_HANDLER = new GameMenuMOVEHandler();
 	static final InputHandler GAME_MENU_AREA_HANDLER = new GameMenuAREAHandler();

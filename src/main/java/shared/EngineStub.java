@@ -11,7 +11,7 @@ public interface EngineStub {
 
 	void loadGame();
 
-	void showStartMenu();
+	void showModeMenu();
 
 	void textDisplayFinished();
 

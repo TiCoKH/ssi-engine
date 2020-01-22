@@ -13,8 +13,8 @@ import shared.GameResourceConfiguration;
 
 public class EngineConfiguration extends GameResourceConfiguration {
 
-	private static final String CONFIG_MAIN_PREFIX = "main.";
-	private static final String CONFIG_MAIN_NAME = CONFIG_MAIN_PREFIX + "name";
+	private static final String CONFIG_MODE_MENU_PREFIX = "mode.";
+	private static final String CONFIG_MODE_MENU_NAME = CONFIG_MODE_MENU_PREFIX + "name";
 	private static final String CONFIG_CODE_BASE = "code.base";
 	private static final String CONFIG_ADDRESS_PREFIX = "address.";
 	private static final String CONFIG_OVERLAND_MAP_IDS = "overland.map";
@@ -24,12 +24,12 @@ public class EngineConfiguration extends GameResourceConfiguration {
 		super(filemap);
 	}
 
-	public String getMainMenuName() {
-		return getProperty(CONFIG_MAIN_NAME);
+	public String getModeMenuName() {
+		return getProperty(CONFIG_MODE_MENU_NAME);
 	}
 
-	public String getMainMenuEntry(String entry) {
-		return getProperty(CONFIG_MAIN_PREFIX + entry, "");
+	public String getModeMenuEntry(String entry) {
+		return getProperty(CONFIG_MODE_MENU_PREFIX + entry, "");
 	}
 
 	public int getCodeBase() {

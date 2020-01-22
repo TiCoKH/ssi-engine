@@ -167,7 +167,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		if (showTitle)
 			showTitles();
 		else
-			showStartMenu();
+			showModeMenu();
 	}
 
 	@Override
@@ -205,14 +205,14 @@ public class ClassicMode extends JPanel implements UserInterface {
 		if (titleId < config.getTitleCount() - 1) {
 			titleSwitcher = () -> showNextTitle(titleId + 1);
 		} else {
-			titleSwitcher = () -> showStartMenu();
+			titleSwitcher = () -> showModeMenu();
 		}
 		animationFuture = exec.schedule(titleSwitcher, 5000, MILLISECONDS);
 	}
 
-	public void showStartMenu() {
+	public void showModeMenu() {
 		resources.setPic(createTitleResource(config.getTitleCount()));
-		stub.showStartMenu();
+		stub.showModeMenu();
 	}
 
 	private ImageResource createTitleResource(int index) {

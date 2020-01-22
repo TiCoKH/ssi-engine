@@ -8,8 +8,8 @@ import static data.dungeon.WallDef.WallDistance.CLOSE;
 import static data.dungeon.WallDef.WallDistance.MEDIUM;
 import static data.dungeon.WallDef.WallPlacement.FOWARD;
 import static engine.EngineInputAction.GAME_MENU_ACTIONS;
-import static engine.EngineInputAction.MAIN_MENU_HANDLER;
 import static engine.EngineInputAction.MENU_HANDLER;
+import static engine.EngineInputAction.MODE_MENU_HANDLER;
 import static engine.EngineInputAction.MOVEMENT_ACTIONS;
 import static engine.EngineInputAction.MOVEMENT_HANDLER;
 import static engine.text.SpecialCharType.SHARP_S;
@@ -123,13 +123,13 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public void showStartMenu() {
+	public void showModeMenu() {
 		setNextTask(() -> {
-			List<String> menu = Stream.of("GAME", "DEMO", "START", "DEBUG").filter(e -> !Strings.isNullOrEmpty(cfg.getMainMenuEntry(e)))
+			List<String> menu = Stream.of("GAME", "DEMO", "START", "DEBUG").filter(e -> !Strings.isNullOrEmpty(cfg.getModeMenuEntry(e)))
 				.collect(Collectors.toList());
 			setMenu(MenuType.HORIZONTAL,
-				menu.stream().map(e -> new EngineInputAction(MAIN_MENU_HANDLER, e, menu.indexOf(e))).collect(Collectors.toList()),
-				new CustomGoldboxString(cfg.getMainMenuName()));
+				menu.stream().map(e -> new EngineInputAction(MODE_MENU_HANDLER, e, menu.indexOf(e))).collect(Collectors.toList()),
+				new CustomGoldboxString(cfg.getModeMenuName()));
 			if (abortCurrentThread) {
 				return;
 			}
