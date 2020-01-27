@@ -23,11 +23,11 @@ public class LoadHandler implements InputHandler {
 				readMemory(savesPath, memory);
 				engine.loadArea(memory.getAreaValue(0), memory.getAreaValue(1), memory.getAreaValue(2));
 				engine.loadAreaDecoration(memory.getAreaDecoValue(0), memory.getAreaDecoValue(1), memory.getAreaDecoValue(2));
-				engine.loadEcl(memory.getCurrentECL(), false);
 				System.out.println("Game loaded");
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 			}
+			engine.showProgramMenu();
 		});
 	}
 

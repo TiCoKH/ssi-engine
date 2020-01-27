@@ -7,11 +7,13 @@ import static data.ContentType.PIC;
 import static data.dungeon.WallDef.WallDistance.CLOSE;
 import static data.dungeon.WallDef.WallDistance.MEDIUM;
 import static data.dungeon.WallDef.WallPlacement.FOWARD;
+import static engine.EngineInputAction.DIALOG_MENU_ACTIONS;
 import static engine.EngineInputAction.GAME_MENU_ACTIONS;
 import static engine.EngineInputAction.MENU_HANDLER;
 import static engine.EngineInputAction.MODE_MENU_HANDLER;
 import static engine.EngineInputAction.MOVEMENT_ACTIONS;
 import static engine.EngineInputAction.MOVEMENT_HANDLER;
+import static engine.EngineInputAction.SELECT;
 import static engine.text.SpecialCharType.SHARP_S;
 import static engine.text.SpecialCharType.UMLAUT_A;
 import static engine.text.SpecialCharType.UMLAUT_O;
@@ -25,6 +27,7 @@ import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -54,6 +57,7 @@ import shared.GoldboxString;
 import shared.GoldboxStringPart;
 import shared.InputAction;
 import shared.MenuType;
+import shared.ProgramMenuType;
 import shared.UserInterface;
 
 public class Engine implements EngineCallback, EngineStub {
@@ -135,6 +139,19 @@ public class Engine implements EngineCallback, EngineStub {
 		});
 	}
 
+	public void showProgramMenu() {
+		List<InputAction> menu = new ArrayList<>();
+		menu.add(EngineInputAction.CREATE_CHAR);
+		menu.add(EngineInputAction.VIEW_CHAR);
+		menu.add(EngineInputAction.MODIFY_CHAR);
+		menu.add(EngineInputAction.ADD_CHAR);
+		menu.add(EngineInputAction.REMOVE_CHAR);
+		menu.add(EngineInputAction.SAVE_GAME);
+		menu.add(EngineInputAction.BEGIN_ADVENTURE);
+
+		ui.showProgramMenuDialog(ProgramMenuType.PROGRAM, menu, DIALOG_MENU_ACTIONS, null, SELECT);
+	}
+
 	@Override
 	public void textDisplayFinished() {
 		// continue VM after all text is displayed
@@ -208,13 +225,13 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void loadEcl(int id) {
-		loadEcl(id, true);
+		memory.setLastECL(memory.getCurrentECL());
+		memory.setCurrentECL(id);
+		loadEcl(true);
 	}
 
-	public void loadEcl(int id, boolean fromVM) {
+	public void loadEcl(boolean fromVM) {
 		setNextTask(() -> {
-			memory.setLastECL(memory.getCurrentECL());
-			memory.setCurrentECL(id);
 			memory.setTriedToLeaveMap(false);
 			memory.setMovementBlock(0);
 			if (fromVM)
@@ -226,7 +243,7 @@ public class Engine implements EngineCallback, EngineStub {
 
 			try {
 				delayCurrentThread();
-				EclProgram ecl = res.find(id, EclProgram.class, ECL);
+				EclProgram ecl = res.find(memory.getCurrentECL(), EclProgram.class, ECL);
 				vm.newEcl(ecl);
 				vm.startInit();
 				if (abortCurrentThread) {

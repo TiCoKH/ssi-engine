@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
@@ -48,6 +50,7 @@ import io.vavr.collection.Stream;
 import common.FileMap;
 import data.ContentType;
 import data.dungeon.DungeonMap.VisibleWalls;
+import io.vavr.collection.Stream;
 import shared.EngineStub;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
@@ -106,6 +109,9 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient ScheduledThreadPoolExecutor exec;
 	private transient ScheduledFuture<?> animationFuture;
+
+	private transient ActionMap backupActionMap;
+	private transient InputMap backupInputMap;
 
 	private transient boolean running = false;
 
@@ -396,6 +402,35 @@ public class ClassicMode extends JPanel implements UserInterface {
 		});
 	}
 
+	private void backupKeyMaps() {
+		if (dialogStates.isEmpty()) {
+			backupActionMap = copyCurrentActionMap();
+			backupInputMap = copyCurrentInputMap();
+		}
+	}
+
+	private void restoreKeyMaps() {
+		final ActionMap actionMap = !dialogStates.empty() ? dialogStates.peek().getActionMap() : this.backupActionMap;
+		getActionMap().clear();
+		Stream.of(actionMap.keys()).forEach(key -> getActionMap().put(key, actionMap.get(key)));
+
+		final InputMap inputMap = !dialogStates.empty() ? dialogStates.peek().getInputMap() : this.backupInputMap;
+		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
+		Stream.of(inputMap.keys()).forEach(key -> getInputMap(WHEN_IN_FOCUSED_WINDOW).put(key, inputMap.get(key)));
+	}
+
+	private ActionMap copyCurrentActionMap() {
+		final ActionMap result = new ActionMap();
+		Stream.of(getActionMap().keys()).forEach(key -> result.put(key, getActionMap().get(key)));
+		return result;
+	}
+
+	private InputMap copyCurrentInputMap() {
+		final InputMap result = new InputMap();
+		Stream.of(getInputMap(WHEN_IN_FOCUSED_WINDOW).keys()).forEach(key -> result.put(key, getInputMap(WHEN_IN_FOCUSED_WINDOW).get(key)));
+		return result;
+	}
+
 	@Override
 	public void clearStatus() {
 		state.setStatusLine(null);
@@ -409,17 +444,20 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void clearCurrentDialog() {
 		dialogStates.pop();
+		restoreKeyMaps();
 	}
 
 	@Override
 	public void clearAllDialogs() {
 		dialogStates.clear();
+		restoreKeyMaps();
 	}
 
 	@Override
 	public void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
 		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect) {
 
+		backupKeyMaps();
 		resetInput();
 
 		final Menu hMenu = new Menu(MenuType.HORIZONTAL, horizontalMenu);
@@ -453,7 +491,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			}
 		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
 
-		dialogStates.push(new ProgramMenuState(hMenu, menuSelect, pMenu, programType));
+		dialogStates.push(new ProgramMenuState(hMenu, copyCurrentActionMap(), copyCurrentInputMap(), menuSelect, pMenu, programType));
 	}
 
 	@Override
