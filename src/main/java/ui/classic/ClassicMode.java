@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,8 +77,6 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient EngineStub stub;
 
-	private transient Map<UIState, AbstractRenderer> renderers = new EnumMap<>(UIState.class);
-	private transient FrameRenderer frameRenderer;
 	private UIState currentState;
 
 	private boolean textNeedsProgressing = false;
@@ -88,6 +85,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient UIResourceLoader loader;
 	private transient UIResources resources;
 	private transient UISettings settings;
+	private transient RendererContainer renderers;
 
 	private transient ScheduledThreadPoolExecutor exec;
 	private transient ScheduledFuture<?> animationFuture;
@@ -105,22 +103,11 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		this.loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(config, loader, settings, excHandler);
-		this.frameRenderer = new FrameRenderer(config, resman, settings);
 		this.resources = new UIResources(config, resman);
+		this.renderers = new RendererContainer(config, resman, resources, settings);
 
-		initRenderers();
 		initSurface();
 		resetInput();
-	}
-
-	private void initRenderers() {
-		renderers.clear();
-		renderers.put(UIState.TITLE, new TitleRenderer(resources, settings, frameRenderer));
-		renderers.put(UIState.STORY, new StoryRenderer(resources, settings, frameRenderer));
-		renderers.put(UIState.BIGPIC, new BigPicRenderer(resources, settings, frameRenderer));
-		renderers.put(UIState.DUNGEON, new DungeonRenderer(resources, settings, frameRenderer));
-		renderers.put(UIState.OVERLAND, new OverlandMapRenderer(resources, settings, frameRenderer));
-		renderers.put(UIState.SPACE, new SpaceTravelRenderer(resources, settings, frameRenderer));
 	}
 
 	private void initSurface() {
@@ -652,13 +639,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void setPortraitFrameVisible(boolean enabled) {
-		frameRenderer.setPortraitShown(enabled);
+		renderers.fameRenderer().setPortraitShown(enabled);
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
 
-		renderers.get(currentState).render((Graphics2D) g);
+		renderers.rendererFor(currentState).render((Graphics2D) g);
 	}
 }
