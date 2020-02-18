@@ -29,7 +29,7 @@ public class DungeonRenderer extends StoryRenderer {
 	private static final int[] WALL_SPACING = { 2, 3, 7, 2, 3, 0, 2, 3, 0 };
 	private static final int[] WALL_MAX_HEIGHT = { 16, 32, 64, 32, 64, 88, 32, 64, 88 };
 
-	public DungeonRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	public DungeonRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

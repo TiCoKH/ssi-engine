@@ -39,7 +39,8 @@ import ui.UIFrame;
 import ui.UIResourceConfiguration;
 import ui.UIResourceManager;
 import ui.UISettings;
-import ui.classic.FrameRenderer;
+import ui.classic.AbstractFrameRenderer;
+import ui.classic.RendererContainer;
 
 public class RenderSurface extends JPanel implements Scrollable {
 	private static final long serialVersionUID = -3126585855013388072L;
@@ -47,7 +48,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 	private transient UIResourceManager resman;
 	private transient UISettings settings;
 
-	private transient FrameRenderer frameRenderer;
+	private transient AbstractFrameRenderer frameRenderer;
 
 	private transient Optional<Object> renderObject = Optional.empty();
 
@@ -58,7 +59,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
 		this.resman = resman;
 		this.settings = settings;
-		this.frameRenderer = new FrameRenderer(config, resman, settings);
+		this.frameRenderer = RendererContainer.createFrameRenderer(config, resman, settings);
 
 		exec.scheduleWithFixedDelay(() -> {
 			ImageResource ir = renderObject //

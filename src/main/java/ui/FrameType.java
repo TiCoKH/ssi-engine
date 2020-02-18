@@ -1,13 +1,9 @@
 package ui;
 
 public enum FrameType {
-	FRAME, SYMBOLS;
+	FRAME, SYMBOLS, SYMBOLS_PORTRAIT_FRAME;
 
 	public enum BackgroundType {
 		COLOR, IMAGE;
-	}
-
-	public enum PortraitType {
-		FRAME, NORMAL, THICK;
 	}
 }

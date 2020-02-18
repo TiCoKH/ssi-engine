@@ -11,7 +11,7 @@ import ui.UISettings;
 
 public class OverlandMapRenderer extends StoryRenderer {
 
-	public OverlandMapRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	public OverlandMapRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

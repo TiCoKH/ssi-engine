@@ -13,7 +13,7 @@ import ui.UISettings;
 public class SpaceTravelRenderer extends StoryRenderer {
 	protected static final int TEXT_LINE_WIDTH = 15;
 
-	public SpaceTravelRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	public SpaceTravelRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

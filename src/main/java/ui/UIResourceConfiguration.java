@@ -12,7 +12,6 @@ import data.image.VGADependentImages;
 import data.image.VGAImage;
 import shared.GameResourceConfiguration;
 import ui.FrameType.BackgroundType;
-import ui.FrameType.PortraitType;
 
 public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_8X8D = "8x8d.format";
@@ -43,7 +42,6 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_OUTER_FRAME_RIGHT = "outer.right";
 	private static final String CONFIG_INNER_FRAME_H = "horizontal.separator";
 	private static final String CONFIG_INNER_FRAME_V = "vertical.separator";
-	private static final String CONFIG_FRAME_PORTRAIT_TYPE = CONFIG_FRAME_START + "portrait.type";
 	private static final String CONFIG_PORTRAIT_TOP = CONFIG_FRAME_START + "portrait.top";
 	private static final String CONFIG_PORTRAIT_BOTTOM = CONFIG_FRAME_START + "portrait.bottom";
 	private static final String CONFIG_PORTRAIT_LEFT = CONFIG_FRAME_START + "portrait.left";
@@ -175,10 +173,6 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 
 	public String getBackground() {
 		return getProperty(CONFIG_FRAME_BACKGROUND, "");
-	}
-
-	public PortraitType getPortraitType() {
-		return PortraitType.valueOf(getProperty(CONFIG_FRAME_PORTRAIT_TYPE));
 	}
 
 	public String getPortraitTop() {

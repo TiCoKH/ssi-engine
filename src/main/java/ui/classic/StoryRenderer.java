@@ -14,7 +14,7 @@ public class StoryRenderer extends AbstractRenderer {
 	protected static final int TEXT_START_Y = 17;
 	protected static final int TEXT_LINE_WIDTH = 38;
 
-	public StoryRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	public StoryRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

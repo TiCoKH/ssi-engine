@@ -29,9 +29,9 @@ public abstract class AbstractRenderer {
 	protected UIResources resources;
 	protected UISettings settings;
 
-	private FrameRenderer frameRenderer;
+	private AbstractFrameRenderer frameRenderer;
 
-	public AbstractRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	protected AbstractRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		this.resources = resources;
 		this.settings = settings;
 		this.frameRenderer = frameRenderer;

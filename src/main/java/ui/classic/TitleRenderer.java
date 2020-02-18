@@ -11,7 +11,7 @@ import ui.UISettings;
 
 public class TitleRenderer extends AbstractRenderer {
 
-	public TitleRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	public TitleRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

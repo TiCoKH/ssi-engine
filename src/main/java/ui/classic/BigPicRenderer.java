@@ -11,7 +11,7 @@ import ui.UISettings;
 
 public class BigPicRenderer extends StoryRenderer {
 
-	public BigPicRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull FrameRenderer frameRenderer) {
+	public BigPicRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

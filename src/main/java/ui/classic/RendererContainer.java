@@ -17,21 +17,21 @@ public class RendererContainer {
 	private final UIResources resources;
 	private final UISettings settings;
 
-	private final FrameRenderer frameRenderer;
+	private final AbstractFrameRenderer frameRenderer;
 
 	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UIResources resources,
 		@Nonnull UISettings settings) {
 
 		this.resources = resources;
 		this.settings = settings;
-		this.frameRenderer = new FrameRenderer(config, resman, settings);
+		this.frameRenderer = createFrameRenderer(config, resman, settings);
 	}
 
 	public AbstractRenderer rendererFor(@Nonnull UIState uiState) {
 		return GAME_RENDERERS.computeIfAbsent(uiState, this::createRenderer);
 	}
 
-	public FrameRenderer fameRenderer() {
+	public AbstractFrameRenderer fameRenderer() {
 		return frameRenderer;
 	}
 
@@ -51,6 +51,21 @@ public class RendererContainer {
 				return new TitleRenderer(resources, settings, frameRenderer);
 			default:
 				throw new IllegalArgumentException("Unknown UIState: " + uiState);
+		}
+	}
+
+	public static AbstractFrameRenderer createFrameRenderer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman,
+		@Nonnull UISettings settings) {
+
+		switch (config.getFrameType()) {
+			case FRAME:
+				return new FrameRendererFrames(config, resman, settings);
+			case SYMBOLS:
+				return new FrameRendererSymbols(config, resman, settings);
+			case SYMBOLS_PORTRAIT_FRAME:
+				return new FrameRendererPortraitFrame(config, resman, settings);
+			default:
+				throw new IllegalArgumentException("Unknown FrameType: " + config.getFrameType());
 		}
 	}
 }
