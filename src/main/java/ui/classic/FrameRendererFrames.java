@@ -30,11 +30,17 @@ public class FrameRendererFrames extends AbstractFrameRenderer {
 		}
 
 		if (UIFrame.BIGPIC.equals(f)) {
-			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 128);
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 16 * 8);
+		}
+		if (UIFrame.SHEET.equals(f)) {
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 8 * 8);
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 16 * 8);
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 20 * 8);
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameVertical(f)), 19 * 8, 8 * 8 + 5);
 		}
 		if (UIFrame.GAME.equals(f)) {
-			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 96);
-			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 128);
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 12 * 8);
+			renderFramePart(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(f)), 0, 16 * 8);
 			renderFramePart(g2d, parseFrameIndexes(config.getPortraitTop()));
 			renderFramePart(g2d, parseFrameIndexes(config.getPortraitLeft()));
 		}

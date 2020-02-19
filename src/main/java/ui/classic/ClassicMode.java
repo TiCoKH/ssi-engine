@@ -62,6 +62,7 @@ import shared.ViewDungeonPosition;
 import shared.ViewGlobalData;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
+import shared.party.CharacterSheet;
 import ui.ExceptionHandler;
 import ui.UISettings;
 import ui.classic.RendererState.DungeonResources;
@@ -494,6 +495,37 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		dialogStates
 			.push(new ProgramMenuState(state.getGlobalData(), hMenu, copyCurrentActionMap(), copyCurrentInputMap(), menuSelect, pMenu, programType));
+	}
+
+	@Override
+	public void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu) {
+		showCharacterSheet(sheet, horizontalMenu, null);
+	}
+
+	@Override
+	public void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description) {
+		backupKeyMaps();
+		resetInput();
+
+		final Menu hMenu = new Menu(MenuType.HORIZONTAL, horizontalMenu, description);
+
+		horizontalMenu.forEach(a -> {
+			registerInput(a, () -> {
+				stub.handleInput(a);
+			}, getKeyStroke(toLowerCase(a.getName().toString().charAt(0))));
+		});
+		if (horizontalMenu.size() > 1) {
+			registerInput(MENU_PREV, hMenu::prev, getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
+			registerInput(MENU_NEXT, hMenu::next, getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
+		}
+
+		registerInput(MENU_ACTION, () -> {
+			final CharacterSheetState menuState = (CharacterSheetState) dialogStates.peek();
+			final InputAction action = menuState.getHorizontalMenu().getSelectedItem();
+			stub.handleInput(action);
+		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
+
+		dialogStates.push(new CharacterSheetState(sheet, hMenu, copyCurrentActionMap(), copyCurrentInputMap()));
 	}
 
 	@Override

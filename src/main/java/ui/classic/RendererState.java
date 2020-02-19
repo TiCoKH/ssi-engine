@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 
 import data.dungeon.DungeonMap.Direction;
 import data.dungeon.DungeonMap.VisibleWalls;
-import shared.GameFeature;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
 import shared.ViewDungeonPosition;
@@ -158,10 +157,6 @@ public class RendererState {
 			else
 				picIndex = 0;
 		});
-	}
-
-	public boolean isUsingSpaceTravel() {
-		return config.isUsingFeature(GameFeature.SPACE_TRAVEL);
 	}
 
 	public boolean preferSprite() {

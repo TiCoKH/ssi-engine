@@ -5,5 +5,6 @@ public enum UIFrame {
 	SCREEN, //
 	SPACE, //
 	GAME, //
-	BIGPIC;
+	BIGPIC, //
+	SHEET;
 }

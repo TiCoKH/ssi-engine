@@ -18,12 +18,14 @@ public class RendererContainer {
 	private final RendererState state;
 	private final UISettings settings;
 	private final UIResourceManager resman;
+	private final UIResourceConfiguration config;
 
 	private final AbstractFrameRenderer frameRenderer;
 
 	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull RendererState state,
 		@Nonnull UISettings settings) {
 
+		this.config = config;
 		this.resman = resman;
 		this.state = state;
 		this.settings = settings;
@@ -65,6 +67,9 @@ public class RendererContainer {
 		if (ProgramMenuRenderer.class.equals(clazz)) {
 			return new ProgramMenuRenderer(settings, resman, frameRenderer);
 		}
+		if (CharacterSheetRenderer.class.equals(clazz)) {
+			return new CharacterSheetRenderer(config, settings, resman, frameRenderer);
+		}
 		throw new IllegalArgumentException("Unknown dialog renderer class: " + clazz.getName());
 	}
 
@@ -78,6 +83,8 @@ public class RendererContainer {
 				return new FrameRendererSymbols(config, resman, settings);
 			case SYMBOLS_PORTRAIT_FRAME:
 				return new FrameRendererPortraitFrame(config, resman, settings);
+			case SYMBOLS_SPACE:
+				return new FrameRendererSpace(config, resman, settings);
 			default:
 				throw new IllegalArgumentException("Unknown FrameType: " + config.getFrameType());
 		}

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import data.ContentType;
 import data.dungeon.DungeonMap.VisibleWalls;
+import shared.party.CharacterSheet;
 
 public interface UserInterface {
 
@@ -48,6 +49,10 @@ public interface UserInterface {
 
 	void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
 		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect);
+
+	void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu);
+
+	void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description);
 
 	void setNoResources();
 

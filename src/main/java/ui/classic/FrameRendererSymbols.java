@@ -23,6 +23,9 @@ public class FrameRendererSymbols extends AbstractFrameRenderer {
 			case GAME:
 				renderGAMEFrame(g2d);
 				break;
+			case SHEET:
+				renderSHEETFrame(g2d);
+				break;
 			case SPACE:
 				renderSPACEFrame(g2d);
 				break;
@@ -55,6 +58,14 @@ public class FrameRendererSymbols extends AbstractFrameRenderer {
 
 		if (isPortraitShown())
 			renderPortrait(g2d);
+	}
+
+	protected void renderSHEETFrame(@Nonnull Graphics2D g2d) {
+		renderOuterFrame(g2d, UIFrame.SHEET);
+		renderHorizontalFrameBorder(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(UIFrame.SHEET)), 1, 8);
+		renderHorizontalFrameBorder(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(UIFrame.SHEET)), 1, 16);
+		renderHorizontalFrameBorder(g2d, parseFrameIndexes(config.getInnerFrameHorizontal(UIFrame.SHEET)), 1, 20);
+		renderVerticalFrameBorder(g2d, parseFrameIndexes(config.getInnerFrameVertical(UIFrame.SHEET)), 19, 8);
 	}
 
 	protected void renderBIGPICFrame(@Nonnull Graphics2D g2d) {

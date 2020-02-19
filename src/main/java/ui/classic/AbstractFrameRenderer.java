@@ -9,9 +9,11 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.base.Strings;
+
 import ui.UISettings;
-import ui.shared.UIFrame;
 import ui.shared.FrameType.BackgroundType;
+import ui.shared.UIFrame;
 import ui.shared.resource.ImageResource;
 import ui.shared.resource.UIResourceConfiguration;
 import ui.shared.resource.UIResourceManager;
@@ -73,6 +75,9 @@ public abstract class AbstractFrameRenderer {
 	}
 
 	protected int[] parseFrameIndexes(String indexes) {
+		if (Strings.isNullOrEmpty(indexes)) {
+			return new int[0];
+		}
 		return Stream.of(indexes.split(",")).mapToInt(Integer::parseInt).toArray();
 	}
 }
