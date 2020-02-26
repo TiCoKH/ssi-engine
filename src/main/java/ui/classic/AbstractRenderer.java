@@ -49,6 +49,18 @@ public abstract class AbstractRenderer {
 		frameRenderer.render(g2d, layout);
 	}
 
+	protected void renderString(@Nonnull Graphics2D g2d, @Nonnull GoldboxString str, int xStart, int y, @Nonnull FontColor color) {
+		renderString(g2d, str, xStart, y, color, color);
+	}
+
+	protected void renderString(@Nonnull Graphics2D g2d, @Nonnull GoldboxString str, int xStart, int y, @Nonnull FontColor firstCharcolor,
+		@Nonnull FontColor color) {
+
+		for (int pos = 0; pos < str.getLength(); pos++) {
+			renderChar(g2d, xStart + pos, y, str.getChar(pos), pos == 0 ? firstCharcolor : color);
+		}
+	}
+
 	protected void renderChar(@Nonnull Graphics2D g2d, int x, int y, int c, @Nonnull FontColor textFont) {
 		BufferedImage ci = resources.getFont(textFont).get(c);
 		renderImage(g2d, ci, x, y);
@@ -100,9 +112,7 @@ public abstract class AbstractRenderer {
 
 	protected void renderStatus(@Nonnull Graphics2D g2d) {
 		resources.getStatusLine().ifPresent(status -> {
-			for (int pos = 0; pos < status.getLength(); pos++) {
-				renderChar(g2d, pos, 24, status.getChar(pos), NORMAL);
-			}
+			renderString(g2d, status, 0, 24, NORMAL);
 		});
 	}
 
@@ -111,33 +121,26 @@ public abstract class AbstractRenderer {
 			switch (menu.getType()) {
 				case HORIZONTAL:
 					menu.getDescription().ifPresent(desc -> {
-						for (int pos = 0; pos < desc.getLength(); pos++) {
-							renderChar(g2d, pos, 24, desc.getChar(pos), GAME_NAME);
-						}
+						renderString(g2d, desc, 0, 24, GAME_NAME);
 					});
 					int menuStart = menu.getDescription().map(desc -> desc.getLength() + 1).orElse(0);
 					for (int i = 0; i < menu.getItemCount(); i++) {
 						GoldboxString menuName = menu.getMenuItem(i);
-						for (int charIndex = 0; charIndex < menuName.getLength(); charIndex++) {
-							renderChar(g2d, menuStart + charIndex, 24, menuName.getChar(charIndex),
-								menu.isSelected(i) ? INTENSE : charIndex == 0 ? SHORTCUT : NORMAL);
-						}
+						renderString(g2d, menuName, menuStart, 24, //
+							menu.isSelected(i) ? INTENSE : SHORTCUT, //
+							menu.isSelected(i) ? INTENSE : NORMAL);
 						menuStart += menuName.getLength() + 1;
 					}
 					break;
 				case VERTICAL:
 					menu.getDescription().ifPresent(desc -> {
-						for (int pos = 0; pos < desc.getLength(); pos++) {
-							renderChar(g2d, 1 + pos, 17, desc.getChar(pos), NORMAL);
-						}
+						renderString(g2d, desc, 1, 17, NORMAL);
 					});
 					int firstLine = menu.getDescription().map(desc -> 18).orElse(17);
 					for (int i = 0; i < menu.getItemCount(); i++) {
-						GoldboxString menuName = menu.getMenuItem(i);
-						for (int pos = 0; pos < menuName.getLength(); pos++) {
-							renderChar(g2d, 1 + pos, firstLine + i, menuName.getChar(pos),
-								menu.isSelected(i) ? INTENSE : pos == 0 ? SHORTCUT : NORMAL);
-						}
+						renderString(g2d, menu.getMenuItem(i), 1, firstLine + i, //
+							menu.isSelected(i) ? INTENSE : SHORTCUT, //
+							menu.isSelected(i) ? INTENSE : NORMAL);
 					}
 					break;
 				case PROGRAM:

@@ -16,7 +16,6 @@ import javax.annotation.Nonnull;
 import data.dungeon.DungeonMap.VisibleWalls;
 import data.dungeon.WallDef.WallDistance;
 import data.dungeon.WallDef.WallPlacement;
-import shared.GoldboxString;
 import ui.DungeonWall;
 import ui.UIResources;
 import ui.UIResources.DungeonResources;
@@ -155,10 +154,7 @@ public class DungeonRenderer extends StoryRenderer {
 
 	private void renderPosition(@Nonnull Graphics2D g2d) {
 		resources.getDungeonResources().ifPresent(r -> {
-			GoldboxString position = r.getPositionText();
-			for (int pos = 0; pos < position.getLength(); pos++) {
-				renderChar(g2d, 17 + pos, 15, position.getChar(pos), NORMAL);
-			}
+			renderString(g2d, r.getPositionText(), 17, 15, NORMAL);
 		});
 	}
 }
