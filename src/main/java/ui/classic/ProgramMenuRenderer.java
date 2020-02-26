@@ -1,5 +1,6 @@
 package ui.classic;
 
+import static shared.FontColor.GAME_NAME;
 import static shared.FontColor.INTENSE;
 import static shared.FontColor.NORMAL;
 import static shared.FontColor.SHORTCUT;
@@ -24,7 +25,19 @@ public class ProgramMenuRenderer extends AbstractDialogRenderer {
 		final ProgramMenuState menuState = (ProgramMenuState) state;
 		renderFrame(g2d, SCREEN);
 		renderHorizontalMenu(g2d, menuState.getHorizontalMenu());
-		renderProgramMenu(g2d, menuState.getProgramMenu());
+		switch (menuState.getMenuType()) {
+			case PROGRAM:
+				renderProgramMenu(g2d, menuState.getProgramMenu());
+				break;
+			case PROGRAM_SUB:
+				menuState.getProgramMenuDescription().ifPresent(desc -> {
+					renderString(g2d, desc, 1, 2, GAME_NAME);
+				});
+				renderProgramSubMenu(g2d, menuState.getProgramMenu());
+				break;
+			default:
+				break;
+		}
 	}
 
 	protected void renderProgramMenu(@Nonnull Graphics2D g2d, @Nonnull Menu menu) {
@@ -34,4 +47,13 @@ public class ProgramMenuRenderer extends AbstractDialogRenderer {
 				menu.isSelected(i) ? INTENSE : NORMAL);
 		}
 	}
+
+	protected void renderProgramSubMenu(@Nonnull Graphics2D g2d, @Nonnull Menu menu) {
+		for (int i = 0; i < menu.getItemCount(); i++) {
+			renderString(g2d, menu.getMenuItem(i), 3, 3 + i, //
+				menu.isSelected(i) ? INTENSE : SHORTCUT, //
+				menu.isSelected(i) ? INTENSE : NORMAL);
+		}
+	}
+
 }

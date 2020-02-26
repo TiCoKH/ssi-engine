@@ -1,7 +1,9 @@
 package shared;
 
 public enum ProgramMenuType {
-	PROGRAM(MenuType.PROGRAM);
+	PROGRAM(MenuType.PROGRAM), //
+	PROGRAM_SUB(MenuType.PROGRAM_SUB), //
+	;
 
 	private final MenuType menuType;
 
