@@ -100,6 +100,7 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void registerUI(@Nonnull UserInterface ui) {
 		this.ui = ui;
+		this.ui.setGlobalData(memory);
 	}
 
 	@Override
