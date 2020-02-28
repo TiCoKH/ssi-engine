@@ -38,6 +38,7 @@ public class DungeonRenderer extends StoryRenderer {
 	@Override
 	public void render(@Nonnull Graphics2D g2d) {
 		renderFrame(g2d, GAME);
+		renderParty(g2d, state.getGlobalData(), 17);
 		renderMenuOrTextStatus(g2d);
 		Optional<DungeonResources> r = state.getDungeonResources();
 		if (r.isPresent() && r.get().isShowRunicText()) {

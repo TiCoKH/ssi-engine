@@ -39,6 +39,7 @@ public class StoryRenderer extends AbstractStateRenderer {
 	public void render(@Nonnull Graphics2D g2d) {
 		renderFrame(g2d, GAME);
 		renderPicture(g2d, 3);
+		renderParty(g2d, state.getGlobalData(), 17);
 		renderMenuOrTextStatus(g2d);
 	}
 

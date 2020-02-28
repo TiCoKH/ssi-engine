@@ -59,6 +59,7 @@ import shared.MenuType;
 import shared.ProgramMenuType;
 import shared.UserInterface;
 import shared.ViewDungeonPosition;
+import shared.ViewGlobalData;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
 import ui.ExceptionHandler;
@@ -491,7 +492,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 			}
 		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
 
-		dialogStates.push(new ProgramMenuState(hMenu, copyCurrentActionMap(), copyCurrentInputMap(), menuSelect, pMenu, programType));
+		dialogStates
+			.push(new ProgramMenuState(state.getGlobalData(), hMenu, copyCurrentActionMap(), copyCurrentInputMap(), menuSelect, pMenu, programType));
 	}
 
 	@Override
@@ -526,6 +528,11 @@ public class ClassicMode extends JPanel implements UserInterface {
 		switchUIState(UIState.SPACE);
 		state.clearDungeonResources();
 		state.clearOverlandResources();
+	}
+
+	@Override
+	public void setGlobalData(ViewGlobalData globalData) {
+		state.setGlobalData(globalData);
 	}
 
 	@Override

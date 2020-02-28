@@ -25,6 +25,7 @@ import shared.GameFeature;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
 import shared.ViewDungeonPosition;
+import shared.ViewGlobalData;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
 import shared.ViewSpacePosition.Celestial;
@@ -53,6 +54,9 @@ public class RendererState {
 
 	// Elements to render the space map and ship combat, only available in space
 	private Optional<SpaceResources> spaceResources = Optional.empty();
+
+	// global info like party members or time
+	private Optional<ViewGlobalData> globalData = Optional.empty();
 
 	// The flavor picture(s), can be a small or big picture
 	// Also used for the title pictures
@@ -106,6 +110,11 @@ public class RendererState {
 	@Nonnull
 	public Optional<DungeonResources> getDungeonResources() {
 		return dungeonResources;
+	}
+
+	@Nonnull
+	public Optional<ViewGlobalData> getGlobalData() {
+		return globalData;
 	}
 
 	@Nonnull
@@ -163,6 +172,10 @@ public class RendererState {
 		@Nonnull DungeonResource res) {
 
 		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, map, res));
+	}
+
+	public void setGlobalData(@Nonnull ViewGlobalData globalData) {
+		this.globalData = Optional.of(globalData);
 	}
 
 	public void setMenu(@Nullable Menu menu) {

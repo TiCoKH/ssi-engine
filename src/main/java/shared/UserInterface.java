@@ -57,6 +57,8 @@ public interface UserInterface {
 
 	void setSpaceResources(ViewSpacePosition position);
 
+	void setGlobalData(ViewGlobalData globalData);
+
 	void setInputNone();
 
 	void setInputMenu(MenuType type, List<InputAction> menuItems, GoldboxString description, InputAction selected);

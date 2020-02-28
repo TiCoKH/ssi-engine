@@ -27,6 +27,7 @@ public class ProgramMenuRenderer extends AbstractDialogRenderer {
 		renderHorizontalMenu(g2d, menuState.getHorizontalMenu());
 		switch (menuState.getMenuType()) {
 			case PROGRAM:
+				renderParty(g2d, menuState.getGlobalData(), 1);
 				renderProgramMenu(g2d, menuState.getProgramMenu());
 				break;
 			case PROGRAM_SUB:
