@@ -30,6 +30,8 @@ import static shared.GameFeature.EXTENDED_DUNGEON;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -39,10 +41,12 @@ import engine.script.EclArgument;
 import engine.script.EclString;
 import shared.GoldboxString;
 import shared.ViewDungeonPosition;
+import shared.ViewGlobalData;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
+import shared.party.PartyMember;
 
-public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition {
+public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, ViewOverlandPosition, ViewGlobalData {
 	public static final int MEMLOC_CELESTIAL_POS_START = 0x4B85;
 	public static final int MEMLOC_SPACE_X = 0x4BBE;
 	public static final int MEMLOC_SPACE_Y = 0x4BBF;
@@ -96,6 +100,8 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static final int[] CELESTIAL_INITIAL_X = new int[] { 12, 12, 9, 9, 21, 18, 12, 6, 2, 4, 8, 14, 20 };
 	private static final int[] CELESTIAL_INITIAL_Y = new int[] { 10, 9, 8, 15, 11, 17, 20, 18, 13, 3, 1, 1, 7 };
 	private ByteBufferWrapper mem;
+
+	private final List<PartyMember> members = new ArrayList<>();
 
 	private int menuChoice;
 	private GoldboxString input;
@@ -620,6 +626,25 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	@Override
 	public int getBackdropIndex() {
 		return (getSquareInfo() & 0x80) >> 7;
+	}
+
+	public boolean isPartyFull() {
+		return getPartyMemberCount() >= 6;
+	}
+
+	@Override
+	public boolean hasPartyMembers() {
+		return !members.isEmpty();
+	}
+
+	@Override
+	public int getPartyMemberCount() {
+		return members.size();
+	}
+
+	@Override
+	public PartyMember getPartyMember(int index) {
+		return members.get(index);
 	}
 
 	public int readMemInt(EclArgument a) {
