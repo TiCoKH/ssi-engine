@@ -1,5 +1,7 @@
 package engine;
 
+import static engine.rulesystem.Flavors.STANDARD;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,8 @@ import java.util.stream.Stream;
 import common.FileMap;
 import data.character.CharacterValues;
 import engine.character.PlayerDataType;
+import engine.rulesystem.Flavor;
+import engine.rulesystem.Flavors;
 import engine.script.EclOpCode;
 import engine.text.SpecialCharType;
 import shared.GameResourceConfiguration;
@@ -24,6 +28,7 @@ public class EngineConfiguration extends GameResourceConfiguration {
 
 	private static final String CONFIG_CHARACTER_FORMAT = "character.format";
 	private static final String CONFIG_CHARACTER_VALUES = "character.values";
+	private static final String CONFIG_RULE_FLAVOR = "rule.flavor";
 
 	public EngineConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
@@ -88,5 +93,9 @@ public class EngineConfiguration extends GameResourceConfiguration {
 
 	public CharacterValues getCharacterValues() {
 		return CharacterValues.valueOf(getProperty(CONFIG_CHARACTER_VALUES));
+	}
+
+	public Flavor getFlavor() {
+		return Flavors.valueOf(getProperty(CONFIG_RULE_FLAVOR, STANDARD.name())).getFlavor();
 	}
 }
