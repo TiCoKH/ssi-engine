@@ -1,4 +1,4 @@
-package ui.resource;
+package ui.debug;
 
 import static data.content.DAXContentType.PIC;
 import static data.content.DAXContentType.SPRIT;

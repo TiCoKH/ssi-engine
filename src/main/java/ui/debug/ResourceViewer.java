@@ -1,4 +1,4 @@
-package ui.resource;
+package ui.debug;
 
 import static data.content.DAXContentType.BACK;
 import static data.content.DAXContentType.BIGPIC;
