@@ -8,12 +8,15 @@ import javax.annotation.Nonnull;
 
 import shared.ViewSpacePosition.Celestial;
 import ui.UISettings;
+import ui.shared.resource.UIResourceManager;
 
 public class SpaceTravelRenderer extends StoryRenderer {
 	protected static final int TEXT_LINE_WIDTH = 15;
 
-	public SpaceTravelRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
-		super(resources, settings, frameRenderer);
+	public SpaceTravelRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull UIResourceManager resman,
+		@Nonnull AbstractFrameRenderer frameRenderer) {
+
+		super(resources, settings, resman, frameRenderer);
 	}
 
 	@Override

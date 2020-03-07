@@ -7,11 +7,14 @@ import java.awt.Graphics2D;
 import javax.annotation.Nonnull;
 
 import ui.UISettings;
+import ui.shared.resource.UIResourceManager;
 
 public class OverlandMapRenderer extends StoryRenderer {
 
-	public OverlandMapRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
-		super(resources, settings, frameRenderer);
+	public OverlandMapRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull UIResourceManager resman,
+		@Nonnull AbstractFrameRenderer frameRenderer) {
+
+		super(resources, settings, resman, frameRenderer);
 	}
 
 	@Override

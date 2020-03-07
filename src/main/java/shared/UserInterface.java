@@ -42,6 +42,13 @@ public interface UserInterface {
 
 	void setStatus(GoldboxString status);
 
+	void clearCurrentDialog();
+
+	void clearAllDialogs();
+
+	void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
+		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect);
+
 	void setNoResources();
 
 	void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map, int[] decoIds);

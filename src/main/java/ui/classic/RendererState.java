@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 
 import data.dungeon.DungeonMap.Direction;
 import data.dungeon.DungeonMap.VisibleWalls;
-import shared.FontColor;
 import shared.GameFeature;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
@@ -107,11 +106,6 @@ public class RendererState {
 	@Nonnull
 	public Optional<DungeonResources> getDungeonResources() {
 		return dungeonResources;
-	}
-
-	@Nonnull
-	public List<BufferedImage> getFont(@Nonnull FontColor type) {
-		return resman.getFont(type);
 	}
 
 	@Nonnull

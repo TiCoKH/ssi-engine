@@ -1,6 +1,7 @@
 package ui.classic;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -11,46 +12,60 @@ import ui.shared.resource.UIResourceConfiguration;
 import ui.shared.resource.UIResourceManager;
 
 public class RendererContainer {
-	private static final Map<UIState, AbstractRenderer> GAME_RENDERERS = new EnumMap<>(UIState.class);
+	private static final Map<UIState, AbstractStateRenderer> GAME_RENDERERS = new EnumMap<>(UIState.class);
+	private static final Map<Class<? extends AbstractDialogRenderer>, AbstractDialogRenderer> DIALOG_RENDERERS = new HashMap<>();
 
 	private final RendererState state;
 	private final UISettings settings;
+	private final UIResourceManager resman;
 
 	private final AbstractFrameRenderer frameRenderer;
 
 	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull RendererState state,
 		@Nonnull UISettings settings) {
 
+		this.resman = resman;
 		this.state = state;
 		this.settings = settings;
 		this.frameRenderer = createFrameRenderer(config, resman, settings);
 	}
 
-	public AbstractRenderer rendererFor(@Nonnull UIState uiState) {
+	public AbstractStateRenderer rendererFor(@Nonnull UIState uiState) {
 		return GAME_RENDERERS.computeIfAbsent(uiState, this::createRenderer);
+	}
+
+	public AbstractDialogRenderer rendererFor(@Nonnull AbstractDialogState dialogState) {
+		return DIALOG_RENDERERS.computeIfAbsent(dialogState.getRendererClass(), this::createRenderer);
 	}
 
 	public AbstractFrameRenderer fameRenderer() {
 		return frameRenderer;
 	}
 
-	private AbstractRenderer createRenderer(@Nonnull UIState uiState) {
+	private AbstractStateRenderer createRenderer(@Nonnull UIState uiState) {
 		switch (uiState) {
 			case BIGPIC:
-				return new BigPicRenderer(state, settings, frameRenderer);
+				return new BigPicRenderer(state, settings, resman, frameRenderer);
 			case DUNGEON:
-				return new DungeonRenderer(state, settings, frameRenderer);
+				return new DungeonRenderer(state, settings, resman, frameRenderer);
 			case OVERLAND:
-				return new OverlandMapRenderer(state, settings, frameRenderer);
+				return new OverlandMapRenderer(state, settings, resman, frameRenderer);
 			case SPACE:
-				return new SpaceTravelRenderer(state, settings, frameRenderer);
+				return new SpaceTravelRenderer(state, settings, resman, frameRenderer);
 			case STORY:
-				return new StoryRenderer(state, settings, frameRenderer);
+				return new StoryRenderer(state, settings, resman, frameRenderer);
 			case TITLE:
-				return new TitleRenderer(state, settings, frameRenderer);
+				return new TitleRenderer(state, settings, resman, frameRenderer);
 			default:
 				throw new IllegalArgumentException("Unknown UIState: " + uiState);
 		}
+	}
+
+	private AbstractDialogRenderer createRenderer(@Nonnull Class<? extends AbstractDialogRenderer> clazz) {
+		if (ProgramMenuRenderer.class.equals(clazz)) {
+			return new ProgramMenuRenderer(settings, resman, frameRenderer);
+		}
+		throw new IllegalArgumentException("Unknown dialog renderer class: " + clazz.getName());
 	}
 
 	public static AbstractFrameRenderer createFrameRenderer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman,

@@ -21,6 +21,10 @@ public class Menu {
 
 	private int selection = 0;
 
+	public Menu(@Nonnull MenuType type, @Nonnull List<InputAction> menu) {
+		this(type, menu, null);
+	}
+
 	public Menu(@Nonnull MenuType type, @Nonnull List<InputAction> menu, @Nullable GoldboxString description) {
 		this.type = type;
 		this.menu = ImmutableList.copyOf(menu);

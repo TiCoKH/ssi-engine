@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -42,6 +43,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import io.vavr.collection.Stream;
+
 import common.FileMap;
 import data.ContentType;
 import data.dungeon.DungeonMap.VisibleWalls;
@@ -50,6 +53,7 @@ import shared.GoldboxString;
 import shared.GoldboxStringPart;
 import shared.InputAction;
 import shared.MenuType;
+import shared.ProgramMenuType;
 import shared.UserInterface;
 import shared.ViewDungeonPosition;
 import shared.ViewOverlandPosition;
@@ -90,6 +94,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient EngineStub stub;
 
 	private UIState currentState;
+	private Stack<AbstractDialogState> dialogStates = new Stack<>();
 
 	private boolean textNeedsProgressing = false;
 
@@ -402,6 +407,56 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
+	public void clearCurrentDialog() {
+		dialogStates.pop();
+	}
+
+	@Override
+	public void clearAllDialogs() {
+		dialogStates.clear();
+	}
+
+	@Override
+	public void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
+		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect) {
+
+		resetInput();
+
+		final Menu hMenu = new Menu(MenuType.HORIZONTAL, horizontalMenu);
+		final Menu pMenu = new Menu(programType.getMenuType(), programMenu, description);
+
+		horizontalMenu.forEach(a -> {
+			registerInput(a, () -> {
+				if (menuSelect.equals(a)) {
+					stub.handleInput(pMenu.getSelectedItem());
+				} else {
+					stub.handleInput(a);
+				}
+			}, getKeyStroke(toLowerCase(a.getName().toString().charAt(0))));
+		});
+		if (horizontalMenu.size() > 1) {
+			registerInput(MENU_PREV, hMenu::prev, getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
+			registerInput(MENU_NEXT, hMenu::next, getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
+		}
+		if (programMenu.size() > 1) {
+			registerInput(MENU_PREV + "_PROGRAM", pMenu::prev, getKeyStroke(VK_UP, 0), getKeyStroke(VK_KP_UP, 0));
+			registerInput(MENU_NEXT + "_PROGRAM", pMenu::next, getKeyStroke(VK_DOWN, 0), getKeyStroke(VK_KP_DOWN, 0));
+		}
+
+		registerInput(MENU_ACTION, () -> {
+			final ProgramMenuState menuState = (ProgramMenuState) dialogStates.peek();
+			final InputAction action = menuState.getHorizontalMenu().getSelectedItem();
+			if (menuSelect.equals(action)) {
+				stub.handleInput(pMenu.getSelectedItem());
+			} else {
+				stub.handleInput(action);
+			}
+		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
+
+		dialogStates.push(new ProgramMenuState(hMenu, menuSelect, pMenu, programType));
+	}
+
+	@Override
 	public void setNoResources() {
 		switchUIState(UIState.STORY);
 		state.clearDungeonResources();
@@ -596,6 +651,10 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
 
-		renderers.rendererFor(currentState).render((Graphics2D) g);
+		if (!dialogStates.empty()) {
+			AbstractDialogState dialogState = dialogStates.peek();
+			renderers.rendererFor(dialogState).render((Graphics2D) g, dialogState);
+		} else
+			renderers.rendererFor(currentState).render((Graphics2D) g);
 	}
 }
