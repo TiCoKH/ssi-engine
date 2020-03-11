@@ -43,11 +43,13 @@ import com.google.common.collect.ImmutableList;
 
 import common.FileMap;
 import data.ResourceLoader;
+import data.character.AbstractCharacter;
 import data.dungeon.DungeonMap;
 import data.dungeon.DungeonMap.Direction;
 import data.dungeon.DungeonMap.VisibleWalls;
 import data.dungeon.DungeonMap2;
 import data.script.EclProgram;
+import engine.character.PlayerDataFactory;
 import engine.input.MovementHandler;
 import engine.script.EclInstruction;
 import engine.text.GoldboxStringPartFactory;
@@ -79,6 +81,8 @@ public class Engine implements EngineCallback, EngineStub {
 
 	private GoldboxStringPartFactory stringPartFactory;
 
+	private final PlayerDataFactory playerDataFactory;
+
 	private boolean showRunicText = false;
 
 	public Engine(@Nonnull FileMap fm) throws Exception {
@@ -87,6 +91,7 @@ public class Engine implements EngineCallback, EngineStub {
 
 		if (cfg.getCodeBase() != 0)
 			EclInstruction.configOpCodes(cfg.getOpCodes());
+		AbstractCharacter.configValues(cfg.getCharacterValues());
 
 		this.memory = new VirtualMemory(cfg);
 		this.vm = new VirtualMachine(this, this.memory, cfg.getCodeBase());
@@ -95,6 +100,8 @@ public class Engine implements EngineCallback, EngineStub {
 				cfg.getSpecialChar(UMLAUT_U), cfg.getSpecialChar(SHARP_S));
 		else
 			this.stringPartFactory = new GoldboxStringPartFactory();
+
+		this.playerDataFactory = new PlayerDataFactory(res, cfg);
 	}
 
 	@Override
@@ -533,6 +540,10 @@ public class Engine implements EngineCallback, EngineStub {
 
 	public EngineConfiguration getConfig() {
 		return cfg;
+	}
+
+	public PlayerDataFactory getPlayerDataFactory() {
+		return playerDataFactory;
 	}
 
 	public boolean isAbortCurrentThread() {

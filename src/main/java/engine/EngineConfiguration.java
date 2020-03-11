@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import common.FileMap;
+import data.character.CharacterValues;
+import engine.character.PlayerDataType;
 import engine.script.EclOpCode;
 import engine.text.SpecialCharType;
 import shared.GameResourceConfiguration;
@@ -19,6 +21,9 @@ public class EngineConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_ADDRESS_PREFIX = "address.";
 	private static final String CONFIG_OVERLAND_MAP_IDS = "overland.map";
 	private static final String CONFIG_SPECIAL_CHAR_PREFIX = "ecl.char.";
+
+	private static final String CONFIG_CHARACTER_FORMAT = "character.format";
+	private static final String CONFIG_CHARACTER_VALUES = "character.values";
 
 	public EngineConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
@@ -75,5 +80,13 @@ public class EngineConfiguration extends GameResourceConfiguration {
 
 	public char getSpecialChar(SpecialCharType type) {
 		return getProperty(CONFIG_SPECIAL_CHAR_PREFIX + type.name(), "\0").charAt(0);
+	}
+
+	public PlayerDataType getCharacterFormat() {
+		return PlayerDataType.valueOf(getProperty(CONFIG_CHARACTER_FORMAT));
+	}
+
+	public CharacterValues getCharacterValues() {
+		return CharacterValues.valueOf(getProperty(CONFIG_CHARACTER_VALUES));
 	}
 }
