@@ -1,0 +1,258 @@
+//------------------------------------------------
+//--- 010 Editor v8.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct {
+	ubyte strength;
+	ubyte dexterity;
+	ubyte constitution;
+	ubyte intelligence;
+	ubyte wisdom;
+	ubyte charisma;
+	ubyte tech;
+} AbilityScores;
+
+typedef struct {
+// TECH
+	ubyte repair_electrical;
+	ubyte repair_mechanical;
+	ubyte repair_nuclear_engine;
+	ubyte repair_life_support;
+	ubyte repair_rocket_hull;
+	ubyte jury_rig;
+	ubyte bypass_security;
+	ubyte open_lock;
+	ubyte commo_operation;
+	ubyte sensor_operation;
+	ubyte demolitions;
+	ubyte unused_skill;
+	ubyte first_aid;
+	ubyte repair_weapon;
+	ubyte unused_skill;
+// MEDIC (TECH)
+	ubyte treat_disease;
+	ubyte treat_light_wounds;
+	ubyte treat_serious_wounds;
+	ubyte treat_critical_wounds;
+	ubyte treat_poisoning;
+	ubyte treat_stun_paralysis;
+	ubyte life_suspension_tech;
+	ubyte diagnosis;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+// INTELLIGENCE
+	ubyte mathematics;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte planetology;
+	ubyte battle_tactics;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte astronomy;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte programming;
+	ubyte unused_skill;
+	ubyte library_search;
+	ubyte astrogation;
+	ubyte navigation;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte disguise;
+// DEXTERITY
+	ubyte pilot_rocket;
+	ubyte pilot_fixed_wing;
+	ubyte drive_ground_car;
+	ubyte pilot_rotor_wing;
+	ubyte unknown_skill;
+	ubyte use_jetpack;
+	ubyte unknown_skill;
+	ubyte unknown_skill;
+	ubyte drive_jetcar;
+	ubyte unknown_skill;
+	ubyte hide_shadows;
+	ubyte move_silently;
+	ubyte pick_pockets;
+	ubyte acrobatics;
+	ubyte climb;
+	ubyte unknown_skill;
+	ubyte maneuver_in_0g;
+	ubyte unused_skill;
+	ubyte unused_skill;
+	ubyte unused_skill;
+// CHARISMA
+	ubyte act;
+	ubyte intimidate;
+	ubyte leadership;
+	ubyte befriend_animal;
+	ubyte unknown_skill;
+	ubyte fast_talk_convince;
+	ubyte singing;
+	ubyte distract;
+	ubyte eqtiquette;
+// WISDOM
+	ubyte tracking;
+	ubyte shadowing;
+	ubyte unknown_skill;
+	ubyte notice;
+	ubyte planetary_survival;
+} Skills;
+
+enum <ubyte> gender_type {
+	male,
+	female
+};
+
+enum <ubyte> race_type {
+	monster,
+	terran,
+	martian,
+	venusian,
+	mercurian,
+	tinker,
+	desert_runner,
+	lunarian,
+	lowlander
+};
+
+
+enum <ubyte> class_type {
+	none,
+	rocketjock,
+	medic,
+	warrior,
+	engineer,
+	rogue,
+	scout
+};
+
+//------------------------------------------------------
+// main definition
+
+LittleEndian();
+ubyte name_length;
+char name[name_length];
+char name_padding[15 - name_length];
+AbilityScores current;
+AbilityScores natural;
+ubyte save_explosion;
+ubyte save_electrical;
+ubyte save_paralysis;
+ubyte save_toxic;
+ubyte save_suffocation;
+ubyte save_radiation;
+ubyte save_heat;
+ubyte save_cold;
+gender_type gender;
+race_type race;
+class_type class;
+ubyte level;
+ubyte unknown;
+ushort credits;
+ubyte unknown;
+ubyte unknown;
+uint exp;
+ubyte thaco_natural;
+ubyte icon_dimension;
+ubyte unknown;
+ubyte movement_natural;
+ubyte ac_natural;
+ubyte age;
+ubyte unknown;
+ubyte _special_type_;
+ubyte attack1;
+ubyte attack2;
+ubyte unarmed_dice_count1;
+ubyte unarmed_dice_count2;
+ubyte unarmed_dice_sides1;
+ubyte unarmed_dice_sides2;
+ubyte unarmed_mod1;
+ubyte unarmed_mod2;
+ubyte unknown;
+ubyte unknown;
+ushort hp_natural;
+ubyte unknown;
+ubyte _encumbrance_max_;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte is_moncha;
+Skills skills;
+ubyte _infection_status_;
+ubyte _fell_on_grenade_;
+ubyte _won_against_talon_;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ushort xp_when_defeated;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte unknown;
+ubyte player_icon;
+ubyte combat_pic;
+ubyte weapon_spec1;
+ubyte weapon_spec2;
+ubyte weapon_spec3;
+ubyte weapon_spec4;
+ubyte weapon_spec5;
+ubyte weapon_spec6;
+ubyte weapon_spec7;
+ubyte weapon_spec8;
+ubyte weapon_spec9;
+ubyte weapon_spec10;
+ubyte numbers_0_15[16];
+ubyte status;
+ubyte enabled;
+ubyte hostile;
+ubyte quickfight;
+ubyte thaco_current;
+ubyte ac_current;
+ubyte _ac_current_behind_;
+ubyte unknown;
+ubyte unknown;
+ubyte current_dice_count1;
+ubyte current_dice_count2;
+ubyte current_dice_sides1;
+ubyte current_dice_sides2;
+ubyte current_mod1;
+ubyte current_mod2;
+ushort hp_current;
+ubyte movement_current;
+ubyte unknown;
+ubyte npc;
+ushort encumbrance_current;
+ubyte unknown;
+uint address1 <format=hex>;
+uint address2 <format=hex>;
+uint combat_address <format=hex>;
+uint items_address <format=hex>;
+uint effects_address <format=hex>;
+uint next_character_address <format=hex>;

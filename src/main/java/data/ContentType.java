@@ -8,6 +8,7 @@ public enum ContentType {
 	ECL("ECL[0-9]?\\.(DAX|GLB)"), //
 	GEO("GEO[0-9]?\\.(DAX|GLB)"), //
 	HEAD("HEAD[1-9]?\\.DAX"), //
+	MONCHA("MONST.GLB|MON[0-9]?CHA\\.(DAX|GLB)"), //
 	PIC("PIC[1-9ABCDEF]?A?\\.(DAX|TLB)"), //
 	SPRIT("SPRIT[1-9]?\\.(DAX|TLB)"), //
 	TITLE("TITLE\\.(DAX|TLB)"), //

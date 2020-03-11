@@ -1,5 +1,6 @@
 package data.image;
 
+import static data.HLIBContent.uncompress;
 import static data.image.ImageContentProperties.X_OFFSET;
 import static data.image.ImageContentProperties.Y_OFFSET;
 
@@ -132,28 +133,6 @@ public class TLBTILEBlock extends ImageContent {
 
 	private void readColorCycling(TILEHeader header, ByteBufferWrapper colorData) {
 		// TODO
-	}
-
-	private static ByteBufferWrapper uncompress(ByteBufferWrapper compressed, int sizeRaw) {
-		ByteBufferWrapper result = ByteBufferWrapper.allocateLE(sizeRaw);
-
-		int in = 0;
-		int out = 0;
-		while (in < compressed.limit() && out < result.limit()) {
-			byte next = compressed.get(in++);
-			int count = Math.abs(next);
-			if (next >= 0) {
-				for (int i = 0; i < count + 1; i++) {
-					result.put(out++, compressed.get(in++));
-				}
-			} else {
-				byte repeat = compressed.get(in++);
-				for (int i = 0; i < count + 1; i++) {
-					result.put(out++, repeat);
-				}
-			}
-		}
-		return result;
 	}
 
 	private static ByteBufferWrapper deswizzle(ByteBufferWrapper src, int rowLength) {
