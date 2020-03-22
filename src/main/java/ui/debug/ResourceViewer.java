@@ -39,6 +39,7 @@ import data.ContentType;
 import data.DAXFile;
 import data.dungeon.DungeonMap;
 import data.dungeon.DungeonMap2;
+import shared.GameFeature;
 import ui.ExceptionHandler;
 import ui.UISettings;
 import ui.shared.BackdropMode;
@@ -215,8 +216,7 @@ public class ResourceViewer {
 	}
 
 	private boolean isSpaceFrameUsed() {
-		return !config.getInnerFrameHorizontal(UIFrame.SPACE).isEmpty() //
-			&& !config.getInnerFrameVertical(UIFrame.SPACE).isEmpty();
+		return config.isUsingFeature(GameFeature.SPACE_TRAVEL);
 	}
 
 	public void show() {
