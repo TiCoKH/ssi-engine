@@ -69,8 +69,7 @@ public class UIResources {
 		clearDungeonResources();
 		clearOverlandResources();
 		clearSpaceResources();
-		pic = Optional.empty();
-		picIndex = 0;
+		clearPic();
 		storyText.resetText();
 		statusLine = Optional.empty();
 		menu = Optional.empty();
@@ -90,6 +89,7 @@ public class UIResources {
 
 	public void clearPic() {
 		pic = Optional.empty();
+		picIndex = 0;
 	}
 
 	@Nonnull
