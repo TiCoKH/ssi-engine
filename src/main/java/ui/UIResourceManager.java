@@ -24,11 +24,11 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import data.content.DAXImageContent;
-import data.content.DAXPalette;
-import data.content.WallDef;
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
+import data.dungeon.WallDef;
+import data.dungeon.WallDef.WallDistance;
+import data.dungeon.WallDef.WallPlacement;
+import data.image.ImageContent;
+import data.palette.Palette;
 import shared.FontColor;
 import shared.GameFeature;
 
@@ -45,9 +45,9 @@ public class UIResourceManager {
 	private ExceptionHandler excHandler;
 	private UIScaler scaler;
 
-	private DAXImageContent originalFont;
-	private DAXImageContent originalMisc;
-	private DAXImageContent originalFrames;
+	private ImageContent originalFont;
+	private ImageContent originalMisc;
+	private ImageContent originalFrames;
 	private Map<DungeonResource, List<DungeonWall>> originalWalls = new HashMap<>();
 
 	private Map<FontColor, List<BufferedImage>> fonts = new EnumMap<>(FontColor.class);
@@ -95,7 +95,7 @@ public class UIResourceManager {
 		if (!imageResources.containsKey(INTERNAL_ID_OVERLAND_CURSOR)) {
 			List<BufferedImage> cursor = null;
 			try {
-				DAXImageContent content = loader.getOverlandCursor();
+				ImageContent content = loader.getOverlandCursor();
 				if (content != null) {
 					cursor = scale(content);
 				}
@@ -151,7 +151,7 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	private List<BufferedImage> getOrCreateResource(@Nonnull ImageResource r, @Nonnull DAXImageContent content) {
+	private List<BufferedImage> getOrCreateResource(@Nonnull ImageResource r, @Nonnull ImageContent content) {
 		if (!imageResources.containsKey(r)) {
 			synchronized (imageResources) {
 				if (!imageResources.containsKey(r)) {
@@ -193,7 +193,7 @@ public class UIResourceManager {
 		Color textColor = FRAME.equals(config.getFrameType()) ? //
 			type.getFrameFontColor() : type.getFontColor();
 		IndexColorModel newCM = type == INTENSE ? //
-			DAXPalette.toInvertedPalette(cm) : DAXPalette.toPaletteWithFG(cm, textColor);
+			Palette.toInvertedPalette(cm) : Palette.toPaletteWithFG(cm, textColor);
 
 		List<BufferedImage> scaledFont = originalFont.stream() //
 			.map(c -> scaler.scale(new BufferedImage(newCM, c.getRaster(), false, null))) //
@@ -227,7 +227,7 @@ public class UIResourceManager {
 				List<BufferedImage> allContent = new ArrayList<>();
 				List<Point> allOffsets = new ArrayList<>();
 				for (int i = 0; i < cr.getLength(); i++) {
-					DAXImageContent content = loadResource(cr.get(i));
+					ImageContent content = loadResource(cr.get(i));
 					if (content != null) {
 						allContent.addAll(content.toList());
 						allOffsets.add(cr.getOffset(i));
@@ -238,7 +238,7 @@ public class UIResourceManager {
 				return result;
 			}
 
-			DAXImageContent content = loadResource(r);
+			ImageContent content = loadResource(r);
 			if (content != null) {
 				return scale(content);
 			}
@@ -249,7 +249,7 @@ public class UIResourceManager {
 		return BROKEN_List;
 	}
 
-	private DAXImageContent loadResource(@Nonnull ImageResource r) throws IOException {
+	private ImageContent loadResource(@Nonnull ImageResource r) throws IOException {
 		Optional<String> fn = r.getFilename();
 		if (fn.isPresent()) {
 			return loader.load(fn.get(), r.getId(), r.getType());
@@ -308,7 +308,7 @@ public class UIResourceManager {
 	}
 
 	@Nonnull
-	private List<BufferedImage> scale(@Nonnull DAXImageContent content) {
+	private List<BufferedImage> scale(@Nonnull ImageContent content) {
 		return content.stream().map(scaler::scale).collect(Collectors.toList());
 	}
 }

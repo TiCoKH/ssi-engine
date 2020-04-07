@@ -6,8 +6,6 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
-import data.content.DAXContent;
-import data.content.DAXContentType;
 
 public class TLBFile extends ContentFile {
 
@@ -27,7 +25,7 @@ public class TLBFile extends ContentFile {
 	}
 
 	@Override
-	public <T extends DAXContent> T getById(int id, @Nonnull Class<T> clazz, @Nonnull DAXContentType type) {
+	public <T extends Content> T getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
 		return content.getById(id, clazz, type);
 	}
 

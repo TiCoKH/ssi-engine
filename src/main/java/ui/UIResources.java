@@ -1,7 +1,7 @@
 package ui;
 
-import static data.content.DAXContentType.BACK;
-import static data.content.DAXContentType.SPRIT;
+import static data.ContentType.BACK;
+import static data.ContentType.SPRIT;
 import static ui.ImageResource.SKY_CLOUD;
 import static ui.ImageResource.SKY_STREET;
 import static ui.ImageResource.SKY_SUN;
@@ -19,8 +19,8 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import data.content.DungeonMap.Direction;
-import data.content.DungeonMap.VisibleWalls;
+import data.dungeon.DungeonMap.Direction;
+import data.dungeon.DungeonMap.VisibleWalls;
 import shared.FontColor;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;

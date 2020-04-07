@@ -1,4 +1,4 @@
-package engine.opcodes;
+package engine.script;
 
 import common.ByteBufferWrapper;
 import shared.GoldboxString;

@@ -1,9 +1,9 @@
 package engine.debug;
 
-import static engine.opcodes.EclOpCode.GOSUB;
-import static engine.opcodes.EclOpCode.GOTO;
-import static engine.opcodes.EclOpCode.ON_GOSUB;
-import static engine.opcodes.EclOpCode.ON_GOTO;
+import static engine.script.EclOpCode.GOSUB;
+import static engine.script.EclOpCode.GOTO;
+import static engine.script.EclOpCode.ON_GOSUB;
+import static engine.script.EclOpCode.ON_GOTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +13,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import common.ByteBufferWrapper;
-import data.content.EclProgram;
-import engine.opcodes.EclInstruction;
-import engine.opcodes.EclOpCode;
+import data.script.EclProgram;
+import engine.script.EclInstruction;
+import engine.script.EclOpCode;
 
 public class Disassembler {
 	private int codeBase;;

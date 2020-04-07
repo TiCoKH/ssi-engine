@@ -1,12 +1,13 @@
-package data.content;
+package data.image;
 
 import java.awt.image.IndexColorModel;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
 
 public class ExtendedEGAImage extends EGAImage implements VGABitPackedExtension {
 
-	public ExtendedEGAImage(ByteBufferWrapper data, DAXContentType type) {
+	public ExtendedEGAImage(ByteBufferWrapper data, ContentType type) {
 		EGAHeader header = parseHeader(data, type);
 
 		int dataSizeEGA = BASE_IMAGE_START + header.imageCount * (header.width << 2) * header.height;

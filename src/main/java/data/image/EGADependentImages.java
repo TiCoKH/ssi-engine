@@ -1,8 +1,8 @@
-package data.content;
+package data.image;
 
-import static data.content.ImageContentProperties.DELAY;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.DELAY;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -14,16 +14,18 @@ import java.util.Hashtable;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
+import data.palette.Palette;
 
-public class EGADependentImages extends DAXImageContent {
-	protected static final DAXContentType SAME_SIZE_IMAGES = DAXContentType.PIC;
+public class EGADependentImages extends ImageContent {
+	protected static final ContentType SAME_SIZE_IMAGES = ContentType.PIC;
 	protected static final int BASE_IMAGE_START = 22;
 
 	protected EGADependentImages() {
 		// Dummy constructor
 	}
 
-	public EGADependentImages(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public EGADependentImages(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		int imageCount = data.getUnsigned();
 
 		for (int i = 0; i < imageCount; i++) {
@@ -35,7 +37,7 @@ public class EGADependentImages extends DAXImageContent {
 		}
 	}
 
-	protected EGAHeader parseHeader(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	protected EGAHeader parseHeader(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		EGAHeader result = new EGAHeader();
 		result.type = type;
 		result.delay = (int) data.getUnsignedInt();
@@ -51,7 +53,7 @@ public class EGADependentImages extends DAXImageContent {
 		byte[] cgaColorMapping = new byte[8];
 		data.get(cgaColorMapping);
 
-		return DAXPalette.createColorModel(header.type);
+		return Palette.createColorModel(header.type);
 	}
 
 	protected BufferedImage parseData(@Nonnull ByteBufferWrapper data, @Nonnull EGAHeader header, @Nonnull IndexColorModel cm) {

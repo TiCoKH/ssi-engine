@@ -1,7 +1,9 @@
-package data.content;
+package data.image;
+
+import data.ContentType;
 
 class EGAHeader {
-	DAXContentType type;
+	ContentType type;
 	int delay;
 	int height;
 	int width;

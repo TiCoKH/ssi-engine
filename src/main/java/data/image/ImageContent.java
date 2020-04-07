@@ -1,4 +1,4 @@
-package data.content;
+package data.image;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -10,7 +10,9 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public abstract class DAXImageContent extends DAXContent {
+import data.Content;
+
+public abstract class ImageContent extends Content {
 	protected final List<BufferedImage> images = new ArrayList<>();
 
 	public boolean contains(Object arg0) {

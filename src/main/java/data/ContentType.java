@@ -1,6 +1,6 @@
-package data.content;
+package data;
 
-public enum DAXContentType {
+public enum ContentType {
 	_8X8D("8X8D[1-9BC]?\\.(DAX|TLB)"), //
 	BACK("BACK[1-9]?\\.(DAX|TLB)"), //
 	BIGPIC("BIGPI[CX][1-9]?\\.(DAX|TLB)"), //
@@ -15,7 +15,7 @@ public enum DAXContentType {
 
 	private String filePattern;
 
-	private DAXContentType(String filePattern) {
+	private ContentType(String filePattern) {
 		this.filePattern = filePattern;
 	}
 

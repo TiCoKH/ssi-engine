@@ -1,4 +1,4 @@
-package data.content;
+package data.image;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
+import data.palette.Palette;
 
-public class MonocromeLargeSymbols extends DAXImageContent {
+public class MonocromeLargeSymbols extends ImageContent {
 
-	public MonocromeLargeSymbols(ByteBufferWrapper data, DAXContentType type) {
-		IndexColorModel cm = DAXPalette.toPaletteWithFG(null, DAXPalette.COLOR_WHITE);
+	public MonocromeLargeSymbols(ByteBufferWrapper data, ContentType type) {
+		IndexColorModel cm = Palette.toPaletteWithFG(null, Palette.COLOR_WHITE);
 		for (int i = 0; i < data.capacity() / 12; i++) {
 			// font is 8x12, shown as 8x8; some rows are skipped
 			ByteBufferWrapper glyph = ByteBufferWrapper.allocateLE(8);

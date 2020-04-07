@@ -1,4 +1,4 @@
-package engine.opcodes;
+package engine.script;
 
 public enum EclOpCode {
 	EXIT(0x00, 0, -1, -1), //

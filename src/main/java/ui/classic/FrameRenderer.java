@@ -1,8 +1,8 @@
 package ui.classic;
 
-import static data.content.DAXContentType._8X8D;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.ContentType._8X8D;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 import static ui.FrameType.FRAME;
 import static ui.FrameType.PortraitType.NORMAL;
 import static ui.FrameType.PortraitType.THICK;

@@ -1,13 +1,14 @@
-package data.content;
+package data.image;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
 
 public class ExtendedEGADependentImages extends EGADependentImages implements VGABitPackedExtension {
 
-	public ExtendedEGADependentImages(ByteBufferWrapper data, DAXContentType type) {
+	public ExtendedEGADependentImages(ByteBufferWrapper data, ContentType type) {
 		int imageCount = data.getUnsigned();
 
 		BufferedImage baseImage = null;

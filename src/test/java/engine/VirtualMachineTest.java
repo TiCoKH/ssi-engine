@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import common.FileMap;
 import data.ContentFile;
-import data.content.DAXContentType;
-import data.content.EclProgram;
+import data.ContentType;
+import data.script.EclProgram;
 import shared.GoldboxString;
 import shared.InputAction;
 import shared.MenuType;
@@ -99,7 +99,7 @@ public class VirtualMachineTest {
 			public void delayCurrentThread() {
 			}
 		}, new VirtualMemory(cfg), cfg.getCodeBase());
-		vm.newEcl(ecls.getById(16, EclProgram.class, DAXContentType.ECL));
+		vm.newEcl(ecls.getById(16, EclProgram.class, ContentType.ECL));
 
 		System.out.println("Init:");
 		vm.startInit();

@@ -1,6 +1,6 @@
 package ui;
 
-import static data.content.DAXContentType._8X8D;
+import static data.ContentType._8X8D;
 
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;

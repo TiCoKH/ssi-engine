@@ -1,8 +1,8 @@
 package ui;
 
-import static data.content.DAXContentType.BACK;
-import static data.content.DAXContentType.BIGPIC;
-import static data.content.DAXContentType._8X8D;
+import static data.ContentType.BACK;
+import static data.ContentType.BIGPIC;
+import static data.ContentType._8X8D;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import data.content.DAXContentType;
+import data.ContentType;
 
 public class ImageResource {
 	public static final ImageResource SPACE_SYMBOLS = new ImageResource("8X8D0.DAX", 1, _8X8D);
@@ -23,15 +23,15 @@ public class ImageResource {
 
 	private Optional<String> filename;
 	private final int id;
-	private final DAXContentType type;
+	private final ContentType type;
 
-	public ImageResource(int id, @Nullable DAXContentType type) {
+	public ImageResource(int id, @Nullable ContentType type) {
 		this.filename = Optional.empty();
 		this.id = id;
 		this.type = type;
 	}
 
-	public ImageResource(@Nonnull String filename, int id, @Nonnull DAXContentType type) {
+	public ImageResource(@Nonnull String filename, int id, @Nonnull ContentType type) {
 		this.filename = Optional.of(filename);
 		this.id = id;
 		this.type = requireNonNull(type);
@@ -45,7 +45,7 @@ public class ImageResource {
 		return id;
 	}
 
-	public DAXContentType getType() {
+	public ContentType getType() {
 		return type;
 	}
 

@@ -1,14 +1,15 @@
-package data.content;
+package data.dungeon;
 
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
 
 public class DungeonMap2 extends DungeonMap {
 
 	private int[] decoIds = new int[6];
 
-	public DungeonMap2(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public DungeonMap2(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		super(data.getUnsigned(), data.getUnsigned());
 
 		decoIds[0] = data.getUnsigned();

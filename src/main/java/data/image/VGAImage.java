@@ -1,7 +1,7 @@
-package data.content;
+package data.image;
 
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -12,10 +12,12 @@ import java.util.Hashtable;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
+import data.palette.Palette;
 
-public class VGAImage extends DAXImageContent {
+public class VGAImage extends ImageContent {
 
-	public VGAImage(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public VGAImage(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		// 10 byte Header
 		int height = data.getUnsigned(0);
 		int width = 8 * data.getUnsigned(1);
@@ -32,7 +34,7 @@ public class VGAImage extends DAXImageContent {
 		props.put(X_OFFSET.name(), 8 * xStart);
 		props.put(Y_OFFSET.name(), 8 * yStart);
 
-		IndexColorModel cm = DAXPalette.createColorModel(data, 10, colorCount, colorBase, type);
+		IndexColorModel cm = Palette.createColorModel(data, 10, colorCount, colorBase, type);
 
 		data.position(imageOffset);
 		for (int i = 0; i < imageCount; i++, imageOffset += imageSize) {

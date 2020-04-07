@@ -1,15 +1,15 @@
 package ui.debug;
 
-import static data.content.DAXContentType.BACK;
-import static data.content.DAXContentType.BIGPIC;
-import static data.content.DAXContentType.BODY;
-import static data.content.DAXContentType.GEO;
-import static data.content.DAXContentType.HEAD;
-import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.SPRIT;
-import static data.content.DAXContentType.TITLE;
-import static data.content.DAXContentType.WALLDEF;
-import static data.content.DAXContentType._8X8D;
+import static data.ContentType.BACK;
+import static data.ContentType.BIGPIC;
+import static data.ContentType.BODY;
+import static data.ContentType.GEO;
+import static data.ContentType.HEAD;
+import static data.ContentType.PIC;
+import static data.ContentType.SPRIT;
+import static data.ContentType.TITLE;
+import static data.ContentType.WALLDEF;
+import static data.ContentType._8X8D;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
@@ -35,10 +35,10 @@ import javax.swing.tree.TreeNode;
 
 import common.FileMap;
 import data.ContentFile;
+import data.ContentType;
 import data.DAXFile;
-import data.content.DAXContentType;
-import data.content.DungeonMap;
-import data.content.DungeonMap2;
+import data.dungeon.DungeonMap;
+import data.dungeon.DungeonMap2;
 import ui.BackdropMode;
 import ui.DungeonMapResource;
 import ui.DungeonResource;
@@ -131,7 +131,7 @@ public class ResourceViewer {
 		return root;
 	}
 
-	private void initChildren(MutableTreeNode root, DAXContentType type) throws IOException {
+	private void initChildren(MutableTreeNode root, ContentType type) throws IOException {
 		Set<Integer> ids = new TreeSet<>(loader.idsFor(type));
 		if (!ids.isEmpty()) {
 			MutableTreeNode parent = new DefaultMutableTreeNode(type.name());

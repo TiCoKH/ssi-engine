@@ -3,9 +3,9 @@ package engine;
 import static engine.EngineInputAction.CONTINUE_ACTION;
 import static engine.EngineInputAction.MENU_HANDLER;
 import static engine.EngineInputAction.YES_NO_ACTIONS;
-import static engine.opcodes.EclOpCode.CALL;
-import static engine.opcodes.EclOpCode.GOSUB;
-import static engine.opcodes.EclOpCode.GOTO;
+import static engine.script.EclOpCode.CALL;
+import static engine.script.EclOpCode.GOSUB;
+import static engine.script.EclOpCode.GOTO;
 import static shared.MenuType.HORIZONTAL;
 import static shared.MenuType.VERTICAL;
 
@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 
 import common.ByteBufferWrapper;
-import data.content.EclProgram;
-import engine.opcodes.EclArgument;
-import engine.opcodes.EclInstruction;
-import engine.opcodes.EclOpCode;
+import data.script.EclProgram;
+import engine.script.EclArgument;
+import engine.script.EclInstruction;
+import engine.script.EclOpCode;
 import shared.CustomGoldboxString;
 import shared.GoldboxString;
 

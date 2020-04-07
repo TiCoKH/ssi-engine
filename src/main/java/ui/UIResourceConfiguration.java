@@ -1,15 +1,15 @@
 package ui;
 
 import common.FileMap;
-import data.content.DAXContentType;
-import data.content.DAXImageContent;
-import data.content.EGADependentImages;
-import data.content.EGAImage;
-import data.content.ExtendedEGADependentImages;
-import data.content.ExtendedEGAImage;
-import data.content.TLBTILEBlock;
-import data.content.VGADependentImages;
-import data.content.VGAImage;
+import data.ContentType;
+import data.image.EGADependentImages;
+import data.image.EGAImage;
+import data.image.ExtendedEGADependentImages;
+import data.image.ExtendedEGAImage;
+import data.image.ImageContent;
+import data.image.TLBTILEBlock;
+import data.image.VGADependentImages;
+import data.image.VGAImage;
 import shared.GameResourceConfiguration;
 import ui.FrameType.BackgroundType;
 import ui.FrameType.PortraitType;
@@ -57,7 +57,7 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 		super(filemap);
 	}
 
-	public Class<? extends DAXImageContent> getImageTypeClass(DAXContentType content) {
+	public Class<? extends ImageContent> getImageTypeClass(ContentType content) {
 		switch (content) {
 			case _8X8D:
 				return getFormatClass(CONFIG_FORMAT_8X8D);
@@ -79,7 +79,7 @@ public class UIResourceConfiguration extends GameResourceConfiguration {
 		}
 	}
 
-	private Class<? extends DAXImageContent> getFormatClass(String key) {
+	private Class<? extends ImageContent> getFormatClass(String key) {
 		String format = getProperty(key);
 		switch (format) {
 			case "E":

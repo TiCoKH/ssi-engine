@@ -1,7 +1,7 @@
-package data.content;
+package data.image;
 
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -12,10 +12,12 @@ import java.util.Hashtable;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
+import data.palette.Palette;
 
-public class VGADependentImages extends DAXImageContent {
+public class VGADependentImages extends ImageContent {
 
-	public VGADependentImages(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public VGADependentImages(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		// 11 byte Header
 		int height = data.getUnsignedShort(0);
 		int width = 8 * data.getUnsignedShort(2);
@@ -31,7 +33,7 @@ public class VGADependentImages extends DAXImageContent {
 		props.put(X_OFFSET.name(), 8 * xStart);
 		props.put(Y_OFFSET.name(), 8 * yStart);
 
-		IndexColorModel cm = DAXPalette.createColorModel(data, 11, colorCount, colorBase, type);
+		IndexColorModel cm = Palette.createColorModel(data, 11, colorCount, colorBase, type);
 
 		byte[] egaColorMapping = new byte[colorCount >> 1];
 		data.position(11 + 3 * colorCount);

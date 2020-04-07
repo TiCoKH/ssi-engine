@@ -1,7 +1,7 @@
-package data.content;
+package data.image;
 
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -13,15 +13,17 @@ import java.util.Hashtable;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
+import data.palette.Palette;
 
-public class EGAImage extends DAXImageContent {
+public class EGAImage extends ImageContent {
 	protected static final int BASE_IMAGE_START = 17;
 
 	protected EGAImage() {
 		// Dummy constructor
 	}
 
-	public EGAImage(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public EGAImage(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		EGAHeader header = parseHeader(data, type);
 
 		IndexColorModel cm = parseCLUT(data, header);
@@ -31,7 +33,7 @@ public class EGAImage extends DAXImageContent {
 		}
 	}
 
-	protected EGAHeader parseHeader(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	protected EGAHeader parseHeader(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		EGAHeader result = new EGAHeader();
 		result.type = type;
 		result.delay = Integer.MIN_VALUE;
@@ -51,7 +53,7 @@ public class EGAImage extends DAXImageContent {
 		byte[] cgaColorMapping = new byte[8];
 		data.get(cgaColorMapping);
 
-		return DAXPalette.createColorModel(header.type);
+		return Palette.createColorModel(header.type);
 	}
 
 	protected BufferedImage parseData(@Nonnull ByteBufferWrapper data, @Nonnull EGAHeader header, @Nonnull IndexColorModel cm) {

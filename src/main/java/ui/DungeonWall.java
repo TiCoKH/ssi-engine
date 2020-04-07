@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
+import data.dungeon.WallDef.WallDistance;
+import data.dungeon.WallDef.WallPlacement;
 
 public class DungeonWall {
 	private Map<WallDistance, Map<WallPlacement, BufferedImage>> wallViewsMap;

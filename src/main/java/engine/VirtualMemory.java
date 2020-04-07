@@ -34,9 +34,9 @@ import java.nio.channels.FileChannel;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
-import data.content.DungeonMap.Direction;
-import engine.opcodes.EclArgument;
-import engine.opcodes.EclString;
+import data.dungeon.DungeonMap.Direction;
+import engine.script.EclArgument;
+import engine.script.EclString;
 import shared.GoldboxString;
 import shared.ViewDungeonPosition;
 import shared.ViewOverlandPosition;

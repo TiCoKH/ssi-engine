@@ -1,16 +1,16 @@
 package ui.debug;
 
-import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.SPRIT;
-import static data.content.DAXContentType._8X8D;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
-import static data.content.WallDef.WallDistance.CLOSE;
-import static data.content.WallDef.WallDistance.FAR;
-import static data.content.WallDef.WallDistance.MEDIUM;
-import static data.content.WallDef.WallPlacement.FOWARD;
-import static data.content.WallDef.WallPlacement.LEFT;
-import static data.content.WallDef.WallPlacement.RIGHT;
+import static data.ContentType.PIC;
+import static data.ContentType.SPRIT;
+import static data.ContentType._8X8D;
+import static data.dungeon.WallDef.WallDistance.CLOSE;
+import static data.dungeon.WallDef.WallDistance.FAR;
+import static data.dungeon.WallDef.WallDistance.MEDIUM;
+import static data.dungeon.WallDef.WallPlacement.FOWARD;
+import static data.dungeon.WallDef.WallPlacement.LEFT;
+import static data.dungeon.WallDef.WallPlacement.RIGHT;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
-import data.content.DAXContentType;
+import data.ContentType;
 import shared.FontColor;
 import ui.DungeonMapResource;
 import ui.DungeonResource;
@@ -100,7 +100,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 	}
 
 	public void changeRenderObject(@Nonnull ImageResource ir) {
-		if (ir.getType() == DAXContentType.TITLE) {
+		if (ir.getType() == ContentType.TITLE) {
 			index = 0;
 			renderObject = Optional.of(new ImageCompositeResource(ir));
 		} else {

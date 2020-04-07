@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import data.content.DAXContentType;
+import data.ContentType;
 
 public class ImageCompositeResource extends ImageResource {
 	private ImageResource[] r;
@@ -54,7 +54,7 @@ public class ImageCompositeResource extends ImageResource {
 		return r[index].getId();
 	}
 
-	public DAXContentType getType(int index) {
+	public ContentType getType(int index) {
 		return r[index].getType();
 	}
 

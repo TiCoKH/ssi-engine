@@ -2,7 +2,7 @@ package ui;
 
 import javax.annotation.Nonnull;
 
-import data.content.DungeonMap.Direction;
+import data.dungeon.DungeonMap.Direction;
 import shared.CustomGoldboxString;
 import shared.ViewDungeonPosition;
 

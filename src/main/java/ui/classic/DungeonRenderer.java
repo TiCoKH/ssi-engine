@@ -1,8 +1,8 @@
 package ui.classic;
 
-import static data.content.DAXPalette.COLOR_GAME_STATIC;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
+import static data.palette.Palette.COLOR_GAME_STATIC;
 import static shared.FontColor.NORMAL;
 import static ui.UIFrame.GAME;
 
@@ -13,9 +13,9 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import data.content.DungeonMap.VisibleWalls;
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
+import data.dungeon.DungeonMap.VisibleWalls;
+import data.dungeon.WallDef.WallDistance;
+import data.dungeon.WallDef.WallPlacement;
 import shared.GoldboxString;
 import ui.DungeonWall;
 import ui.UIResources;

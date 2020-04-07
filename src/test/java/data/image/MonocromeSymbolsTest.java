@@ -1,4 +1,4 @@
-package data.content;
+package data.image;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import data.ContentFile;
+import data.ContentType;
 
 public class MonocromeSymbolsTest {
 
@@ -15,7 +16,7 @@ public class MonocromeSymbolsTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/8X8D1.DAX");
 		Assume.assumeTrue(f.exists());
 		ContentFile symbols = ContentFile.create(f).get();
-		MonocromeSymbols ms = symbols.getById(201, MonocromeSymbols.class, DAXContentType._8X8D);
+		MonocromeSymbols ms = symbols.getById(201, MonocromeSymbols.class, ContentType._8X8D);
 	}
 
 }

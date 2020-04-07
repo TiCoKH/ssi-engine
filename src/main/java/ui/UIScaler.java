@@ -1,12 +1,12 @@
 package ui;
 
-import static data.content.DAXContentType.BIGPIC;
-import static data.content.DAXContentType.BODY;
-import static data.content.DAXContentType.HEAD;
-import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.TITLE;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.ContentType.BIGPIC;
+import static data.ContentType.BODY;
+import static data.ContentType.HEAD;
+import static data.ContentType.PIC;
+import static data.ContentType.TITLE;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
@@ -34,8 +34,8 @@ import common.scaler.xbrz.Scaler3x;
 import common.scaler.xbrz.Scaler4x;
 import common.scaler.xbrz.Scaler5x;
 import common.scaler.xbrz.ScalerConfig;
-import data.content.DAXContentType;
-import data.content.ImageContentProperties;
+import data.ContentType;
+import data.image.ImageContentProperties;
 import ui.UISettings.PropertyName;
 
 public class UIScaler {
@@ -82,7 +82,7 @@ public class UIScaler {
 	}
 
 	@Nonnull
-	public BufferedImage scaleComposite(@Nonnull DAXContentType type, @Nonnull List<BufferedImage> images, List<Point> offsets) {
+	public BufferedImage scaleComposite(@Nonnull ContentType type, @Nonnull List<BufferedImage> images, List<Point> offsets) {
 		int width = 0, height = 0;
 		if (type == TITLE) {
 			width = 320;

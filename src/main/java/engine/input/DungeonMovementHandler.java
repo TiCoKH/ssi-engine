@@ -1,6 +1,6 @@
 package engine.input;
 
-import data.content.DungeonMap;
+import data.dungeon.DungeonMap;
 import engine.Engine;
 import engine.EngineInputAction;
 import engine.VirtualMachine;

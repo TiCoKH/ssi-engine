@@ -1,4 +1,4 @@
-package data.content;
+package data.image;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -10,6 +10,7 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import data.ContentFile;
+import data.ContentType;
 
 public class VGADependentImagesTest {
 
@@ -18,7 +19,7 @@ public class VGADependentImagesTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/PIC1.DAX");
 		Assume.assumeTrue(f.exists());
 		ContentFile pic1 = ContentFile.create(f).get();
-		VGADependentImages terrines = pic1.getById(32, VGADependentImages.class, DAXContentType.PIC);
+		VGADependentImages terrines = pic1.getById(32, VGADependentImages.class, ContentType.PIC);
 		assertThat(terrines.size(), is(6));
 	}
 }

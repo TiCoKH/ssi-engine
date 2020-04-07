@@ -5,8 +5,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import data.content.DAXContentType;
-import data.content.DungeonMap.VisibleWalls;
+import data.ContentType;
+import data.dungeon.DungeonMap.VisibleWalls;
 
 public interface UserInterface {
 
@@ -26,7 +26,7 @@ public interface UserInterface {
 
 	void showPicture(int headId, int bodyId);
 
-	void showPicture(int id, DAXContentType type);
+	void showPicture(int id, ContentType type);
 
 	void clearPictures();
 

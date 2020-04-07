@@ -1,9 +1,9 @@
 package ui;
 
-import static data.content.DAXContentType.BIGPIC;
-import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.WALLDEF;
-import static data.content.DAXContentType._8X8D;
+import static data.ContentType.BIGPIC;
+import static data.ContentType.PIC;
+import static data.ContentType.WALLDEF;
+import static data.ContentType._8X8D;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,12 +18,12 @@ import javax.annotation.Nullable;
 
 import common.ByteBufferWrapper;
 import common.FileMap;
+import data.ContentType;
 import data.ResourceLoader;
-import data.content.DAXContentType;
-import data.content.DAXImageContent;
-import data.content.MonocromeLargeSymbols;
-import data.content.MonocromeSymbols;
-import data.content.WallDef;
+import data.dungeon.WallDef;
+import data.image.ImageContent;
+import data.image.MonocromeLargeSymbols;
+import data.image.MonocromeSymbols;
 
 public class UIResourceLoader extends ResourceLoader {
 	private UIResourceConfiguration config;
@@ -34,7 +34,7 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
-	public DAXImageContent getFont() throws IOException {
+	public ImageContent getFont() throws IOException {
 		String font = config.getFont();
 		if (font.contains(",")) {
 			StringTokenizer st = new StringTokenizer(font, ",");
@@ -58,7 +58,7 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
-	public DAXImageContent getMisc() throws IOException {
+	public ImageContent getMisc() throws IOException {
 		StringTokenizer st = new StringTokenizer(config.getMisc(), ",");
 		String archive = st.nextToken();
 		int blockId = Integer.parseUnsignedInt(st.nextToken());
@@ -66,7 +66,7 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
-	public DAXImageContent getFrames() throws IOException {
+	public ImageContent getFrames() throws IOException {
 		if (config.getFrameLocation().equals("MISC")) {
 			return getMisc();
 		}
@@ -77,7 +77,7 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nullable
-	public DAXImageContent getOverlandCursor() throws IOException {
+	public ImageContent getOverlandCursor() throws IOException {
 		if (toFile("CURSOR.DAX").isPresent())
 			return load("CURSOR.DAX", 1, _8X8D);
 		else if (idsFor(_8X8D).contains(204)) {
@@ -87,7 +87,7 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nullable
-	public DAXImageContent findImage(int id) throws IOException {
+	public ImageContent findImage(int id) throws IOException {
 		if (idsFor(PIC).contains(id)) {
 			return find(id, config.getImageTypeClass(PIC), PIC);
 		} else if (idsFor(BIGPIC).contains(id)) {
@@ -97,14 +97,14 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nullable
-	public DAXImageContent findImage(int id, @Nullable DAXContentType type) throws IOException {
+	public ImageContent findImage(int id, @Nullable ContentType type) throws IOException {
 		if (type == null) {
 			return findImage(id);
 		}
 		return find(id, config.getImageTypeClass(type), type);
 	}
 
-	public DAXImageContent find8x8d(int id) throws IOException {
+	public ImageContent find8x8d(int id) throws IOException {
 		for (String fn : filesFor(WALLDEF)) {
 			WallDef wallDef = load(fn, id, WallDef.class, WALLDEF);
 			if (wallDef != null) {
@@ -118,7 +118,7 @@ public class UIResourceLoader extends ResourceLoader {
 	}
 
 	@Nonnull
-	protected DAXImageContent load(@Nonnull String name, int blockId, @Nonnull DAXContentType type) throws IOException {
+	protected ImageContent load(@Nonnull String name, int blockId, @Nonnull ContentType type) throws IOException {
 		return load(name).getById(blockId, config.getImageTypeClass(type), type);
 	}
 }

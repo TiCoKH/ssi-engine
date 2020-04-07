@@ -1,14 +1,14 @@
 package engine.debug;
 
-import static engine.opcodes.EclOpCode.AND;
-import static engine.opcodes.EclOpCode.COMPARE;
-import static engine.opcodes.EclOpCode.COMPARE_AND;
-import static engine.opcodes.EclOpCode.IF_EQUALS;
-import static engine.opcodes.EclOpCode.IF_GREATER;
-import static engine.opcodes.EclOpCode.IF_GREATER_EQUALS;
-import static engine.opcodes.EclOpCode.IF_LESS;
-import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
-import static engine.opcodes.EclOpCode.OR;
+import static engine.script.EclOpCode.AND;
+import static engine.script.EclOpCode.COMPARE;
+import static engine.script.EclOpCode.COMPARE_AND;
+import static engine.script.EclOpCode.IF_EQUALS;
+import static engine.script.EclOpCode.IF_GREATER;
+import static engine.script.EclOpCode.IF_GREATER_EQUALS;
+import static engine.script.EclOpCode.IF_LESS;
+import static engine.script.EclOpCode.IF_LESS_EQUALS;
+import static engine.script.EclOpCode.OR;
 
 import java.util.List;
 
@@ -16,8 +16,8 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
-import engine.opcodes.EclArgument;
-import engine.opcodes.EclOpCode;
+import engine.script.EclArgument;
+import engine.script.EclOpCode;
 
 public class EclInstructionCompareIf implements EclInstructionData {
 	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);

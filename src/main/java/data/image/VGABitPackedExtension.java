@@ -1,8 +1,8 @@
-package data.content;
+package data.image;
 
-import static data.content.ImageContentProperties.DELAY;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.DELAY;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import common.ByteBufferWrapper;
+import data.palette.Palette;
 
 public interface VGABitPackedExtension {
 
@@ -42,7 +43,7 @@ public interface VGABitPackedExtension {
 			}
 		}
 
-		return DAXPalette.createColorModel(b48, header.type);
+		return Palette.createColorModel(b48, header.type);
 	}
 
 	default BufferedImage parseExtendedData(@Nonnull ByteBufferWrapper data, @Nonnull EGAHeader header, @Nonnull IndexColorModel cm,

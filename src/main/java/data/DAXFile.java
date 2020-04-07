@@ -12,8 +12,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedMap;
 
 import common.ByteBufferWrapper;
-import data.content.DAXContent;
-import data.content.DAXContentType;
 
 public class DAXFile extends ContentFile {
 	private Map<Integer, ByteBufferWrapper> blocks;
@@ -43,11 +41,11 @@ public class DAXFile extends ContentFile {
 	}
 
 	@Override
-	public <T extends DAXContent> T getById(int id, @Nonnull Class<T> clazz, @Nonnull DAXContentType type) {
+	public <T extends Content> T getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
 		ByteBufferWrapper b = blocks.get(id);
 		if (b != null) {
 			try {
-				return clazz.getConstructor(ByteBufferWrapper.class, DAXContentType.class).newInstance(b.rewind(), type);
+				return clazz.getConstructor(ByteBufferWrapper.class, ContentType.class).newInstance(b.rewind(), type);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 				e.printStackTrace(System.err);

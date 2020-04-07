@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import common.FileMap;
-import engine.opcodes.EclOpCode;
+import engine.script.EclOpCode;
 import engine.text.SpecialCharType;
 import shared.GameResourceConfiguration;
 

@@ -14,12 +14,10 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableList;
 
 import common.ByteBufferWrapper;
-import data.content.DAXContent;
-import data.content.DAXContentType;
 
 public class TLBHLIBBlock {
-	private static final Class<?>[] DATA_ARGUMENT = new Class[] { ByteBufferWrapper.class, DAXContentType.class };
-	private static final Class<?>[] LIST_ARGUMENT = new Class[] { List.class, DAXContentType.class };
+	private static final Class<?>[] DATA_ARGUMENT = new Class[] { ByteBufferWrapper.class, ContentType.class };
+	private static final Class<?>[] LIST_ARGUMENT = new Class[] { List.class, ContentType.class };
 
 	private List<ByteBufferWrapper> blocks;
 	private HLIBHeader header;
@@ -56,7 +54,7 @@ public class TLBHLIBBlock {
 		return ImmutableList.of(data);
 	}
 
-	public <T extends DAXContent> T getById(int id, @Nonnull Class<T> clazz, @Nonnull DAXContentType type) {
+	public <T extends Content> T getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
 		if (!hasBlockIds()) {
 			return createInstance(clazz, LIST_ARGUMENT, blocks, type);
 		}
@@ -71,7 +69,7 @@ public class TLBHLIBBlock {
 		return createInstance(clazz, DATA_ARGUMENT, data, type);
 	}
 
-	private <T extends DAXContent> T createInstance(Class<T> clazz, Class<?>[] argument, Object... value) {
+	private <T extends Content> T createInstance(Class<T> clazz, Class<?>[] argument, Object... value) {
 		try {
 			return clazz.getConstructor(argument).newInstance(value);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException

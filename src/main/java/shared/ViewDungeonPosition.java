@@ -1,6 +1,6 @@
 package shared;
 
-import data.content.DungeonMap.Direction;
+import data.dungeon.DungeonMap.Direction;
 
 public interface ViewDungeonPosition {
 	int getSkyColorOutdoors();

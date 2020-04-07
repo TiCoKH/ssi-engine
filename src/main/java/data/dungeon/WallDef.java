@@ -1,4 +1,4 @@
-package data.content;
+package data.dungeon;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -6,11 +6,13 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.Content;
+import data.ContentType;
 
-public class WallDef extends DAXContent {
+public class WallDef extends Content {
 	private WallDisplay[] walls;
 
-	public WallDef(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public WallDef(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		int setCount = data.remaining() / 156;
 		walls = new WallDisplay[setCount];
 		for (int i = 0; i < setCount; i++) {

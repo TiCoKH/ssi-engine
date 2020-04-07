@@ -1,10 +1,10 @@
 package ui.classic;
 
-import static data.content.DAXContentType.BIGPIC;
-import static data.content.DAXContentType.BODY;
-import static data.content.DAXContentType.HEAD;
-import static data.content.DAXContentType.PIC;
-import static data.content.DAXContentType.TITLE;
+import static data.ContentType.BIGPIC;
+import static data.ContentType.BODY;
+import static data.ContentType.HEAD;
+import static data.ContentType.PIC;
+import static data.ContentType.TITLE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static shared.InputAction.LOAD;
 
@@ -31,8 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import common.FileMap;
-import data.content.DAXContentType;
-import data.content.DungeonMap.VisibleWalls;
+import data.ContentType;
+import data.dungeon.DungeonMap.VisibleWalls;
 import shared.EngineStub;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
@@ -509,7 +509,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void showPicture(int pictureId, @Nullable DAXContentType type) {
+	public void showPicture(int pictureId, @Nullable ContentType type) {
 		stopPicAnimation();
 		if (type == null) {
 			try {
@@ -535,7 +535,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 		}
 	}
 
-	private void updateUIStateForPictureType(@Nonnull DAXContentType type) {
+	private void updateUIStateForPictureType(@Nonnull ContentType type) {
 		if (PIC.equals(type)) {
 			switchUIState( //
 				resources.getDungeonResources().isPresent() ? UIState.DUNGEON : //

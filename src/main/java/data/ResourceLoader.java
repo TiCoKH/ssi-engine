@@ -15,11 +15,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import common.FileMap;
-import data.content.DAXContent;
-import data.content.DAXContentType;
 
 public class ResourceLoader {
-	private static final Map<DAXContentType, List<String>> contentMap = new EnumMap<>(DAXContentType.class);
+	private static final Map<ContentType, List<String>> contentMap = new EnumMap<>(ContentType.class);
 	private Map<String, ContentFile> files = new HashMap<>();
 
 	private FileMap fileMap;
@@ -27,13 +25,13 @@ public class ResourceLoader {
 	public ResourceLoader(@Nonnull FileMap fileMap) {
 		this.fileMap = fileMap;
 
-		for (DAXContentType content : DAXContentType.values()) {
+		for (ContentType content : ContentType.values()) {
 			contentMap.put(content, fileMap.findMatching(content.getFilePattern()));
 		}
 	}
 
 	@Nonnull
-	public Set<Integer> idsFor(@Nonnull DAXContentType type) throws IOException {
+	public Set<Integer> idsFor(@Nonnull ContentType type) throws IOException {
 		Set<Integer> result = new HashSet<>();
 		List<String> filenames = contentMap.get(type);
 		for (int i = 0; i < filenames.size(); i++) {
@@ -44,12 +42,12 @@ public class ResourceLoader {
 	}
 
 	@Nonnull
-	protected Set<String> filesFor(@Nonnull DAXContentType type) throws IOException {
+	protected Set<String> filesFor(@Nonnull ContentType type) throws IOException {
 		return new HashSet<>(contentMap.get(type));
 	}
 
 	@Nullable
-	public <T extends DAXContent> T find(int id, @Nonnull Class<T> clazz, @Nonnull DAXContentType type) throws IOException {
+	public <T extends Content> T find(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) throws IOException {
 		List<String> filenames = contentMap.get(type);
 		for (int i = 0; i < filenames.size(); i++) {
 			T dic = load(filenames.get(i), id, clazz, type);
@@ -61,7 +59,7 @@ public class ResourceLoader {
 	}
 
 	@Nonnull
-	protected <T extends DAXContent> T load(@Nonnull String name, int blockId, @Nonnull Class<T> clazz, @Nonnull DAXContentType type)
+	protected <T extends Content> T load(@Nonnull String name, int blockId, @Nonnull Class<T> clazz, @Nonnull ContentType type)
 		throws IOException {
 
 		return load(name).getById(blockId, clazz, type);

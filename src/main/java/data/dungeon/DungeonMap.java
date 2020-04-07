@@ -1,4 +1,4 @@
-package data.content;
+package data.dungeon;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -6,10 +6,12 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
+import data.Content;
+import data.ContentType;
+import data.dungeon.WallDef.WallDistance;
+import data.dungeon.WallDef.WallPlacement;
 
-public class DungeonMap extends DAXContent {
+public class DungeonMap extends Content {
 	private int height;
 	private int width;
 	private DungeonSquare[][] map;
@@ -20,7 +22,7 @@ public class DungeonMap extends DAXContent {
 		this.map = new DungeonSquare[width][height];
 	}
 
-	public DungeonMap(@Nonnull ByteBufferWrapper data, @Nonnull DAXContentType type) {
+	public DungeonMap(@Nonnull ByteBufferWrapper data, @Nonnull ContentType type) {
 		this(16, 16);
 
 		data.getUnsignedShort(); // GEO ID, different for each game

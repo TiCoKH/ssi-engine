@@ -1,4 +1,4 @@
-package data.content;
+package data.palette;
 
 import java.awt.Color;
 import java.awt.image.IndexColorModel;
@@ -8,8 +8,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
 
-public class DAXPalette {
+public class Palette {
 	public static final Color COLOR_TRANSPARENT = new Color(0xff000000);
 	public static final Color COLOR_BLACK = new Color(0x000000);
 	public static final Color COLOR_BLUE = new Color(0x0000AA);
@@ -32,7 +33,7 @@ public class DAXPalette {
 	private static final Color[] COLOR_SPRITE_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_GREY_DARK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_BLACK, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 	private static final Color[] COLOR_COMBAT_STATIC = { COLOR_TRANSPARENT, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN, COLOR_RED, COLOR_MAGENTA, COLOR_BROWN, COLOR_GREY_LIGHT, COLOR_BLACK, COLOR_BLUE_BRIGHT, COLOR_GREEN_BRIGHT, COLOR_CYAN_BRIGHT, COLOR_RED_BRIGHT, COLOR_MAGENTA_BRIGHT, COLOR_YELLOW_BRIGHT, COLOR_WHITE };
 
-	public static IndexColorModel createColorModel(@Nonnull DAXContentType type) {
+	public static IndexColorModel createColorModel(@Nonnull ContentType type) {
 		switch (type) {
 			case _8X8D:
 			case BACK:
@@ -66,7 +67,7 @@ public class DAXPalette {
 			return new IndexColorModel(4, 16, r, g, b, Arrays.asList(staticColors).indexOf(transparent));
 	}
 
-	public static IndexColorModel createColorModel(@Nonnull byte[] data, @Nonnull DAXContentType type) {
+	public static IndexColorModel createColorModel(@Nonnull byte[] data, @Nonnull ContentType type) {
 		switch (type) {
 			case _8X8D:
 			case BACK:
@@ -108,7 +109,7 @@ public class DAXPalette {
 	}
 
 	public static IndexColorModel createColorModel(@Nonnull ByteBufferWrapper data, int dataOffset, int colorCount, int colorStart,
-		@Nonnull DAXContentType type) {
+		@Nonnull ContentType type) {
 
 		switch (type) {
 			case _8X8D:
@@ -155,7 +156,7 @@ public class DAXPalette {
 	}
 
 	public static IndexColorModel createColorModelNoShift(@Nonnull ByteBufferWrapper data, int colorCount, int colorStart, boolean transparent,
-		@Nonnull DAXContentType type) {
+		@Nonnull ContentType type) {
 
 		switch (type) {
 			case _8X8D:

@@ -1,18 +1,18 @@
 package engine.debug;
 
-import static engine.opcodes.EclOpCode.EXIT;
-import static engine.opcodes.EclOpCode.GOTO;
-import static engine.opcodes.EclOpCode.IF_EQUALS;
-import static engine.opcodes.EclOpCode.IF_GREATER;
-import static engine.opcodes.EclOpCode.IF_GREATER_EQUALS;
-import static engine.opcodes.EclOpCode.IF_LESS;
-import static engine.opcodes.EclOpCode.IF_LESS_EQUALS;
-import static engine.opcodes.EclOpCode.IF_NOT_EQUALS;
-import static engine.opcodes.EclOpCode.NEW_ECL;
-import static engine.opcodes.EclOpCode.ON_GOTO;
-import static engine.opcodes.EclOpCode.RETURN;
-import static engine.opcodes.EclOpCode.STOP_MOVE_23;
-import static engine.opcodes.EclOpCode.STOP_MOVE_42;
+import static engine.script.EclOpCode.EXIT;
+import static engine.script.EclOpCode.GOTO;
+import static engine.script.EclOpCode.IF_EQUALS;
+import static engine.script.EclOpCode.IF_GREATER;
+import static engine.script.EclOpCode.IF_GREATER_EQUALS;
+import static engine.script.EclOpCode.IF_LESS;
+import static engine.script.EclOpCode.IF_LESS_EQUALS;
+import static engine.script.EclOpCode.IF_NOT_EQUALS;
+import static engine.script.EclOpCode.NEW_ECL;
+import static engine.script.EclOpCode.ON_GOTO;
+import static engine.script.EclOpCode.RETURN;
+import static engine.script.EclOpCode.STOP_MOVE_23;
+import static engine.script.EclOpCode.STOP_MOVE_42;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,9 +24,9 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
-import engine.opcodes.EclArgument;
-import engine.opcodes.EclInstruction;
-import engine.opcodes.EclOpCode;
+import engine.script.EclArgument;
+import engine.script.EclInstruction;
+import engine.script.EclOpCode;
 
 public class EclinstructionWrapper implements EclInstructionData {
 	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO, ON_GOTO, RETURN, NEW_ECL);

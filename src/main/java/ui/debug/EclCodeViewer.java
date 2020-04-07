@@ -1,6 +1,6 @@
 package ui.debug;
 
-import static data.content.DAXContentType.ECL;
+import static data.ContentType.ECL;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
@@ -35,17 +35,17 @@ import javax.swing.table.TableColumn;
 
 import common.FileMap;
 import data.ResourceLoader;
-import data.content.EclProgram;
+import data.script.EclProgram;
 import engine.EngineConfiguration;
 import engine.debug.CodeBlock;
 import engine.debug.CodeSection;
 import engine.debug.Decompiler;
 import engine.debug.Disassembler;
 import engine.debug.Disassembler.JumpAddresses;
+import engine.script.EclInstruction;
+import engine.script.EclOpCode;
 import engine.debug.EclInstructionData;
 import engine.debug.EclinstructionWrapper;
-import engine.opcodes.EclInstruction;
-import engine.opcodes.EclOpCode;
 
 public class EclCodeViewer {
 	private JFrame frame;

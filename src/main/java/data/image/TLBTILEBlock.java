@@ -1,7 +1,7 @@
-package data.content;
+package data.image;
 
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -13,10 +13,12 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
+import data.ContentType;
+import data.palette.Palette;
 
-public class TLBTILEBlock extends DAXImageContent {
+public class TLBTILEBlock extends ImageContent {
 
-	public TLBTILEBlock(@Nonnull List<ByteBufferWrapper> tileBuffers, @Nonnull DAXContentType type) {
+	public TLBTILEBlock(@Nonnull List<ByteBufferWrapper> tileBuffers, @Nonnull ContentType type) {
 		TILEHeader colorHeader = null;
 		ByteBufferWrapper colorData = null;
 
@@ -125,7 +127,7 @@ public class TLBTILEBlock extends DAXImageContent {
 	}
 
 	private static IndexColorModel readColorPalette(TILEHeader header, ByteBufferWrapper colorData, boolean transparent) {
-		return DAXPalette.createColorModelNoShift(colorData, header.short3, header.short2, transparent, header.contentType);
+		return Palette.createColorModelNoShift(colorData, header.short3, header.short2, transparent, header.contentType);
 	}
 
 	private void readColorCycling(TILEHeader header, ByteBufferWrapper colorData) {
@@ -210,9 +212,9 @@ public class TLBTILEBlock extends DAXImageContent {
 		private int short3;
 		private int byte1;
 		private int type;
-		private DAXContentType contentType;
+		private ContentType contentType;
 
-		private TILEHeader(int short1, int short2, int short3, int byte1, int type, @Nonnull DAXContentType contentType) {
+		private TILEHeader(int short1, int short2, int short3, int byte1, int type, @Nonnull ContentType contentType) {
 			this.short1 = short1;
 			this.short2 = short2;
 			this.short3 = short3;
@@ -221,7 +223,7 @@ public class TLBTILEBlock extends DAXImageContent {
 			this.contentType = contentType;
 		}
 
-		public static TILEHeader readFrom(ByteBufferWrapper data, DAXContentType type) {
+		public static TILEHeader readFrom(ByteBufferWrapper data, ContentType type) {
 			int short1 = data.getShort();
 			int short2 = data.getShort();
 			int short3 = data.getShort();

@@ -1,9 +1,9 @@
 package ui;
 
-import static data.content.DAXContentType.WALLDEF;
-import static data.content.DAXContentType._8X8D;
-import static data.content.ImageContentProperties.X_OFFSET;
-import static data.content.ImageContentProperties.Y_OFFSET;
+import static data.ContentType.WALLDEF;
+import static data.ContentType._8X8D;
+import static data.image.ImageContentProperties.X_OFFSET;
+import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
@@ -25,11 +25,11 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
-import data.content.DAXImageContent;
-import data.content.DAXPalette;
-import data.content.WallDef;
-import data.content.WallDef.WallDistance;
-import data.content.WallDef.WallPlacement;
+import data.dungeon.WallDef;
+import data.dungeon.WallDef.WallDistance;
+import data.dungeon.WallDef.WallPlacement;
+import data.image.ImageContent;
+import data.palette.Palette;
 
 public class DungeonWallSetBuilder {
 	private UIResourceLoader loader;
@@ -218,7 +218,7 @@ public class DungeonWallSetBuilder {
 	private List<BufferedImage> buildWallSymbolListFor(int id, boolean additionalSymbols) throws IOException {
 		List<BufferedImage> result = new ArrayList<>();
 
-		DAXImageContent symbols = loader.find8x8d(id);
+		ImageContent symbols = loader.find8x8d(id);
 		if (symbols != null && symbols.size() >= 255) {
 			if (symbols.size() == 255) {
 				result.add(createTransparentSymbol());
@@ -246,7 +246,7 @@ public class DungeonWallSetBuilder {
 	}
 
 	private BufferedImage createTransparentSymbol() {
-		IndexColorModel cm = DAXPalette.createColorModel(_8X8D);
+		IndexColorModel cm = Palette.createColorModel(_8X8D);
 		byte[] data = new byte[32];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (byte) 0xDD;
