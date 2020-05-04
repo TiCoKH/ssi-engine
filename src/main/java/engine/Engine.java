@@ -16,7 +16,6 @@ import static engine.text.SpecialCharType.SHARP_S;
 import static engine.text.SpecialCharType.UMLAUT_A;
 import static engine.text.SpecialCharType.UMLAUT_O;
 import static engine.text.SpecialCharType.UMLAUT_U;
-import static java.nio.file.StandardOpenOption.READ;
 import static shared.GameFeature.BODY_HEAD;
 import static shared.GameFeature.FLEXIBLE_DUNGEON_SIZE;
 import static shared.GameFeature.INTERACTIVE_OVERLAND;
@@ -26,7 +25,6 @@ import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -205,26 +203,7 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void loadGame() {
-		File savesPath = getSavesPath();
-		File saveGame = new File(savesPath, "savegame.dat");
-		if (!saveGame.exists() && !saveGame.canRead()) {
-			System.err.println("Cant load");
-			return;
-		}
-
-		setNextTask(() -> {
-			getUi().clearAll();
-
-			try (FileChannel fc = FileChannel.open(saveGame.toPath(), READ)) {
-				memory.loadFrom(fc);
-				loadArea(memory.getAreaValue(0), memory.getAreaValue(1), memory.getAreaValue(2));
-				loadAreaDecoration(memory.getAreaDecoValue(0), memory.getAreaDecoValue(1), memory.getAreaDecoValue(2));
-				loadEcl(memory.getCurrentECL(), false);
-				System.out.println("Game loaded");
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
-		});
+		EngineInputAction.LOAD.handle(this, null);
 	}
 
 	@Override

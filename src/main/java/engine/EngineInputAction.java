@@ -12,6 +12,7 @@ import engine.input.GameMenuLOOKHandler;
 import engine.input.GameMenuMOVEHandler;
 import engine.input.GameMenuSEARCHHandler;
 import engine.input.InputHandler;
+import engine.input.LoadHandler;
 import engine.input.MenuHandler;
 import engine.input.ModeMenuHandler;
 import engine.input.MovementHandler;
@@ -30,6 +31,8 @@ public class EngineInputAction implements InputAction {
 	static final InputHandler GAME_MENU_SEARCH_HANDLER = new GameMenuSEARCHHandler();
 	static final InputHandler GAME_MENU_LOOK_HANDLER = new GameMenuLOOKHandler();
 	static final InputHandler GAME_MENU_EXIT_HANDLER = new GameMenuEXITHandler();
+
+	public static final InputHandler LOAD = new LoadHandler();
 
 	private static final EngineInputAction YES = new EngineInputAction(MENU_HANDLER, "YES", 0);
 	private static final EngineInputAction NO = new EngineInputAction(MENU_HANDLER, "NO", 1);
