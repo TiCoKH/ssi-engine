@@ -5,7 +5,20 @@ import static data.ContentType.BODY;
 import static data.ContentType.HEAD;
 import static data.ContentType.PIC;
 import static data.ContentType.TITLE;
+import static java.awt.event.KeyEvent.VK_BACK_SPACE;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_ENTER;
+import static java.awt.event.KeyEvent.VK_KP_DOWN;
+import static java.awt.event.KeyEvent.VK_KP_LEFT;
+import static java.awt.event.KeyEvent.VK_KP_RIGHT;
+import static java.awt.event.KeyEvent.VK_KP_UP;
+import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_RIGHT;
+import static java.awt.event.KeyEvent.VK_SPACE;
+import static java.awt.event.KeyEvent.VK_UP;
+import static java.lang.Character.toLowerCase;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static javax.swing.KeyStroke.getKeyStroke;
 import static shared.InputAction.LOAD;
 
 import java.awt.Dimension;
@@ -168,20 +181,14 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	public void showTitles() {
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "CONTINUE");
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "CONTINUE");
-		getActionMap().put("CONTINUE", new AbstractAction() {
+		registerInput("CONTINUE", () -> {
+			if (animationFuture != null //
+				&& !animationFuture.isDone() //
+				&& animationFuture.cancel(false)) {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (animationFuture != null //
-					&& !animationFuture.isDone() //
-					&& animationFuture.cancel(false)) {
-
-					exec.execute(titleSwitcher);
-				}
+				exec.execute(titleSwitcher);
 			}
-		});
+		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
 		showNextTitle(1);
 	}
 
@@ -255,15 +262,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private void resetInput() {
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KEY_MAPPING.get(LOAD), LOAD);
 		getActionMap().clear();
-		getActionMap().put(LOAD, new AbstractAction() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				stub.loadGame();
-			}
-		});
+		registerInput(LOAD, () -> stub.loadGame(), KEY_MAPPING.get(LOAD));
 	}
 
 	@Override
@@ -279,56 +279,35 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		List<InputAction> namedMenuItems = menuItems.stream().filter(a -> a.getName().getLength() > 0).collect(Collectors.toList());
 		namedMenuItems.stream().forEach(a -> {
-			KeyStroke k = KeyStroke.getKeyStroke(Character.toLowerCase(a.getName().toString().charAt(0)));
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
-			mapToAction(a);
+			registerInput(a, () -> {
+				resources.setMenu(null);
+				stub.handleInput(a);
+			}, getKeyStroke(toLowerCase(a.getName().toString().charAt(0))));
 		});
 		if (namedMenuItems.size() > 1) {
 			if (type == MenuType.HORIZONTAL) {
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), MENU_PREV);
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), MENU_PREV);
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), MENU_NEXT);
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0), MENU_NEXT);
+				registerInput(MENU_PREV, () -> resources.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
+				registerInput(MENU_NEXT, () -> resources.getMenu().ifPresent(Menu::next), getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
 			} else {
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), MENU_PREV);
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), MENU_PREV);
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), MENU_NEXT);
-				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), MENU_NEXT);
+				registerInput(MENU_PREV, () -> resources.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_UP, 0), getKeyStroke(VK_KP_UP, 0));
+				registerInput(MENU_NEXT, () -> resources.getMenu().ifPresent(Menu::next), getKeyStroke(VK_DOWN, 0), getKeyStroke(VK_KP_DOWN, 0));
 			}
-			getActionMap().put(MENU_PREV, new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					resources.getMenu().ifPresent(Menu::prev);
-				}
-			});
-			getActionMap().put(MENU_NEXT, new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					resources.getMenu().ifPresent(Menu::next);
-				}
-			});
 		}
 
 		menuItems.stream().filter(a -> a.getName().getLength() == 0).forEach(a -> {
-			KeyStroke k = KEY_MAPPING.get(a.getName());
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(k, a);
-			mapToAction(a);
+			registerInput(a, () -> {
+				resources.setMenu(null);
+				stub.handleInput(a);
+			}, KEY_MAPPING.get(a.getName()));
 		});
 
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), MENU_ACTION);
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), MENU_ACTION);
-		getActionMap().put(MENU_ACTION, new AbstractAction() {
+		registerInput(MENU_ACTION, () -> {
+			resources.getMenu().ifPresent(m -> {
+				resources.setMenu(null);
+				stub.handleInput(m.getSelectedItem());
+			});
+		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				resources.getMenu().ifPresent(m -> {
-					resources.setMenu(null);
-					stub.handleInput(m.getSelectedItem());
-				});
-			}
-		});
 		Menu menu = new Menu(type, namedMenuItems, description);
 		if (selected != null)
 			menu.setSelectedItem(selected);
@@ -342,17 +321,12 @@ public class ClassicMode extends JPanel implements UserInterface {
 		resources.setStatusLine(input);
 		for (char c = '0'; c <= '9'; c++) {
 			Character d = c;
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
-			getActionMap().put(d, new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					input.addChar(d);
-					if (input.getInputCount() == 1) {
-						mapInputDone();
-					}
+			registerInput(d, () -> {
+				input.addChar(d);
+				if (input.getInputCount() == 1) {
+					mapInputDone();
 				}
-			});
+			}, getKeyStroke(c));
 		}
 		mapInputBack();
 	}
@@ -364,79 +338,56 @@ public class ClassicMode extends JPanel implements UserInterface {
 		resources.setStatusLine(input);
 		for (char c = 'a'; c <= 'z'; c++) {
 			Character d = c;
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
-			getActionMap().put(d, new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					input.addChar(Character.toUpperCase(d));
-					if (input.getInputCount() == 1) {
-						mapInputDone();
-					}
+			registerInput(d, () -> {
+				input.addChar(Character.toUpperCase(d));
+				if (input.getInputCount() == 1) {
+					mapInputDone();
 				}
-			});
+			}, getKeyStroke(c));
 		}
 		for (char c = 'A'; c <= 'Z'; c++) {
 			Character d = c;
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
-			getActionMap().put(d, new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					input.addChar(Character.toUpperCase(d));
-					if (input.getInputCount() == 1) {
-						mapInputDone();
-					}
+			registerInput(d, () -> {
+				input.addChar(Character.toUpperCase(d));
+				if (input.getInputCount() == 1) {
+					mapInputDone();
 				}
-			});
+			}, getKeyStroke(c));
 		}
 		for (char c = '0'; c <= '9'; c++) {
 			Character d = c;
-			getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), d);
-			getActionMap().put(d, new AbstractAction() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					input.addChar(Character.toUpperCase(d));
-					if (input.getInputCount() == 1) {
-						mapInputDone();
-					}
+			registerInput(d, () -> {
+				input.addChar(Character.toUpperCase(d));
+				if (input.getInputCount() == 1) {
+					mapInputDone();
 				}
-			});
+			}, getKeyStroke(c));
 		}
 		mapInputBack();
 	}
 
 	private void mapInputBack() {
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "_INPUT_BACK");
-		getActionMap().put("_INPUT_BACK", new AbstractAction() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.removeLastChar();
-			}
-		});
+		registerInput("_INPUT_BACK", () -> input.removeLastChar(), getKeyStroke(VK_BACK_SPACE, 0));
 	}
 
 	private void mapInputDone() {
-		getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "_INPUT_DONE");
-		getActionMap().put("_INPUT_DONE", new AbstractAction() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				clearStatus();
-				stub.handleInput(input.toString());
-			}
-		});
+		registerInput("_INPUT_DONE", () -> {
+			clearStatus();
+			stub.handleInput(input.toString());
+		}, getKeyStroke(VK_ENTER, 0));
 	}
 
-	private void mapToAction(@Nonnull InputAction a) {
-		getActionMap().put(a, new AbstractAction() {
+	private void registerInput(Object actionId, Runnable action, KeyStroke... shortcuts) {
+		if (shortcuts != null) {
+			for (int i = 0; i < shortcuts.length; i++) {
+				getInputMap(WHEN_IN_FOCUSED_WINDOW).put(shortcuts[i], actionId);
+			}
+		}
+		getActionMap().put(actionId, new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				resources.setMenu(null);
-				stub.handleInput(a);
+				action.run();
 			}
 		});
 	}
