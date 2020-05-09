@@ -240,6 +240,11 @@ public class ByteBufferWrapper {
 		return this;
 	}
 
+	public ByteBufferWrapper put(int index, byte[] src) {
+		final int pos = position();
+		return position(index).put(src).position(pos);
+	}
+
 	public ByteBufferWrapper putChar(char value) {
 		buf.putChar(value);
 		return this;
