@@ -21,6 +21,7 @@ import static engine.EngineAddress.OVERLAND_Y;
 import static engine.EngineAddress.PICTURE_HEAD_ID;
 import static engine.EngineAddress.SAVED_TEMP_START;
 import static engine.EngineAddress.SEARCH_FLAGS;
+import static engine.EngineAddress.SEL_PC_START;
 import static engine.EngineAddress.SKY_COLOR_INDOORS;
 import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
 import static engine.EngineAddress.TEMP_START;
@@ -81,6 +82,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_MISSILE_AMMO = 0x4D46;
 	public static final int MEMLOC_MISSILE_RELOAD = 0x4D47;
 	public static final int MEMLOC_LASER_WEAPONS = 0x4D4A;
+	private final int MEMLOC_SEL_PC_START;
 	private final int MEMLOC_COMBAT_RESULT;
 	private final int MEMLOC_MOVEMENT_BLOCK;
 	private final int MEMLOC_SEARCH_FLAGS;
@@ -126,6 +128,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_OVERLAND_CITY = cfg.getEngineAddress(OVERLAND_CITY);
 		MEMLOC_FOR_LOOP_COUNT = cfg.getEngineAddress(FOR_LOOP_COUNT);
 		MEMLOC_DOOR_FLAGS = cfg.getEngineAddress(DOOR_FLAGS);
+		MEMLOC_SEL_PC_START = cfg.getEngineAddress(SEL_PC_START);
 		MEMLOC_COMBAT_RESULT = cfg.getEngineAddress(COMBAT_RESULT);
 		MEMLOC_MOVEMENT_BLOCK = cfg.getEngineAddress(MOVEMENT_BLOCK);
 		MEMLOC_SEARCH_FLAGS = cfg.getEngineAddress(SEARCH_FLAGS);

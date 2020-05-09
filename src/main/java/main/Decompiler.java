@@ -100,8 +100,6 @@ public class Decompiler {
 		KNOWN_ADRESSES.put(0x4D7C, "ENEMY_WAS_ENTERED");
 		KNOWN_ADRESSES.put(0x4D81, "ENEMY_WEAPONS");
 		KNOWN_ADRESSES.put(0x7B90, "STRING1");
-		KNOWN_ADRESSES.put(0x7C00, "SEL_PC_NAME");
-		KNOWN_ADRESSES.put(0x7D00, "SEL_PC_STATUS");
 		KNOWN_ADRESSES.put(0x7EC6, "COMBAT_MORALE_BASE");
 		KNOWN_ADRESSES.put(0x7ECB, "COMBAT_IS_AMBUSH");
 		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS", "PSYCHE", "JUNO",
@@ -140,8 +138,9 @@ public class Decompiler {
 			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));
 		}
 		int selPCStart = cfg.getEngineAddress(SEL_PC_START);
-		for (int i = selPCStart; i < selPCStart + 0x103; i++) {
-			KNOWN_ADRESSES.put(i, "SEL_PC_" + hex(i));
+		KNOWN_ADRESSES.put(selPCStart, "SEL_PC_NAME");
+		for (int i = selPCStart; i < selPCStart + 0x1FF; i++) {
+			KNOWN_ADRESSES.putIfAbsent(i, "SEL_PC_" + hex(i));
 		}
 		int tempStart = cfg.getEngineAddress(TEMP_START);
 		for (int i = 0; i < 0xA; i++) {

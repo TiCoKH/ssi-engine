@@ -115,7 +115,7 @@ public class Decompiler {
 			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));
 		}
 		int selPCStart = cfg.getEngineAddress(SEL_PC_START);
-		for (int i = selPCStart; i < selPCStart + 0x103; i++) {
+		for (int i = selPCStart; i < selPCStart + 0x1FF; i++) {
 			KNOWN_ADRESSES.put(i, "SEL_PC_" + hex(i));
 		}
 		int tempStart = cfg.getEngineAddress(TEMP_START);
