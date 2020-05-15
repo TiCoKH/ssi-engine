@@ -72,6 +72,13 @@ public class ByteBufferWrapper {
 		return new ByteBufferWrapper(buf.duplicate().order(buf.order()));
 	}
 
+	public ByteBufferWrapper fill(byte value) {
+		for (int i = 0; i < limit(); i++) {
+			put(i, value);
+		}
+		return this;
+	}
+
 	public final ByteBufferWrapper flip() {
 		buf.flip();
 		return this;
@@ -84,6 +91,11 @@ public class ByteBufferWrapper {
 	public ByteBufferWrapper get(byte[] dst) {
 		buf.get(dst);
 		return this;
+	}
+
+	public ByteBufferWrapper get(int index, byte[] dst) {
+		final int pos = position();
+		return position(index).get(dst).position(pos);
 	}
 
 	public ByteBufferWrapper get(byte[] dst, int offset, int length) {
