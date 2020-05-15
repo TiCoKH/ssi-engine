@@ -233,7 +233,6 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void loadEcl(int id) {
-		memory.setLastECL(memory.getCurrentECL());
 		memory.setCurrentECL(id);
 		loadEcl(true);
 	}
@@ -251,9 +250,11 @@ public class Engine implements EngineCallback, EngineStub {
 
 			try {
 				delayCurrentThread();
-				EclProgram ecl = res.find(memory.getCurrentECL(), EclProgram.class, ECL);
+				final int currentECL = memory.getCurrentECL();
+				EclProgram ecl = res.find(currentECL, EclProgram.class, ECL);
 				vm.newEcl(ecl);
 				vm.startInit();
+				memory.setLastECL(currentECL);
 				if (abortCurrentThread) {
 					return;
 				}
