@@ -71,7 +71,7 @@ public abstract class AbstractRenderer {
 			renderString(g2d, HP, 37, 2, PC_HEADING);
 			for (int i = 0; i < globalData.getPartyMemberCount(); i++) {
 				PartyMember member = globalData.getPartyMember(i);
-				renderString(g2d, member.getName(), xNameStart, 3 + i, PC);
+				renderString(g2d, member.getName(), xNameStart, 3 + i, i == globalData.getSelectedPartyMember() ? PC : FontColor.ECL_B);
 				renderNumber(g2d, member.getArmorClassDescription(), 35, 3 + i, NORMAL);
 				renderNumber(g2d, member.getCurrentHPDescription(), 39, 3 + i, NORMAL);
 			}
