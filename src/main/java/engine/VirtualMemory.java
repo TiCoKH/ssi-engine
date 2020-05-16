@@ -8,6 +8,7 @@ import static engine.EngineAddress.DUNGEON_VALUE;
 import static engine.EngineAddress.DUNGEON_X;
 import static engine.EngineAddress.DUNGEON_Y;
 import static engine.EngineAddress.FOR_LOOP_COUNT;
+import static engine.EngineAddress.INDEX_OF_SEL_PC;
 import static engine.EngineAddress.LAST_DUNGEON_X;
 import static engine.EngineAddress.LAST_DUNGEON_Y;
 import static engine.EngineAddress.LAST_ECL;
@@ -18,6 +19,7 @@ import static engine.EngineAddress.OVERLAND_CITY;
 import static engine.EngineAddress.OVERLAND_DIR;
 import static engine.EngineAddress.OVERLAND_X;
 import static engine.EngineAddress.OVERLAND_Y;
+import static engine.EngineAddress.PARTY_COUNT;
 import static engine.EngineAddress.PICTURE_HEAD_ID;
 import static engine.EngineAddress.SAVED_TEMP_START;
 import static engine.EngineAddress.SEARCH_FLAGS;
@@ -83,11 +85,13 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public static final int MEMLOC_MISSILE_RELOAD = 0x4D47;
 	public static final int MEMLOC_LASER_WEAPONS = 0x4D4A;
 	private final int MEMLOC_SEL_PC_START;
+	private final int MEMLOC_INDEX_OF_SEL_PC;
 	private final int MEMLOC_COMBAT_RESULT;
 	private final int MEMLOC_MOVEMENT_BLOCK;
 	private final int MEMLOC_SEARCH_FLAGS;
 	private final int MEMLOC_TRIED_TO_LEAVE_MAP;
 	private final int MEMLOC_PICTURE_HEAD_ID;
+	private final int MEMLOC_PARTY_COUNT;
 	private final int MEMLOC_DIVISION_MODULO;
 	private final int MEMLOC_TEXT_COLOR;
 	private final int MEMLOC_DUNGEON_X;
@@ -129,11 +133,13 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		MEMLOC_FOR_LOOP_COUNT = cfg.getEngineAddress(FOR_LOOP_COUNT);
 		MEMLOC_DOOR_FLAGS = cfg.getEngineAddress(DOOR_FLAGS);
 		MEMLOC_SEL_PC_START = cfg.getEngineAddress(SEL_PC_START);
+		MEMLOC_INDEX_OF_SEL_PC = cfg.getEngineAddress(INDEX_OF_SEL_PC);
 		MEMLOC_COMBAT_RESULT = cfg.getEngineAddress(COMBAT_RESULT);
 		MEMLOC_MOVEMENT_BLOCK = cfg.getEngineAddress(MOVEMENT_BLOCK);
 		MEMLOC_SEARCH_FLAGS = cfg.getEngineAddress(SEARCH_FLAGS);
 		MEMLOC_TRIED_TO_LEAVE_MAP = cfg.getEngineAddress(TRIED_TO_LEAVE_MAP);
 		MEMLOC_PICTURE_HEAD_ID = cfg.getEngineAddress(PICTURE_HEAD_ID);
+		MEMLOC_PARTY_COUNT = cfg.getEngineAddress(PARTY_COUNT);
 		MEMLOC_DIVISION_MODULO = cfg.getEngineAddress(DIVISION_MODULO);
 		MEMLOC_TEXT_COLOR = cfg.getEngineAddress(TEXT_COLOR);
 		MEMLOC_DUNGEON_X = cfg.getEngineAddress(DUNGEON_X);
@@ -515,6 +521,19 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		mem.put(MEMLOC_LASER_WEAPONS, (byte) lasers);
 	}
 
+	@Override
+	public int getSelectedPartyMember() {
+		return mem.getUnsigned(MEMLOC_INDEX_OF_SEL_PC);
+	}
+
+	@Override
+	public void setSelectedPartyMember(int index) {
+		if (index < 0 || index >= members.size()) {
+			return;
+		}
+		mem.put(MEMLOC_INDEX_OF_SEL_PC, (byte) index);
+	}
+
 	public int getCombatResult() {
 		return mem.getUnsigned(MEMLOC_COMBAT_RESULT);
 	}
@@ -566,6 +585,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void setPictureHeadId(int pictureHeadId) {
 		mem.put(MEMLOC_PICTURE_HEAD_ID, (byte) pictureHeadId);
+	}
+
+	public int getPartyCount() {
+		return mem.getUnsigned(MEMLOC_PARTY_COUNT);
+	}
+
+	public void setPartyCount(int partyCount) {
+		mem.put(MEMLOC_PARTY_COUNT, (byte) partyCount);
 	}
 
 	public int getDivisionModulo() {
@@ -638,10 +665,12 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public void addPartyMember(@Nonnull CharacterSheetImpl member) {
 		members.add(member);
+		setPartyCount(members.size());
 	}
 
 	public void clearParty() {
 		members.clear();
+		setPartyCount(members.size());
 	}
 
 	@Override
