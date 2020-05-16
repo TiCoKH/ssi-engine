@@ -13,6 +13,8 @@ import static java.awt.event.KeyEvent.VK_KP_LEFT;
 import static java.awt.event.KeyEvent.VK_KP_RIGHT;
 import static java.awt.event.KeyEvent.VK_KP_UP;
 import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_PAGE_DOWN;
+import static java.awt.event.KeyEvent.VK_PAGE_UP;
 import static java.awt.event.KeyEvent.VK_RIGHT;
 import static java.awt.event.KeyEvent.VK_SPACE;
 import static java.awt.event.KeyEvent.VK_UP;
@@ -277,6 +279,12 @@ public class ClassicMode extends JPanel implements UserInterface {
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
 		getActionMap().clear();
 		registerInput(LOAD, () -> stub.loadGame(), KEY_MAPPING.get(LOAD));
+		registerInput("__PARTY_UP", //
+			() -> state.getGlobalData().ifPresent(ViewGlobalData::moveSelectedPartyMemberUp), //
+			getKeyStroke(VK_PAGE_UP, 0));
+		registerInput("__PARTY_DOWN", //
+			() -> state.getGlobalData().ifPresent(ViewGlobalData::moveSelectedPartyMemberDown), //
+			getKeyStroke(VK_PAGE_DOWN, 0));
 	}
 
 	@Override
