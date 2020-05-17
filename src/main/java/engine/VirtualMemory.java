@@ -690,56 +690,68 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		return members.get(index);
 	}
 
+	private boolean isCharacterAddress(int address) {
+		return MEMLOC_SEL_PC_START <= address && address < (MEMLOC_SEL_PC_START + 0x1FF);
+	}
+
 	public int readMemInt(EclArgument a) {
 		if (!a.isMemAddress()) {
 			return 0;
 		}
-		return a.isShortValue() ? mem.getUnsignedShort(a.valueAsInt()) : mem.getUnsigned(a.valueAsInt());
+		return readMemInt(a.valueAsInt(), a.isShortValue());
 	}
 
 	public int readMemInt(EclArgument base, int offset) {
 		if (!base.isMemAddress()) {
 			return 0;
 		}
-		return base.isShortValue() ? mem.getUnsignedShort(base.valueAsInt() + offset) : mem.getUnsigned(base.valueAsInt() + offset);
+		return readMemInt(base.valueAsInt() + offset, base.isShortValue());
+	}
+
+	private int readMemInt(int address, boolean isShort) {
+		if (isCharacterAddress(address)) {
+			return members.get(getLoadedCharacter()).getCharacter().readValue(address - MEMLOC_SEL_PC_START, isShort);
+		}
+		return isShort ? mem.getUnsignedShort(address) : mem.getUnsigned(address);
 	}
 
 	public void writeMemInt(EclArgument a, int value) {
 		if (!a.isMemAddress()) {
 			return;
 		}
-		if (a.isShortValue()) {
-			mem.putShort(a.valueAsInt(), (short) value);
-		} else {
-			mem.put(a.valueAsInt(), (byte) value);
-		}
+		writeMemInt(a.valueAsInt(), value, a.isShortValue());
 	}
 
 	public void writeMemInt(EclArgument base, int offset, int value) {
 		if (!base.isMemAddress()) {
 			return;
 		}
-		if (base.isShortValue()) {
-			mem.putShort(base.valueAsInt() + offset, (short) value);
-		} else {
-			mem.put(base.valueAsInt() + offset, (byte) value);
-		}
+		writeMemInt(base.valueAsInt() + offset, value, base.isShortValue());
 	}
 
 	public void copyMemInt(EclArgument base, int offset, EclArgument target) {
 		if (!base.isMemAddress() || !target.isMemAddress()) {
 			return;
 		}
-		if (target.isShortValue()) {
-			mem.putShort(target.valueAsInt(), (short) readMemInt(base, offset));
+		writeMemInt(target.valueAsInt(), readMemInt(base, offset), target.isShortValue());
+	}
+
+	public void writeMemInt(int address, int value, boolean isShort) {
+		if (isCharacterAddress(address)) {
+			members.get(getLoadedCharacter()).getCharacter().writeValue(address - MEMLOC_SEL_PC_START, value, isShort);
+		} else if (isShort) {
+			mem.putShort(address, (short) value);
 		} else {
-			mem.put(target.valueAsInt(), (byte) readMemInt(base, offset));
+			mem.put(address, (byte) value);
 		}
 	}
 
 	public GoldboxString readMemString(EclArgument a) {
 		if (!a.isMemAddress()) {
 			return null;
+		}
+		if (isCharacterAddress(a.valueAsInt())) {
+			return members.get(getLoadedCharacter()).getName();
 		}
 
 		int pos = a.valueAsInt();
