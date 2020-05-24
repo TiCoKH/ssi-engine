@@ -74,46 +74,12 @@ public class Decompiler {
 		AND, OR, RANDOM, RANDOM0, ENCOUNTER_MENU, PARLAY);
 	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);
 
-	private static final Map<Integer, String> KNOWN_ADRESSES = new HashMap<>();
-	static {
-		KNOWN_ADRESSES.put(0x4BAB, "ENGINE_CONF_4BAB"); // probably boolean flag game state changed
-		KNOWN_ADRESSES.put(0x4BC5, "GEO_ID");
-		KNOWN_ADRESSES.put(0x4BC7, "TIME_MIN_ONE");
-		KNOWN_ADRESSES.put(0x4BC8, "TIME_MIN_TEN");
-		KNOWN_ADRESSES.put(0x4BC9, "TIME_HOUR");
-		KNOWN_ADRESSES.put(0x4BCA, "TIME_DAY");
-		KNOWN_ADRESSES.put(0x4BCB, "TIME_YEAR");
-		KNOWN_ADRESSES.put(0x4BE6, "DUNGEON_VALUE");
-		KNOWN_ADRESSES.put(0x4BE7, "ENGINE_CONF_4BE7"); // configures OpCode LOAD_AREA_DECO
-		KNOWN_ADRESSES.put(0x4BE8, "ENGINE_CONF_4BE8"); // configures OpCode LOAD_AREA_DECO
-		KNOWN_ADRESSES.put(0x4BE9, "ENGINE_CONF_4BE9");
-		KNOWN_ADRESSES.put(0x4BFB, "ENGINE_CONF_NO_AREA_MAP");
-		KNOWN_ADRESSES.put(0x4BFF, "PICS_ARE_DRAWN");
-		KNOWN_ADRESSES.put(0x4C2F, "CURRENT_PIC");
-		KNOWN_ADRESSES.put(0x4C1A, "REPAIR_COST");
-		KNOWN_ADRESSES.put(0x4CE6, "MONEY_NEO_ACCT");
-		KNOWN_ADRESSES.put(0x4D6C, "ENEMY_HULL");
-		KNOWN_ADRESSES.put(0x4D6E, "ENEMY_SENSORS");
-		KNOWN_ADRESSES.put(0x4D70, "ENEMY_CONTROL");
-		KNOWN_ADRESSES.put(0x4D72, "ENEMY_LIFE");
-		KNOWN_ADRESSES.put(0x4D76, "ENEMY_ENGINE");
-		KNOWN_ADRESSES.put(0x4D7C, "ENEMY_WAS_ENTERED");
-		KNOWN_ADRESSES.put(0x4D81, "ENEMY_WEAPONS");
-		KNOWN_ADRESSES.put(0x7B90, "STRING1");
-		KNOWN_ADRESSES.put(0x7EC6, "COMBAT_MORALE_BASE");
-		KNOWN_ADRESSES.put(0x7ECB, "COMBAT_IS_AMBUSH");
-		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS", "PSYCHE", "JUNO",
-			"HYGEIA", "AURORA", "THULE");
-		for (int i = 0; i < 13; i++) {
-			KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i), celestials.get(i) + "_X");
-			KNOWN_ADRESSES.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i) + 1, celestials.get(i) + "_Y");
-		}
-	}
 	private int base;
 	private int size;
 	private int indention = 0;
 
-	private SortedMap<Integer, Boolean> gotoAddressList = new TreeMap<>();
+	private final Map<Integer, String> knownAddresses = new HashMap<>();
+	private final SortedMap<Integer, Boolean> gotoAddressList = new TreeMap<>();
 
 	private EclInstruction compare = null;
 	private EclOpCode lastIf = null;
@@ -131,20 +97,29 @@ public class Decompiler {
 		base = cfg.getCodeBase();
 		EclInstruction.configOpCodes(cfg.getOpCodes());
 
-		KNOWN_ADRESSES.putAll(cfg.getEngineAdresses());
+		knownAddresses.putAll(cfg.getEngineAdresses());
+		knownAddresses.put(0x4BFF, "PICS_ARE_DRAWN");
+		knownAddresses.put(0x4C2F, "CURRENT_PIC");
+		knownAddresses.put(0x7B90, "STRING1");
+		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS", "PSYCHE", "JUNO",
+			"HYGEIA", "AURORA", "THULE");
+		for (int i = 0; i < 13; i++) {
+			knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i), celestials.get(i) + "_X");
+			knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i) + 1, celestials.get(i) + "_Y");
+		}
 
 		int savedTempStart = cfg.getEngineAddress(SAVED_TEMP_START);
 		for (int i = savedTempStart; i < savedTempStart + 0x20; i++) {
-			KNOWN_ADRESSES.put(i, "SAVED_TEMP_" + hex(i));
+			knownAddresses.put(i, "SAVED_TEMP_" + hex(i));
 		}
 		int selPCStart = cfg.getEngineAddress(SEL_PC_START);
-		KNOWN_ADRESSES.put(selPCStart, "SEL_PC_NAME");
+		knownAddresses.put(selPCStart, "SEL_PC_NAME");
 		for (int i = selPCStart; i < selPCStart + 0x1FF; i++) {
-			KNOWN_ADRESSES.putIfAbsent(i, "SEL_PC_" + hex(i));
+			knownAddresses.putIfAbsent(i, "SEL_PC_" + hex(i));
 		}
 		int tempStart = cfg.getEngineAddress(TEMP_START);
 		for (int i = 0; i < 0xA; i++) {
-			KNOWN_ADRESSES.put(tempStart + i, "TEMP" + String.format("%01X", i + 1));
+			knownAddresses.put(tempStart + i, "TEMP" + String.format("%01X", i + 1));
 		}
 
 		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
@@ -511,23 +486,23 @@ public class Decompiler {
 		if (!a.isMemAddress()) {
 			System.err.println("Value is not a memory address at " + hex(inst.getPosition() + base));
 		}
-		if (!KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
+		if (!knownAddresses.containsKey(a.valueAsInt())) {
 			if (a.isStringValue()) {
-				KNOWN_ADRESSES.put(a.valueAsInt(), "string_" + currentId + "_" + hex(a.valueAsInt()));
+				knownAddresses.put(a.valueAsInt(), "string_" + currentId + "_" + hex(a.valueAsInt()));
 			} else if (a.isShortValue()) {
-				KNOWN_ADRESSES.put(a.valueAsInt(), "short_" + currentId + "_" + hex(a.valueAsInt()));
+				knownAddresses.put(a.valueAsInt(), "short_" + currentId + "_" + hex(a.valueAsInt()));
 			} else {
-				KNOWN_ADRESSES.put(a.valueAsInt(), "byte_" + currentId + "_" + hex(a.valueAsInt()));
+				knownAddresses.put(a.valueAsInt(), "byte_" + currentId + "_" + hex(a.valueAsInt()));
 			}
 		}
-		return KNOWN_ADRESSES.get(a.valueAsInt());
+		return knownAddresses.get(a.valueAsInt());
 	}
 
 	private String argR(EclInstruction inst, int argNr) {
 		EclArgument a = inst.getArgument(argNr);
 		if (a.isMemAddress()) {
-			if (KNOWN_ADRESSES.containsKey(a.valueAsInt())) {
-				return KNOWN_ADRESSES.get(a.valueAsInt());
+			if (knownAddresses.containsKey(a.valueAsInt())) {
+				return knownAddresses.get(a.valueAsInt());
 			} else if (a.valueAsInt() >= base && a.valueAsInt() <= (base + size)) {
 				return "CODE_" + hex(a.valueAsInt());
 			} else {
