@@ -602,7 +602,7 @@ public class VirtualMachine {
 			memory.writeMemInt(inst.getArgument(1), intValue(inst.getArgument(2)), intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.NPC_ADD, inst -> {
-
+			engine.addNpc(intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.NPC_FIND, inst -> {
 
@@ -635,7 +635,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.NPC_REMOVE, inst -> {
-
+			engine.removeNpc(memory.getLoadedCharacter());
 		});
 		IMPL.put(EclOpCode.HAS_EFFECT, inst -> {
 

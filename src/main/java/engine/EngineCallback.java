@@ -45,4 +45,8 @@ public interface EngineCallback {
 	void updatePosition();
 
 	void delayCurrentThread();
+
+	void addNpc(int id);
+
+	void removeNpc(int index);
 }

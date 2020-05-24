@@ -670,6 +670,21 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		setPartyCount(members.size());
 	}
 
+	public void removePartyMember(@Nonnull CharacterSheetImpl member) {
+		int memberIndex = members.indexOf(member);
+		if (memberIndex != -1) {
+			members.remove(member);
+			setPartyCount(members.size());
+			if (memberIndex <= getSelectedPartyMember()) {
+				int newIndex = getSelectedPartyMember() - 1;
+				if (newIndex < 0) {
+					newIndex = 0;
+				}
+				setSelectedPartyMember(newIndex);
+			}
+		}
+	}
+
 	public void clearParty() {
 		members.clear();
 		setPartyCount(members.size());
@@ -687,6 +702,10 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	@Override
 	public PartyMember getPartyMember(int index) {
+		return members.get(index);
+	}
+
+	public CharacterSheetImpl getPartyMemberAsCharacterSheet(int index) {
 		return members.get(index);
 	}
 

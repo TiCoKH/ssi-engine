@@ -49,6 +49,7 @@ import data.dungeon.DungeonMap.Direction;
 import data.dungeon.DungeonMap.VisibleWalls;
 import data.dungeon.DungeonMap2;
 import data.script.EclProgram;
+import engine.character.CharacterSheetImpl;
 import engine.character.PlayerDataFactory;
 import engine.input.MovementHandler;
 import engine.script.EclInstruction;
@@ -352,6 +353,21 @@ public class Engine implements EngineCallback, EngineStub {
 			MOVEMENT_HANDLER.setMode(MovementHandler.Mode.SPACE);
 		}
 		updatePosition();
+	}
+
+	@Override
+	public void addNpc(int id) {
+		try {
+			AbstractCharacter npc = getPlayerDataFactory().loadCharacter(id);
+			memory.addPartyMember(new CharacterSheetImpl(cfg.getFlavor(), npc));
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+		}
+	}
+
+	@Override
+	public void removeNpc(int index) {
+		memory.removePartyMember(memory.getPartyMemberAsCharacterSheet(index));
 	}
 
 	@Override

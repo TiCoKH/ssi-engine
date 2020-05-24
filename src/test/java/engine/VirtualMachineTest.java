@@ -99,6 +99,14 @@ public class VirtualMachineTest {
 			@Override
 			public void delayCurrentThread() {
 			}
+
+			@Override
+			public void addNpc(int id) {
+			}
+
+			@Override
+			public void removeNpc(int index) {
+			}
 		}, new VirtualMemory(cfg), cfg.getCodeBase());
 		EclInstruction.configOpCodes(cfg.getOpCodes());
 		vm.newEcl(ecls.getById(16, EclProgram.class, ContentType.ECL));
