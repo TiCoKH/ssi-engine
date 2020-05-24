@@ -109,6 +109,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private ByteBufferWrapper mem;
 
 	private final List<CharacterSheetImpl> members = new ArrayList<>();
+	private int loadedCharacter = 0;
 
 	private int menuChoice;
 	private GoldboxString input;
@@ -531,6 +532,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		if (index < 0 || index >= members.size()) {
 			return;
 		}
+		setLoadedCharacter(index);
 		mem.put(MEMLOC_INDEX_OF_SEL_PC, (byte) index);
 	}
 
@@ -765,6 +767,17 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public void writeProgram(int startAddress, ByteBufferWrapper eclCode) {
 		eclCode.rewind();
 		mem.position(startAddress).put(eclCode);
+	}
+
+	public int getLoadedCharacter() {
+		return loadedCharacter;
+	}
+
+	public void setLoadedCharacter(int index) {
+		if (index < 0 || index >= members.size()) {
+			return;
+		}
+		this.loadedCharacter = index;
 	}
 
 	public void writePartyMember(int index, @Nonnull FileChannel fc) throws IOException {

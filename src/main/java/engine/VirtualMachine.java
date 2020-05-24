@@ -2,6 +2,7 @@ package engine;
 
 import static engine.EngineInputAction.CONTINUE_ACTION;
 import static engine.EngineInputAction.MENU_HANDLER;
+import static engine.EngineInputAction.SELECT_ACTION;
 import static engine.EngineInputAction.YES_NO_ACTIONS;
 import static engine.script.EclOpCode.CALL;
 import static engine.script.EclOpCode.GOSUB;
@@ -30,10 +31,6 @@ import shared.CustomGoldboxString;
 import shared.GoldboxString;
 
 public class VirtualMachine {
-	private static final EclArgument SELECTED_PLAYER_NAME = new EclArgument(1, 3, 0x7C00);
-	private static final EclArgument SELECTED_PLAYER_MONEY = new EclArgument(5, 3, 0x7C2B);
-	private static final EclArgument SELECTED_PLAYER_STATUS = new EclArgument(1, 3, 0x7D00);
-
 	private final Map<EclOpCode, Consumer<EclInstruction>> IMPL = new EnumMap<>(EclOpCode.class);
 
 	private EngineCallback engine;
@@ -235,7 +232,7 @@ public class VirtualMachine {
 			}
 		});
 		IMPL.put(EclOpCode.LOAD_CHAR, inst -> {
-
+			memory.setLoadedCharacter(intValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.LOAD_MON, inst -> {
 
@@ -617,10 +614,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.WHO, inst -> {
-			// TODO Implement party management
-			memory.writeMemString(SELECTED_PLAYER_NAME, new CustomGoldboxString("THIS ONE"));
-			memory.writeMemInt(SELECTED_PLAYER_MONEY, 10000);
-			memory.writeMemInt(SELECTED_PLAYER_STATUS, 1);
+			engine.setMenu(HORIZONTAL, SELECT_ACTION, stringValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.DELAY, inst -> {
 			engine.delayCurrentThread();

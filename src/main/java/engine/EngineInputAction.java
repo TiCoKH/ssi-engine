@@ -95,6 +95,7 @@ public class EngineInputAction implements InputAction {
 	public static final List<InputAction> CONTINUE_ACTION = ImmutableList.of(CONTINUE);
 	public static final List<InputAction> DIALOG_MENU_ACTIONS = ImmutableList.of(SELECT, DIALOG_BACK);
 	public static final List<InputAction> CHAR_SHEET_ACTION = ImmutableList.of(EXIT_SHEET);
+	public static final List<InputAction> SELECT_ACTION = ImmutableList.of(SELECT);
 
 	private final InputHandler handler;
 	private final GoldboxString name;
