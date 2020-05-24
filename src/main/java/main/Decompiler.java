@@ -556,6 +556,8 @@ public class Decompiler {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Decompiler(args[0]);
+		for (int i = 0; i < args.length; i++) {
+			new Decompiler(args[i]);
+		}
 	}
 }
