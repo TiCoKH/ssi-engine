@@ -640,6 +640,10 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 		members.add(member);
 	}
 
+	public void clearParty() {
+		members.clear();
+	}
+
 	@Override
 	public boolean hasPartyMembers() {
 		return !members.isEmpty();
@@ -732,5 +736,12 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	public void writeProgram(int startAddress, ByteBufferWrapper eclCode) {
 		eclCode.rewind();
 		mem.position(startAddress).put(eclCode);
+	}
+
+	public void writePartyMember(int index, @Nonnull FileChannel fc) throws IOException {
+		if (index < 0 || index >= members.size()) {
+			return;
+		}
+		members.get(index).getCharacter().writeTo(fc);
 	}
 }
