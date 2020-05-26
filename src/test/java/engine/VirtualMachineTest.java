@@ -10,6 +10,7 @@ import common.FileMap;
 import data.ContentFile;
 import data.ContentType;
 import data.script.EclProgram;
+import engine.script.EclInstruction;
 import shared.GoldboxString;
 import shared.InputAction;
 import shared.MenuType;
@@ -99,6 +100,7 @@ public class VirtualMachineTest {
 			public void delayCurrentThread() {
 			}
 		}, new VirtualMemory(cfg), cfg.getCodeBase());
+		EclInstruction.configOpCodes(cfg.getOpCodes());
 		vm.newEcl(ecls.getById(16, EclProgram.class, ContentType.ECL));
 
 		System.out.println("Init:");
