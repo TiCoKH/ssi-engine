@@ -8,6 +8,7 @@ import static engine.script.EclOpCode.CALL;
 import static engine.script.EclOpCode.GOSUB;
 import static engine.script.EclOpCode.GOTO;
 import static shared.MenuType.HORIZONTAL;
+import static shared.MenuType.PARTY;
 import static shared.MenuType.VERTICAL;
 
 import java.util.ArrayList;
@@ -614,7 +615,7 @@ public class VirtualMachine {
 
 		});
 		IMPL.put(EclOpCode.WHO, inst -> {
-			engine.setMenu(HORIZONTAL, SELECT_ACTION, stringValue(inst.getArgument(0)));
+			engine.setMenu(PARTY, SELECT_ACTION, stringValue(inst.getArgument(0)));
 		});
 		IMPL.put(EclOpCode.DELAY, inst -> {
 			engine.delayCurrentThread();

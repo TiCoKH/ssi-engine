@@ -94,6 +94,7 @@ public abstract class AbstractStateRenderer extends AbstractRenderer {
 		state.getMenu().ifPresent(menu -> {
 			switch (menu.getType()) {
 				case HORIZONTAL:
+				case PARTY:
 					renderHorizontalMenu(g2d, menu);
 					break;
 				case VERTICAL:
@@ -122,11 +123,11 @@ public abstract class AbstractStateRenderer extends AbstractRenderer {
 	}
 
 	protected void renderMenuOrTextStatus(@Nonnull Graphics2D g2d) {
-		if (state.getMenu().filter(menu -> menu.getType() == MenuType.VERTICAL).isPresent())
+		if (state.getMenu().map(Menu::getType).filter(MenuType::isVerticalMenu).isPresent())
 			renderMenu(g2d);
 		else
 			renderText(g2d);
-		if (state.getMenu().filter(menu -> menu.getType() == MenuType.HORIZONTAL).isPresent())
+		if (state.getMenu().map(Menu::getType).filter(MenuType::isHorizontalMenu).isPresent())
 			renderMenu(g2d);
 		else
 			renderStatus(g2d);

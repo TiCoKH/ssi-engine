@@ -306,7 +306,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			}, getKeyStroke(toLowerCase(a.getName().toString().charAt(0))));
 		});
 		if (namedMenuItems.size() > 1) {
-			if (type == MenuType.HORIZONTAL) {
+			if (type.isHorizontalMenu()) {
 				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
 				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
 			} else {
@@ -324,6 +324,9 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		registerInput(MENU_ACTION, () -> {
 			state.getMenu().ifPresent(m -> {
+				if (m.getType().isPartySelection()) {
+					state.getGlobalData().ifPresent(data -> data.setSelectedPartyMember(data.getSelectedPartyMember()));
+				}
 				state.setMenu(null);
 				stub.handleInput(m.getSelectedItem());
 			});
