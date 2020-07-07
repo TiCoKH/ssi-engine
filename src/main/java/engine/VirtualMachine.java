@@ -242,12 +242,15 @@ public class VirtualMachine {
 		});
 		IMPL.put(EclOpCode.SPRITE_START3, inst -> {
 			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
+			engine.delayCurrentThread();
 		});
 		IMPL.put(EclOpCode.SPRITE_START4, inst -> {
 			engine.showSprite(intValue(inst.getArgument(0)), intValue(inst.getArgument(1)), intValue(inst.getArgument(2)));
+			engine.delayCurrentThread();
 		});
 		IMPL.put(EclOpCode.SPRITE_ADVANCE, inst -> {
 			engine.advanceSprite();
+			engine.delayCurrentThread();
 		});
 		IMPL.put(EclOpCode.PICTURE, inst -> {
 			engine.showPicture(intValue(inst.getArgument(0)));
