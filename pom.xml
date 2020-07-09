@@ -99,6 +99,11 @@
 			<version>r03</version>
 		</dependency>
 		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr</artifactId>
+			<version>0.10.3</version>
+		</dependency>
+		<dependency>
 			<groupId>com.jtattoo</groupId>
 			<artifactId>JTattoo</artifactId>
 			<version>1.6.11</version>
