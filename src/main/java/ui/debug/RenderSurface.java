@@ -154,6 +154,11 @@ public class RenderSurface extends JPanel implements Scrollable {
 						g2d.drawImage(images.get(i), settings.zoom8(i % 16), settings.zoom8(i / 16), null);
 					}
 				} else {
+					BufferedImage image0 = resman.getImageResource(ir).get(0);
+					int xOffset0 = settings.zoom(Math.abs((int) image0.getProperty(X_OFFSET.name())));
+					int yOffset0 = settings.zoom(Math.abs((int) image0.getProperty(Y_OFFSET.name())));
+					adaptSize(image0.getWidth() + xOffset0, image0.getHeight() + yOffset0);
+					g2d.drawImage(image0, xOffset0, yOffset0, null);
 					BufferedImage image = resman.getImageResource(ir).get(index);
 					int xOffset = settings.zoom(Math.abs((int) image.getProperty(X_OFFSET.name())));
 					int yOffset = settings.zoom(Math.abs((int) image.getProperty(Y_OFFSET.name())));
