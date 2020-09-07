@@ -1,0 +1,55 @@
+//------------------------------------------------
+//--- 010 Editor v8.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct {
+	char eh[2];
+	ubyte type;
+	ushort type_header_length;
+
+	if(type == 1) {
+		local uint32 data_size = type_header_length - 8;
+		if (data_size > 0)
+			ubyte data[data_size];
+		ushort picture_count;
+		ushort picture_width;
+		ubyte picture_height;
+		ubyte transparent_color <format=hex>;
+		ubyte compression_format;
+		ubyte zero_or_one;
+	}
+	if(type == 2) {
+		local uint32 data_size = type_header_length - 136;
+		if (data_size > 0)
+			ubyte data[data_size];
+		ubyte array_sizes[128];
+		ushort picture_count;
+		ushort picture_width;
+		ubyte picture_height;
+		ubyte transparent_color <format=hex>;
+		ubyte compression_format;
+		ubyte always_zero;
+	}
+} resource_header;
+
+//------------------------------------------------------
+// main definition
+
+LittleEndian();
+uint32 resource_count;
+uint32 resource_offset[resource_count] <format=hex>;
+
+local int i;
+for (i = 0; i < resource_count; i++) {
+	FSeek(resource_offset[i]);
+	resource_header header;
+}

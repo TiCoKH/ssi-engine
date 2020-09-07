@@ -1,0 +1,104 @@
+//------------------------------------------------
+//--- 010 Editor v8.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct {
+	char signature[4];
+	ushort version1;
+	ushort version2;
+	uint data_offset <format=hex>;
+	uint directory_offset <format=hex>;
+	uint directory_size <format=hex>;
+	uint zero;
+	uint unknown;
+} header_type;
+
+typedef struct {
+	uint resource_offset <format=hex>;
+	uint resource_size;
+} resource_type;
+
+typedef struct {
+	uint resource_id;
+	resource_type resource;
+} resource_block_type;
+
+typedef struct {
+	uint base_resource_id;
+	uint resource_count;
+} resource_ref_type;
+
+typedef struct {
+	char name[4];
+	uint count;
+	if ((count & 0xFF000000) > 0) {
+		uint resource_count;
+		uint block_id;
+		uint element_count;
+		local int i;
+		for (i = 0; i < element_count; i++) {
+			resource_ref_type res_ref;
+		}
+	} else {
+		local int i;
+		for (i = 0; i < count; i++) {
+			resource_block_type res_block;
+		}
+	}
+} directory_entry_type;
+
+typedef struct {
+	uint count;
+	local int i;
+	for (i = 0; i < count; i++) {
+		resource_type resource;
+	}
+} gffi_table_type;
+
+typedef struct(resource_type& r) {
+	byte data[r.resource_size];
+} data_type;
+
+//------------------------------------------------------
+// main definition
+
+LittleEndian();
+header_type header <bgcolor=cLtRed,fgcolor=cWhite>;
+
+FSeek(header.directory_offset);
+uint directory_id <bgcolor=cLtBlue,fgcolor=cWhite>;
+uint directory_size <format=hex,bgcolor=cLtBlue,fgcolor=cWhite>;
+ushort directory_entry_count <bgcolor=cLtBlue,fgcolor=cWhite>;
+
+local int i,j,k;
+for (i = 0; i < directory_entry_count; i++) {
+	directory_entry_type entry <bgcolor=cLtBlue,fgcolor=cWhite>;
+}
+ushort directory_delimiter <bgcolor=cLtBlue,fgcolor=cWhite>;
+
+
+for (i = 0; i < directory_entry_count; i++) {
+	if ((entry[i].count & 0xFF000000) == 0) {
+		for (j = 0; j < entry[i].count; j++) {
+			FSeek(entry[i].res_block[j].resource.resource_offset);
+			if (entry[i].name == "GFFI") {
+				gffi_table_type gffi_table <bgcolor=cWhite,fgcolor=cBlack>;
+				for (k = 0; k < gffi_table.count; k++) {
+					FSeek(gffi_table.resource[k].resource_offset);
+					data_type gffi_data(gffi_table.resource[k]) <bgcolor=cDkGreen,fgcolor=cWhite>;
+				}
+			} else {
+				data_type data(entry[i].res_block[j].resource) <bgcolor=cDkGreen,fgcolor=cBlack>;
+			}
+		}
+	}
+}
