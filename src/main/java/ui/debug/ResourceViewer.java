@@ -39,16 +39,16 @@ import data.ContentType;
 import data.DAXFile;
 import data.dungeon.DungeonMap;
 import data.dungeon.DungeonMap2;
-import ui.BackdropMode;
-import ui.DungeonMapResource;
-import ui.DungeonResource;
 import ui.ExceptionHandler;
-import ui.ImageResource;
-import ui.UIFrame;
-import ui.UIResourceConfiguration;
-import ui.UIResourceLoader;
-import ui.UIResourceManager;
 import ui.UISettings;
+import ui.shared.BackdropMode;
+import ui.shared.UIFrame;
+import ui.shared.resource.DungeonMapResource;
+import ui.shared.resource.DungeonResource;
+import ui.shared.resource.ImageResource;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceLoader;
+import ui.shared.resource.UIResourceManager;
 
 public class ResourceViewer {
 	private JFrame frame;

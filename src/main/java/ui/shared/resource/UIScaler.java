@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.resource;
 
 import static data.ContentType.BIGPIC;
 import static data.ContentType.BODY;
@@ -36,6 +36,7 @@ import common.scaler.xbrz.Scaler5x;
 import common.scaler.xbrz.ScalerConfig;
 import data.ContentType;
 import data.image.ImageContentProperties;
+import ui.UISettings;
 import ui.UISettings.PropertyName;
 
 public class UIScaler {

@@ -19,20 +19,19 @@ import shared.FontColor;
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
 import shared.MenuType;
-import ui.StoryText;
-import ui.UIFrame;
-import ui.UIResources;
 import ui.UISettings;
+import ui.shared.UIFrame;
+import ui.shared.text.StoryText;
 
 public abstract class AbstractRenderer {
 
-	protected UIResources resources;
+	protected RendererState state;
 	protected UISettings settings;
 
 	private AbstractFrameRenderer frameRenderer;
 
-	protected AbstractRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
-		this.resources = resources;
+	protected AbstractRenderer(@Nonnull RendererState state, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
+		this.state = state;
 		this.settings = settings;
 		this.frameRenderer = frameRenderer;
 	}
@@ -62,12 +61,12 @@ public abstract class AbstractRenderer {
 	}
 
 	protected void renderChar(@Nonnull Graphics2D g2d, int x, int y, int c, @Nonnull FontColor textFont) {
-		BufferedImage ci = resources.getFont(textFont).get(c);
+		BufferedImage ci = state.getFont(textFont).get(c);
 		renderImage(g2d, ci, x, y);
 	}
 
 	protected void renderText(@Nonnull Graphics2D g2d) {
-		StoryText st = resources.getStoryText();
+		StoryText st = state.getStoryText();
 		st.getTextList().ifPresent(
 			text -> renderText(g2d, text, getTextStartX(), getTextStartY(), getLineWidth(), st.getCharStop(), st.getDefaultTextColor(), 0));
 	}
@@ -100,7 +99,7 @@ public abstract class AbstractRenderer {
 				int c = tp.getChar(i++);
 				FontColor fontColor = tp.getFontColor().orElse(fc.orElse(NORMAL));
 				if (c < 0) {
-					c += resources.getFont(fontColor).size();
+					c += state.getFont(fontColor).size();
 				}
 				renderChar(g2d, x, y, c, fontColor);
 				renderCount++;
@@ -111,13 +110,13 @@ public abstract class AbstractRenderer {
 	}
 
 	protected void renderStatus(@Nonnull Graphics2D g2d) {
-		resources.getStatusLine().ifPresent(status -> {
+		state.getStatusLine().ifPresent(status -> {
 			renderString(g2d, status, 0, 24, NORMAL);
 		});
 	}
 
 	protected void renderMenu(@Nonnull Graphics2D g2d) {
-		resources.getMenu().ifPresent(menu -> {
+		state.getMenu().ifPresent(menu -> {
 			switch (menu.getType()) {
 				case HORIZONTAL:
 					menu.getDescription().ifPresent(desc -> {
@@ -150,11 +149,11 @@ public abstract class AbstractRenderer {
 	}
 
 	protected void renderMenuOrTextStatus(@Nonnull Graphics2D g2d) {
-		if (resources.getMenu().filter(menu -> menu.getType() == MenuType.VERTICAL).isPresent())
+		if (state.getMenu().filter(menu -> menu.getType() == MenuType.VERTICAL).isPresent())
 			renderMenu(g2d);
 		else
 			renderText(g2d);
-		if (resources.getMenu().filter(menu -> menu.getType() == MenuType.HORIZONTAL).isPresent())
+		if (state.getMenu().filter(menu -> menu.getType() == MenuType.HORIZONTAL).isPresent())
 			renderMenu(g2d);
 		else
 			renderStatus(g2d);

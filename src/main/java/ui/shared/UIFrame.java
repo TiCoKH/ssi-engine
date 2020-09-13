@@ -1,4 +1,4 @@
-package ui;
+package ui.shared;
 
 public enum UIFrame {
 	NONE, //

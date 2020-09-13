@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.dungeon;
 
 import static data.ContentType.WALLDEF;
 import static data.ContentType._8X8D;
@@ -30,6 +30,7 @@ import data.dungeon.WallDef.WallDistance;
 import data.dungeon.WallDef.WallPlacement;
 import data.image.ImageContent;
 import data.palette.Palette;
+import ui.shared.resource.UIResourceLoader;
 
 public class DungeonWallSetBuilder {
 	private UIResourceLoader loader;

@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.text;
 
 import javax.annotation.Nonnull;
 

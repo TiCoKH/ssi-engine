@@ -9,12 +9,12 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import ui.FrameType.BackgroundType;
-import ui.ImageResource;
-import ui.UIFrame;
-import ui.UIResourceConfiguration;
-import ui.UIResourceManager;
 import ui.UISettings;
+import ui.shared.UIFrame;
+import ui.shared.FrameType.BackgroundType;
+import ui.shared.resource.ImageResource;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceManager;
 
 public abstract class AbstractFrameRenderer {
 	protected UIResourceConfiguration config;

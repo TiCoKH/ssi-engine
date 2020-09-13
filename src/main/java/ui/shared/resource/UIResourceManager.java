@@ -1,7 +1,7 @@
-package ui;
+package ui.shared.resource;
 
 import static shared.FontColor.INTENSE;
-import static ui.FrameType.FRAME;
+import static ui.shared.FrameType.FRAME;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -31,6 +31,11 @@ import data.image.ImageContent;
 import data.palette.Palette;
 import shared.FontColor;
 import shared.GameFeature;
+import ui.ExceptionHandler;
+import ui.UISettings;
+import ui.shared.dungeon.DungeonMapBuilder;
+import ui.shared.dungeon.DungeonWall;
+import ui.shared.dungeon.DungeonWallSetBuilder;
 
 public class UIResourceManager {
 	private static final ImageResource INTERNAL_ID_MISC = new ImageResource(1000, null);

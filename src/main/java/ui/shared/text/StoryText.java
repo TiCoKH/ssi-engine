@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.text;
 
 import static shared.GoldboxStringPart.PartType.COLOR;
 import static shared.GoldboxStringPart.PartType.TEXT;

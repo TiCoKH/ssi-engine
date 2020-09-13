@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.dungeon;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;

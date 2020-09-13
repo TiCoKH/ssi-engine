@@ -5,24 +5,23 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import ui.UIResourceConfiguration;
-import ui.UIResourceManager;
-import ui.UIResources;
 import ui.UISettings;
-import ui.UIState;
+import ui.shared.UIState;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceManager;
 
 public class RendererContainer {
 	private static final Map<UIState, AbstractRenderer> GAME_RENDERERS = new EnumMap<>(UIState.class);
 
-	private final UIResources resources;
+	private final RendererState state;
 	private final UISettings settings;
 
 	private final AbstractFrameRenderer frameRenderer;
 
-	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UIResources resources,
+	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull RendererState state,
 		@Nonnull UISettings settings) {
 
-		this.resources = resources;
+		this.state = state;
 		this.settings = settings;
 		this.frameRenderer = createFrameRenderer(config, resman, settings);
 	}
@@ -38,17 +37,17 @@ public class RendererContainer {
 	private AbstractRenderer createRenderer(@Nonnull UIState uiState) {
 		switch (uiState) {
 			case BIGPIC:
-				return new BigPicRenderer(resources, settings, frameRenderer);
+				return new BigPicRenderer(state, settings, frameRenderer);
 			case DUNGEON:
-				return new DungeonRenderer(resources, settings, frameRenderer);
+				return new DungeonRenderer(state, settings, frameRenderer);
 			case OVERLAND:
-				return new OverlandMapRenderer(resources, settings, frameRenderer);
+				return new OverlandMapRenderer(state, settings, frameRenderer);
 			case SPACE:
-				return new SpaceTravelRenderer(resources, settings, frameRenderer);
+				return new SpaceTravelRenderer(state, settings, frameRenderer);
 			case STORY:
-				return new StoryRenderer(resources, settings, frameRenderer);
+				return new StoryRenderer(state, settings, frameRenderer);
 			case TITLE:
-				return new TitleRenderer(resources, settings, frameRenderer);
+				return new TitleRenderer(state, settings, frameRenderer);
 			default:
 				throw new IllegalArgumentException("Unknown UIState: " + uiState);
 		}

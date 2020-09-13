@@ -4,7 +4,7 @@ import static data.image.ImageContentProperties.X_OFFSET;
 import static data.image.ImageContentProperties.Y_OFFSET;
 import static data.palette.Palette.COLOR_GAME_STATIC;
 import static shared.FontColor.NORMAL;
-import static ui.UIFrame.GAME;
+import static ui.shared.UIFrame.GAME;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -16,10 +16,9 @@ import javax.annotation.Nonnull;
 import data.dungeon.DungeonMap.VisibleWalls;
 import data.dungeon.WallDef.WallDistance;
 import data.dungeon.WallDef.WallPlacement;
-import ui.DungeonWall;
-import ui.UIResources;
-import ui.UIResources.DungeonResources;
 import ui.UISettings;
+import ui.classic.RendererState.DungeonResources;
+import ui.shared.dungeon.DungeonWall;
 
 public class DungeonRenderer extends StoryRenderer {
 	// Order is FORWARD(FAR,MEDIUM,CLOSE), LEFT(FAR,MEDIUM,CLOSE), RIGHT(FAR,MEDIUM,CLOSE)
@@ -28,7 +27,7 @@ public class DungeonRenderer extends StoryRenderer {
 	private static final int[] WALL_SPACING = { 2, 3, 7, 2, 3, 0, 2, 3, 0 };
 	private static final int[] WALL_MAX_HEIGHT = { 16, 32, 64, 32, 64, 88, 32, 64, 88 };
 
-	public DungeonRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
+	public DungeonRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 
@@ -36,10 +35,10 @@ public class DungeonRenderer extends StoryRenderer {
 	public void render(@Nonnull Graphics2D g2d) {
 		renderFrame(g2d, GAME);
 		renderMenuOrTextStatus(g2d);
-		Optional<DungeonResources> r = resources.getDungeonResources();
+		Optional<DungeonResources> r = state.getDungeonResources();
 		if (r.isPresent() && r.get().isShowRunicText()) {
 			renderRunicText(g2d, r.get());
-		} else if (resources.getPic().isPresent() && !resources.preferSprite()) {
+		} else if (state.getPic().isPresent() && !state.preferSprite()) {
 			renderPicture(g2d, 3);
 		} else {
 			renderDungeon(g2d);
@@ -48,7 +47,7 @@ public class DungeonRenderer extends StoryRenderer {
 	}
 
 	private void renderDungeon(@Nonnull Graphics2D g2d) {
-		resources.getDungeonResources().ifPresent(r -> {
+		state.getDungeonResources().ifPresent(r -> {
 
 			if (r.isShowAreaMap()) {
 				r.getMap().ifPresent(map -> renderMap(g2d, r, map));
@@ -153,7 +152,7 @@ public class DungeonRenderer extends StoryRenderer {
 	}
 
 	private void renderPosition(@Nonnull Graphics2D g2d) {
-		resources.getDungeonResources().ifPresent(r -> {
+		state.getDungeonResources().ifPresent(r -> {
 			renderString(g2d, r.getPositionText(), 17, 15, NORMAL);
 		});
 	}

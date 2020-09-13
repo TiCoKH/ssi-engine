@@ -1,12 +1,12 @@
-package ui;
+package ui.classic;
 
 import static data.ContentType.BACK;
 import static data.ContentType.SPRIT;
-import static ui.ImageResource.SKY_CLOUD;
-import static ui.ImageResource.SKY_STREET;
-import static ui.ImageResource.SKY_SUN;
-import static ui.ImageResource.SPACE_BACKGROUND;
-import static ui.ImageResource.SPACE_SYMBOLS;
+import static ui.shared.resource.ImageResource.SKY_CLOUD;
+import static ui.shared.resource.ImageResource.SKY_STREET;
+import static ui.shared.resource.ImageResource.SKY_SUN;
+import static ui.shared.resource.ImageResource.SPACE_BACKGROUND;
+import static ui.shared.resource.ImageResource.SPACE_SYMBOLS;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -28,8 +28,19 @@ import shared.ViewDungeonPosition;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
 import shared.ViewSpacePosition.Celestial;
+import ui.shared.BackdropMode;
+import ui.shared.Menu;
+import ui.shared.dungeon.DungeonWall;
+import ui.shared.resource.DungeonMapResource;
+import ui.shared.resource.DungeonResource;
+import ui.shared.resource.ImageResource;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceManager;
+import ui.shared.text.GoldboxStringFuel;
+import ui.shared.text.GoldboxStringPosition;
+import ui.shared.text.StoryText;
 
-public class UIResources {
+public class RendererState {
 	private static final int[] SKY_COLOURS = new int[] { //
 		0x00, 0x0F, 0x04, 0x0B, 0x0D, 0x02, 0x09, 0x0E, 0x00, 0x0F, 0x04, 0x0B, 0x0D, 0x02, 0x09, 0x0E //
 	};
@@ -60,7 +71,7 @@ public class UIResources {
 	private UIResourceConfiguration config;
 	private UIResourceManager resman;
 
-	public UIResources(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman) {
+	public RendererState(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman) {
 		this.config = config;
 		this.resman = resman;
 	}

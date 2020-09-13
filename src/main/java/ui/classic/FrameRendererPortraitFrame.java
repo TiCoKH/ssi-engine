@@ -4,10 +4,10 @@ import java.awt.Graphics2D;
 
 import javax.annotation.Nonnull;
 
-import ui.UIFrame;
-import ui.UIResourceConfiguration;
-import ui.UIResourceManager;
 import ui.UISettings;
+import ui.shared.UIFrame;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceManager;
 
 public class FrameRendererPortraitFrame extends FrameRendererSymbols {
 

@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.dungeon;
 
 import static data.ContentType._8X8D;
 
@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceLoader;
 
 public class DungeonMapBuilder {
 	private UIResourceConfiguration config;

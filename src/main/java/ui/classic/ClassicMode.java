@@ -54,20 +54,19 @@ import shared.UserInterface;
 import shared.ViewDungeonPosition;
 import shared.ViewOverlandPosition;
 import shared.ViewSpacePosition;
-import ui.DungeonResource;
 import ui.ExceptionHandler;
-import ui.GoldboxStringInput;
-import ui.ImageCompositeResource;
-import ui.ImageResource;
-import ui.Menu;
-import ui.StoryText;
-import ui.UIResourceConfiguration;
-import ui.UIResourceLoader;
-import ui.UIResourceManager;
-import ui.UIResources;
-import ui.UIResources.DungeonResources;
 import ui.UISettings;
-import ui.UIState;
+import ui.classic.RendererState.DungeonResources;
+import ui.shared.Menu;
+import ui.shared.UIState;
+import ui.shared.resource.DungeonResource;
+import ui.shared.resource.ImageCompositeResource;
+import ui.shared.resource.ImageResource;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceLoader;
+import ui.shared.resource.UIResourceManager;
+import ui.shared.text.GoldboxStringInput;
+import ui.shared.text.StoryText;
 
 public class ClassicMode extends JPanel implements UserInterface {
 	private static final String MENU_PREV = "__MENU_PREV";
@@ -96,7 +95,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient UIResourceConfiguration config;
 	private transient UIResourceLoader loader;
-	private transient UIResources resources;
+	private transient RendererState state;
 	private transient UISettings settings;
 	private transient RendererContainer renderers;
 
@@ -116,8 +115,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 		this.loader = new UIResourceLoader(fileMap, config);
 		UIResourceManager resman = new UIResourceManager(config, loader, settings, excHandler);
-		this.resources = new UIResources(config, resman);
-		this.renderers = new RendererContainer(config, resman, resources, settings);
+		this.state = new RendererState(config, resman);
+		this.renderers = new RendererContainer(config, resman, state, settings);
 
 		initSurface();
 		resetInput();
@@ -195,7 +194,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private transient Runnable titleSwitcher = null;
 
 	private void showNextTitle(int titleId) {
-		resources.setPic(createTitleResource(titleId));
+		state.setPic(createTitleResource(titleId));
 		if (titleId < config.getTitleCount() - 1) {
 			titleSwitcher = () -> showNextTitle(titleId + 1);
 		} else {
@@ -205,7 +204,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	public void showModeMenu() {
-		resources.setPic(createTitleResource(config.getTitleCount()));
+		state.setPic(createTitleResource(config.getTitleCount()));
 		stub.showModeMenu();
 	}
 
@@ -250,14 +249,14 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void clearAll() {
 		setInputNone();
-		resources.reset();
+		state.reset();
 		switchUIState(UIState.STORY);
 	}
 
 	@Override
 	public void clearPictures() {
 		stopPicAnimation();
-		resources.clearPic();
+		state.clearPic();
 	}
 
 	private void resetInput() {
@@ -280,30 +279,30 @@ public class ClassicMode extends JPanel implements UserInterface {
 		List<InputAction> namedMenuItems = menuItems.stream().filter(a -> a.getName().getLength() > 0).collect(Collectors.toList());
 		namedMenuItems.stream().forEach(a -> {
 			registerInput(a, () -> {
-				resources.setMenu(null);
+				state.setMenu(null);
 				stub.handleInput(a);
 			}, getKeyStroke(toLowerCase(a.getName().toString().charAt(0))));
 		});
 		if (namedMenuItems.size() > 1) {
 			if (type == MenuType.HORIZONTAL) {
-				registerInput(MENU_PREV, () -> resources.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
-				registerInput(MENU_NEXT, () -> resources.getMenu().ifPresent(Menu::next), getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
+				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
+				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
 			} else {
-				registerInput(MENU_PREV, () -> resources.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_UP, 0), getKeyStroke(VK_KP_UP, 0));
-				registerInput(MENU_NEXT, () -> resources.getMenu().ifPresent(Menu::next), getKeyStroke(VK_DOWN, 0), getKeyStroke(VK_KP_DOWN, 0));
+				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_UP, 0), getKeyStroke(VK_KP_UP, 0));
+				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_DOWN, 0), getKeyStroke(VK_KP_DOWN, 0));
 			}
 		}
 
 		menuItems.stream().filter(a -> a.getName().getLength() == 0).forEach(a -> {
 			registerInput(a, () -> {
-				resources.setMenu(null);
+				state.setMenu(null);
 				stub.handleInput(a);
 			}, KEY_MAPPING.get(a.getName()));
 		});
 
 		registerInput(MENU_ACTION, () -> {
-			resources.getMenu().ifPresent(m -> {
-				resources.setMenu(null);
+			state.getMenu().ifPresent(m -> {
+				state.setMenu(null);
 				stub.handleInput(m.getSelectedItem());
 			});
 		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
@@ -311,14 +310,14 @@ public class ClassicMode extends JPanel implements UserInterface {
 		Menu menu = new Menu(type, namedMenuItems, description);
 		if (selected != null)
 			menu.setSelectedItem(selected);
-		resources.setMenu(menu);
+		state.setMenu(menu);
 	}
 
 	@Override
 	public void setInputNumber(int maxDigits) {
 		resetInput();
 		input = new GoldboxStringInput(INPUT_NUMBER, maxDigits);
-		resources.setStatusLine(input);
+		state.setStatusLine(input);
 		for (char c = '0'; c <= '9'; c++) {
 			Character d = c;
 			registerInput(d, () -> {
@@ -335,7 +334,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void setInputString(int maxLetters) {
 		resetInput();
 		input = new GoldboxStringInput(INPUT_STRING, maxLetters);
-		resources.setStatusLine(input);
+		state.setStatusLine(input);
 		for (char c = 'a'; c <= 'z'; c++) {
 			Character d = c;
 			registerInput(d, () -> {
@@ -394,46 +393,46 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void clearStatus() {
-		resources.setStatusLine(null);
+		state.setStatusLine(null);
 	}
 
 	@Override
 	public void setStatus(@Nonnull GoldboxString status) {
-		resources.setStatusLine(status);
+		state.setStatusLine(status);
 	}
 
 	@Override
 	public void setNoResources() {
 		switchUIState(UIState.STORY);
-		resources.clearDungeonResources();
-		resources.clearOverlandResources();
-		resources.clearSpaceResources();
+		state.clearDungeonResources();
+		state.clearOverlandResources();
+		state.clearSpaceResources();
 	}
 
 	@Override
 	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
 		int[] decoIds) {
 
-		resources.setDungeonResources(position, visibleWalls, map, new DungeonResource(decoIds));
+		state.setDungeonResources(position, visibleWalls, map, new DungeonResource(decoIds));
 		switchUIState(UIState.DUNGEON);
-		resources.clearOverlandResources();
-		resources.clearSpaceResources();
+		state.clearOverlandResources();
+		state.clearSpaceResources();
 	}
 
 	@Override
 	public void setOverlandResources(@Nonnull ViewOverlandPosition position, int mapId) {
-		resources.setOverlandResources(position, mapId);
+		state.setOverlandResources(position, mapId);
 		switchUIState(UIState.OVERLAND);
-		resources.clearDungeonResources();
-		resources.clearSpaceResources();
+		state.clearDungeonResources();
+		state.clearSpaceResources();
 	}
 
 	@Override
 	public void setSpaceResources(@Nonnull ViewSpacePosition position) {
-		resources.setSpaceResources(position);
+		state.setSpaceResources(position);
 		switchUIState(UIState.SPACE);
-		resources.clearDungeonResources();
-		resources.clearOverlandResources();
+		state.clearDungeonResources();
+		state.clearOverlandResources();
 	}
 
 	@Override
@@ -443,7 +442,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			new ImageResource(headId, HEAD), 0, 0, //
 			new ImageResource(bodyId, BODY), 0, 40 //
 		);
-		resources.setPic(res);
+		state.setPic(res);
 	}
 
 	@Override
@@ -460,15 +459,15 @@ public class ClassicMode extends JPanel implements UserInterface {
 			}
 		}
 		if (type != null) {
-			resources.setPic(new ImageResource(pictureId, type));
+			state.setPic(new ImageResource(pictureId, type));
 			updateUIStateForPictureType(type);
 		} else {
-			resources.clearPic();
-			resources.getDungeonResources().ifPresent(r -> switchUIState(UIState.DUNGEON));
-			resources.getOverlandResources().ifPresent(r -> switchUIState(UIState.OVERLAND));
-			resources.getSpaceResources().ifPresent(r -> switchUIState(UIState.SPACE));
+			state.clearPic();
+			state.getDungeonResources().ifPresent(r -> switchUIState(UIState.DUNGEON));
+			state.getOverlandResources().ifPresent(r -> switchUIState(UIState.OVERLAND));
+			state.getSpaceResources().ifPresent(r -> switchUIState(UIState.SPACE));
 		}
-		if (resources.getPic().isPresent()) {
+		if (state.getPic().isPresent()) {
 			startPicAnimation();
 		}
 	}
@@ -476,8 +475,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private void updateUIStateForPictureType(@Nonnull ContentType type) {
 		if (PIC.equals(type)) {
 			switchUIState( //
-				resources.getDungeonResources().isPresent() ? UIState.DUNGEON : //
-					resources.getSpaceResources().isPresent() ? UIState.SPACE : //
+				state.getDungeonResources().isPresent() ? UIState.DUNGEON : //
+					state.getSpaceResources().isPresent() ? UIState.SPACE : //
 						UIState.STORY);
 		} else if (BIGPIC.equals(type)) {
 			switchUIState(UIState.BIGPIC);
@@ -485,7 +484,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	private void startPicAnimation() {
-		animationFuture = exec.scheduleWithFixedDelay(() -> resources.incPicIndex(), 400, 400, MILLISECONDS);
+		animationFuture = exec.scheduleWithFixedDelay(() -> state.incPicIndex(), 400, 400, MILLISECONDS);
 	}
 
 	private void stopPicAnimation() {
@@ -515,13 +514,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private void showSprite(int spriteId, @Nullable ImageResource picture, int distance) {
 		clearSprite();
 		if (picture != null)
-			resources.setPic(picture);
+			state.setPic(picture);
 		else
-			resources.clearPic();
-		resources.getDungeonResources().ifPresent(r -> {
+			state.clearPic();
+		state.getDungeonResources().ifPresent(r -> {
 			if (spriteId != 255)
 				r.setSprite(spriteId, distance);
-			if (resources.getPic().isPresent()) {
+			if (state.getPic().isPresent()) {
 				spriteReplacement(r);
 			}
 		});
@@ -529,9 +528,9 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void advanceSprite() {
-		resources.getDungeonResources().ifPresent(r -> {
+		state.getDungeonResources().ifPresent(r -> {
 			r.advanceSprite();
-			if (resources.getPic().isPresent())
+			if (state.getPic().isPresent())
 				spriteReplacement(r);
 		});
 	}
@@ -548,17 +547,17 @@ public class ClassicMode extends JPanel implements UserInterface {
 	@Override
 	public void clearSprite() {
 		clearPictures();
-		resources.getDungeonResources().ifPresent(DungeonResources::clearSprite);
+		state.getDungeonResources().ifPresent(DungeonResources::clearSprite);
 	}
 
 	public void clearText() {
 		this.textNeedsProgressing = false;
-		resources.getStoryText().resetText();
+		state.getStoryText().resetText();
 	}
 
 	@Override
 	public void addText(boolean withclear, List<GoldboxStringPart> text) {
-		StoryText st = resources.getStoryText();
+		StoryText st = state.getStoryText();
 		if (withclear)
 			st.clearScreen();
 		st.addText(text);
@@ -567,23 +566,23 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void addRunicText(GoldboxStringPart text) {
-		resources.getDungeonResources().ifPresent(r -> r.addRunicText(text));
+		state.getDungeonResources().ifPresent(r -> r.addRunicText(text));
 	}
 
 	private void advance() {
 		if (textNeedsProgressing) {
-			if (resources.getStoryText().hasCharStopReachedLimit()) {
+			if (state.getStoryText().hasCharStopReachedLimit()) {
 				textNeedsProgressing = false;
 				stub.textDisplayFinished();
 			} else {
-				resources.getStoryText().incCharStop(settings.getTextSpeed());
+				state.getStoryText().incCharStop(settings.getTextSpeed());
 			}
 		}
 	}
 
 	@Override
 	public void switchDungeonAreaMap() {
-		resources.getDungeonResources().ifPresent(r -> {
+		state.getDungeonResources().ifPresent(r -> {
 			r.toggleShowAreaMap();
 		});
 	}

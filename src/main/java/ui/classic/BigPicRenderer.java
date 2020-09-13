@@ -1,17 +1,16 @@
 package ui.classic;
 
-import static ui.UIFrame.BIGPIC;
+import static ui.shared.UIFrame.BIGPIC;
 
 import java.awt.Graphics2D;
 
 import javax.annotation.Nonnull;
 
-import ui.UIResources;
 import ui.UISettings;
 
 public class BigPicRenderer extends StoryRenderer {
 
-	public BigPicRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
+	public BigPicRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 

@@ -39,6 +39,7 @@ import ui.UISettings.TextSpeed;
 import ui.classic.ClassicMode;
 import ui.debug.EclCodeViewer;
 import ui.debug.ResourceViewer;
+import ui.shared.resource.UIResourceConfiguration;
 
 public class DesktopFrame implements ExceptionHandler {
 	private JFrame frame;

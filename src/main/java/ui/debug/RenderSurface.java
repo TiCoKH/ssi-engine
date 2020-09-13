@@ -30,17 +30,17 @@ import javax.swing.Scrollable;
 
 import data.ContentType;
 import shared.FontColor;
-import ui.DungeonMapResource;
-import ui.DungeonResource;
-import ui.DungeonWall;
-import ui.ImageCompositeResource;
-import ui.ImageResource;
-import ui.UIFrame;
-import ui.UIResourceConfiguration;
-import ui.UIResourceManager;
 import ui.UISettings;
 import ui.classic.AbstractFrameRenderer;
 import ui.classic.RendererContainer;
+import ui.shared.UIFrame;
+import ui.shared.dungeon.DungeonWall;
+import ui.shared.resource.DungeonMapResource;
+import ui.shared.resource.DungeonResource;
+import ui.shared.resource.ImageCompositeResource;
+import ui.shared.resource.ImageResource;
+import ui.shared.resource.UIResourceConfiguration;
+import ui.shared.resource.UIResourceManager;
 
 public class RenderSurface extends JPanel implements Scrollable {
 	private static final long serialVersionUID = -3126585855013388072L;

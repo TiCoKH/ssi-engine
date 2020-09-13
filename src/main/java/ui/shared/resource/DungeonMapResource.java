@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.resource;
 
 import java.util.Arrays;
 import java.util.Objects;

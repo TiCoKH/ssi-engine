@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.resource;
 
 import common.FileMap;
 import data.ContentType;
@@ -11,7 +11,10 @@ import data.image.TLBTILEBlock;
 import data.image.VGADependentImages;
 import data.image.VGAImage;
 import shared.GameResourceConfiguration;
-import ui.FrameType.BackgroundType;
+import ui.shared.BackdropMode;
+import ui.shared.FrameType;
+import ui.shared.UIFrame;
+import ui.shared.FrameType.BackgroundType;
 
 public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_8X8D = "8x8d.format";

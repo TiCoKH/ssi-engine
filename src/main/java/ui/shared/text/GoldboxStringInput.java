@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.text;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package ui;
+package ui.shared;
 
 import java.util.List;
 import java.util.Optional;

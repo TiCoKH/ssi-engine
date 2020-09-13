@@ -1,17 +1,16 @@
 package ui.classic;
 
-import static ui.UIFrame.BIGPIC;
+import static ui.shared.UIFrame.BIGPIC;
 
 import java.awt.Graphics2D;
 
 import javax.annotation.Nonnull;
 
-import ui.UIResources;
 import ui.UISettings;
 
 public class OverlandMapRenderer extends StoryRenderer {
 
-	public OverlandMapRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
+	public OverlandMapRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 
@@ -23,7 +22,7 @@ public class OverlandMapRenderer extends StoryRenderer {
 	}
 
 	protected void renderMap(@Nonnull Graphics2D g2d) {
-		resources.getOverlandResources().ifPresent(r -> {
+		state.getOverlandResources().ifPresent(r -> {
 			renderImage(g2d, r.getMap(), 1, 1);
 			renderImage(g2d, r.getCursor(), 1 + r.getCursorX(), 1 + r.getCursorY());
 		});

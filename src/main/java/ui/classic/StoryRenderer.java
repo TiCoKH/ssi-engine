@@ -1,12 +1,11 @@
 package ui.classic;
 
-import static ui.UIFrame.GAME;
+import static ui.shared.UIFrame.GAME;
 
 import java.awt.Graphics2D;
 
 import javax.annotation.Nonnull;
 
-import ui.UIResources;
 import ui.UISettings;
 
 public class StoryRenderer extends AbstractRenderer {
@@ -14,7 +13,7 @@ public class StoryRenderer extends AbstractRenderer {
 	protected static final int TEXT_START_Y = 17;
 	protected static final int TEXT_LINE_WIDTH = 38;
 
-	public StoryRenderer(@Nonnull UIResources resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
+	public StoryRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull AbstractFrameRenderer frameRenderer) {
 		super(resources, settings, frameRenderer);
 	}
 
@@ -41,7 +40,7 @@ public class StoryRenderer extends AbstractRenderer {
 	}
 
 	protected void renderPicture(@Nonnull Graphics2D g2d, int start) {
-		resources.getPic().ifPresent(pic -> {
+		state.getPic().ifPresent(pic -> {
 			renderImage(g2d, pic, start, start);
 		});
 	}

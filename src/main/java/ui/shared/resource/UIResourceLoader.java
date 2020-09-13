@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.resource;
 
 import static data.ContentType.BIGPIC;
 import static data.ContentType.PIC;

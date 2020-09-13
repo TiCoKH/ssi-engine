@@ -1,4 +1,4 @@
-package ui;
+package ui.shared.resource;
 
 import java.awt.Point;
 import java.util.Arrays;
