@@ -19,7 +19,7 @@ Building
 Requirements:
 
 * Maven 3
-* Java Development Kit 8
+* Java Development Kit 11
 
 Run
 `mvn clean package -Dmaven.test.skip=true`
