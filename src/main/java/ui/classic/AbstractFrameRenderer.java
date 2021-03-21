@@ -44,6 +44,15 @@ public abstract class AbstractFrameRenderer {
 		renderFrame(g2d, f);
 	}
 
+	public void clearStatusLine(Graphics2D g2d) {
+		Color c = Color.black;
+		if (BackgroundType.COLOR.equals(config.getBackgroundType())) {
+			c = Color.decode(config.getBackground());
+		}
+		g2d.setBackground(c);
+		g2d.clearRect(0, settings.zoom8(24), settings.zoom(320), settings.zoom(200));
+	}
+
 	protected abstract void renderFrame(@Nonnull Graphics2D g2d, @Nonnull UIFrame f);
 
 	protected void renderBackground(@Nonnull Graphics2D g2d, @Nonnull UIFrame f) {

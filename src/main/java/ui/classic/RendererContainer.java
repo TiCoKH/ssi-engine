@@ -21,6 +21,7 @@ public class RendererContainer {
 	private final UIResourceConfiguration config;
 
 	private final AbstractFrameRenderer frameRenderer;
+	private final TextInputRenderer inputRenderer;
 
 	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull RendererState state,
 		@Nonnull UISettings settings) {
@@ -30,6 +31,7 @@ public class RendererContainer {
 		this.state = state;
 		this.settings = settings;
 		this.frameRenderer = createFrameRenderer(config, resman, settings);
+		this.inputRenderer = new TextInputRenderer(settings, resman, frameRenderer);
 	}
 
 	public AbstractStateRenderer rendererFor(@Nonnull UIState uiState) {
@@ -40,8 +42,12 @@ public class RendererContainer {
 		return DIALOG_RENDERERS.computeIfAbsent(dialogState.getRendererClass(), this::createRenderer);
 	}
 
-	public AbstractFrameRenderer fameRenderer() {
+	public AbstractFrameRenderer frameRenderer() {
 		return frameRenderer;
+	}
+
+	public TextInputRenderer inputRenderer() {
+		return inputRenderer;
 	}
 
 	private AbstractStateRenderer createRenderer(@Nonnull UIState uiState) {

@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -117,7 +118,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient boolean running = false;
 
-	private transient GoldboxStringInput input = null;
+	private transient Optional<GoldboxStringInput> input = Optional.empty();
 
 	public ClassicMode(@Nonnull FileMap fileMap, @Nonnull EngineStub stub, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
 		@Nonnull ExceptionHandler excHandler) throws IOException {
@@ -328,64 +329,68 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void setInputNumber(int maxDigits) {
+		backupKeyMaps();
 		resetInput();
-		input = new GoldboxStringInput(INPUT_NUMBER, maxDigits);
-		state.setStatusLine(input);
+
+		input = Optional.of(new GoldboxStringInput(INPUT_NUMBER, maxDigits));
+
 		for (char c = '0'; c <= '9'; c++) {
-			Character d = c;
-			registerInput(d, () -> {
-				input.addChar(d);
-				if (input.getInputCount() == 1) {
-					mapInputDone();
-				}
-			}, getKeyStroke(c));
+			mapCharacter(c);
 		}
+
 		mapInputBack();
+
 	}
 
 	@Override
 	public void setInputString(int maxLetters) {
+		backupKeyMaps();
 		resetInput();
-		input = new GoldboxStringInput(INPUT_STRING, maxLetters);
-		state.setStatusLine(input);
+
+		input = Optional.of(new GoldboxStringInput(INPUT_STRING, maxLetters));
+
 		for (char c = 'a'; c <= 'z'; c++) {
-			Character d = c;
-			registerInput(d, () -> {
-				input.addChar(Character.toUpperCase(d));
-				if (input.getInputCount() == 1) {
-					mapInputDone();
-				}
-			}, getKeyStroke(c));
+			mapCharacter(c);
 		}
 		for (char c = 'A'; c <= 'Z'; c++) {
-			Character d = c;
-			registerInput(d, () -> {
-				input.addChar(Character.toUpperCase(d));
-				if (input.getInputCount() == 1) {
-					mapInputDone();
-				}
-			}, getKeyStroke(c));
+			mapCharacter(c);
 		}
 		for (char c = '0'; c <= '9'; c++) {
-			Character d = c;
-			registerInput(d, () -> {
-				input.addChar(Character.toUpperCase(d));
-				if (input.getInputCount() == 1) {
-					mapInputDone();
-				}
-			}, getKeyStroke(c));
+			mapCharacter(c);
 		}
 		mapInputBack();
 	}
 
+	private void mapCharacter(Character c) {
+		registerInput(c, () -> {
+			input.ifPresent(input -> {
+				input.addChar(Character.toUpperCase(c));
+				if (input.getInputCount() == 1) {
+					mapInputDone();
+				}
+			});
+		}, getKeyStroke(c));
+	}
+
 	private void mapInputBack() {
-		registerInput("_INPUT_BACK", () -> input.removeLastChar(), getKeyStroke(VK_BACK_SPACE, 0));
+		registerInput("_INPUT_BACK", () -> {
+			input.ifPresent(input -> {
+				input.removeLastChar();
+				if (input.getInputCount() == 0) {
+					getInputMap(WHEN_IN_FOCUSED_WINDOW).remove(getKeyStroke(VK_ENTER, 0));
+					getActionMap().remove("_INPUT_DONE");
+				}
+			});
+		}, getKeyStroke(VK_BACK_SPACE, 0));
 	}
 
 	private void mapInputDone() {
 		registerInput("_INPUT_DONE", () -> {
-			clearStatus();
-			stub.handleInput(input.toString());
+			input.ifPresent(input -> {
+				restoreKeyMaps();
+				stub.handleInput(input.toString());
+			});
+			input = Optional.empty();
 		}, getKeyStroke(VK_ENTER, 0));
 	}
 
@@ -721,7 +726,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void setPortraitFrameVisible(boolean enabled) {
-		renderers.fameRenderer().setPortraitShown(enabled);
+		renderers.frameRenderer().setPortraitShown(enabled);
 	}
 
 	@Override
@@ -733,5 +738,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			renderers.rendererFor(dialogState).render((Graphics2D) g, dialogState);
 		} else
 			renderers.rendererFor(currentState).render((Graphics2D) g);
+
+		input.ifPresent(i -> renderers.inputRenderer().render((Graphics2D) g, i));
 	}
 }

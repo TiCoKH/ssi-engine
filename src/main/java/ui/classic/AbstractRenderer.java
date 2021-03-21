@@ -31,7 +31,7 @@ public abstract class AbstractRenderer {
 	protected UISettings settings;
 	protected UIResourceManager resman;
 
-	private AbstractFrameRenderer frameRenderer;
+	protected AbstractFrameRenderer frameRenderer;
 
 	protected AbstractRenderer(@Nonnull UISettings settings, @Nonnull UIResourceManager resman, @Nonnull AbstractFrameRenderer frameRenderer) {
 		this.settings = settings;
