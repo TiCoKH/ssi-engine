@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
+import engine.input.CharacterSheetEXITHandler;
 import engine.input.DialogBackHandler;
 import engine.input.GameMenuAREAHandler;
 import engine.input.GameMenuEXITHandler;
@@ -53,6 +54,8 @@ public class EngineInputAction implements InputAction {
 	private static final InputHandler PROGRAM_MENU_REMOVE_CHAR_HANDLER = new ProgramMenuRemoveCharacterHandler();
 	private static final InputHandler PROGRAM_MENU_BEGIN_HANDLER = new ProgramMenuBeginHandler();
 
+	private static final InputHandler CHAR_SHEET_EXIT_HANDLER = new CharacterSheetEXITHandler();
+
 	private static final EngineInputAction YES = new EngineInputAction(MENU_HANDLER, "YES", 0);
 	private static final EngineInputAction NO = new EngineInputAction(MENU_HANDLER, "NO", 1);
 
@@ -64,7 +67,7 @@ public class EngineInputAction implements InputAction {
 	private static final EngineInputAction MOVE_TURN_LEFT = new EngineInputAction(MOVEMENT_HANDLER, TURN_LEFT);
 	private static final EngineInputAction MOVE_TURN_RIGHT = new EngineInputAction(MOVEMENT_HANDLER, TURN_RIGHT);
 	private static final EngineInputAction TURN_AROUND_DOWN = new EngineInputAction(MOVEMENT_HANDLER, UTURN_DOWN);
-	private static final EngineInputAction EXIT = new EngineInputAction(GAME_MENU_EXIT_HANDLER, "EXIT");
+	private static final EngineInputAction EXIT_MOVE = new EngineInputAction(GAME_MENU_EXIT_HANDLER, "EXIT");
 
 	public static final EngineInputAction SELECT = new EngineInputAction(MENU_HANDLER, "SELECT");
 	public static final EngineInputAction DIALOG_BACK = new EngineInputAction(BACK_HANDLER, "BACK");
@@ -83,12 +86,15 @@ public class EngineInputAction implements InputAction {
 	public static final EngineInputAction LOAD_GAME = new EngineInputAction(LOAD_HANDLER, "LOAD SAVED GAME");
 	public static final EngineInputAction SAVE_GAME = new EngineInputAction(SAVE_HANDLER, "SAVE CURRENT GAME");
 
+	public static final EngineInputAction EXIT_SHEET = new EngineInputAction(CHAR_SHEET_EXIT_HANDLER, "EXIT");
+
 	public static final List<InputAction> YES_NO_ACTIONS = ImmutableList.of(YES, NO);
 	public static final List<InputAction> MOVEMENT_ACTIONS = ImmutableList.of(DO_SAVE, MOVE_FORWARD_UP, MOVE_TURN_LEFT, MOVE_TURN_RIGHT,
-		TURN_AROUND_DOWN, EXIT);
+		TURN_AROUND_DOWN, EXIT_MOVE);
 	public static final List<InputAction> GAME_MENU_ACTIONS = ImmutableList.of(DO_SAVE, MOVE, AREA, SEARCH, LOOK);
 	public static final List<InputAction> CONTINUE_ACTION = ImmutableList.of(CONTINUE);
 	public static final List<InputAction> DIALOG_MENU_ACTIONS = ImmutableList.of(SELECT, DIALOG_BACK);
+	public static final List<InputAction> CHAR_SHEET_ACTION = ImmutableList.of(EXIT_SHEET);
 
 	private final InputHandler handler;
 	private final GoldboxString name;

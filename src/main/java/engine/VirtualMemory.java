@@ -37,6 +37,7 @@ import javax.annotation.Nonnull;
 
 import common.ByteBufferWrapper;
 import data.dungeon.DungeonMap.Direction;
+import engine.character.CharacterSheetImpl;
 import engine.script.EclArgument;
 import engine.script.EclString;
 import shared.GoldboxString;
@@ -101,7 +102,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static final int[] CELESTIAL_INITIAL_Y = new int[] { 10, 9, 8, 15, 11, 17, 20, 18, 13, 3, 1, 1, 7 };
 	private ByteBufferWrapper mem;
 
-	private final List<PartyMember> members = new ArrayList<>();
+	private final List<CharacterSheetImpl> members = new ArrayList<>();
 
 	private int menuChoice;
 	private GoldboxString input;
@@ -630,6 +631,10 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 
 	public boolean isPartyFull() {
 		return getPartyMemberCount() >= 6;
+	}
+
+	public void addPartyMember(@Nonnull CharacterSheetImpl member) {
+		members.add(member);
 	}
 
 	@Override
