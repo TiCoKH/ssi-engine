@@ -238,7 +238,7 @@ public class DesktopFrame implements ExceptionHandler {
 			Engine engine = new Engine(fm);
 			config = new UIResourceConfiguration(fm);
 			ui = Optional.of(new ClassicMode(fm, engine, config, settings, this));
-			resourceUi = new ResourceViewer(fm, config, settings, this);
+			resourceUi = new ResourceViewer(fm, config, settings, this, engine);
 			codeViewUi = new EclCodeViewer(fm);
 			resource.setEnabled(true);
 			codeView.setEnabled(true);

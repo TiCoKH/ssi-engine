@@ -5,6 +5,7 @@ import static data.ContentType.BIGPIC;
 import static data.ContentType.BODY;
 import static data.ContentType.GEO;
 import static data.ContentType.HEAD;
+import static data.ContentType.MONCHA;
 import static data.ContentType.PIC;
 import static data.ContentType.SPRIT;
 import static data.ContentType.TITLE;
@@ -39,6 +40,7 @@ import data.ContentType;
 import data.DAXFile;
 import data.dungeon.DungeonMap;
 import data.dungeon.DungeonMap2;
+import shared.EngineStub;
 import shared.GameFeature;
 import ui.ExceptionHandler;
 import ui.UISettings;
@@ -46,6 +48,7 @@ import ui.shared.BackdropMode;
 import ui.shared.UIFrame;
 import ui.shared.resource.DungeonMapResource;
 import ui.shared.resource.DungeonResource;
+import ui.shared.resource.IdTypeResource;
 import ui.shared.resource.ImageResource;
 import ui.shared.resource.UIResourceConfiguration;
 import ui.shared.resource.UIResourceLoader;
@@ -59,13 +62,13 @@ public class ResourceViewer {
 	private UIResourceLoader loader;
 
 	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
-		@Nonnull ExceptionHandler excHandler) throws IOException {
+		@Nonnull ExceptionHandler excHandler, @Nonnull EngineStub engine) throws IOException {
 
 		this.config = config;
 		this.loader = new UIResourceLoader(fileMap, config);
 
 		UIResourceManager resman = new UIResourceManager(config, loader, settings, excHandler);
-		this.drawSurface = new RenderSurface(config, resman, settings);
+		this.drawSurface = new RenderSurface(config, resman, settings, engine);
 
 		initFrame();
 	}
@@ -109,6 +112,7 @@ public class ResourceViewer {
 		if (!loader.idsFor(WALLDEF).isEmpty())
 			initChildren(root, _8X8D);
 		initFrameChildren(root);
+		initChildren(root, MONCHA);
 		initChildren(root, BIGPIC);
 		BackdropMode mode = config.getBackdropMode();
 		if (BackdropMode.SPACE.equals(mode) //
@@ -137,7 +141,12 @@ public class ResourceViewer {
 		if (!ids.isEmpty()) {
 			MutableTreeNode parent = new DefaultMutableTreeNode(type.name());
 			for (Integer id : ids) {
-				parent.insert(new DefaultMutableTreeNode(new ImageResource(id, type)), parent.getChildCount());
+				Object res;
+				if (MONCHA.equals(type))
+					res = new IdTypeResource(id, type);
+				else
+					res = new ImageResource(id, type);
+				parent.insert(new DefaultMutableTreeNode(res), parent.getChildCount());
 			}
 			root.insert(parent, root.getChildCount());
 		}

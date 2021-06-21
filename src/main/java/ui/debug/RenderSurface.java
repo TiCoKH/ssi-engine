@@ -28,15 +28,25 @@ import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
+import io.vavr.collection.Array;
+
 import data.ContentType;
+import shared.EngineStub;
 import shared.FontColor;
+import shared.InputAction;
+import shared.MenuType;
+import shared.party.CharacterSheet;
 import ui.UISettings;
 import ui.classic.AbstractFrameRenderer;
+import ui.classic.CharacterSheetRenderer;
+import ui.classic.CharacterSheetState;
 import ui.classic.RendererContainer;
+import ui.shared.Menu;
 import ui.shared.UIFrame;
 import ui.shared.dungeon.DungeonWall;
 import ui.shared.resource.DungeonMapResource;
 import ui.shared.resource.DungeonResource;
+import ui.shared.resource.IdTypeResource;
 import ui.shared.resource.ImageCompositeResource;
 import ui.shared.resource.ImageResource;
 import ui.shared.resource.UIResourceConfiguration;
@@ -49,6 +59,9 @@ public class RenderSurface extends JPanel implements Scrollable {
 	private transient UISettings settings;
 
 	private transient AbstractFrameRenderer frameRenderer;
+	private transient CharacterSheetRenderer csRenderer;
+
+	private transient EngineStub engine;
 
 	private transient Optional<Object> renderObject = Optional.empty();
 
@@ -56,10 +69,14 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	private int index = 0;
 
-	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
+	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings,
+		@Nonnull EngineStub engine) {
+
 		this.resman = resman;
 		this.settings = settings;
 		this.frameRenderer = RendererContainer.createFrameRenderer(config, resman, settings);
+		this.csRenderer = new CharacterSheetRenderer(config, settings, resman, frameRenderer);
+		this.engine = engine;
 
 		exec.scheduleWithFixedDelay(() -> {
 			ImageResource ir = renderObject //
@@ -94,6 +111,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 			changeRenderObject((DungeonResource) o);
 		else if (o instanceof DungeonMapResource)
 			changeRenderObject((DungeonMapResource) o);
+		else if (o instanceof IdTypeResource)
+			changeRenderObject((IdTypeResource) o);
 		else if (o instanceof UIFrame)
 			changeRenderObject((UIFrame) o);
 		else
@@ -116,14 +135,24 @@ public class RenderSurface extends JPanel implements Scrollable {
 		adaptSize(settings.zoom8(22), settings.zoom8(11 * walls.size()));
 	}
 
-	public void changeRenderObject(@Nonnull UIFrame frame) {
-		renderObject = Optional.of(frame);
-		adaptSize(settings.zoom8(40), settings.zoom8(25));
-	}
-
 	public void changeRenderObject(@Nonnull DungeonMapResource mr) {
 		renderObject = Optional.of(mr);
 		adaptSize(settings.zoom8(mr.getMapWidth()), settings.zoom8(mr.getMapHeight()));
+	}
+
+	public void changeRenderObject(@Nonnull IdTypeResource itr) {
+		CharacterSheet cs = engine.readCharacter(itr.getId());
+		if (cs != null) {
+			CharacterSheetState state = new CharacterSheetState(cs, new Menu(MenuType.HORIZONTAL, Array.<InputAction>empty().asJava()),
+				getActionMap(), getInputMap());
+			renderObject = Optional.of(state);
+			adaptSize(settings.zoom8(40), settings.zoom8(25));
+		}
+	}
+
+	public void changeRenderObject(@Nonnull UIFrame frame) {
+		renderObject = Optional.of(frame);
+		adaptSize(settings.zoom8(40), settings.zoom8(25));
 	}
 
 	public void clearRenderObject() {
@@ -191,6 +220,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 				}
 			} else if (o instanceof DungeonMapResource) {
 				g2d.drawImage(resman.getMapResource((DungeonMapResource) o), 0, 0, null);
+			} else if (o instanceof CharacterSheetState) {
+				csRenderer.render(g2d, (CharacterSheetState) o);
 			} else if (o instanceof UIFrame) {
 				frameRenderer.render(g2d, (UIFrame) o);
 			}
