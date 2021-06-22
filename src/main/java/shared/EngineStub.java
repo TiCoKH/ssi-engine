@@ -1,5 +1,7 @@
 package shared;
 
+import shared.party.CharacterSheet;
+
 public interface EngineStub {
 	void registerUI(UserInterface ui);
 
@@ -18,4 +20,6 @@ public interface EngineStub {
 	void handleInput(InputAction action);
 
 	void handleInput(String input);
+
+	CharacterSheet readCharacter(int id);
 }

@@ -62,6 +62,7 @@ import shared.InputAction;
 import shared.MenuType;
 import shared.ProgramMenuType;
 import shared.UserInterface;
+import shared.party.CharacterSheet;
 
 public class Engine implements EngineCallback, EngineStub {
 	private ResourceLoader res;
@@ -165,6 +166,17 @@ public class Engine implements EngineCallback, EngineStub {
 	public void textDisplayFinished() {
 		// continue VM after all text is displayed
 		continueCurrentThread();
+	}
+
+	@Override
+	public CharacterSheet readCharacter(int id) {
+		try {
+			return new CharacterSheetImpl(cfg.getFlavor(), getPlayerDataFactory().loadCharacter(id));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
