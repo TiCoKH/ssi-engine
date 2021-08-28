@@ -6,7 +6,7 @@ public class DungeonResource {
 	private int[] ids;
 
 	public DungeonResource(int id1) {
-		this(new int[]{ id1, 127, 127});
+		this(new int[] { id1, 127, 127 });
 	}
 
 	public DungeonResource(int[] ids) {

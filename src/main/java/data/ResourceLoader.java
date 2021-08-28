@@ -59,8 +59,7 @@ public class ResourceLoader {
 	}
 
 	@Nonnull
-	protected <T extends Content> T load(@Nonnull String name, int blockId, @Nonnull Class<T> clazz, @Nonnull ContentType type)
-		throws IOException {
+	protected <T extends Content> T load(@Nonnull String name, int blockId, @Nonnull Class<T> clazz, @Nonnull ContentType type) throws IOException {
 
 		return load(name).getById(blockId, clazz, type);
 	}

@@ -22,8 +22,7 @@ import ui.shared.dungeon.DungeonWall;
 import ui.shared.resource.UIResourceManager;
 
 public class DungeonRenderer extends StoryRenderer {
-	// Order is FORWARD(FAR,MEDIUM,CLOSE), LEFT(FAR,MEDIUM,CLOSE),
-	// RIGHT(FAR,MEDIUM,CLOSE)
+	// Order is FORWARD(FAR,MEDIUM,CLOSE), LEFT(FAR,MEDIUM,CLOSE), RIGHT(FAR,MEDIUM,CLOSE)
 	private static final int[] WALL_START_X = { 2, 1, -2, 3, 2, 3, 9, 10, 12 };
 	private static final int[] WALL_START_Y = { 7, 6, 4, 6, 4, 3, 6, 4, 3 };
 	private static final int[] WALL_SPACING = { 2, 3, 7, 2, 3, 0, 2, 3, 0 };
