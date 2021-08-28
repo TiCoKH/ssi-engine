@@ -122,7 +122,7 @@ public class Engine implements EngineCallback, EngineStub {
 		if (ui == null) {
 			throw new IllegalStateException("Cant start engine without a registered ui.");
 		}
-		exec = Executors.newFixedThreadPool(1);
+		exec = Executors.newFixedThreadPool(1, r -> new Thread(r, "Engine Executor"));
 	}
 
 	@Override

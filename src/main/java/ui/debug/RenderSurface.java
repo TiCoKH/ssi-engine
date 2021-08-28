@@ -65,7 +65,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	private transient Optional<Object> renderObject = Optional.empty();
 
-	private transient ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+	private transient ScheduledExecutorService exec = Executors.newScheduledThreadPool(1, r -> new Thread(r, "Resourceview Animator"));
 
 	private int index = 0;
 

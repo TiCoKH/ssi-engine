@@ -153,7 +153,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void start(boolean showTitle) {
 		running = true;
 
-		exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
+		exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1, r -> new Thread(r, "Animation support"));
 		exec.setRemoveOnCancelPolicy(true);
 
 		Thread gameLoop = new Thread(() -> {
