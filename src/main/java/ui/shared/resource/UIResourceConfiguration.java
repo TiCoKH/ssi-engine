@@ -13,8 +13,8 @@ import data.image.VGAImage;
 import shared.GameResourceConfiguration;
 import ui.shared.BackdropMode;
 import ui.shared.FrameType;
-import ui.shared.UIFrame;
 import ui.shared.FrameType.BackgroundType;
+import ui.shared.UIFrame;
 
 public class UIResourceConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_FORMAT_8X8D = "8x8d.format";

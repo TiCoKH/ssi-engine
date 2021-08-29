@@ -42,10 +42,10 @@ import engine.debug.CodeSection;
 import engine.debug.Decompiler;
 import engine.debug.Disassembler;
 import engine.debug.Disassembler.JumpAddresses;
-import engine.script.EclInstruction;
-import engine.script.EclOpCode;
 import engine.debug.EclInstructionData;
 import engine.debug.EclinstructionWrapper;
+import engine.script.EclInstruction;
+import engine.script.EclOpCode;
 
 public class EclCodeViewer {
 	private JFrame frame;
