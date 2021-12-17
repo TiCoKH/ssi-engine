@@ -89,7 +89,7 @@ public class DungeonMap extends Content {
 		DungeonSquare square = map[x][y];
 		int newX = x + d.getDeltaX();
 		int newY = y + d.getDeltaY();
-		return square.isDoor(d) && (newX < 0 || newX > 15 || newY < 0 || newY > 15);
+		return square.isDoor(d) && (newX < 0 || newX >= width || newY < 0 || newY >= height);
 	}
 
 	public void visibleWallsAt(@Nonnull VisibleWalls vwalls, int x, int y, @Nonnull Direction o) {
