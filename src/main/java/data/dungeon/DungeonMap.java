@@ -92,66 +92,66 @@ public class DungeonMap extends Content {
 		return square.isDoor(d) && (newX < 0 || newX >= width || newY < 0 || newY >= height);
 	}
 
-	public void visibleWallsAt(@Nonnull VisibleWalls vwalls, int x, int y, @Nonnull Direction o) {
-		vwalls.closeLeft[0] = wallIndexAt(x, y, o.getLeft());
+	public void visibleWallsAt(@Nonnull VisibleWalls vwalls, int x, int y, @Nonnull Direction d) {
+		vwalls.closeLeft[0] = wallIndexAt(x, y, d.getLeft());
 
-		vwalls.closeRight[0] = wallIndexAt(x, y, o.getRight());
+		vwalls.closeRight[0] = wallIndexAt(x, y, d.getRight());
 
 		vwalls.closeAhead[0] = //
-			wallIndexAt(x + o.getLeft().getDeltaX(), y + o.getLeft().getDeltaY(), o);
-		vwalls.closeAhead[1] = wallIndexAt(x, y, o);
+			wallIndexAt(x + d.getLeft().getDeltaX(), y + d.getLeft().getDeltaY(), d);
+		vwalls.closeAhead[1] = wallIndexAt(x, y, d);
 		vwalls.closeAhead[2] = //
-			wallIndexAt(x + o.getRight().getDeltaX(), y + o.getRight().getDeltaY(), o);
+			wallIndexAt(x + d.getRight().getDeltaX(), y + d.getRight().getDeltaY(), d);
 
 		vwalls.medLeft[0] = //
-			wallIndexAt(x + o.getDeltaX() + o.getLeft().getDeltaX(), y + o.getDeltaY() + o.getLeft().getDeltaY(), o.getLeft());
+			wallIndexAt(x + d.getDeltaX() + d.getLeft().getDeltaX(), y + d.getDeltaY() + d.getLeft().getDeltaY(), d.getLeft());
 		vwalls.medLeft[1] = //
-			wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o.getLeft());
+			wallIndexAt(x + d.getDeltaX(), y + d.getDeltaY(), d.getLeft());
 
 		vwalls.medRight[0] = //
-			wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o.getRight());
+			wallIndexAt(x + d.getDeltaX(), y + d.getDeltaY(), d.getRight());
 		vwalls.medRight[1] = //
-			wallIndexAt(x + o.getDeltaX() + o.getRight().getDeltaX(), y + o.getDeltaY() + o.getRight().getDeltaY(), o.getRight());
+			wallIndexAt(x + d.getDeltaX() + d.getRight().getDeltaX(), y + d.getDeltaY() + d.getRight().getDeltaY(), d.getRight());
 
 		vwalls.medAhead[0] = //
-			wallIndexAt(x + o.getDeltaX() + 2 * o.getLeft().getDeltaX(), y + o.getDeltaY() + 2 * o.getLeft().getDeltaY(), o);
+			wallIndexAt(x + d.getDeltaX() + 2 * d.getLeft().getDeltaX(), y + d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d);
 		vwalls.medAhead[1] = //
-			wallIndexAt(x + o.getDeltaX() + o.getLeft().getDeltaX(), y + o.getDeltaY() + o.getLeft().getDeltaY(), o);
+			wallIndexAt(x + d.getDeltaX() + d.getLeft().getDeltaX(), y + d.getDeltaY() + d.getLeft().getDeltaY(), d);
 		vwalls.medAhead[2] = //
-			wallIndexAt(x + o.getDeltaX(), y + o.getDeltaY(), o);
+			wallIndexAt(x + d.getDeltaX(), y + d.getDeltaY(), d);
 		vwalls.medAhead[3] = //
-			wallIndexAt(x + o.getDeltaX() + o.getRight().getDeltaX(), y + o.getDeltaY() + o.getRight().getDeltaY(), o);
+			wallIndexAt(x + d.getDeltaX() + d.getRight().getDeltaX(), y + d.getDeltaY() + d.getRight().getDeltaY(), d);
 		vwalls.medAhead[4] = //
-			wallIndexAt(x + o.getDeltaX() + 2 * o.getRight().getDeltaX(), y + o.getDeltaY() + 2 * o.getRight().getDeltaY(), o);
+			wallIndexAt(x + d.getDeltaX() + 2 * d.getRight().getDeltaX(), y + d.getDeltaY() + 2 * d.getRight().getDeltaY(), d);
 
 		vwalls.farLeft[0] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 2 * o.getLeft().getDeltaX(), y + 2 * o.getDeltaY() + 2 * o.getLeft().getDeltaY(), o.getLeft());
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d.getLeft());
 		vwalls.farLeft[1] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 1 * o.getLeft().getDeltaX(), y + 2 * o.getDeltaY() + 1 * o.getLeft().getDeltaY(), o.getLeft());
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getLeft().getDeltaY(), d.getLeft());
 		vwalls.farLeft[2] = //
-			wallIndexAt(x + 2 * o.getDeltaX(), y + 2 * o.getDeltaY(), o.getLeft());
+			wallIndexAt(x + 2 * d.getDeltaX(), y + 2 * d.getDeltaY(), d.getLeft());
 
 		vwalls.farRight[0] = //
-			wallIndexAt(x + 2 * o.getDeltaX(), y + 2 * o.getDeltaY(), o.getRight());
+			wallIndexAt(x + 2 * d.getDeltaX(), y + 2 * d.getDeltaY(), d.getRight());
 		vwalls.farRight[1] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 1 * o.getRight().getDeltaX(), y + 2 * o.getDeltaY() + 1 * o.getRight().getDeltaY(), o.getRight());
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getRight().getDeltaY(), d.getRight());
 		vwalls.farRight[2] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 2 * o.getRight().getDeltaX(), y + 2 * o.getDeltaY() + 2 * o.getRight().getDeltaY(), o.getRight());
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getRight().getDeltaY(), d.getRight());
 
 		vwalls.farAhead[0] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 3 * o.getLeft().getDeltaX(), y + 2 * o.getDeltaY() + 3 * o.getLeft().getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX() + 3 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 3 * d.getLeft().getDeltaY(), d);
 		vwalls.farAhead[1] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 2 * o.getLeft().getDeltaX(), y + 2 * o.getDeltaY() + 2 * o.getLeft().getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d);
 		vwalls.farAhead[2] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 1 * o.getLeft().getDeltaX(), y + 2 * o.getDeltaY() + 1 * o.getLeft().getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getLeft().getDeltaY(), d);
 		vwalls.farAhead[3] = //
-			wallIndexAt(x + 2 * o.getDeltaX(), y + 2 * o.getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX(), y + 2 * d.getDeltaY(), d);
 		vwalls.farAhead[4] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 1 * o.getRight().getDeltaX(), y + 2 * o.getDeltaY() + 1 * o.getRight().getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getRight().getDeltaY(), d);
 		vwalls.farAhead[5] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 2 * o.getRight().getDeltaX(), y + 2 * o.getDeltaY() + 2 * o.getRight().getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getRight().getDeltaY(), d);
 		vwalls.farAhead[6] = //
-			wallIndexAt(x + 2 * o.getDeltaX() + 3 * o.getRight().getDeltaX(), y + 2 * o.getDeltaY() + 3 * o.getRight().getDeltaY(), o);
+			wallIndexAt(x + 2 * d.getDeltaX() + 3 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 3 * d.getRight().getDeltaY(), d);
 	}
 
 	public int wallIndexAt(int x, int y, Direction d) {
