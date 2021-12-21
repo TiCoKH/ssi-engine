@@ -4,7 +4,7 @@ About
 This project tries to create an engine that can play all
 SSI Goldbox game series including content created by FRUA.
 
-All games except FRUA are plyable to a varyng degree. All games are still
+All games except FRUA are playable to a varying degree. All games are still
 missing party handling and combat mechanics as big features.
 
 Most information of the inner workings of these games has been retrieved from
