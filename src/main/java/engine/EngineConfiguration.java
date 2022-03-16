@@ -29,6 +29,8 @@ public class EngineConfiguration extends GameResourceConfiguration {
 	private static final String CONFIG_CHARACTER_FORMAT = "character.format";
 	private static final String CONFIG_CHARACTER_VALUES = "character.values";
 	private static final String CONFIG_RULE_FLAVOR = "rule.flavor";
+	private static final String CONFIG_STARTING_EXP = "rule.starting_experience";
+	private static final String CONFIG_STARTING_LEVEL = "rule.starting_level";
 
 	public EngineConfiguration(FileMap filemap) throws Exception {
 		super(filemap);
@@ -97,5 +99,13 @@ public class EngineConfiguration extends GameResourceConfiguration {
 
 	public Flavor getFlavor() {
 		return Flavors.valueOf(getProperty(CONFIG_RULE_FLAVOR, STANDARD.name())).getFlavor();
+	}
+
+	public int getStartingExperience() {
+		return Integer.parseInt(getProperty(CONFIG_STARTING_EXP, "-1"));
+	}
+
+	public int getStartingLevel() {
+		return Integer.parseInt(getProperty(CONFIG_STARTING_LEVEL, "-1"));
 	}
 }
