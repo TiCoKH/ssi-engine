@@ -23,6 +23,7 @@ public class PlayerDataFactoryTest {
 		EngineConfiguration cfg = new EngineConfiguration(fm);
 		ResourceLoader res = new ResourceLoader(fm);
 		PlayerDataFactory fac = new PlayerDataFactory(res, cfg);
+		AbstractCharacter.configValues(cfg.getCharacterValues());
 		AbstractCharacter c = fac.loadCharacter(60);
 		assertNotNull(c);
 	}
