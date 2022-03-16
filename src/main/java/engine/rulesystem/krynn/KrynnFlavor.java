@@ -90,4 +90,9 @@ public class KrynnFlavor implements Flavor {
 		character.setCurrentHP(10);
 		character.setNaturalHP(10);
 	}
+
+	@Override
+	public int getRequiredExperienceFor(CharacterClass clazz, int level) {
+		return ClassData.forClass(clazz).getLevelInfo().forLevel(level).getExpNeeded();
+	}
 }

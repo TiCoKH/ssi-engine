@@ -58,7 +58,7 @@ enum LevelData {
 		this.levelInfo = levelInfo;
 	}
 
-	public LevelInfo getLevelInfo(int level) {
+	public LevelInfo forLevel(int level) {
 		return levelInfo[level - 1];
 	}
 }

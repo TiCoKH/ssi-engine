@@ -16,6 +16,8 @@ import static engine.rulesystem.standard.LevelData.RANGER_LEVELS;
 import static engine.rulesystem.standard.LevelData.THIEF_LEVELS;
 
 import character.CharacterAlignment;
+import character.CharacterClass;
+import character.forgottenrealms.CharacterClassForgottenRealms;
 
 enum ClassData {
 	CLERIC(CLERIC_LEVELS), //
@@ -42,5 +44,12 @@ enum ClassData {
 
 	public CharacterAlignment[] getAllowedAlignments() {
 		return allowedAlignments;
+	}
+
+	public static ClassData forClass(CharacterClass clazz) {
+		if (!(clazz instanceof CharacterClassForgottenRealms)) {
+			throw new IllegalArgumentException("clazz not of type CharacterClassForgottenRealms");
+		}
+		return valueOf(((CharacterClassForgottenRealms) clazz).name());
 	}
 }

@@ -6,6 +6,9 @@ import static engine.rulesystem.buckrogers.LevelData.ROCKETJOCK_LEVELS;
 import static engine.rulesystem.buckrogers.LevelData.ROGUE_LEVELS;
 import static engine.rulesystem.buckrogers.LevelData.WARRIOR_LEVELS;
 
+import character.CharacterClass;
+import character.buckrogers.CharacterClassBuckRogers;
+
 enum ClassData {
 	ROCKETJOCK(ROCKETJOCK_LEVELS), //
 	MEDIC(MEDIC_LEVELS), //
@@ -23,5 +26,12 @@ enum ClassData {
 
 	public LevelData getLevelInfo() {
 		return levelInfo;
+	}
+
+	public static ClassData forClass(CharacterClass clazz) {
+		if (!(clazz instanceof CharacterClassBuckRogers)) {
+			throw new IllegalArgumentException("clazz not of type CharacterBuckRogers");
+		}
+		return valueOf(((CharacterClassBuckRogers) clazz).name());
 	}
 }

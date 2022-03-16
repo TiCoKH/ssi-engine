@@ -11,6 +11,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 
 import character.CharacterAlignment;
+import character.CharacterClass;
 import character.CharacterDeity;
 import character.CharacterRace;
 import character.ClassSelection;
@@ -81,5 +82,10 @@ public class BuckRogersFlavor implements Flavor {
 		});
 		character.setCurrentHP(10);
 		character.setNaturalHP(10);
+	}
+
+	@Override
+	public int getRequiredExperienceFor(CharacterClass clazz, int level) {
+		return ClassData.forClass(clazz).getLevelInfo().forLevel(level).getExpNeeded();
 	}
 }

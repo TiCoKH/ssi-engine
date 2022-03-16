@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import io.vavr.collection.Seq;
 
 import character.CharacterAlignment;
+import character.CharacterClass;
 import character.CharacterDeity;
 import character.CharacterRace;
 import character.ClassSelection;
@@ -26,4 +27,6 @@ public interface Flavor {
 	void initCharacter(@Nonnull AbstractCharacter character, int initialExperience);
 
 	void reroll(@Nonnull AbstractCharacter character);
+
+	int getRequiredExperienceFor(CharacterClass clazz, int level);
 }
