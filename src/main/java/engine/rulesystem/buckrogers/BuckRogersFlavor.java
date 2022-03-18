@@ -60,10 +60,18 @@ public class BuckRogersFlavor implements Flavor {
 		character.setName("");
 		character.setAge(10);
 		character.addExperience(initialExperience);
-		character.getClassSelection().forEach(CharacterClassBuckRogers.class, c -> character.setLevel(c, 1));
+		setInitialLevel(character, initialExperience);
 		character.setMoneyValue(CREDITS, 1000);
 		character.setStatus(OKAY);
 		reroll(character);
+	}
+
+	private void setInitialLevel(AbstractCharacter character, int initialExperience) {
+		final int exp = initialExperience / character.getClassSelection().getClassesCount();
+		character.getClassSelection().forEach(CharacterClassBuckRogers.class, c -> {
+			final int level = ClassData.forClass(c).getLevelInfo().levelFor(exp);
+			character.setLevel(c, level);
+		});
 	}
 
 	@Override

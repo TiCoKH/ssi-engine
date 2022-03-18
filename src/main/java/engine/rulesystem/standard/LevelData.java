@@ -3,6 +3,8 @@ package engine.rulesystem.standard;
 import static engine.rulesystem.LevelInfo.forCasters;
 import static engine.rulesystem.LevelInfo.forNonCasters;
 
+import io.vavr.collection.Array;
+
 import engine.rulesystem.LevelInfo;
 
 enum LevelData {
@@ -70,5 +72,11 @@ enum LevelData {
 
 	public LevelInfo forLevel(int level) {
 		return levelInfo[level - 1];
+	}
+
+	public int levelFor(int exp) {
+		final Array<LevelInfo> levels = Array.of(levelInfo);
+		return levels.findLast(info -> info.getExpNeeded() <= exp).map(levels::indexOf).map(index -> index + 1)
+			.getOrElseThrow(IllegalArgumentException::new);
 	}
 }

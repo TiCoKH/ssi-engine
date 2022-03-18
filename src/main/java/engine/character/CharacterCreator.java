@@ -17,6 +17,7 @@ import character.CharacterRace;
 import character.ClassSelection;
 import data.character.AbstractCharacter;
 import engine.Engine;
+import engine.EngineConfiguration;
 import engine.EngineInputAction;
 import engine.input.InputHandler;
 import engine.rulesystem.Flavor;
@@ -46,15 +47,17 @@ public class CharacterCreator {
 	private CharacterAlignment selectedAlignment;
 	private CharacterSheetImpl cs;
 
+	private final EngineConfiguration cfg;
 	private final Flavor flavor;
 	private final PlayerDataFactory playerDataFactory;
 	private final UserInterface ui;
 	private final Consumer<Runnable> taskHandler;
 
-	public CharacterCreator(@Nonnull Flavor flavor, @Nonnull PlayerDataFactory playerDataFactory, @Nonnull UserInterface ui,
+	public CharacterCreator(@Nonnull EngineConfiguration cfg, @Nonnull PlayerDataFactory playerDataFactory, @Nonnull UserInterface ui,
 		@Nonnull Consumer<Runnable> taskHandler) {
 
-		this.flavor = flavor;
+		this.cfg = cfg;
+		this.flavor = cfg.getFlavor();
 		this.playerDataFactory = playerDataFactory;
 		this.ui = ui;
 		this.taskHandler = taskHandler;
@@ -134,7 +137,18 @@ public class CharacterCreator {
 	}
 
 	private void continueWithCharacter(AbstractCharacter pc) {
-		flavor.initCharacter(pc, 0);
+		int startingExp;
+		final int level = cfg.getStartingLevel();
+		if (level != -1) {
+			startingExp = selectedClasses.map(clazz -> flavor.getRequiredExperienceFor(clazz, level)).max()
+				.map(exp -> selectedClasses.getClassesCount() * exp).getOrElse(0);
+		} else {
+			startingExp = cfg.getStartingExperience();
+			if (startingExp == -1) {
+				throw new IllegalStateException("neither starting experience nor starting level are configured!");
+			}
+		}
+		flavor.initCharacter(pc, startingExp);
 		cs = new CharacterSheetImpl(flavor, pc);
 		ui.showCharacterSheet(cs, CSHEET_ACTION.asJava(), REROLL_STATS);
 	}

@@ -67,10 +67,18 @@ public class KrynnFlavor implements Flavor {
 		character.setName("");
 		character.setAge(10);
 		character.addExperience(initialExperience);
-		character.getClassSelection().forEach(CharacterClassForgottenRealms.class, c -> character.setLevel(c, 1));
+		setInitialLevel(character, initialExperience);
 		character.getMoneyTypes().forEach(m -> character.setMoneyValue(m, 10));
 		character.setStatus(OKAY);
 		reroll(character);
+	}
+
+	private void setInitialLevel(AbstractCharacter character, int initialExperience) {
+		final int exp = initialExperience / character.getClassSelection().getClassesCount();
+		character.getClassSelection().forEach(CharacterClassForgottenRealms.class, c -> {
+			final int level = ClassData.forClass(c).getLevelInfo().levelFor(exp);
+			character.setLevel(c, level);
+		});
 	}
 
 	@Override
