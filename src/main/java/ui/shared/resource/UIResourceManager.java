@@ -172,7 +172,7 @@ public class UIResourceManager {
 		if (r instanceof ImageCompositeResource) {
 			ImageCompositeResource cr = (ImageCompositeResource) r;
 
-				final Seq<Tuple2<Point, Seq<BufferedImage>>> images = range(0, cr.getLength()).map(i -> {
+			final Seq<Tuple2<Point, Seq<BufferedImage>>> images = range(0, cr.getLength()).map(i -> {
 				final Point offset = cr.getOffset(i);
 				final Seq<BufferedImage> img = loadImageResource(cr.get(i)) //
 					.map(t -> toSeq(r, t))
@@ -226,6 +226,7 @@ public class UIResourceManager {
 		final DungeonMapBuilder builder = new DungeonMapBuilder(config, loader);
 		builder.withMap(r.getMap());
 		r.getRes()
+			.filter(res -> res.getIds()[1] != 127)
 			.ifPresentOrElse(res -> builder.withWMapDecoIds(res.getIds()[0], res.getIds()[1], res.getIds()[2]),
 				builder::withoutMapDecoIds);
 		return builder.build()

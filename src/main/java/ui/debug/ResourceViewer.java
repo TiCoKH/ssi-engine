@@ -220,7 +220,8 @@ public class ResourceViewer {
 					new DungeonMapResource(dungeon.generateOverlandMap(), //
 						new DungeonResource(new int[] { 18, 2 * id + 8, 2 * id + 9 })));
 			else
-				return new DefaultMutableTreeNode(new DungeonMapResource(dungeon.generateWallMap()));
+				return new DefaultMutableTreeNode(
+					new DungeonMapResource(dungeon.generateWallMap(), new DungeonResource(id)));
 		}).forEach(node -> parent.insert(node, parent.getChildCount()));
 		root.insert(parent, root.getChildCount());
 	}

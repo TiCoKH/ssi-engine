@@ -61,6 +61,6 @@ public class DungeonMapResource {
 
 	@Override
 	public String toString() {
-		return String.format("GEO[map=%dx%d%s]", getMapWidth(), getMapHeight(), res.map(r -> "," + r.toString()).orElse(""));
+		return String.format("%s[%dx%d]", res.map(DungeonResource::toString).orElse(""), getMapWidth(), getMapHeight());
 	}
 }
