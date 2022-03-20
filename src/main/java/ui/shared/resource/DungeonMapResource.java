@@ -10,14 +10,20 @@ import javax.annotation.Nullable;
 public class DungeonMapResource {
 	private int[][] map;
 	private Optional<DungeonResource> res;
+	private Optional<int[][]> sqaureInfos;
 
 	public DungeonMapResource(int[][] map) {
-		this(map, null);
+		this(map, null, null);
 	}
 
 	public DungeonMapResource(int[][] map, @Nullable DungeonResource res) {
+		this(map, res, null);
+	}
+
+	public DungeonMapResource(int[][] map, @Nullable DungeonResource res, @Nullable int[][] squareInfos) {
 		this.map = map;
 		this.res = Optional.ofNullable(res);
+		this.sqaureInfos = Optional.ofNullable(squareInfos);
 	}
 
 	@Nonnull
@@ -36,6 +42,11 @@ public class DungeonMapResource {
 	@Nonnull
 	public Optional<DungeonResource> getRes() {
 		return res;
+	}
+
+	@Nonnull
+	public Optional<int[][]> getSqaureInfos() {
+		return sqaureInfos;
 	}
 
 	@Override

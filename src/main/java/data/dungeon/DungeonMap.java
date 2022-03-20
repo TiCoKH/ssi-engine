@@ -228,6 +228,16 @@ public class DungeonMap extends Content {
 		return result;
 	}
 
+	public int[][] getSquareInfos() {
+		int[][] result = new int[height][width];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				result[y][x] = squareInfoAt(x, y);
+			}
+		}
+		return result;
+	}
+
 	private static class DungeonSquare {
 		private final Map<Direction, Integer> wallTypes;
 		private Map<Direction, Integer> doorFlags;

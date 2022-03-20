@@ -14,6 +14,7 @@ import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -217,7 +218,19 @@ public class RenderSurface extends JPanel implements Scrollable {
 					i++;
 				}
 			} else if (o instanceof DungeonMapResource) {
-				g2d.drawImage(resman.getMapResource((DungeonMapResource) o), 0, 0, null);
+				DungeonMapResource res = (DungeonMapResource) o;
+				g2d.drawImage(resman.getMapResource(res), 0, 0, null);
+				res.getSqaureInfos().ifPresent(sqaureInfos -> {
+					Font f = new Font("Liberation Mono", 0, settings.zoom(4));
+					for (int y = 0; y < res.getMapHeight(); y++) {
+						for (int x = 0; x < res.getMapWidth(); x++) {
+							int sqaureInfo = sqaureInfos[y][x];
+							g2d.setFont(f);
+							g2d.drawString(String.format("%02X", sqaureInfo), settings.zoom8(x) + settings.zoom(1),
+								settings.zoom8(y) + settings.zoom(4) + settings.zoom(1));
+						}
+					}
+				});
 			} else if (o instanceof CharacterSheetState) {
 				csRenderer.render(g2d, (CharacterSheetState) o);
 			} else if (o instanceof UIFrame) {
