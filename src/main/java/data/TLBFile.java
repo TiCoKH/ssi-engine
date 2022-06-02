@@ -1,9 +1,12 @@
 package data;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
+import io.vavr.control.Try;
 
 import common.ByteBufferWrapper;
 
@@ -20,12 +23,12 @@ public class TLBFile extends ContentFile {
 	}
 
 	@Override
-	public List<ByteBufferWrapper> getById(int id) {
+	public Seq<ByteBufferWrapper> getById(int id) {
 		return content.getById(id);
 	}
 
 	@Override
-	public <T extends Content> T getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
+	public <T extends Content> Optional<Try<T>> getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
 		return content.getById(id, clazz, type);
 	}
 

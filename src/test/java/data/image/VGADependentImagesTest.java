@@ -19,7 +19,7 @@ public class VGADependentImagesTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/PIC1.DAX");
 		Assume.assumeTrue(f.exists());
 		ContentFile pic1 = ContentFile.create(f).get();
-		VGADependentImages terrines = pic1.getById(32, VGADependentImages.class, ContentType.PIC);
+		VGADependentImages terrines = pic1.getById(32, VGADependentImages.class, ContentType.PIC).get().get();
 		assertThat(terrines.size(), is(6));
 	}
 }

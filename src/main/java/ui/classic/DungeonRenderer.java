@@ -8,10 +8,11 @@ import static ui.shared.UIFrame.GAME;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import data.dungeon.DungeonMap.VisibleWalls;
 import data.dungeon.WallDef.WallDistance;
@@ -28,8 +29,8 @@ public class DungeonRenderer extends StoryRenderer {
 	private static final int[] WALL_SPACING = { 2, 3, 7, 2, 3, 0, 2, 3, 0 };
 	private static final int[] WALL_MAX_HEIGHT = { 16, 32, 64, 32, 64, 88, 32, 64, 88 };
 
-	public DungeonRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings, @Nonnull UIResourceManager resman,
-		@Nonnull AbstractFrameRenderer frameRenderer) {
+	public DungeonRenderer(@Nonnull RendererState resources, @Nonnull UISettings settings,
+		@Nonnull UIResourceManager resman, @Nonnull AbstractFrameRenderer frameRenderer) {
 
 		super(resources, settings, resman, frameRenderer);
 	}
@@ -73,7 +74,8 @@ public class DungeonRenderer extends StoryRenderer {
 	private void renderBackdrop(@Nonnull Graphics2D g2d, @Nonnull DungeonResources res) {
 		switch (res.getBackdropMode()) {
 			case COLOR:
-				g2d.setBackground(COLOR_GAME_STATIC[res.isOutside() ? res.getSkyColorOutdoors() : res.getSkyColorIndoors()]);
+				g2d.setBackground(
+					COLOR_GAME_STATIC[res.isOutside() ? res.getSkyColorOutdoors() : res.getSkyColorIndoors()]);
 				g2d.clearRect(settings.zoom8(3), settings.zoom8(3), settings.zoom8(11), settings.zoom(43));
 				g2d.setBackground(COLOR_GAME_STATIC[15]);
 				g2d.clearRect(settings.zoom8(3), settings.zoom(67), settings.zoom8(11), settings.zoom(1));
@@ -84,7 +86,8 @@ public class DungeonRenderer extends StoryRenderer {
 				break;
 			case SKY:
 				renderImage(g2d, res.getBackdrop(2), 3, 8);
-				g2d.setBackground(COLOR_GAME_STATIC[res.isOutside() ? res.getSkyColorOutdoors() : res.getSkyColorIndoors()]);
+				g2d.setBackground(
+					COLOR_GAME_STATIC[res.isOutside() ? res.getSkyColorOutdoors() : res.getSkyColorIndoors()]);
 				g2d.clearRect(settings.zoom8(3), settings.zoom8(3), settings.zoom8(11), settings.zoom(44));
 				g2d.setBackground(COLOR_GAME_STATIC[7]);
 				g2d.clearRect(settings.zoom8(3), settings.zoom(69), settings.zoom8(11), settings.zoom(2));
@@ -99,15 +102,15 @@ public class DungeonRenderer extends StoryRenderer {
 		}
 	}
 
-	private void renderVisibleWalls(Graphics2D g2d, VisibleWalls vwalls, List<DungeonWall> walls) {
+	private void renderVisibleWalls(Graphics2D g2d, VisibleWalls vwalls, Seq<DungeonWall> walls) {
 		g2d.clipRect(settings.zoom8(3), settings.zoom8(3), settings.zoom8(11), settings.zoom8(11));
 		for (WallDistance dis : WallDistance.values()) {
 			for (WallPlacement plc : WallPlacement.values()) {
 				int[] vwallindexes = vwalls.getVisibleWall(dis, plc);
 				int xStart = WALL_START_X[3 * plc.ordinal() + dis.ordinal()];
 				for (int i = 0; i < vwallindexes.length; i++) {
-					boolean renderFiller = dis == WallDistance.FAR && plc == WallPlacement.FOWARD && i + 1 < vwallindexes.length
-						&& vwallindexes[i + 1] > 0;
+					boolean renderFiller = dis == WallDistance.FAR && plc == WallPlacement.FOWARD
+						&& i + 1 < vwallindexes.length && vwallindexes[i + 1] > 0;
 					if (vwallindexes[i] > 0) {
 						renderWall(g2d, walls, vwallindexes[i], xStart, plc, dis, renderFiller);
 					}
@@ -118,19 +121,21 @@ public class DungeonRenderer extends StoryRenderer {
 		g2d.setClip(null);
 	}
 
-	private void renderWall(@Nonnull Graphics2D g2d, @Nonnull List<DungeonWall> walls, int index, int xStart, WallPlacement plc, WallDistance dis,
-		boolean renderFarfillerNext) {
+	private void renderWall(@Nonnull Graphics2D g2d, @Nonnull Seq<DungeonWall> walls, int index, int xStart,
+		WallPlacement plc, WallDistance dis, boolean renderFarfillerNext) {
 
 		int yStart = WALL_START_Y[3 * plc.ordinal() + dis.ordinal()];
 		int maxHeight = WALL_MAX_HEIGHT[3 * plc.ordinal() + dis.ordinal()];
 
 		DungeonWall wall = walls.get(index - 1);
 		BufferedImage wallView = wall.getWallViewFor(dis, plc);
-		g2d.drawImage(wallView, settings.zoom8(xStart), settings.zoom8(yStart) + settings.zoom(maxHeight) - wallView.getHeight(), null);
+		g2d.drawImage(wallView, settings.zoom8(xStart),
+			settings.zoom8(yStart) + settings.zoom(maxHeight) - wallView.getHeight(), null);
 
 		if (renderFarfillerNext) {
 			wallView = wall.getFarFiller();
-			g2d.drawImage(wallView, settings.zoom8(xStart + 1), settings.zoom8(yStart) + settings.zoom(maxHeight) - wallView.getHeight(), null);
+			g2d.drawImage(wallView, settings.zoom8(xStart + 1),
+				settings.zoom8(yStart) + settings.zoom(maxHeight) - wallView.getHeight(), null);
 		}
 	}
 

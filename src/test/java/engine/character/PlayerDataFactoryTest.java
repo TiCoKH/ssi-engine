@@ -1,8 +1,11 @@
 package engine.character;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.Optional;
+
+import io.vavr.control.Try;
 
 import org.junit.Assume;
 import org.junit.Test;
@@ -24,8 +27,8 @@ public class PlayerDataFactoryTest {
 		ResourceLoader res = new ResourceLoader(fm);
 		PlayerDataFactory fac = new PlayerDataFactory(res, cfg);
 		AbstractCharacter.configValues(cfg.getCharacterValues());
-		AbstractCharacter c = fac.loadCharacter(60);
-		assertNotNull(c);
+		Optional<Try<AbstractCharacter>> character = fac.loadCharacter(60);
+		assertTrue(character.isPresent() && character.get().isSuccess());
 	}
 
 }

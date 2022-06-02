@@ -33,7 +33,7 @@ public class EGADependentImages extends ImageContent {
 
 			IndexColorModel cm = parseCLUT(data, header);
 
-			images.add(parseData(data, header, cm));
+			images = images.append(parseData(data, header, cm));
 		}
 	}
 
@@ -56,7 +56,8 @@ public class EGADependentImages extends ImageContent {
 		return Palette.createColorModel(header.type);
 	}
 
-	protected BufferedImage parseData(@Nonnull ByteBufferWrapper data, @Nonnull EGAHeader header, @Nonnull IndexColorModel cm) {
+	protected BufferedImage parseData(@Nonnull ByteBufferWrapper data, @Nonnull EGAHeader header,
+		@Nonnull IndexColorModel cm) {
 		int stride = header.width << 2;
 		int imageDataSize = stride * header.height;
 

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
-import data.character.AbstractCharacter;
 import engine.Engine;
 import engine.EngineInputAction;
 import engine.VirtualMemory;
@@ -30,7 +29,8 @@ public class LoadHandler implements InputHandler {
 					}
 				}
 				engine.loadArea(memory.getAreaValue(0), memory.getAreaValue(1), memory.getAreaValue(2));
-				engine.loadAreaDecoration(memory.getAreaDecoValue(0), memory.getAreaDecoValue(1), memory.getAreaDecoValue(2));
+				engine.loadAreaDecoration(memory.getAreaDecoValue(0), memory.getAreaDecoValue(1),
+					memory.getAreaDecoValue(2));
 				System.out.println("Game loaded");
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
@@ -53,14 +53,15 @@ public class LoadHandler implements InputHandler {
 		}
 	}
 
-	private boolean readCharacter(Engine engine, File savesPath, int index) throws Exception {
+	private boolean readCharacter(Engine engine, File savesPath, int index) {
 		final File charFile = new File(savesPath, String.format("chrdate%d.dat", index + 1));
 		if (!charFile.exists() && !charFile.canRead()) {
 			return false;
 		}
-		final FileChannel fc = FileChannel.open(charFile.toPath(), READ);
-		final AbstractCharacter c = engine.getPlayerDataFactory().loadCharacter(fc);
-		engine.getMemory().addPartyMember(new CharacterSheetImpl(engine.getConfig().getFlavor(), c));
+		engine.getPlayerDataFactory()
+			.loadCharacter(charFile)
+			.map(c -> new CharacterSheetImpl(engine.getConfig().getFlavor(), c))
+			.onSuccess(engine.getMemory()::addPartyMember);
 		return true;
 	}
 }

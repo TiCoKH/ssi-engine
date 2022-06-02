@@ -16,7 +16,7 @@ public class ExtendedEGAImage extends EGAImage implements VGABitPackedExtension 
 		IndexColorModel cm = isEGA ? parseCLUT(data, header) : parseExtendedCLUT(data, header);
 
 		for (int i = 0; i < header.imageCount; i++) {
-			images.add(isEGA ? parseData(data, header, cm) : parseExtendedData(data, header, cm, null));
+			images = images.append(isEGA ? parseData(data, header, cm) : parseExtendedData(data, header, cm, null));
 		}
 	}
 }

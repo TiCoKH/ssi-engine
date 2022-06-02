@@ -1,11 +1,15 @@
 package engine.character;
 
 import static data.ContentType.MONCHA;
+import static java.nio.file.StandardOpenOption.READ;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.channels.FileChannel;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.control.Try;
 
 import character.CharacterAlignment;
 import character.CharacterGender;
@@ -31,7 +35,8 @@ public class PlayerDataFactory {
 		this.cfg = cfg;
 	}
 
-	public AbstractCharacter createCharacter(@Nonnull CharacterRace race, @Nonnull CharacterGender gender, @Nonnull ClassSelection classes) {
+	public AbstractCharacter createCharacter(@Nonnull CharacterRace race, @Nonnull CharacterGender gender,
+		@Nonnull ClassSelection classes) {
 		switch (cfg.getCharacterFormat()) {
 			case BUCK_ROGERS:
 				return new CharacterBuckRogers(race, gender, classes);
@@ -40,8 +45,8 @@ public class PlayerDataFactory {
 		}
 	}
 
-	public AbstractCharacter createCharacter(@Nonnull CharacterRace race, @Nonnull CharacterGender gender, @Nonnull ClassSelection classes,
-		@Nonnull CharacterAlignment alignment) {
+	public AbstractCharacter createCharacter(@Nonnull CharacterRace race, @Nonnull CharacterGender gender,
+		@Nonnull ClassSelection classes, @Nonnull CharacterAlignment alignment) {
 		switch (cfg.getCharacterFormat()) {
 			case FORGOTTEN_REALMS:
 				return new CharacterForgottenRealms(race, gender, classes, alignment);
@@ -52,35 +57,42 @@ public class PlayerDataFactory {
 		}
 	}
 
-	public AbstractCharacter loadCharacter(@Nonnull FileChannel fc) throws IOException {
-		final ByteBufferWrapper data = ByteBufferWrapper.allocateLE((int) fc.size());
-		try {
-			data.readFrom(fc);
-		} finally {
-			fc.close();
-		}
+	public Try<AbstractCharacter> loadCharacter(@Nonnull File charFile) {
+		return Try.withResources(() -> FileChannel.open(charFile.toPath(), READ))
+			.of(ByteBufferWrapper.allocateLE((int) charFile.length())::readFrom)
+			.map(data -> {
+				switch (cfg.getCharacterFormat()) {
+					case BUCK_ROGERS:
+						return new CharacterBuckRogers(data, ContentType.MONCHA);
+					case FORGOTTEN_REALMS:
+						return new CharacterForgottenRealms(data, ContentType.MONCHA);
+					case FORGOTTEN_REALMS_UNLIMITED:
+						return new CharacterForgottenRealmsUnlimited(data, ContentType.MONCHA);
+					default:
+						throw new IllegalArgumentException(UNKNOWN_CHARACTER_FORMAT + cfg.getCharacterFormat());
+				}
+			});
+	}
+
+	public Optional<Try<AbstractCharacter>> loadCharacter(int id) {
 		switch (cfg.getCharacterFormat()) {
 			case BUCK_ROGERS:
-				return new CharacterBuckRogers(data, ContentType.MONCHA);
+				return narrow(res.find(id, CharacterBuckRogers.class, MONCHA));
 			case FORGOTTEN_REALMS:
-				return new CharacterForgottenRealms(data, ContentType.MONCHA);
+				return narrow(res.find(id, CharacterForgottenRealms.class, MONCHA));
 			case FORGOTTEN_REALMS_UNLIMITED:
-				return new CharacterForgottenRealmsUnlimited(data, ContentType.MONCHA);
+				return narrow(res.find(id, CharacterForgottenRealmsUnlimited.class, MONCHA));
 			default:
 				throw new IllegalArgumentException(UNKNOWN_CHARACTER_FORMAT + cfg.getCharacterFormat());
 		}
 	}
 
-	public AbstractCharacter loadCharacter(int id) throws IOException {
-		switch (cfg.getCharacterFormat()) {
-			case BUCK_ROGERS:
-				return res.find(id, CharacterBuckRogers.class, MONCHA);
-			case FORGOTTEN_REALMS:
-				return res.find(id, CharacterForgottenRealms.class, MONCHA);
-			case FORGOTTEN_REALMS_UNLIMITED:
-				return res.find(id, CharacterForgottenRealmsUnlimited.class, MONCHA);
-			default:
-				throw new IllegalArgumentException(UNKNOWN_CHARACTER_FORMAT + cfg.getCharacterFormat());
-		}
+	private <T extends AbstractCharacter> Optional<Try<AbstractCharacter>> narrow(Optional<Try<T>> value) {
+		return value.map(t -> {
+			if (t.isFailure()) {
+				return Try.failure(t.getCause());
+			}
+			return t.map(AbstractCharacter.class::cast);
+		});
 	}
 }

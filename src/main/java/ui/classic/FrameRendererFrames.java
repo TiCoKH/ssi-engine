@@ -5,9 +5,10 @@ import static data.image.ImageContentProperties.Y_OFFSET;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import ui.UISettings;
 import ui.shared.UIFrame;
@@ -47,7 +48,7 @@ public class FrameRendererFrames extends AbstractFrameRenderer {
 	}
 
 	private void renderFramePart(Graphics2D g2d, int[] indexes) {
-		List<BufferedImage> frames = resman.getFrames();
+		final Seq<BufferedImage> frames = resman.getFrames();
 		for (int i = 0; i < indexes.length; i++) {
 			BufferedImage part = frames.get(indexes[i]);
 			int x = Math.abs((int) part.getProperty(X_OFFSET.name()));
@@ -57,7 +58,7 @@ public class FrameRendererFrames extends AbstractFrameRenderer {
 	}
 
 	private void renderFramePart(Graphics2D g2d, int[] indexes, int x, int y) {
-		List<BufferedImage> frames = resman.getFrames();
+		final Seq<BufferedImage> frames = resman.getFrames();
 		for (int i = 0; i < indexes.length; i++) {
 			BufferedImage part = frames.get(indexes[i]);
 			g2d.drawImage(part, settings.zoom(x), settings.zoom(y), null);

@@ -121,8 +121,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private transient Optional<GoldboxStringInput> input = Optional.empty();
 
-	public ClassicMode(@Nonnull FileMap fileMap, @Nonnull EngineStub stub, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
-		@Nonnull ExceptionHandler excHandler) throws IOException {
+	public ClassicMode(@Nonnull FileMap fileMap, @Nonnull EngineStub stub, @Nonnull UIResourceConfiguration config,
+		@Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler) throws IOException {
 
 		this.stub = stub;
 		this.config = config;
@@ -152,7 +152,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void start(boolean showTitle) {
 		running = true;
 
-		exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1, r -> new Thread(r, "Animation support"));
+		exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1,
+			r -> new Thread(r, "Animation support"));
 		exec.setRemoveOnCancelPolicy(true);
 
 		Thread gameLoop = new Thread(() -> {
@@ -292,12 +293,14 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description,
-		@Nullable InputAction selected) {
+	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems,
+		@Nullable GoldboxString description, @Nullable InputAction selected) {
 
 		resetInput();
 
-		List<InputAction> namedMenuItems = menuItems.stream().filter(a -> a.getName().getLength() > 0).collect(Collectors.toList());
+		List<InputAction> namedMenuItems = menuItems.stream()
+			.filter(a -> a.getName().getLength() > 0)
+			.collect(Collectors.toList());
 		namedMenuItems.stream().forEach(a -> {
 			registerInput(a, () -> {
 				state.setMenu(null);
@@ -306,11 +309,15 @@ public class ClassicMode extends JPanel implements UserInterface {
 		});
 		if (namedMenuItems.size() > 1) {
 			if (type.isHorizontalMenu()) {
-				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_LEFT, 0), getKeyStroke(VK_KP_LEFT, 0));
-				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_RIGHT, 0), getKeyStroke(VK_KP_RIGHT, 0));
+				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_LEFT, 0),
+					getKeyStroke(VK_KP_LEFT, 0));
+				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_RIGHT, 0),
+					getKeyStroke(VK_KP_RIGHT, 0));
 			} else {
-				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_UP, 0), getKeyStroke(VK_KP_UP, 0));
-				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_DOWN, 0), getKeyStroke(VK_KP_DOWN, 0));
+				registerInput(MENU_PREV, () -> state.getMenu().ifPresent(Menu::prev), getKeyStroke(VK_UP, 0),
+					getKeyStroke(VK_KP_UP, 0));
+				registerInput(MENU_NEXT, () -> state.getMenu().ifPresent(Menu::next), getKeyStroke(VK_DOWN, 0),
+					getKeyStroke(VK_KP_DOWN, 0));
 			}
 		}
 
@@ -444,7 +451,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	private InputMap copyCurrentInputMap() {
 		final InputMap result = new InputMap();
-		Stream.of(getInputMap(WHEN_IN_FOCUSED_WINDOW).keys()).forEach(key -> result.put(key, getInputMap(WHEN_IN_FOCUSED_WINDOW).get(key)));
+		Stream.of(getInputMap(WHEN_IN_FOCUSED_WINDOW).keys())
+			.forEach(key -> result.put(key, getInputMap(WHEN_IN_FOCUSED_WINDOW).get(key)));
 		return result;
 	}
 
@@ -472,7 +480,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 
 	@Override
 	public void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
-		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect) {
+		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description,
+		@Nonnull InputAction menuSelect) {
 
 		backupKeyMaps();
 		resetInput();
@@ -508,8 +517,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 			}
 		}, getKeyStroke(VK_SPACE, 0), getKeyStroke(VK_ENTER, 0));
 
-		dialogStates
-			.push(new ProgramMenuState(state.getGlobalData(), hMenu, copyCurrentActionMap(), copyCurrentInputMap(), menuSelect, pMenu, programType));
+		dialogStates.push(new ProgramMenuState(state.getGlobalData(), hMenu, copyCurrentActionMap(),
+			copyCurrentInputMap(), menuSelect, pMenu, programType));
 	}
 
 	@Override
@@ -518,7 +527,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description) {
+	public void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu,
+		@Nullable GoldboxString description) {
 		backupKeyMaps();
 		resetInput();
 
@@ -552,8 +562,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
-		int[] decoIds) {
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls,
+		@Nullable int[][] map, int[] decoIds) {
 
 		state.setDungeonResources(position, visibleWalls, map, new DungeonResource(decoIds));
 		switchUIState(UIState.DUNGEON);
@@ -596,13 +606,10 @@ public class ClassicMode extends JPanel implements UserInterface {
 	public void showPicture(int pictureId, @Nullable ContentType type) {
 		stopPicAnimation();
 		if (type == null) {
-			try {
-				if (loader.idsFor(PIC).contains(pictureId)) {
-					type = PIC;
-				} else if (loader.idsFor(BIGPIC).contains(pictureId)) {
-					type = BIGPIC;
-				}
-			} catch (IOException e) {
+			if (loader.idsFor(PIC).contains(pictureId)) {
+				type = PIC;
+			} else if (loader.idsFor(BIGPIC).contains(pictureId)) {
+				type = BIGPIC;
 			}
 		}
 		if (type != null) {
@@ -624,7 +631,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			switchUIState( //
 				state.getDungeonResources().isPresent() ? UIState.DUNGEON : //
 					state.getSpaceResources().isPresent() ? UIState.SPACE : //
-						UIState.STORY);
+					UIState.STORY);
 		} else if (BIGPIC.equals(type)) {
 			switchUIState(UIState.BIGPIC);
 		}

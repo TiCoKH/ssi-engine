@@ -43,7 +43,7 @@ public class GameResourceConfiguration {
 			String detectionMD5 = props.getProperty("detection.md5");
 
 			Optional<File> detectionFile = filemap.toFile(detectionFilename);
-			if (!detectionFile.isPresent()) {
+			if (detectionFile.isEmpty()) {
 				continue;
 			}
 
@@ -74,6 +74,10 @@ public class GameResourceConfiguration {
 	}
 
 	public List<String> findProperties(String propStart) {
-		return gameProperties.keySet().stream().map(k -> (String) k).filter(k -> k != null && k.startsWith(propStart)).collect(Collectors.toList());
+		return gameProperties.keySet()
+			.stream()
+			.map(k -> (String) k)
+			.filter(k -> k != null && k.startsWith(propStart))
+			.collect(Collectors.toList());
 	}
 }

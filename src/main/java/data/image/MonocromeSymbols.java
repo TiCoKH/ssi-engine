@@ -19,7 +19,7 @@ public class MonocromeSymbols extends ImageContent {
 		for (int i = 0; i < data.capacity() / 8; i++) {
 			DataBufferByte db = new DataBufferByte(data.array(), 8, i * 8);
 			WritableRaster r = Raster.createPackedRaster(db, 8, 8, 1, null);
-			images.add(new BufferedImage(cm, r, false, null));
+			images = images.append(new BufferedImage(cm, r, false, null));
 		}
 	}
 }

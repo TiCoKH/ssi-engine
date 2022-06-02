@@ -2,9 +2,10 @@ package ui.classic;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import ui.UISettings;
 import ui.shared.UIFrame;
@@ -90,7 +91,7 @@ public class FrameRendererSymbols extends AbstractFrameRenderer {
 	}
 
 	protected void renderHorizontalFrameBorder(Graphics2D g2d, int[] indexes, int startX, int y) {
-		List<BufferedImage> frames = resman.getFrames();
+		final Seq<BufferedImage> frames = resman.getFrames();
 		for (int x = 0; x < indexes.length; x++) {
 			if (indexes[x] != -1) {
 				g2d.drawImage(frames.get(indexes[x]), settings.zoom8(startX + x), settings.zoom8(y), null);
@@ -99,7 +100,7 @@ public class FrameRendererSymbols extends AbstractFrameRenderer {
 	}
 
 	protected void renderVerticalFrameBorder(Graphics2D g2d, int[] indexes, int x, int startY) {
-		List<BufferedImage> frames = resman.getFrames();
+		final Seq<BufferedImage> frames = resman.getFrames();
 		for (int y = 0; y < indexes.length; y++) {
 			if (indexes[y] != -1) {
 				g2d.drawImage(frames.get(indexes[y]), settings.zoom8(x), settings.zoom8(startY + y), null);

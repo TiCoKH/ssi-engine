@@ -1,48 +1,50 @@
 package data;
 
+import static java.nio.channels.FileChannel.open;
+import static java.nio.file.StandardOpenOption.READ;
+
 import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
+import io.vavr.control.Try;
 
 import common.ByteBufferWrapper;
 
 public abstract class ContentFile {
 
-	public abstract <T extends Content> T getById(int id, Class<T> clazz, ContentType type);
+	public abstract <T extends Content> Optional<Try<T>> getById(int id, Class<T> clazz, ContentType type);
 
-	public abstract List<ByteBufferWrapper> getById(int id);
+	public abstract Seq<ByteBufferWrapper> getById(int id);
 
 	public abstract Set<Integer> getIds();
 
 	@Nonnull
-	public static Optional<ContentFile> create(@Nonnull File f) throws IOException {
-		Optional<ContentFileType> type = ContentFileType.getType(f);
-		if (type.isPresent()) {
-			try (FileChannel c = FileChannel.open(f.toPath(), StandardOpenOption.READ)) {
-				// TODO endianness
-				ByteBufferWrapper file = ByteBufferWrapper.allocateLE((int) c.size()).readFrom(c);
-				switch (type.get()) {
+	public static Try<ContentFile> create(@Nonnull File f) {
+		return ContentFileType.getType(f).map(type -> {
+			return Try.withResources(() -> open(f.toPath(), READ)).of(channel -> {
+				final ByteBufferWrapper file = ByteBufferWrapper.allocateLE((int) channel.size()).readFrom(channel);
+				switch (type) {
 					case DAX:
-						return Optional.of(DAXFile.createFrom(file.rewind()));
+						return DAXFile.createFrom(file.rewind());
 					case TLB:
-						return Optional.of(TLBFile.createFrom(file.rewind()));
+						return TLBFile.createFrom(file.rewind());
 				}
-			}
-		}
-		return Optional.empty();
+				throw new IllegalArgumentException("Unhandled file type for file " + f.getAbsolutePath());
+			});
+		})
+			.orElseGet(
+				() -> Try.failure(new IllegalArgumentException("Unknown file type for file " + f.getAbsolutePath())));
 	}
 
 	public static boolean isKnown(File f) {
 		return ContentFileType.getType(f).isPresent();
 	}
 
-	private static enum ContentFileType {
+	private enum ContentFileType {
 		DAX(".+?\\.DAX$"), TLB(".+?\\.[GT]LB$");
 
 		private String namePattern;

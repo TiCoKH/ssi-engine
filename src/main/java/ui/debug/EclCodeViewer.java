@@ -11,13 +11,10 @@ import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -32,6 +29,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+
+import io.vavr.collection.Set;
 
 import common.FileMap;
 import data.ResourceLoader;
@@ -89,9 +88,9 @@ public class EclCodeViewer {
 		initFrame();
 	}
 
-	private void initFrame() throws IOException {
-		Set<Integer> blockIds = new TreeSet<Integer>(res.idsFor(ECL));
-		blockCombo = new JComboBox<Integer>(blockIds.toArray(new Integer[blockIds.size()]));
+	private void initFrame() {
+		Set<Integer> blockIds = res.idsFor(ECL);
+		blockCombo = new JComboBox<>(blockIds.toJavaArray(Integer[]::new));
 		blockCombo.setSelectedIndex(-1);
 		blockCombo.addActionListener(ev -> {
 			int selIndex = blockCombo.getSelectedIndex();
@@ -99,31 +98,31 @@ public class EclCodeViewer {
 				exec.execute(() -> {
 					sectionsCombo.setEnabled(false);
 					int blockid = blockCombo.getItemAt(selIndex);
-					try {
-						EclProgram ecl = res.find(blockid, EclProgram.class, ECL);
+					res.find(blockid, EclProgram.class, ECL).ifPresentOrElse(t -> {
+						t.onFailure(throwable -> {
+						}).onSuccess(ecl -> {
+							MemoryTableModel model = (MemoryTableModel) memoryTable.getModel();
+							model.setCode(ecl.getCode());
+							memoryTable.invalidate();
 
-						MemoryTableModel model = (MemoryTableModel) memoryTable.getModel();
-						model.setCode(ecl.getCode());
-						memoryTable.invalidate();
-
-						Map<CodeSection, EclDisassembly> code = new EnumMap<>(CodeSection.class);
-						for (CodeSection section : CodeSection.values()) {
-							EclDisassembly d = new EclDisassembly();
-							d.addresses = disasm.parseJumpAdresses(ecl, section);
-							d.asmBlocks = disasm.parseCodeblocks(ecl, section, d.addresses);
-							code.put(section, d);
-							decom.updateKnownAddresses(addressNames, d.asmBlocks, blockid);
-						}
-						for (CodeSection section : CodeSection.values()) {
-							EclDisassembly d = code.get(section);
-							d.codeBlocks = decom.decompile(section, d.asmBlocks, addressNames, d.addresses);
-						}
-						data = code;
-						hexRenderer.setCode(data);
-						updateCode();
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
+							Map<CodeSection, EclDisassembly> code = new EnumMap<>(CodeSection.class);
+							for (CodeSection section : CodeSection.values()) {
+								EclDisassembly d = new EclDisassembly();
+								d.addresses = disasm.parseJumpAdresses(ecl, section);
+								d.asmBlocks = disasm.parseCodeblocks(ecl, section, d.addresses);
+								code.put(section, d);
+								decom.updateKnownAddresses(addressNames, d.asmBlocks, blockid);
+							}
+							for (CodeSection section : CodeSection.values()) {
+								EclDisassembly d = code.get(section);
+								d.codeBlocks = decom.decompile(section, d.asmBlocks, addressNames, d.addresses);
+							}
+							data = code;
+							hexRenderer.setCode(data);
+							updateCode();
+						});
+					}, () -> {
+					});
 					sectionsCombo.setEnabled(true);
 				});
 			}
@@ -183,7 +182,7 @@ public class EclCodeViewer {
 				return;
 			}
 			int[] selectedRows = asmTable.getSelectedRows();
-			Set<EclInstructionData> selectedInst = new HashSet<EclInstructionData>();
+			java.util.Set<EclInstructionData> selectedInst = new HashSet<EclInstructionData>();
 			ASMTableModel model = (ASMTableModel) asmTable.getModel();
 			for (int row : selectedRows) {
 				EclInstructionData inst = model.getInst(row);
@@ -225,7 +224,7 @@ public class EclCodeViewer {
 				return;
 			}
 			int[] selectedRows = codeTable.getSelectedRows();
-			Set<EclInstructionData> selectedInst = new HashSet<EclInstructionData>();
+			java.util.Set<EclInstructionData> selectedInst = new HashSet<EclInstructionData>();
 			CodeTableModel model = (CodeTableModel) codeTable.getModel();
 			for (int row : selectedRows) {
 				EclInstructionData inst = model.getInst(row);
@@ -315,7 +314,7 @@ public class EclCodeViewer {
 
 	static final class EclDisassembly {
 		public JumpAddresses addresses;
-		public Set<CodeBlock> asmBlocks;
-		public Set<CodeBlock> codeBlocks;
+		public java.util.Set<CodeBlock> asmBlocks;
+		public java.util.Set<CodeBlock> codeBlocks;
 	}
 }

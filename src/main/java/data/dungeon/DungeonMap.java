@@ -1,9 +1,9 @@
 package data.dungeon;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
 
 import common.ByteBufferWrapper;
 import data.Content;
@@ -40,17 +40,19 @@ public class DungeonMap extends Content {
 		for (int y = 0; y < height; y++) {
 			int stride = y * width;
 			for (int x = 0; x < width; x++) {
-				Map<Direction, Integer> wallTypes = new EnumMap<>(Direction.class);
-				wallTypes.put(Direction.NORTH, (data.get(WALLS_NE_START + stride + x) & 0xF0) >> 4);
-				wallTypes.put(Direction.EAST, data.get(WALLS_NE_START + stride + x) & 0x0F);
-				wallTypes.put(Direction.SOUTH, (data.get(WALLS_SW_START + stride + x) & 0xF0) >> 4);
-				wallTypes.put(Direction.WEST, data.get(WALLS_SW_START + stride + x) & 0x0F);
+				final Map<Direction, Integer> wallTypes = HashMap.of( //
+					Direction.NORTH, (data.get(WALLS_NE_START + stride + x) & 0xF0) >> 4, //
+					Direction.EAST, data.get(WALLS_NE_START + stride + x) & 0x0F, //
+					Direction.SOUTH, (data.get(WALLS_SW_START + stride + x) & 0xF0) >> 4, //
+					Direction.WEST, data.get(WALLS_SW_START + stride + x) & 0x0F //
+				);
 				int squareInfo = data.getUnsigned(SQUARE_INFO_START + stride + x);
-				Map<Direction, Integer> doorFlags = new EnumMap<>(Direction.class);
-				doorFlags.put(Direction.WEST, (data.get(WALLS_FLAGS_START + stride + x) & 0xC0) >> 6);
-				doorFlags.put(Direction.SOUTH, (data.get(WALLS_FLAGS_START + stride + x) & 0x30) >> 4);
-				doorFlags.put(Direction.EAST, (data.get(WALLS_FLAGS_START + stride + x) & 0x0C) >> 2);
-				doorFlags.put(Direction.NORTH, data.get(WALLS_FLAGS_START + stride + x) & 0x03);
+				final Map<Direction, Integer> doorFlags = HashMap.of( //
+					Direction.WEST, (data.get(WALLS_FLAGS_START + stride + x) & 0xC0) >> 6, //
+					Direction.SOUTH, (data.get(WALLS_FLAGS_START + stride + x) & 0x30) >> 4, //
+					Direction.EAST, (data.get(WALLS_FLAGS_START + stride + x) & 0x0C) >> 2, //
+					Direction.NORTH, (data.get(WALLS_FLAGS_START + stride + x) & 0x03) //
+				);
 				map[x][y] = new DungeonSquare(wallTypes, squareInfo, doorFlags);
 			}
 		}
@@ -104,17 +106,20 @@ public class DungeonMap extends Content {
 			wallIndexAt(x + d.getRight().getDeltaX(), y + d.getRight().getDeltaY(), d);
 
 		vwalls.medLeft[0] = //
-			wallIndexAt(x + d.getDeltaX() + d.getLeft().getDeltaX(), y + d.getDeltaY() + d.getLeft().getDeltaY(), d.getLeft());
+			wallIndexAt(x + d.getDeltaX() + d.getLeft().getDeltaX(), y + d.getDeltaY() + d.getLeft().getDeltaY(),
+				d.getLeft());
 		vwalls.medLeft[1] = //
 			wallIndexAt(x + d.getDeltaX(), y + d.getDeltaY(), d.getLeft());
 
 		vwalls.medRight[0] = //
 			wallIndexAt(x + d.getDeltaX(), y + d.getDeltaY(), d.getRight());
 		vwalls.medRight[1] = //
-			wallIndexAt(x + d.getDeltaX() + d.getRight().getDeltaX(), y + d.getDeltaY() + d.getRight().getDeltaY(), d.getRight());
+			wallIndexAt(x + d.getDeltaX() + d.getRight().getDeltaX(), y + d.getDeltaY() + d.getRight().getDeltaY(),
+				d.getRight());
 
 		vwalls.medAhead[0] = //
-			wallIndexAt(x + d.getDeltaX() + 2 * d.getLeft().getDeltaX(), y + d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d);
+			wallIndexAt(x + d.getDeltaX() + 2 * d.getLeft().getDeltaX(),
+				y + d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d);
 		vwalls.medAhead[1] = //
 			wallIndexAt(x + d.getDeltaX() + d.getLeft().getDeltaX(), y + d.getDeltaY() + d.getLeft().getDeltaY(), d);
 		vwalls.medAhead[2] = //
@@ -122,36 +127,47 @@ public class DungeonMap extends Content {
 		vwalls.medAhead[3] = //
 			wallIndexAt(x + d.getDeltaX() + d.getRight().getDeltaX(), y + d.getDeltaY() + d.getRight().getDeltaY(), d);
 		vwalls.medAhead[4] = //
-			wallIndexAt(x + d.getDeltaX() + 2 * d.getRight().getDeltaX(), y + d.getDeltaY() + 2 * d.getRight().getDeltaY(), d);
+			wallIndexAt(x + d.getDeltaX() + 2 * d.getRight().getDeltaX(),
+				y + d.getDeltaY() + 2 * d.getRight().getDeltaY(), d);
 
 		vwalls.farLeft[0] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d.getLeft());
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getLeft().getDeltaX(),
+				y + 2 * d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d.getLeft());
 		vwalls.farLeft[1] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getLeft().getDeltaY(), d.getLeft());
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getLeft().getDeltaX(),
+				y + 2 * d.getDeltaY() + 1 * d.getLeft().getDeltaY(), d.getLeft());
 		vwalls.farLeft[2] = //
 			wallIndexAt(x + 2 * d.getDeltaX(), y + 2 * d.getDeltaY(), d.getLeft());
 
 		vwalls.farRight[0] = //
 			wallIndexAt(x + 2 * d.getDeltaX(), y + 2 * d.getDeltaY(), d.getRight());
 		vwalls.farRight[1] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getRight().getDeltaY(), d.getRight());
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getRight().getDeltaX(),
+				y + 2 * d.getDeltaY() + 1 * d.getRight().getDeltaY(), d.getRight());
 		vwalls.farRight[2] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getRight().getDeltaY(), d.getRight());
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getRight().getDeltaX(),
+				y + 2 * d.getDeltaY() + 2 * d.getRight().getDeltaY(), d.getRight());
 
 		vwalls.farAhead[0] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 3 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 3 * d.getLeft().getDeltaY(), d);
+			wallIndexAt(x + 2 * d.getDeltaX() + 3 * d.getLeft().getDeltaX(),
+				y + 2 * d.getDeltaY() + 3 * d.getLeft().getDeltaY(), d);
 		vwalls.farAhead[1] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d);
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getLeft().getDeltaX(),
+				y + 2 * d.getDeltaY() + 2 * d.getLeft().getDeltaY(), d);
 		vwalls.farAhead[2] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getLeft().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getLeft().getDeltaY(), d);
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getLeft().getDeltaX(),
+				y + 2 * d.getDeltaY() + 1 * d.getLeft().getDeltaY(), d);
 		vwalls.farAhead[3] = //
 			wallIndexAt(x + 2 * d.getDeltaX(), y + 2 * d.getDeltaY(), d);
 		vwalls.farAhead[4] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 1 * d.getRight().getDeltaY(), d);
+			wallIndexAt(x + 2 * d.getDeltaX() + 1 * d.getRight().getDeltaX(),
+				y + 2 * d.getDeltaY() + 1 * d.getRight().getDeltaY(), d);
 		vwalls.farAhead[5] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 2 * d.getRight().getDeltaY(), d);
+			wallIndexAt(x + 2 * d.getDeltaX() + 2 * d.getRight().getDeltaX(),
+				y + 2 * d.getDeltaY() + 2 * d.getRight().getDeltaY(), d);
 		vwalls.farAhead[6] = //
-			wallIndexAt(x + 2 * d.getDeltaX() + 3 * d.getRight().getDeltaX(), y + 2 * d.getDeltaY() + 3 * d.getRight().getDeltaY(), d);
+			wallIndexAt(x + 2 * d.getDeltaX() + 3 * d.getRight().getDeltaX(),
+				y + 2 * d.getDeltaY() + 3 * d.getRight().getDeltaY(), d);
 	}
 
 	public int wallIndexAt(int x, int y, Direction d) {
@@ -213,7 +229,7 @@ public class DungeonMap extends Content {
 	}
 
 	private static class DungeonSquare {
-		private Map<Direction, Integer> wallTypes;
+		private final Map<Direction, Integer> wallTypes;
 		private Map<Direction, Integer> doorFlags;
 		private int squareInfo;
 
@@ -224,7 +240,7 @@ public class DungeonMap extends Content {
 		}
 
 		private int getWall(Direction d) {
-			return wallTypes.get(d);
+			return wallTypes.get(d).getOrNull();
 		}
 
 		private int getSquareInfo() {
@@ -232,23 +248,23 @@ public class DungeonMap extends Content {
 		}
 
 		private int getDoorFlags(Direction d) {
-			return doorFlags.get(d);
+			return doorFlags.get(d).getOrNull();
 		}
 
 		private boolean isDoor(Direction d) {
-			return doorFlags.get(d) > 0;
+			return doorFlags.get(d).getOrNull() > 0;
 		}
 
 		private boolean isClosedDoor(Direction d) {
-			return doorFlags.get(d) > 1;
+			return doorFlags.get(d).getOrNull() > 1;
 		}
 
 		private boolean isBashableDoor(Direction d) {
-			return doorFlags.get(d) == 2;
+			return doorFlags.get(d).getOrNull() == 2;
 		}
 
 		private void openDoor(Direction d) {
-			doorFlags.put(d, 1);
+			doorFlags = doorFlags.put(d, 1);
 		}
 	}
 

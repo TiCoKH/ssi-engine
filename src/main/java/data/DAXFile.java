@@ -1,15 +1,15 @@
 package data;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSortedMap;
+import io.vavr.collection.Array;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
+import io.vavr.control.Try;
 
 import common.ByteBufferWrapper;
 
@@ -24,7 +24,7 @@ public class DAXFile extends ContentFile {
 		int byteCount = file.getUnsignedShort(0);
 		int headerCount = byteCount / 9;
 
-		Map<Integer, ByteBufferWrapper> blocks = new LinkedHashMap<>();
+		Map<Integer, ByteBufferWrapper> blocks = HashMap.empty();
 
 		for (int i = 0; i < headerCount; i++) {
 			int headerStart = 2 + (i * 9);
@@ -35,28 +35,22 @@ public class DAXFile extends ContentFile {
 
 			file.position(2 + byteCount + offset);
 
-			blocks.put(id, uncompress(file.slice().limit(sizeCmp), sizeRaw));
+			blocks = blocks.put(id, uncompress(file.slice().limit(sizeCmp), sizeRaw));
 		}
-		return new DAXFile(ImmutableSortedMap.copyOf(blocks));
+		return new DAXFile(blocks);
 	}
 
 	@Override
-	public <T extends Content> T getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
-		ByteBufferWrapper b = blocks.get(id);
-		if (b != null) {
-			try {
-				return clazz.getConstructor(ByteBufferWrapper.class, ContentType.class).newInstance(b.rewind(), type);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-				| SecurityException e) {
-				e.printStackTrace(System.err);
-			}
-		}
-		return null;
+	public <T extends Content> Optional<Try<T>> getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
+		return blocks.get(id)
+			.map(b -> Try.of(() -> clazz.getConstructor(ByteBufferWrapper.class, ContentType.class)
+				.newInstance(b.rewind().slice(), type)))
+			.toJavaOptional();
 	}
 
 	@Override
-	public List<ByteBufferWrapper> getById(int id) {
-		return ImmutableList.of(blocks.get(id));
+	public Seq<ByteBufferWrapper> getById(int id) {
+		return blocks.get(id).map(Array::of).getOrElse(Array::empty);
 	}
 
 	@Override

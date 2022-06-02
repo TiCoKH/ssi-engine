@@ -46,12 +46,13 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import io.vavr.collection.Set;
+import io.vavr.control.Try;
 
 import com.google.common.collect.ImmutableList;
 
@@ -66,12 +67,14 @@ import engine.script.EclInstruction;
 import engine.script.EclOpCode;
 
 public class Decompiler {
-	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO, ON_GOTO, RETURN, NEW_ECL);
-	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO_22, INPUT_YES_NO_2C);
-	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
-		IF_NOT_EQUALS);
-	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT, MULTIPLY, DIVIDE,
-		AND, OR, RANDOM, RANDOM0, ENCOUNTER_MENU, PARLAY);
+	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO,
+		ON_GOTO, RETURN, NEW_ECL);
+	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO_22,
+		INPUT_YES_NO_2C);
+	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS,
+		IF_LESS, IF_LESS_EQUALS, IF_NOT_EQUALS);
+	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD,
+		SUBTRACT, MULTIPLY, DIVIDE, AND, OR, RANDOM, RANDOM0, ENCOUNTER_MENU, PARLAY);
 	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);
 
 	private int base;
@@ -101,8 +104,8 @@ public class Decompiler {
 		knownAddresses.put(0x4BFF, "PICS_ARE_DRAWN");
 		knownAddresses.put(0x4C2F, "CURRENT_PIC");
 		knownAddresses.put(0x7B90, "STRING1");
-		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS", "PSYCHE", "JUNO",
-			"HYGEIA", "AURORA", "THULE");
+		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA",
+			"PALLAS", "PSYCHE", "JUNO", "HYGEIA", "AURORA", "THULE");
 		for (int i = 0; i < 13; i++) {
 			knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i), celestials.get(i) + "_X");
 			knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i) + 1, celestials.get(i) + "_Y");
@@ -122,12 +125,14 @@ public class Decompiler {
 			knownAddresses.put(tempStart + i, "TEMP" + String.format("%01X", i + 1));
 		}
 
-		Set<Integer> ids = new TreeSet<>(res.idsFor(ECL));
+		final Set<Integer> ids = res.idsFor(ECL);
 		for (Integer id : ids) {
 			currentId = id;
-			EclProgram eclCode = res.find(id, EclProgram.class, ECL);
-			System.out.println(id);
-			start(gameDir, eclCode);
+			res.find(id, EclProgram.class, ECL).ifPresentOrElse(t -> {
+				t.onFailure(throwable -> System.err.println("failure reading script " + id))
+					.onSuccess(e -> System.out.println(id))
+					.flatMap(eclCode -> Try.run(() -> start(gameDir, eclCode)));
+			}, () -> System.err.println("failure finding script " + id));
 		}
 	}
 
@@ -147,7 +152,8 @@ public class Decompiler {
 		startSection(gameDir, eclCode, onRestInterruption, "onRestInterruption");
 	}
 
-	private void startSection(String gameDir, ByteBufferWrapper eclCode, EclInstruction inst, String section) throws IOException {
+	private void startSection(String gameDir, ByteBufferWrapper eclCode, EclInstruction inst, String section)
+		throws IOException {
 		File outFile = new File(gameDir + "/ECL/ECL." + currentId + "." + section);
 		outFile.getParentFile().mkdirs();
 		out = new PrintStream(outFile);
@@ -186,7 +192,12 @@ public class Decompiler {
 		out.println("}");
 
 		while (gotoAddressList.containsValue(Boolean.FALSE)) {
-			Integer a = gotoAddressList.entrySet().stream().filter(e -> Boolean.FALSE.equals(e.getValue())).findFirst().get().getKey();
+			Integer a = gotoAddressList.entrySet()
+				.stream()
+				.filter(e -> Boolean.FALSE.equals(e.getValue()))
+				.findFirst()
+				.get()
+				.getKey();
 			out.println();
 			indention += 1;
 			disassemble(eclCode, a, true);
@@ -229,13 +240,23 @@ public class Decompiler {
 			List<EclArgument> dynArgs = inst.getDynArgs();
 
 			if (opCode == ON_GOTO) {
-				gotoAddressList.putAll(dynArgs.stream().filter(a -> !gotoAddressList.containsKey(a.valueAsInt())).map(EclArgument::valueAsInt)
-					.sorted().collect(Collectors.toSet()).stream().collect(Collectors.toMap(Function.identity(), a -> {
+				gotoAddressList.putAll(dynArgs.stream()
+					.filter(a -> !gotoAddressList.containsKey(a.valueAsInt()))
+					.map(EclArgument::valueAsInt)
+					.sorted()
+					.collect(Collectors.toSet())
+					.stream()
+					.collect(Collectors.toMap(Function.identity(), a -> {
 						return Boolean.FALSE;
 					})));
 			} else if (opCode == ON_GOSUB) {
-				gotoAddressList.putAll(dynArgs.stream().filter(a -> !gotoAddressList.containsKey(a.valueAsInt())).map(EclArgument::valueAsInt)
-					.sorted().collect(Collectors.toSet()).stream().collect(Collectors.toMap(Function.identity(), a -> {
+				gotoAddressList.putAll(dynArgs.stream()
+					.filter(a -> !gotoAddressList.containsKey(a.valueAsInt()))
+					.map(EclArgument::valueAsInt)
+					.sorted()
+					.collect(Collectors.toSet())
+					.stream()
+					.collect(Collectors.toMap(Function.identity(), a -> {
 						return Boolean.FALSE;
 					})));
 			}
@@ -349,12 +370,14 @@ public class Decompiler {
 				out.println(argL(inst, 0) + " = RANDOM0(" + argR(inst, 1) + ")");
 				break;
 			case ENCOUNTER_MENU:
-				String argsEM = String.join(", ", argR(inst, 0), argR(inst, 1), argR(inst, 2), argR(inst, 4), argR(inst, 5), argR(inst, 6),
-					argR(inst, 7), argR(inst, 8), argR(inst, 9), argR(inst, 10), argR(inst, 11), argR(inst, 12), argR(inst, 13));
+				String argsEM = String.join(", ", argR(inst, 0), argR(inst, 1), argR(inst, 2), argR(inst, 4),
+					argR(inst, 5), argR(inst, 6), argR(inst, 7), argR(inst, 8), argR(inst, 9), argR(inst, 10),
+					argR(inst, 11), argR(inst, 12), argR(inst, 13));
 				out.println(argL(inst, 3) + " = ENCOUNTER_MENU(" + argsEM + ")");
 				break;
 			case PARLAY:
-				String argsP = String.join(", ", argR(inst, 0), argR(inst, 1), argR(inst, 2), argR(inst, 3), argR(inst, 4));
+				String argsP = String.join(", ", argR(inst, 0), argR(inst, 1), argR(inst, 2), argR(inst, 3),
+					argR(inst, 4));
 				out.println(argL(inst, 5) + " = PARLAY(" + argsP + ")");
 				break;
 			default:
@@ -478,7 +501,8 @@ public class Decompiler {
 			}
 			out.print(")");
 		}
-		out.println("(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
+		out.println(
+			"(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
 	}
 
 	private String argL(EclInstruction inst, int argNr) {

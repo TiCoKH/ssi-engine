@@ -9,9 +9,10 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 import java.util.Hashtable;
-import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import common.ByteBufferWrapper;
 import data.ContentType;
@@ -19,7 +20,7 @@ import data.palette.Palette;
 
 public class TLBTILEBlock extends ImageContent {
 
-	public TLBTILEBlock(@Nonnull List<ByteBufferWrapper> tileBuffers, @Nonnull ContentType type) {
+	public TLBTILEBlock(@Nonnull Seq<ByteBufferWrapper> tileBuffers, @Nonnull ContentType type) {
 		TILEHeader colorHeader = null;
 		ByteBufferWrapper colorData = null;
 
@@ -70,11 +71,13 @@ public class TLBTILEBlock extends ImageContent {
 			try {
 				IndexColorModel cm = readColorPalette(colorHeader, colorData, transparent);
 				DataBufferByte db = new DataBufferByte(imageData.array(), imageSize);
-				WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 }, null);
+				WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 },
+					null);
 
-				images.add(new BufferedImage(cm, r, false, props));
+				images = images.append(new BufferedImage(cm, r, false, props));
 			} catch (Exception e) {
-				System.err.println(String.format("Exception during processing of TILE %d with type %2X", i, header.type));
+				System.err
+					.println(String.format("Exception during processing of TILE %d with type %2X", i, header.type));
 				e.printStackTrace(System.err);
 			}
 		}
@@ -127,8 +130,10 @@ public class TLBTILEBlock extends ImageContent {
 		return uncompressAndDeswizzle(imageData, height, width);
 	}
 
-	private static IndexColorModel readColorPalette(TILEHeader header, ByteBufferWrapper colorData, boolean transparent) {
-		return Palette.createColorModelNoShift(colorData, header.short3, header.short2, transparent, header.contentType);
+	private static IndexColorModel readColorPalette(TILEHeader header, ByteBufferWrapper colorData,
+		boolean transparent) {
+		return Palette.createColorModelNoShift(colorData, header.short3, header.short2, transparent,
+			header.contentType);
 	}
 
 	private void readColorCycling(TILEHeader header, ByteBufferWrapper colorData) {

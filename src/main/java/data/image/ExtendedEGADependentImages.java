@@ -20,7 +20,8 @@ public class ExtendedEGADependentImages extends EGADependentImages implements VG
 
 			IndexColorModel cm = isEGA ? parseCLUT(data, header) : parseExtendedCLUT(data, header);
 
-			images.add(isEGA ? parseData(data, header, cm) : parseExtendedData(data, header, cm, baseImage));
+			images = images
+				.append(isEGA ? parseData(data, header, cm) : parseExtendedData(data, header, cm, baseImage));
 
 			baseImage = images.get(i);
 		}

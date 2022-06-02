@@ -18,7 +18,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,13 +28,13 @@ import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
 import io.vavr.collection.Array;
+import io.vavr.collection.Seq;
 
 import data.ContentType;
 import shared.EngineStub;
 import shared.FontColor;
 import shared.InputAction;
 import shared.MenuType;
-import shared.party.CharacterSheet;
 import ui.UISettings;
 import ui.classic.AbstractFrameRenderer;
 import ui.classic.CharacterSheetRenderer;
@@ -65,12 +64,13 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	private transient Optional<Object> renderObject = Optional.empty();
 
-	private transient ScheduledExecutorService exec = Executors.newScheduledThreadPool(1, r -> new Thread(r, "Resourceview Animator"));
+	private transient ScheduledExecutorService exec = Executors.newScheduledThreadPool(1,
+		r -> new Thread(r, "Resourceview Animator"));
 
 	private int index = 0;
 
-	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings,
-		@Nonnull EngineStub engine) {
+	public RenderSurface(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman,
+		@Nonnull UISettings settings, @Nonnull EngineStub engine) {
 
 		this.resman = resman;
 		this.settings = settings;
@@ -130,7 +130,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 	}
 
 	public void changeRenderObject(@Nonnull DungeonResource dr) {
-		List<DungeonWall> walls = resman.getWallResource(dr);
+		final Seq<DungeonWall> walls = resman.getWallResource(dr);
 		renderObject = Optional.of(dr);
 		adaptSize(settings.zoom8(22), settings.zoom8(11 * walls.size()));
 	}
@@ -141,13 +141,12 @@ public class RenderSurface extends JPanel implements Scrollable {
 	}
 
 	public void changeRenderObject(@Nonnull IdTypeResource itr) {
-		CharacterSheet cs = engine.readCharacter(itr.getId());
-		if (cs != null) {
-			CharacterSheetState state = new CharacterSheetState(cs, new Menu(MenuType.HORIZONTAL, Array.<InputAction>empty().asJava()),
-				getActionMap(), getInputMap());
+		engine.readCharacter(itr.getId()).ifPresent(t -> t.onSuccess(cs -> {
+			CharacterSheetState state = new CharacterSheetState(cs,
+				new Menu(MenuType.HORIZONTAL, Array.<InputAction>empty().asJava()), getActionMap(), getInputMap());
 			renderObject = Optional.of(state);
 			adaptSize(settings.zoom8(40), settings.zoom8(25));
-		}
+		}));
 	}
 
 	public void changeRenderObject(@Nonnull UIFrame frame) {
@@ -171,7 +170,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 			if (o instanceof ImageResource) {
 				ImageResource ir = (ImageResource) o;
 				if (ir.getType() == null || ir.getType() == _8X8D) {
-					List<BufferedImage> images = null;
+					Seq<BufferedImage> images = null;
 					if (ir.getId() == 201)
 						images = resman.getFont(FontColor.NORMAL);
 					else if (ir.getId() == 202)
@@ -199,7 +198,7 @@ public class RenderSurface extends JPanel implements Scrollable {
 			} else if (o instanceof DungeonResource) {
 				DungeonResource res = (DungeonResource) o;
 
-				List<DungeonWall> walls = resman.getWallResource(res);
+				final Seq<DungeonWall> walls = resman.getWallResource(res);
 
 				g2d.setBackground(Color.BLUE);
 				g2d.clearRect(0, 0, getWidth(), getHeight());
@@ -228,8 +227,10 @@ public class RenderSurface extends JPanel implements Scrollable {
 		});
 	}
 
-	private void drawWallView(Graphics2D g2d, BufferedImage image, int wallIndex, int xStart, int yStart, int maxHeight) {
-		g2d.drawImage(image, settings.zoom8(xStart), settings.zoom8(11 * wallIndex + yStart) + settings.zoom(maxHeight) - image.getHeight(), null);
+	private void drawWallView(Graphics2D g2d, BufferedImage image, int wallIndex, int xStart, int yStart,
+		int maxHeight) {
+		g2d.drawImage(image, settings.zoom8(xStart),
+			settings.zoom8(11 * wallIndex + yStart) + settings.zoom(maxHeight) - image.getHeight(), null);
 	}
 
 	private void adaptSize(int width, int height) {

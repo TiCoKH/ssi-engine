@@ -1,25 +1,30 @@
 package ui.shared.dungeon;
 
 import java.awt.image.BufferedImage;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Map;
 
 import data.dungeon.WallDef.WallDistance;
 import data.dungeon.WallDef.WallPlacement;
 
 public class DungeonWall {
-	private Map<WallDistance, Map<WallPlacement, BufferedImage>> wallViewsMap;
+	private final Map<WallDistance, Map<WallPlacement, BufferedImage>> wallViewsMap;
 
-	private BufferedImage farFiller;
+	private final BufferedImage farFiller;
 
-	public DungeonWall(@Nonnull Map<WallDistance, Map<WallPlacement, BufferedImage>> wallViewsMap, @Nonnull BufferedImage farFiller) {
+	public DungeonWall(@Nonnull Map<WallDistance, Map<WallPlacement, BufferedImage>> wallViewsMap,
+		@Nonnull BufferedImage farFiller) {
 		this.wallViewsMap = wallViewsMap;
 		this.farFiller = farFiller;
 	}
 
-	public BufferedImage getWallViewFor(WallDistance dis, WallPlacement plc) {
-		return this.wallViewsMap.get(dis).get(plc);
+	public BufferedImage getWallViewFor(@Nonnull WallDistance dis, @Nonnull WallPlacement plc) {
+		return this.wallViewsMap.get(dis)
+			.getOrElseThrow(IllegalStateException::new)
+			.get(plc)
+			.getOrElseThrow(IllegalStateException::new);
 	}
 
 	public BufferedImage getFarFiller() {

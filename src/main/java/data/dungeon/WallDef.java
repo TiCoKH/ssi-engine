@@ -1,9 +1,16 @@
 package data.dungeon;
 
-import java.util.EnumMap;
-import java.util.Map;
+import static data.dungeon.WallDef.WallDistance.CLOSE;
+import static data.dungeon.WallDef.WallDistance.FAR;
+import static data.dungeon.WallDef.WallDistance.MEDIUM;
+import static data.dungeon.WallDef.WallPlacement.FOWARD;
+import static data.dungeon.WallDef.WallPlacement.LEFT;
+import static data.dungeon.WallDef.WallPlacement.RIGHT;
+import static io.vavr.API.Map;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Map;
 
 import common.ByteBufferWrapper;
 import data.Content;
@@ -49,9 +56,9 @@ public class WallDef extends Content {
 	}
 
 	private static class WallDisplay {
-		private Map<WallDistance, Map<WallPlacement, int[][]>> displayMap;
+		private final Map<WallDistance, Map<WallPlacement, int[][]>> displayMap;
 
-		private int[][] farFiller;
+		private final int[][] farFiller;
 
 		public WallDisplay(byte[] symbols) {
 			if (symbols.length != 156) {
@@ -81,25 +88,11 @@ public class WallDef extends Content {
 			offset = init(symbols, offset, closeRight);
 			offset = init(symbols, offset, farFiller);
 
-			displayMap = new EnumMap<>(WallDistance.class);
-
-			Map<WallPlacement, int[][]> farMap = new EnumMap<>(WallPlacement.class);
-			farMap.put(WallPlacement.LEFT, farLeft);
-			farMap.put(WallPlacement.FOWARD, farForward);
-			farMap.put(WallPlacement.RIGHT, farRight);
-			displayMap.put(WallDistance.FAR, farMap);
-
-			Map<WallPlacement, int[][]> medMap = new EnumMap<>(WallPlacement.class);
-			medMap.put(WallPlacement.LEFT, medLeft);
-			medMap.put(WallPlacement.FOWARD, medForward);
-			medMap.put(WallPlacement.RIGHT, medRight);
-			displayMap.put(WallDistance.MEDIUM, medMap);
-
-			Map<WallPlacement, int[][]> closeMap = new EnumMap<>(WallPlacement.class);
-			closeMap.put(WallPlacement.LEFT, closeLeft);
-			closeMap.put(WallPlacement.FOWARD, closeForward);
-			closeMap.put(WallPlacement.RIGHT, closeRight);
-			displayMap.put(WallDistance.CLOSE, closeMap);
+			displayMap = Map( //
+				FAR, Map(LEFT, farLeft, FOWARD, farForward, RIGHT, farRight), //
+				MEDIUM, Map(LEFT, medLeft, FOWARD, medForward, RIGHT, medRight), //
+				CLOSE, Map(LEFT, closeLeft, FOWARD, closeForward, RIGHT, closeRight) //
+			);
 		}
 
 		private int init(byte[] symbols, int offset, int[][] display) {
@@ -113,7 +106,7 @@ public class WallDef extends Content {
 		}
 
 		public int[][] getDisplay(WallDistance dis, WallPlacement plc) {
-			return displayMap.get(dis).get(plc);
+			return displayMap.get(dis).get().get(plc).get();
 		}
 	}
 }

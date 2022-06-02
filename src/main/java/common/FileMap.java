@@ -1,49 +1,45 @@
 package common;
 
+import static java.util.function.Function.identity;
+
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import io.vavr.collection.Array;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
+
 public class FileMap {
-	private static final List<String> SUBDIRS = Arrays.asList("DISK1", "DISK2", "DISK3");
+	private static final Seq<String> SUBDIRS = Array.of("DISK1", "DISK2", "DISK3");
 
-	private Map<String, String> namesMap = new HashMap<>();
-
-	private String gameDir;
+	private final Map<String, File> namesMap;
 
 	public FileMap(@Nonnull String gameDir) {
-		this.gameDir = gameDir;
+		namesMap = Array.of(new File(gameDir).listFiles())
+			.flatMap(FileMap::toFilesSeq)
+			.toMap(file -> file.getName().toUpperCase(), identity());
+	}
 
-		File gameDirFile = new File(gameDir);
-
-		Stream.of(gameDirFile.listFiles()).forEach(f -> {
-			if (f.isFile()) {
-				namesMap.put(f.getName().toUpperCase(), f.getName());
-			}
-			if (f.isDirectory() && SUBDIRS.contains(f.getName().toUpperCase())) {
-				String[] subnames = f.list((dir, name) -> new File(dir, name).isFile());
-				namesMap.putAll(Stream.of(subnames).collect(Collectors.toMap(String::toUpperCase, name -> f.getName() + File.separator + name)));
-			}
-		});
+	private static Seq<File> toFilesSeq(File file) {
+		if (file.isFile()) {
+			return Array.of(file);
+		}
+		if (file.isDirectory() && SUBDIRS.contains(file.getName().toUpperCase())) {
+			return Array.of(file.listFiles((dir, name) -> new File(dir, name).isFile()));
+		}
+		return Array.empty();
 	}
 
 	@Nonnull
-	public List<String> findMatching(String pattern) {
-		return namesMap.keySet().stream().filter(nameUC -> nameUC.matches(pattern)).collect(Collectors.toList());
+	public Set<String> findMatching(String pattern) {
+		return namesMap.keySet().filter(nameUC -> nameUC.matches(pattern));
 	}
 
 	@Nonnull
 	public Optional<File> toFile(String nameUC) {
-		if (namesMap.containsKey(nameUC)) {
-			return Optional.of(new File(gameDir, namesMap.get(nameUC)));
-		}
-		return Optional.empty();
+		return namesMap.get(nameUC).toJavaOptional();
 	}
 }

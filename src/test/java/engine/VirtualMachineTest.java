@@ -109,7 +109,7 @@ public class VirtualMachineTest {
 			}
 		}, new VirtualMemory(cfg), cfg.getCodeBase());
 		EclInstruction.configOpCodes(cfg.getOpCodes());
-		vm.newEcl(ecls.getById(16, EclProgram.class, ContentType.ECL));
+		vm.newEcl(ecls.getById(16, EclProgram.class, ContentType.ECL).get().get());
 
 		System.out.println("Init:");
 		vm.startInit();

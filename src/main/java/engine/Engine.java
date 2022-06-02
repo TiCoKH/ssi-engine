@@ -26,7 +26,6 @@ import static shared.GameFeature.SPECIAL_CHARS_NOT_FROM_FONT;
 import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +36,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import io.vavr.control.Try;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -98,8 +99,8 @@ public class Engine implements EngineCallback, EngineStub {
 		this.memory = new VirtualMemory(cfg);
 		this.vm = new VirtualMachine(this, this.memory, cfg.getCodeBase());
 		if (cfg.isUsingFeature(SPECIAL_CHARS_NOT_FROM_FONT))
-			this.stringPartFactory = new GoldboxStringPartFactory(cfg.getSpecialChar(UMLAUT_A), cfg.getSpecialChar(UMLAUT_O),
-				cfg.getSpecialChar(UMLAUT_U), cfg.getSpecialChar(SHARP_S));
+			this.stringPartFactory = new GoldboxStringPartFactory(cfg.getSpecialChar(UMLAUT_A),
+				cfg.getSpecialChar(UMLAUT_O), cfg.getSpecialChar(UMLAUT_U), cfg.getSpecialChar(SHARP_S));
 		else
 			this.stringPartFactory = new GoldboxStringPartFactory();
 
@@ -137,10 +138,13 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void showModeMenu() {
 		setNextTask(() -> {
-			List<String> menu = Stream.of("GAME", "DEMO", "START", "DEBUG").filter(e -> !Strings.isNullOrEmpty(cfg.getModeMenuEntry(e)))
+			List<String> menu = Stream.of("GAME", "DEMO", "START", "DEBUG")
+				.filter(e -> !Strings.isNullOrEmpty(cfg.getModeMenuEntry(e)))
 				.collect(Collectors.toList());
 			setMenu(MenuType.HORIZONTAL,
-				menu.stream().map(e -> new EngineInputAction(MODE_MENU_HANDLER, e, menu.indexOf(e))).collect(Collectors.toList()),
+				menu.stream()
+					.map(e -> new EngineInputAction(MODE_MENU_HANDLER, e, menu.indexOf(e)))
+					.collect(Collectors.toList()),
 				new CustomGoldboxString(cfg.getModeMenuName()));
 			if (abortCurrentThread) {
 				return;
@@ -169,14 +173,9 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public CharacterSheet readCharacter(int id) {
-		try {
-			return new CharacterSheetImpl(cfg.getFlavor(), getPlayerDataFactory().loadCharacter(id));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	public Optional<Try<CharacterSheet>> readCharacter(int id) {
+		return getPlayerDataFactory().loadCharacter(id)
+			.map(t -> t.<CharacterSheet>map(ac -> new CharacterSheetImpl(cfg.getFlavor(), ac)));
 	}
 
 	@Override
@@ -234,7 +233,8 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description) {
+	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems,
+		@Nullable GoldboxString description) {
 		ui.setInputMenu(type, menuItems, description, null);
 		pauseCurrentThread();
 	}
@@ -261,10 +261,14 @@ public class Engine implements EngineCallback, EngineStub {
 
 			clear();
 
-			try {
-				delayCurrentThread();
-				final int currentECL = memory.getCurrentECL();
-				EclProgram ecl = res.find(currentECL, EclProgram.class, ECL);
+			delayCurrentThread();
+			final int currentECL = memory.getCurrentECL();
+			res.find(currentECL, EclProgram.class, ECL).ifPresent(t -> {
+				if (t.isFailure()) {
+					handleException(t.getCause());
+					return;
+				}
+				final EclProgram ecl = t.get();
 				vm.newEcl(ecl);
 				vm.startInit();
 				memory.setLastECL(currentECL);
@@ -288,9 +292,7 @@ public class Engine implements EngineCallback, EngineStub {
 				this.currentMenuItem = null;
 				setShowGameMenu(true);
 				setInputStandard(null);
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
+			});
 		});
 	}
 
@@ -310,15 +312,21 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	private void loadDungeonMap(int id) {
-		try {
-			if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
-				currentMap = Optional.ofNullable(res.find(id, DungeonMap2.class, GEO));
-			} else {
-				currentMap = Optional.ofNullable(res.find(id, DungeonMap.class, GEO));
-			}
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
+		if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
+			currentMap = narrow(res.find(id, DungeonMap2.class, GEO));
+		} else {
+			currentMap = narrow(res.find(id, DungeonMap.class, GEO));
 		}
+	}
+
+	private <T extends DungeonMap> Optional<DungeonMap> narrow(Optional<Try<T>> value) {
+		return value.flatMap(t -> {
+			if (t.isFailure()) {
+				handleException(t.getCause());
+				return Optional.empty();
+			}
+			return Optional.of(t.get());
+		});
 	}
 
 	public void cleaDungeonMap() {
@@ -369,12 +377,12 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void addNpc(int id) {
-		try {
-			AbstractCharacter npc = getPlayerDataFactory().loadCharacter(id);
-			memory.addPartyMember(new CharacterSheetImpl(cfg.getFlavor(), npc));
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-		}
+		getPlayerDataFactory().loadCharacter(id)
+			.ifPresentOrElse(t -> t.map(npc -> new CharacterSheetImpl(cfg.getFlavor(), npc))
+				.onSuccess(memory::addPartyMember)
+				.onFailure(this::handleException), () -> {
+					System.err.println("Error: could not add NPC with id " + id + " to party");
+				});
 	}
 
 	@Override
@@ -591,5 +599,9 @@ public class Engine implements EngineCallback, EngineStub {
 		}
 		parent = new File(parent, "ssi-engine");
 		return new File(parent, cfg.getGameName());
+	}
+
+	private void handleException(Throwable t) {
+		t.printStackTrace(System.err);
 	}
 }

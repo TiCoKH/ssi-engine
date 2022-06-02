@@ -63,9 +63,10 @@ public class VGADependentImages extends ImageContent {
 			}
 
 			DataBufferByte db = new DataBufferByte(imageData, imageSize);
-			WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 }, null);
+			WritableRaster r = WritableRaster.createInterleavedRaster(db, width, height, width, 1, new int[] { 0 },
+				null);
 
-			images.add(new BufferedImage(cm, r, false, props));
+			images = images.append(new BufferedImage(cm, r, false, props));
 		}
 	}
 

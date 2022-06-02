@@ -19,11 +19,8 @@ import static shared.GameFeature.FLEXIBLE_DUNGEON_SIZE;
 import static shared.GameFeature.OVERLAND_DUNGEON;
 
 import java.awt.BorderLayout;
-import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
@@ -34,10 +31,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
+import io.vavr.Tuple2;
+import io.vavr.collection.Set;
+import io.vavr.collection.SortedSet;
+import io.vavr.control.Try;
+
 import common.FileMap;
 import data.ContentFile;
 import data.ContentType;
-import data.DAXFile;
 import data.dungeon.DungeonMap;
 import data.dungeon.DungeonMap2;
 import shared.EngineStub;
@@ -61,8 +62,9 @@ public class ResourceViewer {
 	private UIResourceConfiguration config;
 	private UIResourceLoader loader;
 
-	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UIResourceConfiguration config, @Nonnull UISettings settings,
-		@Nonnull ExceptionHandler excHandler, @Nonnull EngineStub engine) throws IOException {
+	public ResourceViewer(@Nonnull FileMap fileMap, @Nonnull UIResourceConfiguration config,
+		@Nonnull UISettings settings, @Nonnull ExceptionHandler excHandler, @Nonnull EngineStub engine)
+		throws IOException {
 
 		this.config = config;
 		this.loader = new UIResourceLoader(fileMap, config);
@@ -137,7 +139,7 @@ public class ResourceViewer {
 	}
 
 	private void initChildren(MutableTreeNode root, ContentType type) throws IOException {
-		Set<Integer> ids = new TreeSet<>(loader.idsFor(type));
+		final SortedSet<Integer> ids = loader.idsFor(type);
 		if (!ids.isEmpty()) {
 			MutableTreeNode parent = new DefaultMutableTreeNode(type.name());
 			for (Integer id : ids) {
@@ -159,9 +161,9 @@ public class ResourceViewer {
 	}
 
 	private void initWallChildren(MutableTreeNode root) throws IOException {
-		Set<Integer> ids = new TreeSet<>(loader.idsFor(WALLDEF));
+		Set<Integer> ids = loader.idsFor(WALLDEF);
 		if (ids.isEmpty()) {
-			ids = new TreeSet<>(loader.idsFor(_8X8D));
+			ids = loader.idsFor(_8X8D);
 		}
 
 		MutableTreeNode parent = new DefaultMutableTreeNode(WALLDEF.name());
@@ -188,40 +190,53 @@ public class ResourceViewer {
 		root.insert(parent, root.getChildCount());
 	}
 
-	private void initSkyGroundChildren(MutableTreeNode root) throws IOException {
-		MutableTreeNode parent = new DefaultMutableTreeNode("SKYGRND");
-		Optional<File> skygrndFile = loader.toFile("SKYGRND.DAX");
-		if (skygrndFile.isPresent()) {
-			Optional<ContentFile> cf = DAXFile.create(skygrndFile.get());
-			if (cf.isPresent()) {
-				for (int id : cf.get().getIds()) {
-					parent.insert(new DefaultMutableTreeNode(new ImageResource("SKYGRND.DAX", id, _8X8D)), parent.getChildCount());
-				}
+	private void initSkyGroundChildren(MutableTreeNode root) {
+		loader.toFile("SKYGRND.DAX").ifPresent(file -> {
+			final MutableTreeNode parent = new DefaultMutableTreeNode("SKYGRND");
+			ContentFile.create(file)
+				.get()
+				.getIds()
+				.map(id -> new DefaultMutableTreeNode(new ImageResource("SKYGRND.DAX", id, _8X8D)))
+				.forEach(node -> parent.insert(node, parent.getChildCount()));
+			root.insert(parent, root.getChildCount());
+		});
+	}
+
+	private void initGeoChildren(MutableTreeNode root) {
+		final MutableTreeNode parent = new DefaultMutableTreeNode(GEO.name());
+		loader.idsFor(GEO).toArray().map(id -> {
+			Optional<DungeonMap> dungeon;
+			if (config.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
+				dungeon = narrow(loader.find(id, DungeonMap2.class, GEO));
+			} else {
+				dungeon = narrow(loader.find(id, DungeonMap.class, GEO));
 			}
-		}
+			return new Tuple2<>(id, dungeon);
+		}).filter(t2 -> t2._2.isPresent()).map(t2 -> new Tuple2<>(t2._1, t2._2.get())).map(t2 -> {
+			final int id = t2._1;
+			final DungeonMap dungeon = t2._2;
+			if (config.isUsingFeature(OVERLAND_DUNGEON) && id >= 21 && id <= 26)
+				return new DefaultMutableTreeNode( //
+					new DungeonMapResource(dungeon.generateOverlandMap(), //
+						new DungeonResource(new int[] { 18, 2 * id + 8, 2 * id + 9 })));
+			else
+				return new DefaultMutableTreeNode(new DungeonMapResource(dungeon.generateWallMap()));
+		}).forEach(node -> parent.insert(node, parent.getChildCount()));
 		root.insert(parent, root.getChildCount());
 	}
 
-	private void initGeoChildren(MutableTreeNode root) throws IOException {
-		Set<Integer> ids = new TreeSet<>(loader.idsFor(GEO));
-
-		MutableTreeNode parent = new DefaultMutableTreeNode(GEO.name());
-		for (Integer id : ids) {
-			DungeonMap dungeon;
-			if (config.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
-				dungeon = loader.find(id, DungeonMap2.class, GEO);
-			} else {
-				dungeon = loader.find(id, DungeonMap.class, GEO);
+	private <T extends DungeonMap> Optional<DungeonMap> narrow(Optional<Try<T>> value) {
+		return value.flatMap(t -> {
+			if (t.isFailure()) {
+				handleException(t.getCause());
+				return Optional.empty();
 			}
-			if (config.isUsingFeature(OVERLAND_DUNGEON) && id >= 21 && id <= 26)
-				parent.insert(new DefaultMutableTreeNode( //
-					new DungeonMapResource(dungeon.generateOverlandMap(), //
-						new DungeonResource(new int[] { 18, 2 * id + 8, 2 * id + 9 }))),
-					parent.getChildCount());
-			else
-				parent.insert(new DefaultMutableTreeNode(new DungeonMapResource(dungeon.generateWallMap())), parent.getChildCount());
-		}
-		root.insert(parent, root.getChildCount());
+			return Optional.of(t.get());
+		});
+	}
+
+	private void handleException(Throwable t) {
+		t.printStackTrace(System.err);
 	}
 
 	private boolean isSpaceFrameUsed() {

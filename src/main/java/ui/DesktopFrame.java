@@ -212,8 +212,9 @@ public class DesktopFrame implements ExceptionHandler {
 	private JLabel getLogo() {
 		if (logo == null) {
 			ImageIcon logoIcon = new ImageIcon(getClass().getResource("/ssilogo.png"));
-			logoIcon.setImage(logoIcon.getImage().getScaledInstance(settings.getZoom() * logoIcon.getIconWidth(),
-				settings.getZoom() * logoIcon.getIconHeight(), 0));
+			logoIcon.setImage(logoIcon.getImage()
+				.getScaledInstance(settings.getZoom() * logoIcon.getIconWidth(),
+					settings.getZoom() * logoIcon.getIconHeight(), 0));
 			logo = new JLabel(logoIcon);
 		}
 		return logo;
@@ -248,7 +249,7 @@ public class DesktopFrame implements ExceptionHandler {
 	}
 
 	@Override
-	public void handleException(@Nonnull String title, @Nonnull Exception e) {
+	public void handleException(@Nonnull String title, @Nonnull Throwable e) {
 		e.printStackTrace(System.err);
 		JOptionPane.showMessageDialog(frame, e.getMessage(), title, JOptionPane.ERROR_MESSAGE);
 	}
@@ -276,7 +277,8 @@ public class DesktopFrame implements ExceptionHandler {
 		if (!cofigPath.exists()) {
 			boolean result = cofigPath.mkdirs();
 			if (!result) {
-				JOptionPane.showMessageDialog(frame, "Directory couldn't be created.", "Error writing settings file", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, "Directory couldn't be created.", "Error writing settings file",
+					JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}

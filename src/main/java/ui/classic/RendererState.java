@@ -17,6 +17,8 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.vavr.collection.Seq;
+
 import com.google.common.collect.ImmutableList;
 
 import data.dungeon.DungeonMap.Direction;
@@ -117,7 +119,7 @@ public class RendererState {
 	}
 
 	@Nonnull
-	public List<BufferedImage> getMisc() {
+	public Seq<BufferedImage> getMisc() {
 		return resman.getMisc();
 	}
 
@@ -163,8 +165,8 @@ public class RendererState {
 		return dungeonResources.map(r -> r.getSprite().map(s -> true).orElse(false)).orElse(false);
 	}
 
-	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
-		@Nonnull DungeonResource res) {
+	public void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls,
+		@Nullable int[][] map, @Nonnull DungeonResource res) {
 
 		this.dungeonResources = Optional.of(new DungeonResources(position, visibleWalls, map, res));
 	}
@@ -212,8 +214,8 @@ public class RendererState {
 		// runic text in Pool of Radiance
 		private List<GoldboxStringPart> runicText = new ArrayList<>();
 
-		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map,
-			@Nonnull DungeonResource res) {
+		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls,
+			@Nullable int[][] map, @Nonnull DungeonResource res) {
 
 			this.position = position;
 			this.positionText = new GoldboxStringPosition(position);
@@ -358,7 +360,7 @@ public class RendererState {
 		}
 
 		@Nonnull
-		public List<DungeonWall> getWalls() {
+		public Seq<DungeonWall> getWalls() {
 			return resman.getWallResource(res);
 		}
 

@@ -1,11 +1,14 @@
 package main;
 
+import static java.nio.channels.FileChannel.open;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.Optional;
+
+import io.vavr.collection.Seq;
+import io.vavr.control.Try;
 
 import common.ByteBufferWrapper;
 import data.ContentFile;
@@ -13,30 +16,32 @@ import data.ContentFile;
 public class Extract {
 
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.err.println("Usage: java main.Extract <path or file>");
+		if (args.length < 1) {
+			System.err.println("Usage: java main.Extract <path or file>...");
 			System.exit(1);
 		}
-		File arg = new File(args[0]);
-		if (!arg.canRead()) {
-			System.err.println("Cant read " + args[0]);
-			System.exit(1);
-		}
-		try {
-			if (arg.isDirectory())
-				writeDir(arg);
-			else if (ContentFile.isKnown(arg))
-				writeFile(arg);
-			else {
-				System.err.println("Unsupported file " + args[0] + ", only DAX or (G|T)LB files are supported.");
+		for (String argX : args) {
+			File arg = new File(argX);
+			if (!arg.canRead()) {
+				System.err.println("Cant read " + argX);
 				System.exit(1);
 			}
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
+			try {
+				if (arg.isDirectory())
+					writeDir(arg);
+				else if (ContentFile.isKnown(arg))
+					writeFile(arg).get();
+				else {
+					System.err.println("Unsupported file " + argX + ", only DAX or (G|T)LB files are supported.");
+					System.exit(1);
+				}
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+			}
 		}
 	}
 
-	private static void writeDir(File d) throws IOException {
+	private static void writeDir(File d) {
 		File[] content = d.listFiles((dir, name) -> {
 			File f = new File(dir, name);
 			return f.isDirectory() || ContentFile.isKnown(f);
@@ -46,36 +51,32 @@ public class Extract {
 				writeDir(content[i]);
 			} else if (content[i].isFile()) {
 				System.out.println(content[i].getAbsolutePath());
-				writeFile(content[i]);
+				writeFile(content[i]).get();
 			}
 		}
 	}
 
-	private static void writeFile(File f) throws IOException {
+	private static Try<ContentFile> writeFile(File f) {
 		File outDir = new File(f.getParentFile(), "RAW");
 		outDir.mkdirs();
 
-		Optional<ContentFile> df = ContentFile.create(f);
-		if (df.isPresent()) {
-			for (Integer id : df.get().getIds()) {
+		return ContentFile.create(f).andThenTry(cf -> {
+			for (Integer id : cf.getIds()) {
 				String inputName = f.getName() + "." + id;
-				List<ByteBufferWrapper> dataList = df.get().getById(id);
+				Seq<ByteBufferWrapper> dataList = cf.getById(id);
 				for (int i = 0; i < dataList.size(); i++) {
 					ByteBufferWrapper buf = dataList.get(i);
 					buf.rewind();
 
 					File outFile = new File(outDir, dataList.size() == 1 ? inputName : inputName + "." + i);
-					writeOut(buf, outFile);
+					writeOut(buf, outFile).get();
 				}
 			}
-		}
+		});
 	}
 
-	private static void writeOut(ByteBufferWrapper data, File outFile) throws IOException {
+	private static Try<ByteBufferWrapper> writeOut(ByteBufferWrapper data, File outFile) {
 		System.out.println(outFile.getAbsolutePath());
-		try (FileChannel o = FileChannel.open(outFile.toPath(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-			StandardOpenOption.WRITE)) {
-			data.writeTo(o);
-		}
+		return Try.withResources(() -> open(outFile.toPath(), CREATE, TRUNCATE_EXISTING, WRITE)).of(data::writeTo);
 	}
 }
