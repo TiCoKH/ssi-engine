@@ -105,7 +105,7 @@ public class ResourceViewer {
 	}
 
 	private TreeNode initModel() throws IOException {
-		MutableTreeNode root = new DefaultMutableTreeNode("Countdown to Doomsday");
+		final MutableTreeNode root = new DefaultMutableTreeNode(config.getGameName());
 
 		initChildren(root, "FONT", 201);
 		initChildren(root, "MISC", 202);
