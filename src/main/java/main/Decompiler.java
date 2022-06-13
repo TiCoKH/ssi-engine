@@ -39,22 +39,22 @@ import static engine.script.EclOpCode.STOP_MOVE_42;
 import static engine.script.EclOpCode.SUBTRACT;
 import static engine.script.EclOpCode.WRITE_MEM;
 import static engine.script.EclOpCode.WRITE_MEM_BASE_OFF;
+import static io.vavr.API.Map;
+import static io.vavr.API.Seq;
+import static io.vavr.API.SortedMap;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import io.vavr.collection.Array;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
+import io.vavr.collection.SortedMap;
 import io.vavr.control.Try;
-
-import com.google.common.collect.ImmutableList;
 
 import common.ByteBufferWrapper;
 import common.FileMap;
@@ -67,22 +67,22 @@ import engine.script.EclInstruction;
 import engine.script.EclOpCode;
 
 public class Decompiler {
-	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO,
-		ON_GOTO, RETURN, NEW_ECL);
-	private static final List<EclOpCode> OP_CODE_COMP = ImmutableList.of(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO_22,
+	private static final Seq<EclOpCode> OP_CODE_STOP = Seq(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO, ON_GOTO, RETURN,
+		NEW_ECL);
+	private static final Seq<EclOpCode> OP_CODE_COMP = Seq(COMPARE, COMPARE_AND, AND, OR, INPUT_YES_NO_22,
 		INPUT_YES_NO_2C);
-	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS,
-		IF_LESS, IF_LESS_EQUALS, IF_NOT_EQUALS);
-	private static final List<EclOpCode> OP_CODE_MATH = ImmutableList.of(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD,
-		SUBTRACT, MULTIPLY, DIVIDE, AND, OR, RANDOM, RANDOM0, ENCOUNTER_MENU, PARLAY);
-	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);
+	private static final Seq<EclOpCode> OP_CODE_IF = Seq(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS,
+		IF_LESS_EQUALS, IF_NOT_EQUALS);
+	private static final Seq<EclOpCode> OP_CODE_MATH = Seq(WRITE_MEM, WRITE_MEM_BASE_OFF, COPY_MEM, ADD, SUBTRACT,
+		MULTIPLY, DIVIDE, AND, OR, RANDOM, RANDOM0, ENCOUNTER_MENU, PARLAY);
+	private static final Seq<EclOpCode> OP_CODE_HEX_ARGS = Seq(AND, OR);
 
 	private int base;
 	private int size;
 	private int indention = 0;
 
-	private final Map<Integer, String> knownAddresses = new HashMap<>();
-	private final SortedMap<Integer, Boolean> gotoAddressList = new TreeMap<>();
+	private Map<Integer, String> knownAddresses;
+	private SortedMap<Integer, Boolean> gotoAddressList;
 
 	private EclInstruction compare = null;
 	private EclOpCode lastIf = null;
@@ -100,29 +100,32 @@ public class Decompiler {
 		base = cfg.getCodeBase();
 		EclInstruction.configOpCodes(cfg.getOpCodes());
 
-		knownAddresses.putAll(cfg.getEngineAdresses());
-		knownAddresses.put(0x4BFF, "PICS_ARE_DRAWN");
-		knownAddresses.put(0x4C2F, "CURRENT_PIC");
-		knownAddresses.put(0x7B90, "STRING1");
-		List<String> celestials = ImmutableList.of("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA",
-			"PALLAS", "PSYCHE", "JUNO", "HYGEIA", "AURORA", "THULE");
-		for (int i = 0; i < 13; i++) {
-			knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i), celestials.get(i) + "_X");
-			knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i) + 1, celestials.get(i) + "_Y");
+		knownAddresses = Map();
+		knownAddresses = knownAddresses.merge(HashMap.ofAll(cfg.getEngineAdresses()));
+		knownAddresses = knownAddresses.put(0x4BFF, "PICS_ARE_DRAWN");
+		knownAddresses = knownAddresses.put(0x4C2F, "CURRENT_PIC");
+		knownAddresses = knownAddresses.put(0x7B90, "STRING1");
+		final Seq<String> celestials = Seq("MERKUR", "VENUS", "EARTH", "MARS", "CERES", "VESTA", "FORTUNA", "PALLAS",
+			"PSYCHE", "JUNO", "HYGEIA", "AURORA", "THULE");
+		for (int i = 0; i < celestials.size(); i++) {
+			knownAddresses = knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i),
+				celestials.get(i) + "_X");
+			knownAddresses = knownAddresses.put(VirtualMemory.MEMLOC_CELESTIAL_POS_START + (2 * i) + 1,
+				celestials.get(i) + "_Y");
 		}
 
 		int savedTempStart = cfg.getEngineAddress(SAVED_TEMP_START);
 		for (int i = savedTempStart; i < savedTempStart + 0x20; i++) {
-			knownAddresses.put(i, "SAVED_TEMP_" + hex(i));
+			knownAddresses = knownAddresses.put(i, "SAVED_TEMP_" + hex(i));
 		}
 		int selPCStart = cfg.getEngineAddress(SEL_PC_START);
-		knownAddresses.put(selPCStart, "SEL_PC_NAME");
+		knownAddresses = knownAddresses.put(selPCStart, "SEL_PC_NAME");
 		for (int i = selPCStart; i < selPCStart + 0x1FF; i++) {
-			knownAddresses.putIfAbsent(i, "SEL_PC_" + hex(i));
+			knownAddresses = knownAddresses.computeIfAbsent(i, key -> "SEL_PC_" + hex(key))._2;
 		}
 		int tempStart = cfg.getEngineAddress(TEMP_START);
 		for (int i = 0; i < 0xA; i++) {
-			knownAddresses.put(tempStart + i, "TEMP" + String.format("%01X", i + 1));
+			knownAddresses = knownAddresses.put(tempStart + i, "TEMP" + String.format("%01X", i + 1));
 		}
 
 		final Set<Integer> ids = res.idsFor(ECL);
@@ -154,6 +157,7 @@ public class Decompiler {
 
 	private void startSection(String gameDir, ByteBufferWrapper eclCode, EclInstruction inst, String section)
 		throws IOException {
+
 		File outFile = new File(gameDir + "/ECL/ECL." + currentId + "." + section);
 		outFile.getParentFile().mkdirs();
 		out = new PrintStream(outFile);
@@ -168,15 +172,14 @@ public class Decompiler {
 	}
 
 	private void disassemble(ByteBufferWrapper eclCode, EclInstruction inst, String name) {
-		gotoAddressList.clear();
+		gotoAddressList = SortedMap();
 
 		// To collect Goto and Gosub adresses
 		disassemble(eclCode, inst.getArgument(0).valueAsInt(), false);
 		int sizeBefore = 0, sizeAfter = gotoAddressList.size();
 		while (sizeAfter > sizeBefore) {
 			sizeBefore = gotoAddressList.size();
-			Map<Integer, Boolean> copy = new HashMap<>(gotoAddressList);
-			copy.keySet().stream().forEach(address -> {
+			gotoAddressList.keySet().forEach(address -> {
 				disassemble(eclCode, address, false);
 			});
 			sizeAfter = gotoAddressList.size();
@@ -192,17 +195,12 @@ public class Decompiler {
 		out.println("}");
 
 		while (gotoAddressList.containsValue(Boolean.FALSE)) {
-			Integer a = gotoAddressList.entrySet()
-				.stream()
-				.filter(e -> Boolean.FALSE.equals(e.getValue()))
-				.findFirst()
-				.get()
-				.getKey();
+			Integer a = gotoAddressList.find(e -> Boolean.FALSE.equals(e._2)).get()._1;
 			out.println();
 			indention += 1;
 			disassemble(eclCode, a, true);
 			indention -= 1;
-			gotoAddressList.put(a, Boolean.TRUE);
+			gotoAddressList = gotoAddressList.put(a, Boolean.TRUE);
 		}
 	}
 
@@ -210,7 +208,7 @@ public class Decompiler {
 		int address = base + eclCode.position();
 		while (gotoAddressList.containsKey(address)) {
 			disassemble(eclCode, address, true);
-			gotoAddressList.put(address, Boolean.TRUE);
+			gotoAddressList = gotoAddressList.put(address, Boolean.TRUE);
 			address = base + eclCode.position();
 		}
 	}
@@ -237,28 +235,15 @@ public class Decompiler {
 		wasCompare = false;
 
 		if (opCode.hasDynArgs()) {
-			List<EclArgument> dynArgs = inst.getDynArgs();
+			final Seq<EclArgument> dynArgs = Array.ofAll(inst.getDynArgs());
 
-			if (opCode == ON_GOTO) {
-				gotoAddressList.putAll(dynArgs.stream()
-					.filter(a -> !gotoAddressList.containsKey(a.valueAsInt()))
-					.map(EclArgument::valueAsInt)
-					.sorted()
-					.collect(Collectors.toSet())
-					.stream()
-					.collect(Collectors.toMap(Function.identity(), a -> {
-						return Boolean.FALSE;
-					})));
-			} else if (opCode == ON_GOSUB) {
-				gotoAddressList.putAll(dynArgs.stream()
-					.filter(a -> !gotoAddressList.containsKey(a.valueAsInt()))
-					.map(EclArgument::valueAsInt)
-					.sorted()
-					.collect(Collectors.toSet())
-					.stream()
-					.collect(Collectors.toMap(Function.identity(), a -> {
-						return Boolean.FALSE;
-					})));
+			if (opCode == ON_GOTO || opCode == ON_GOSUB) {
+				gotoAddressList = gotoAddressList
+					.merge(dynArgs.filter(a -> !gotoAddressList.containsKey(a.valueAsInt()))
+						.map(EclArgument::valueAsInt)
+						.sorted()
+						.toSet()
+						.toMap(Function.identity(), a -> Boolean.FALSE));
 			}
 			if (withOutput)
 				output(inst, dynArgs);
@@ -280,9 +265,7 @@ public class Decompiler {
 				disassembleInst(eclCode, compResultInst, withOutput);
 			indention -= 1;
 		} else {
-			if (opCode == GOTO) {
-				addToMap(gotoAddressList, inst.getArgument(0));
-			} else if (opCode == GOSUB) {
+			if (opCode == GOTO || opCode == GOSUB) {
 				addToMap(gotoAddressList, inst.getArgument(0));
 			}
 			if (withOutput)
@@ -310,7 +293,7 @@ public class Decompiler {
 	}
 
 	private void outputInstStart(int address) {
-		if (gotoAddressList.containsKey(address) && Boolean.FALSE.equals(gotoAddressList.get(address))) {
+		if (gotoAddressList.containsKey(address) && Boolean.FALSE.equals(gotoAddressList.get(address).get())) {
 			outputGotoMarker(address);
 			gotoAddressList.put(address, Boolean.TRUE);
 		}
@@ -486,7 +469,7 @@ public class Decompiler {
 		}
 	}
 
-	private void output(EclInstruction inst, List<EclArgument> dynArgs) {
+	private void output(EclInstruction inst, Seq<EclArgument> dynArgs) {
 		outputInstStart(base + inst.getPosition());
 		if (inst.getOpCode() == ON_GOTO || inst.getOpCode() == ON_GOSUB) {
 			out.print("ON " + argL(inst, 0) + (inst.getOpCode() == ON_GOTO ? " GOTO " : " GOSUB "));
@@ -501,8 +484,7 @@ public class Decompiler {
 			}
 			out.print(")");
 		}
-		out.println(
-			"(" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")");
+		out.println(dynArgs.map(EclArgument::toString).mkString("(", ", ", ")"));
 	}
 
 	private String argL(EclInstruction inst, int argNr) {
@@ -512,21 +494,21 @@ public class Decompiler {
 		}
 		if (!knownAddresses.containsKey(a.valueAsInt())) {
 			if (a.isStringValue()) {
-				knownAddresses.put(a.valueAsInt(), "string_" + currentId + "_" + hex(a.valueAsInt()));
+				knownAddresses = knownAddresses.put(a.valueAsInt(), "string_" + currentId + "_" + hex(a.valueAsInt()));
 			} else if (a.isShortValue()) {
-				knownAddresses.put(a.valueAsInt(), "short_" + currentId + "_" + hex(a.valueAsInt()));
+				knownAddresses = knownAddresses.put(a.valueAsInt(), "short_" + currentId + "_" + hex(a.valueAsInt()));
 			} else {
-				knownAddresses.put(a.valueAsInt(), "byte_" + currentId + "_" + hex(a.valueAsInt()));
+				knownAddresses = knownAddresses.put(a.valueAsInt(), "byte_" + currentId + "_" + hex(a.valueAsInt()));
 			}
 		}
-		return knownAddresses.get(a.valueAsInt());
+		return knownAddresses.get(a.valueAsInt()).get();
 	}
 
 	private String argR(EclInstruction inst, int argNr) {
 		EclArgument a = inst.getArgument(argNr);
 		if (a.isMemAddress()) {
 			if (knownAddresses.containsKey(a.valueAsInt())) {
-				return knownAddresses.get(a.valueAsInt());
+				return knownAddresses.get(a.valueAsInt()).get();
 			} else if (a.valueAsInt() >= base && a.valueAsInt() <= (base + size)) {
 				return "CODE_" + hex(a.valueAsInt());
 			} else {
