@@ -21,7 +21,7 @@ public class GoldboxStringInput extends CustomGoldboxString {
 	public void addChar(char c) {
 		if (getInputCount() < maxCount) {
 			chars.add(c);
-			content.add(fromASCII(c));
+			content = content.append(fromASCII(c));
 		}
 	}
 
@@ -32,7 +32,7 @@ public class GoldboxStringInput extends CustomGoldboxString {
 	public void removeLastChar() {
 		if (getInputCount() > 0) {
 			chars.remove(chars.size() - 1);
-			content.remove(content.size() - 1);
+			content = content.removeAt(content.size() - 1);
 		}
 	}
 

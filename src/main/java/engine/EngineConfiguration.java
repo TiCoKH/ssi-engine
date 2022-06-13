@@ -49,14 +49,17 @@ public class EngineConfiguration extends GameResourceConfiguration {
 	}
 
 	public Map<Integer, EclOpCode> getOpCodes() {
-		return Arrays.asList(EclOpCode.values()).stream().collect(Collectors.toMap(op -> op.getId(), op -> op, (op1, op2) -> select(op1, op2)));
+		return Arrays.asList(EclOpCode.values())
+			.stream()
+			.collect(Collectors.toMap(op -> op.getId(), op -> op, (op1, op2) -> select(op1, op2)));
 	}
 
 	private EclOpCode select(EclOpCode op1, EclOpCode op2) {
 		String opCodeId = String.format("%02X", op1.getId());
 		String opCodeName = getProperty("opcode." + opCodeId);
 		if (opCodeName == null) {
-			throw new IllegalArgumentException("OpCode 0x" + opCodeId + " has more than one version, but none is configured!");
+			throw new IllegalArgumentException(
+				"OpCode 0x" + opCodeId + " has more than one version, but none is configured!");
 		}
 		try {
 			EclOpCode.valueOf(opCodeName);
@@ -77,12 +80,14 @@ public class EngineConfiguration extends GameResourceConfiguration {
 	}
 
 	public Map<Integer, String> getEngineAdresses() {
-		return findProperties(CONFIG_ADDRESS_PREFIX).stream()
-			.collect(Collectors.toMap(k -> Integer.parseInt(getProperty(k), 16), k -> k.substring(CONFIG_ADDRESS_PREFIX.length())));
+		return findProperties(CONFIG_ADDRESS_PREFIX).collect(Collectors.toMap(k -> Integer.parseInt(getProperty(k), 16),
+			k -> k.substring(CONFIG_ADDRESS_PREFIX.length())));
 	}
 
 	public List<Integer> getOverlandMapIds() {
-		return Stream.of(getProperty(CONFIG_OVERLAND_MAP_IDS, "0").split(",")).map(Integer::parseInt).collect(Collectors.toList());
+		return Stream.of(getProperty(CONFIG_OVERLAND_MAP_IDS, "0").split(","))
+			.map(Integer::parseInt)
+			.collect(Collectors.toList());
 	}
 
 	public char getSpecialChar(SpecialCharType type) {

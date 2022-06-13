@@ -33,7 +33,6 @@ import io.vavr.collection.Seq;
 import data.ContentType;
 import shared.EngineStub;
 import shared.FontColor;
-import shared.InputAction;
 import shared.MenuType;
 import ui.UISettings;
 import ui.classic.AbstractFrameRenderer;
@@ -142,8 +141,8 @@ public class RenderSurface extends JPanel implements Scrollable {
 
 	public void changeRenderObject(@Nonnull IdTypeResource itr) {
 		engine.readCharacter(itr.getId()).ifPresent(t -> t.onSuccess(cs -> {
-			CharacterSheetState state = new CharacterSheetState(cs,
-				new Menu(MenuType.HORIZONTAL, Array.<InputAction>empty().asJava()), getActionMap(), getInputMap());
+			CharacterSheetState state = new CharacterSheetState(cs, new Menu(MenuType.HORIZONTAL, Array.empty()),
+				getActionMap(), getInputMap());
 			renderObject = Optional.of(state);
 			adaptSize(settings.zoom8(40), settings.zoom8(25));
 		}));

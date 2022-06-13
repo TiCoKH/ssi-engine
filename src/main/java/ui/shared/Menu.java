@@ -1,12 +1,11 @@
 package ui.shared;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.google.common.collect.ImmutableList;
+import io.vavr.collection.Seq;
 
 import shared.GoldboxString;
 import shared.InputAction;
@@ -15,19 +14,19 @@ import shared.MenuType;
 public class Menu {
 
 	private MenuType type;
-	private List<InputAction> menu;
+	private Seq<InputAction> menu;
 
 	private Optional<GoldboxString> description = Optional.empty();
 
 	private int selection = 0;
 
-	public Menu(@Nonnull MenuType type, @Nonnull List<InputAction> menu) {
+	public Menu(@Nonnull MenuType type, @Nonnull Seq<InputAction> menu) {
 		this(type, menu, null);
 	}
 
-	public Menu(@Nonnull MenuType type, @Nonnull List<InputAction> menu, @Nullable GoldboxString description) {
+	public Menu(@Nonnull MenuType type, @Nonnull Seq<InputAction> menu, @Nullable GoldboxString description) {
 		this.type = type;
-		this.menu = ImmutableList.copyOf(menu);
+		this.menu = menu;
 		this.description = Optional.ofNullable(description);
 	}
 

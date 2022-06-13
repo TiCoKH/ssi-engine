@@ -1,8 +1,12 @@
 package engine;
 
+import static io.vavr.API.Seq;
+
 import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import com.google.common.collect.ImmutableList;
 
@@ -59,7 +63,8 @@ public class EngineInputAction implements InputAction {
 	private static final EngineInputAction YES = new EngineInputAction(MENU_HANDLER, "YES", 0);
 	private static final EngineInputAction NO = new EngineInputAction(MENU_HANDLER, "NO", 1);
 
-	private static final EngineInputAction CONTINUE = new EngineInputAction(MENU_HANDLER, "PRESS BUTTON OR RETURN TO CONTINUE", 0);
+	private static final EngineInputAction CONTINUE = new EngineInputAction(MENU_HANDLER,
+		"PRESS BUTTON OR RETURN TO CONTINUE", 0);
 
 	private static final EngineInputAction DO_SAVE = new EngineInputAction(SAVE_HANDLER, SAVE);
 
@@ -77,24 +82,30 @@ public class EngineInputAction implements InputAction {
 	public static final EngineInputAction SEARCH = new EngineInputAction(GAME_MENU_SEARCH_HANDLER, "SEARCH");
 	public static final EngineInputAction LOOK = new EngineInputAction(GAME_MENU_LOOK_HANDLER, "LOOK");
 
-	public static final EngineInputAction CREATE_CHAR = new EngineInputAction(PROGRAM_MENU_CREATE_CHAR_HANDLER, "CREATE NEW CHARACTER");
-	public static final EngineInputAction ADD_CHAR = new EngineInputAction(PROGRAM_MENU_ADD_CHAR_HANDLER, "ADD CHARACTER TO PARTY");
-	public static final EngineInputAction VIEW_CHAR = new EngineInputAction(PROGRAM_MENU_VIEW_CHAR_HANDLER, "VIEW CHARACTER");
-	public static final EngineInputAction MODIFY_CHAR = new EngineInputAction(PROGRAM_MENU_MODIFY_CHAR_HANDLER, "MODIFY CHARACTER");
-	public static final EngineInputAction REMOVE_CHAR = new EngineInputAction(PROGRAM_MENU_REMOVE_CHAR_HANDLER, "REMOVE CHARACTER FROM PARTY");
-	public static final EngineInputAction BEGIN_ADVENTURE = new EngineInputAction(PROGRAM_MENU_BEGIN_HANDLER, "BEGIN ADVENTURING");
+	public static final EngineInputAction CREATE_CHAR = new EngineInputAction(PROGRAM_MENU_CREATE_CHAR_HANDLER,
+		"CREATE NEW CHARACTER");
+	public static final EngineInputAction ADD_CHAR = new EngineInputAction(PROGRAM_MENU_ADD_CHAR_HANDLER,
+		"ADD CHARACTER TO PARTY");
+	public static final EngineInputAction VIEW_CHAR = new EngineInputAction(PROGRAM_MENU_VIEW_CHAR_HANDLER,
+		"VIEW CHARACTER");
+	public static final EngineInputAction MODIFY_CHAR = new EngineInputAction(PROGRAM_MENU_MODIFY_CHAR_HANDLER,
+		"MODIFY CHARACTER");
+	public static final EngineInputAction REMOVE_CHAR = new EngineInputAction(PROGRAM_MENU_REMOVE_CHAR_HANDLER,
+		"REMOVE CHARACTER FROM PARTY");
+	public static final EngineInputAction BEGIN_ADVENTURE = new EngineInputAction(PROGRAM_MENU_BEGIN_HANDLER,
+		"BEGIN ADVENTURING");
 	public static final EngineInputAction LOAD_GAME = new EngineInputAction(LOAD_HANDLER, "LOAD SAVED GAME");
 	public static final EngineInputAction SAVE_GAME = new EngineInputAction(SAVE_HANDLER, "SAVE CURRENT GAME");
 
 	public static final EngineInputAction EXIT_SHEET = new EngineInputAction(CHAR_SHEET_EXIT_HANDLER, "EXIT");
 
 	public static final List<InputAction> YES_NO_ACTIONS = ImmutableList.of(YES, NO);
-	public static final List<InputAction> MOVEMENT_ACTIONS = ImmutableList.of(DO_SAVE, MOVE_FORWARD_UP, MOVE_TURN_LEFT, MOVE_TURN_RIGHT,
-		TURN_AROUND_DOWN, EXIT_MOVE);
-	public static final List<InputAction> GAME_MENU_ACTIONS = ImmutableList.of(DO_SAVE, MOVE, AREA, SEARCH, LOOK);
+	public static final Seq<InputAction> MOVEMENT_ACTIONS = Seq(DO_SAVE, MOVE_FORWARD_UP, MOVE_TURN_LEFT,
+		MOVE_TURN_RIGHT, TURN_AROUND_DOWN, EXIT_MOVE);
+	public static final Seq<InputAction> GAME_MENU_ACTIONS = Seq(DO_SAVE, MOVE, AREA, SEARCH, LOOK);
 	public static final List<InputAction> CONTINUE_ACTION = ImmutableList.of(CONTINUE);
-	public static final List<InputAction> DIALOG_MENU_ACTIONS = ImmutableList.of(SELECT, DIALOG_BACK);
-	public static final List<InputAction> CHAR_SHEET_ACTION = ImmutableList.of(EXIT_SHEET);
+	public static final Seq<InputAction> DIALOG_MENU_ACTIONS = Seq(SELECT, DIALOG_BACK);
+	public static final Seq<InputAction> CHAR_SHEET_ACTION = Seq(EXIT_SHEET);
 	public static final List<InputAction> SELECT_ACTION = ImmutableList.of(SELECT);
 
 	private final InputHandler handler;

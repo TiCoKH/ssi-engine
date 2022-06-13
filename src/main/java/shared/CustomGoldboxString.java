@@ -1,12 +1,12 @@
 package shared;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
+import io.vavr.API;
+import io.vavr.collection.Seq;
+
 public class CustomGoldboxString extends GoldboxString {
-	protected List<Byte> content = new ArrayList<>();
+	protected Seq<Byte> content;
 	private String originalString;
 
 	public CustomGoldboxString(@Nonnull String s) {
@@ -15,8 +15,7 @@ public class CustomGoldboxString extends GoldboxString {
 
 	protected void setText(@Nonnull String s) {
 		this.originalString = s;
-		content.clear();
-		s.chars().forEachOrdered(c -> content.add(fromASCII((char) c)));
+		content = API.CharSeq(s).map(GoldboxString::fromASCII);
 	}
 
 	@Override

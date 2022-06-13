@@ -31,14 +31,12 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,6 +46,7 @@ import javax.swing.InputMap;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import io.vavr.collection.Seq;
 import io.vavr.collection.Stream;
 
 import common.FileMap;
@@ -293,15 +292,13 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void setInputMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems,
+	public void setInputMenu(@Nonnull MenuType type, @Nonnull Seq<InputAction> menuItems,
 		@Nullable GoldboxString description, @Nullable InputAction selected) {
 
 		resetInput();
 
-		List<InputAction> namedMenuItems = menuItems.stream()
-			.filter(a -> a.getName().getLength() > 0)
-			.collect(Collectors.toList());
-		namedMenuItems.stream().forEach(a -> {
+		final Seq<InputAction> namedMenuItems = menuItems.filter(a -> a.getName().getLength() > 0);
+		namedMenuItems.forEach(a -> {
 			registerInput(a, () -> {
 				state.setMenu(null);
 				stub.handleInput(a);
@@ -321,7 +318,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			}
 		}
 
-		menuItems.stream().filter(a -> a.getName().getLength() == 0).forEach(a -> {
+		menuItems.filter(a -> a.getName().getLength() == 0).forEach(a -> {
 			registerInput(a, () -> {
 				state.setMenu(null);
 				stub.handleInput(a);
@@ -479,8 +476,8 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
-		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description,
+	public void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull Seq<InputAction> programMenu,
+		@Nonnull Seq<InputAction> horizontalMenu, @Nullable GoldboxString description,
 		@Nonnull InputAction menuSelect) {
 
 		backupKeyMaps();
@@ -522,12 +519,12 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu) {
+	public void showCharacterSheet(CharacterSheet sheet, @Nonnull Seq<InputAction> horizontalMenu) {
 		showCharacterSheet(sheet, horizontalMenu, null);
 	}
 
 	@Override
-	public void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu,
+	public void showCharacterSheet(CharacterSheet sheet, @Nonnull Seq<InputAction> horizontalMenu,
 		@Nullable GoldboxString description) {
 		backupKeyMaps();
 		resetInput();
@@ -710,7 +707,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	}
 
 	@Override
-	public void addText(boolean withclear, List<GoldboxStringPart> text) {
+	public void addText(boolean withclear, Seq<GoldboxStringPart> text) {
 		StoryText st = state.getStoryText();
 		if (withclear)
 			st.clearScreen();

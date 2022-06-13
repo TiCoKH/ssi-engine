@@ -1,45 +1,47 @@
 package ui.shared.text;
 
-import static shared.GoldboxStringPart.PartType.COLOR;
+import static io.vavr.API.Seq;
 import static shared.GoldboxStringPart.PartType.TEXT;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import io.vavr.collection.Seq;
+
 import com.google.common.collect.ImmutableList;
 
 import shared.FontColor;
 import shared.GoldboxStringPart;
+import shared.GoldboxStringPart.PartType;
 import ui.UISettings.TextSpeed;
 
 public class StoryText {
-	private List<GoldboxStringPart> textList = new ArrayList<>();
+	private Seq<GoldboxStringPart> textList = Seq();
 	private int charCount = 0;
 	private int charStop = 0;
 	private Optional<FontColor> defaultTextColor = Optional.empty();
 
-	public void addText(@Nonnull List<GoldboxStringPart> moreText) {
-		textList.addAll(moreText);
+	public void addText(@Nonnull Seq<GoldboxStringPart> moreText) {
+		textList = textList.appendAll(moreText);
 		updateCharCount();
 	}
 
 	public void clearScreen() {
 		// set to last text color of current text
-		defaultTextColor = textList.stream() //
-			.filter(t -> COLOR.equals(t.getType())) //
-			.filter(t -> t.getFontColor().map(FontColor::isECLColor).orElse(false)) //
-			.map(textList::indexOf) //
-			.max(Integer::compare) //
-			.map(textList::get) //
-			.map(t -> t.getFontColor().get());
+		defaultTextColor = textList.filter(t -> PartType.COLOR.equals(t.getType()))
+			.filter(t -> t.getFontColor().map(FontColor::isECLColor).orElse(false))
+			.map(textList::indexOf)
+			.max()
+			.map(textList::get)
+			.map(t -> t.getFontColor().get())
+			.toJavaOptional();
 		resetText();
 	}
 
 	public void resetText() {
-		textList.clear();
+		textList = Seq();
 		charCount = 0;
 		charStop = 0;
 	}
@@ -100,6 +102,9 @@ public class StoryText {
 	}
 
 	private void updateCharCount() {
-		charCount = textList.stream().filter(t -> t.getType().isDisplayable()).mapToInt(GoldboxStringPart::getLength).sum();
+		charCount = textList.filter(t -> t.getType().isDisplayable())
+			.map(GoldboxStringPart::getLength)
+			.sum()
+			.intValue();
 	}
 }

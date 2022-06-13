@@ -18,6 +18,7 @@ import static engine.text.SpecialCharType.SHARP_S;
 import static engine.text.SpecialCharType.UMLAUT_A;
 import static engine.text.SpecialCharType.UMLAUT_O;
 import static engine.text.SpecialCharType.UMLAUT_U;
+import static io.vavr.API.Seq;
 import static shared.GameFeature.BODY_HEAD;
 import static shared.GameFeature.FLEXIBLE_DUNGEON_SIZE;
 import static shared.GameFeature.INTERACTIVE_OVERLAND;
@@ -26,7 +27,6 @@ import static shared.GameFeature.SPECIAL_CHARS_NOT_FROM_FONT;
 import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -37,10 +37,11 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.vavr.collection.Array;
+import io.vavr.collection.Seq;
 import io.vavr.control.Try;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 
 import common.FileMap;
 import data.ResourceLoader;
@@ -154,14 +155,15 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	public void showProgramMenu() {
-		List<InputAction> menu = new ArrayList<>();
-		menu.add(EngineInputAction.CREATE_CHAR);
-		menu.add(EngineInputAction.VIEW_CHAR);
-		menu.add(EngineInputAction.MODIFY_CHAR);
-		menu.add(EngineInputAction.ADD_CHAR);
-		menu.add(EngineInputAction.REMOVE_CHAR);
-		menu.add(EngineInputAction.SAVE_GAME);
-		menu.add(EngineInputAction.BEGIN_ADVENTURE);
+		Seq<InputAction> menu = Seq( //
+			EngineInputAction.CREATE_CHAR, //
+			EngineInputAction.VIEW_CHAR, //
+			EngineInputAction.MODIFY_CHAR, //
+			EngineInputAction.ADD_CHAR, //
+			EngineInputAction.REMOVE_CHAR, //
+			EngineInputAction.SAVE_GAME, //
+			EngineInputAction.BEGIN_ADVENTURE //
+		);
 
 		ui.showProgramMenuDialog(ProgramMenuType.PROGRAM, menu, DIALOG_MENU_ACTIONS, null, SELECT);
 	}
@@ -225,9 +227,8 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void setECLMenu(MenuType type, List<GoldboxString> menuItems, GoldboxString description) {
 		updateOverlandCityCursor();
-		List<InputAction> actions = menuItems.stream()
-			.map(s -> new EngineInputAction(MENU_HANDLER, this.stringPartFactory.fromMenu(s), menuItems.indexOf(s))) //
-			.collect(Collectors.toList());
+		Seq<InputAction> actions = Array.ofAll(menuItems)
+			.map(s -> new EngineInputAction(MENU_HANDLER, this.stringPartFactory.fromMenu(s), menuItems.indexOf(s)));
 		ui.setInputMenu(type, actions, description, null);
 		pauseCurrentThread();
 	}
@@ -235,7 +236,8 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems,
 		@Nullable GoldboxString description) {
-		ui.setInputMenu(type, menuItems, description, null);
+
+		ui.setInputMenu(type, Array.ofAll(menuItems), description, null);
 		pauseCurrentThread();
 	}
 
@@ -460,9 +462,9 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void addText(GoldboxString str, boolean clear) {
 		synchronized (vm) {
-			List<GoldboxStringPart> text = this.stringPartFactory.from(str);
+			Seq<GoldboxStringPart> text = Array.ofAll(this.stringPartFactory.from(str));
 			if (cfg.getEngineAddress(EngineAddress.TEXT_COLOR) != 0) {
-				text.add(0, this.stringPartFactory.fromTextColor(memory.getTextColor()));
+				text = text.insert(0, this.stringPartFactory.fromTextColor(memory.getTextColor()));
 			}
 			ui.addText(clear, text);
 			// pause VM until all text is displayed
@@ -481,7 +483,7 @@ public class Engine implements EngineCallback, EngineStub {
 			ui.addRunicText(this.stringPartFactory.createLineBreak());
 		} else {
 			synchronized (vm) {
-				ui.addText(false, ImmutableList.of(this.stringPartFactory.createLineBreak()));
+				ui.addText(false, Seq(this.stringPartFactory.createLineBreak()));
 				// pause VM until all text is displayed
 				pauseCurrentThread();
 			}

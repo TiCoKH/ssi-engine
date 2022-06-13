@@ -2,10 +2,12 @@ package shared;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Collectors;
+
+import io.vavr.collection.Array;
+import io.vavr.collection.Seq;
 
 import common.FileMap;
 import common.MD5Util;
@@ -73,11 +75,10 @@ public class GameResourceConfiguration {
 		return gameProperties.getProperty(key, defaultValue);
 	}
 
-	public List<String> findProperties(String propStart) {
-		return gameProperties.keySet()
-			.stream()
-			.map(k -> (String) k)
-			.filter(k -> k != null && k.startsWith(propStart))
-			.collect(Collectors.toList());
+	public Seq<String> findProperties(String propStart) {
+		return Array.ofAll(gameProperties.keySet())
+			.filter(Objects::nonNull)
+			.map(String.class::cast)
+			.filter(key -> key.startsWith(propStart));
 	}
 }

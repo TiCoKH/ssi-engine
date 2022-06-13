@@ -1,9 +1,9 @@
 package shared;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import io.vavr.collection.Seq;
 
 import data.ContentType;
 import data.dungeon.DungeonMap.VisibleWalls;
@@ -21,7 +21,7 @@ public interface UserInterface {
 
 	void clearAll();
 
-	void addText(boolean withClear, List<GoldboxStringPart> text);
+	void addText(boolean withClear, Seq<GoldboxStringPart> text);
 
 	void addRunicText(GoldboxStringPart text);
 
@@ -47,16 +47,18 @@ public interface UserInterface {
 
 	void clearAllDialogs();
 
-	void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull List<InputAction> programMenu,
-		@Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect);
+	void showProgramMenuDialog(@Nonnull ProgramMenuType programType, @Nonnull Seq<InputAction> programMenu,
+		@Nonnull Seq<InputAction> horizontalMenu, @Nullable GoldboxString description, @Nonnull InputAction menuSelect);
 
-	void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu);
+	void showCharacterSheet(CharacterSheet sheet, @Nonnull Seq<InputAction> horizontalMenu);
 
-	void showCharacterSheet(CharacterSheet sheet, @Nonnull List<InputAction> horizontalMenu, @Nullable GoldboxString description);
+	void showCharacterSheet(CharacterSheet sheet, @Nonnull Seq<InputAction> horizontalMenu,
+		@Nullable GoldboxString description);
 
 	void setNoResources();
 
-	void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls, @Nullable int[][] map, int[] decoIds);
+	void setDungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls,
+		@Nullable int[][] map, int[] decoIds);
 
 	void setOverlandResources(ViewOverlandPosition position, int mapId);
 
@@ -66,7 +68,7 @@ public interface UserInterface {
 
 	void setInputNone();
 
-	void setInputMenu(MenuType type, List<InputAction> menuItems, GoldboxString description, InputAction selected);
+	void setInputMenu(MenuType type, Seq<InputAction> menuItems, GoldboxString description, InputAction selected);
 
 	void setInputNumber(int maxDigits);
 

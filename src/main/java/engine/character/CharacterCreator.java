@@ -53,8 +53,8 @@ public class CharacterCreator {
 	private final UserInterface ui;
 	private final Consumer<Runnable> taskHandler;
 
-	public CharacterCreator(@Nonnull EngineConfiguration cfg, @Nonnull PlayerDataFactory playerDataFactory, @Nonnull UserInterface ui,
-		@Nonnull Consumer<Runnable> taskHandler) {
+	public CharacterCreator(@Nonnull EngineConfiguration cfg, @Nonnull PlayerDataFactory playerDataFactory,
+		@Nonnull UserInterface ui, @Nonnull Consumer<Runnable> taskHandler) {
 
 		this.cfg = cfg;
 		this.flavor = cfg.getFlavor();
@@ -115,7 +115,8 @@ public class CharacterCreator {
 		if (flavor.isAlignmentRequired()) {
 			showPreogramSub(alignmentMenuItems(flavor), PICK_ALIGNMENT);
 		} else {
-			continueWithCharacter(playerDataFactory.createCharacter(this.selectedRace, this.selectedGender, this.selectedClasses));
+			continueWithCharacter(
+				playerDataFactory.createCharacter(this.selectedRace, this.selectedGender, this.selectedClasses));
 		}
 	}
 
@@ -125,23 +126,26 @@ public class CharacterCreator {
 		return alignments.map(alignment -> alignmentToAction(alignment, handler, alignments));
 	}
 
-	private InputAction alignmentToAction(CharacterAlignment sel, InputHandler handler, Seq<CharacterAlignment> alignments) {
+	private InputAction alignmentToAction(CharacterAlignment sel, InputHandler handler,
+		Seq<CharacterAlignment> alignments) {
 		return new EngineInputAction(handler, sel.getDescription(), alignments.indexOf(sel));
 	}
 
 	private void setAlignmentAndContinue(int selectedAlignment) {
 		this.selectedAlignment = flavor.getAlignments(selectedClasses).get(selectedAlignment);
 
-		continueWithCharacter(
-			playerDataFactory.createCharacter(this.selectedRace, this.selectedGender, this.selectedClasses, this.selectedAlignment));
+		continueWithCharacter(playerDataFactory.createCharacter(this.selectedRace, this.selectedGender,
+			this.selectedClasses, this.selectedAlignment));
 	}
 
 	private void continueWithCharacter(AbstractCharacter pc) {
 		int startingExp;
 		final int level = cfg.getStartingLevel();
 		if (level != -1) {
-			startingExp = selectedClasses.map(clazz -> flavor.getRequiredExperienceFor(clazz, level)).max()
-				.map(exp -> selectedClasses.getClassesCount() * exp).getOrElse(0);
+			startingExp = selectedClasses.map(clazz -> flavor.getRequiredExperienceFor(clazz, level))
+				.max()
+				.map(exp -> selectedClasses.getClassesCount() * exp)
+				.getOrElse(0);
 		} else {
 			startingExp = cfg.getStartingExperience();
 			if (startingExp == -1) {
@@ -150,12 +154,12 @@ public class CharacterCreator {
 		}
 		flavor.initCharacter(pc, startingExp);
 		cs = new CharacterSheetImpl(flavor, pc);
-		ui.showCharacterSheet(cs, CSHEET_ACTION.asJava(), REROLL_STATS);
+		ui.showCharacterSheet(cs, CSHEET_ACTION, REROLL_STATS);
 	}
 
 	private void showPreogramSub(Seq<InputAction> input, GoldboxString heading) {
 		taskHandler.accept(() -> {
-			ui.showProgramMenuDialog(PROGRAM_SUB, input.asJava(), DIALOG_MENU_ACTIONS, heading, SELECT);
+			ui.showProgramMenuDialog(PROGRAM_SUB, input, DIALOG_MENU_ACTIONS, heading, SELECT);
 		});
 	}
 
@@ -164,7 +168,7 @@ public class CharacterCreator {
 		public void handle(Engine engine, EngineInputAction action) {
 			engine.getUi().clearCurrentDialog();
 			flavor.reroll(cs.getCharacter());
-			engine.getUi().showCharacterSheet(cs, CSHEET_ACTION.asJava(), REROLL_STATS);
+			engine.getUi().showCharacterSheet(cs, CSHEET_ACTION, REROLL_STATS);
 		}
 	}
 
