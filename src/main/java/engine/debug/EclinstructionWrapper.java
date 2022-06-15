@@ -13,30 +13,31 @@ import static engine.script.EclOpCode.ON_GOTO;
 import static engine.script.EclOpCode.RETURN;
 import static engine.script.EclOpCode.STOP_MOVE_23;
 import static engine.script.EclOpCode.STOP_MOVE_42;
+import static io.vavr.API.Seq;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.ImmutableList;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 
 import engine.script.EclArgument;
 import engine.script.EclInstruction;
 import engine.script.EclOpCode;
 
 public class EclinstructionWrapper implements EclInstructionData {
-	private static final List<EclOpCode> OP_CODE_STOP = ImmutableList.of(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO, ON_GOTO, RETURN, NEW_ECL);
-	private static final List<EclOpCode> OP_CODE_IF = ImmutableList.of(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS, IF_LESS_EQUALS,
-		IF_NOT_EQUALS);
+	private static final Seq<EclOpCode> OP_CODE_STOP = Seq(EXIT, STOP_MOVE_23, STOP_MOVE_42, GOTO, ON_GOTO, RETURN,
+		NEW_ECL);
+	private static final Seq<EclOpCode> OP_CODE_IF = Seq(IF_EQUALS, IF_GREATER, IF_GREATER_EQUALS, IF_LESS,
+		IF_LESS_EQUALS, IF_NOT_EQUALS);
 
 	private EclInstruction inst;
 	private boolean conditional;
 
-	private Map<Integer, String> argumentNames = new HashMap<>();
+	private Map<Integer, String> argumentNames = HashMap.empty();
 
 	private Optional<EclArgument> lArgBase = Optional.empty();
 	private Optional<EclArgument> lArgOffset = Optional.empty();
@@ -72,7 +73,8 @@ public class EclinstructionWrapper implements EclInstructionData {
 				lArgOffsetName.orElse(lArgOffset.get().toString()), //
 				rArgExpression.orElse(toString()));
 		}
-		return lArgBase.map(a -> lArgBaseName.orElse(a.toString()) + " = ").orElse("") + rArgExpression.orElse(toString());
+		return lArgBase.map(a -> lArgBaseName.orElse(a.toString()) + " = ").orElse("")
+			+ rArgExpression.orElse(toString());
 	}
 
 	public boolean isBlockFinisher() {
@@ -88,14 +90,14 @@ public class EclinstructionWrapper implements EclInstructionData {
 	}
 
 	public String getArgumentName(int index) {
-		return argumentNames.get(index);
+		return argumentNames.get(index).getOrElse("");
 	}
 
 	public EclArgument[] getArguments() {
 		return inst.getArguments();
 	}
 
-	public List<EclArgument> getDynArgs() {
+	public Seq<EclArgument> getDynArgs() {
 		return inst.getDynArgs();
 	}
 
@@ -124,7 +126,7 @@ public class EclinstructionWrapper implements EclInstructionData {
 	}
 
 	public void setrArgName(int index, String name) {
-		argumentNames.put(index, name);
+		argumentNames = argumentNames.put(index, name);
 	}
 
 	@Override

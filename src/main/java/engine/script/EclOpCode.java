@@ -1,5 +1,9 @@
 package engine.script;
 
+import static io.vavr.API.Set;
+
+import io.vavr.collection.Set;
+
 public enum EclOpCode {
 	EXIT(0x00, 0, -1, -1), //
 	GOTO(0x01, 1, -1, -1), //
@@ -138,5 +142,9 @@ public enum EclOpCode {
 
 	public int getArgIndexDestAddress() {
 		return argIndexDstAddr;
+	}
+
+	public static Set<EclOpCode> byId(int id) {
+		return Set(values()).filter(op -> op.getId() == id);
 	}
 }

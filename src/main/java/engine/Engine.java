@@ -27,12 +27,9 @@ import static shared.GameFeature.SPECIAL_CHARS_NOT_FROM_FONT;
 import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,8 +37,6 @@ import javax.annotation.Nullable;
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
 import io.vavr.control.Try;
-
-import com.google.common.base.Strings;
 
 import common.FileMap;
 import data.ResourceLoader;
@@ -139,19 +134,19 @@ public class Engine implements EngineCallback, EngineStub {
 	@Override
 	public void showModeMenu() {
 		setNextTask(() -> {
-			List<String> menu = Stream.of("GAME", "DEMO", "START", "DEBUG")
-				.filter(e -> !Strings.isNullOrEmpty(cfg.getModeMenuEntry(e)))
-				.collect(Collectors.toList());
-			setMenu(MenuType.HORIZONTAL,
-				menu.stream()
-					.map(e -> new EngineInputAction(MODE_MENU_HANDLER, e, menu.indexOf(e)))
-					.collect(Collectors.toList()),
+			Seq<String> menu = Array.of("GAME", "DEMO", "START", "DEBUG")
+				.filter(e -> !isNullOrEmpty(cfg.getModeMenuEntry(e)));
+			setMenu(MenuType.HORIZONTAL, menu.map(e -> new EngineInputAction(MODE_MENU_HANDLER, e, menu.indexOf(e))),
 				new CustomGoldboxString(cfg.getModeMenuName()));
 			if (abortCurrentThread) {
 				return;
 			}
 			clear();
 		});
+	}
+
+	private static boolean isNullOrEmpty(String s) {
+		return s == null || s.isEmpty();
 	}
 
 	public void showProgramMenu() {
@@ -225,7 +220,7 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public void setECLMenu(MenuType type, List<GoldboxString> menuItems, GoldboxString description) {
+	public void setECLMenu(MenuType type, Seq<GoldboxString> menuItems, GoldboxString description) {
 		updateOverlandCityCursor();
 		Seq<InputAction> actions = Array.ofAll(menuItems)
 			.map(s -> new EngineInputAction(MENU_HANDLER, this.stringPartFactory.fromMenu(s), menuItems.indexOf(s)));
@@ -234,7 +229,7 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems,
+	public void setMenu(@Nonnull MenuType type, @Nonnull Seq<InputAction> menuItems,
 		@Nullable GoldboxString description) {
 
 		ui.setInputMenu(type, Array.ofAll(menuItems), description, null);

@@ -1,24 +1,27 @@
 package engine.script;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import static io.vavr.API.Seq;
+
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import io.vavr.collection.Array;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 
 import common.ByteBufferWrapper;
 
 public class EclInstruction {
 	private static Map<Integer, EclOpCode> OP_CODES;
 
-	private int position;
-	private int size;
-	private EclOpCode opCode;
-	private EclArgument[] arguments;
-	private List<EclArgument> dynArgs;
+	private final int position;
+	private final int size;
+	private final EclOpCode opCode;
+	private final EclArgument[] arguments;
+	private final Seq<EclArgument> dynArgs;
 
-	private EclInstruction(int position, int size, EclOpCode opCode, EclArgument[] arguments, List<EclArgument> dynArgs) {
+	private EclInstruction(int position, int size, EclOpCode opCode, EclArgument[] arguments,
+		Seq<EclArgument> dynArgs) {
+
 		this.position = position;
 		this.size = size;
 		this.opCode = opCode;
@@ -33,7 +36,7 @@ public class EclInstruction {
 	public static EclInstruction parseNext(ByteBufferWrapper eclBlock) {
 		int pos = eclBlock.position();
 		int id = eclBlock.getUnsigned();
-		EclOpCode opCode = OP_CODES.get(id);
+		EclOpCode opCode = OP_CODES.get(id).getOrNull();
 		if (opCode == null) {
 			System.err.println("Unknown opcode " + Integer.toHexString(id) + " at " + Integer.toHexString(pos));
 		}
@@ -46,19 +49,17 @@ public class EclInstruction {
 			size += arguments[i].getSize();
 		}
 
-		List<EclArgument> dynArgs = new ArrayList<>();
+		Seq<EclArgument> dynArgs = Array.empty();
 		if (opCode.hasDynArgs()) {
-			for (int i = 0; i < arguments[opCode.getArgIndexDynArgs()].valueAsInt(); i++) {
-				EclArgument dynArg = EclArgument.parseNext(eclBlock);
-				dynArgs.add(dynArg);
-				size += dynArg.getSize();
-			}
+			dynArgs = Array.range(0, arguments[opCode.getArgIndexDynArgs()].valueAsInt())
+				.map(i -> EclArgument.parseNext(eclBlock));
+			size += dynArgs.map(EclArgument::getSize).sum().intValue();
 		}
 
 		return new EclInstruction(pos, size, opCode, arguments, dynArgs);
 	}
 
-	public List<EclArgument> getDynArgs() {
+	public Seq<EclArgument> getDynArgs() {
 		return dynArgs;
 	}
 
@@ -104,8 +105,7 @@ public class EclInstruction {
 
 	@Override
 	public String toString() {
-		return opCode.name() + "(" + String.join(", ", Arrays.asList(arguments).stream().map(EclArgument::toString).collect(Collectors.toList()))
-			+ ")"
-			+ (opCode.hasDynArgs() ? " (" + String.join(", ", dynArgs.stream().map(EclArgument::toString).collect(Collectors.toList())) + ")" : "");
+		return opCode.name() + Seq(arguments).map(EclArgument::toString).mkString("(", ", ", ")")
+			+ (opCode.hasDynArgs() ? dynArgs.map(EclArgument::toString).mkString("(", ", ", ")") : "");
 	}
 }

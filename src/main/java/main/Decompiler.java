@@ -49,7 +49,6 @@ import java.io.PrintStream;
 import java.util.function.Function;
 
 import io.vavr.collection.Array;
-import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
@@ -101,7 +100,7 @@ public class Decompiler {
 		EclInstruction.configOpCodes(cfg.getOpCodes());
 
 		knownAddresses = Map();
-		knownAddresses = knownAddresses.merge(HashMap.ofAll(cfg.getEngineAdresses()));
+		knownAddresses = knownAddresses.merge(cfg.getEngineAdresses());
 		knownAddresses = knownAddresses.put(0x4BFF, "PICS_ARE_DRAWN");
 		knownAddresses = knownAddresses.put(0x4C2F, "CURRENT_PIC");
 		knownAddresses = knownAddresses.put(0x7B90, "STRING1");

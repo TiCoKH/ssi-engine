@@ -29,14 +29,15 @@ import static engine.EngineAddress.SKY_COLOR_OUTDOORS;
 import static engine.EngineAddress.TEMP_START;
 import static engine.EngineAddress.TEXT_COLOR;
 import static engine.EngineAddress.TRIED_TO_LEAVE_MAP;
+import static io.vavr.API.Seq;
 import static shared.GameFeature.EXTENDED_DUNGEON;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import common.ByteBufferWrapper;
 import data.dungeon.DungeonMap.Direction;
@@ -108,7 +109,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	private static final int[] CELESTIAL_INITIAL_Y = new int[] { 10, 9, 8, 15, 11, 17, 20, 18, 13, 3, 1, 1, 7 };
 	private ByteBufferWrapper mem;
 
-	private final List<CharacterSheetImpl> members = new ArrayList<>();
+	private Seq<CharacterSheetImpl> members = Seq();
 	private int loadedCharacter = 0;
 
 	private int menuChoice;
@@ -666,14 +667,14 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	}
 
 	public void addPartyMember(@Nonnull CharacterSheetImpl member) {
-		members.add(member);
+		members = members.append(member);
 		setPartyCount(members.size());
 	}
 
 	public void removePartyMember(@Nonnull CharacterSheetImpl member) {
 		int memberIndex = members.indexOf(member);
 		if (memberIndex != -1) {
-			members.remove(member);
+			members = members.remove(member);
 			setPartyCount(members.size());
 			if (memberIndex <= getSelectedPartyMember()) {
 				int newIndex = getSelectedPartyMember() - 1;
@@ -686,7 +687,7 @@ public class VirtualMemory implements ViewDungeonPosition, ViewSpacePosition, Vi
 	}
 
 	public void clearParty() {
-		members.clear();
+		members = Seq();
 		setPartyCount(members.size());
 	}
 

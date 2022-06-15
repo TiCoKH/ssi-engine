@@ -1,28 +1,28 @@
 package engine.text;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import static io.vavr.API.Seq;
+
+import io.vavr.collection.Seq;
 
 import shared.GoldboxString;
 import shared.GoldboxStringPart;
 
 public class Composite extends GoldboxStringPart {
-	private List<GoldboxString> parts = new ArrayList<>();
+	private Seq<GoldboxString> parts = Seq();
 
 	Composite(GoldboxString part) {
 		super(PartType.TEXT);
-		this.parts.add(part);
+		parts = parts.append(part);
 	}
 
-	Composite(Collection<? extends GoldboxString> parts) {
+	Composite(Iterable<? extends GoldboxString> partsIt) {
 		super(PartType.TEXT);
-		this.parts.addAll(parts);
+		parts = parts.appendAll(partsIt);
 	}
 
-	Composite(Collection<? extends GoldboxString> parts, GoldboxString part) {
-		this(parts);
-		this.parts.add(part);
+	Composite(Iterable<? extends GoldboxString> partsIt, GoldboxString part) {
+		this(partsIt);
+		parts = parts.append(part);
 	}
 
 	Composite plus(GoldboxString part) {
@@ -55,6 +55,6 @@ public class Composite extends GoldboxStringPart {
 
 	@Override
 	public int getLength() {
-		return this.parts.stream().mapToInt(GoldboxString::getLength).sum();
+		return this.parts.map(GoldboxString::getLength).sum().intValue();
 	}
 }

@@ -1,6 +1,8 @@
 package ui.debug;
 
 import static data.ContentType.ECL;
+import static io.vavr.API.Map;
+import static io.vavr.API.Set;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.HIDE_ON_CLOSE;
@@ -11,12 +13,10 @@ import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.swing.JComboBox;
@@ -30,7 +30,10 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
 import io.vavr.collection.Set;
+import io.vavr.collection.SortedSet;
 
 import common.FileMap;
 import data.ResourceLoader;
@@ -80,8 +83,7 @@ public class EclCodeViewer {
 		disasm = new Disassembler(cfg.getCodeBase());
 		decom = new Decompiler(cfg);
 
-		addressNames = new HashMap<>();
-		decom.updateKnownAddresses(addressNames);
+		addressNames = decom.updateKnownAddresses(Map());
 
 		exec = Executors.newScheduledThreadPool(1);
 
@@ -100,30 +102,9 @@ public class EclCodeViewer {
 					int blockid = blockCombo.getItemAt(selIndex);
 					res.find(blockid, EclProgram.class, ECL).ifPresentOrElse(t -> {
 						t.onFailure(throwable -> {
-						}).onSuccess(ecl -> {
-							MemoryTableModel model = (MemoryTableModel) memoryTable.getModel();
-							model.setCode(ecl.getCode());
-							memoryTable.invalidate();
-
-							Map<CodeSection, EclDisassembly> code = new EnumMap<>(CodeSection.class);
-							for (CodeSection section : CodeSection.values()) {
-								EclDisassembly d = new EclDisassembly();
-								d.addresses = disasm.parseJumpAdresses(ecl, section);
-								d.asmBlocks = disasm.parseCodeblocks(ecl, section, d.addresses);
-								code.put(section, d);
-								decom.updateKnownAddresses(addressNames, d.asmBlocks, blockid);
-							}
-							for (CodeSection section : CodeSection.values()) {
-								EclDisassembly d = code.get(section);
-								d.codeBlocks = decom.decompile(section, d.asmBlocks, addressNames, d.addresses);
-							}
-							data = code;
-							hexRenderer.setCode(data);
-							updateCode();
-						});
+						}).onSuccess(ecl -> createDisassembly(blockid, ecl));
 					}, () -> {
 					});
-					sectionsCombo.setEnabled(true);
 				});
 			}
 		});
@@ -181,15 +162,10 @@ public class EclCodeViewer {
 			if (e.getValueIsAdjusting()) {
 				return;
 			}
-			int[] selectedRows = asmTable.getSelectedRows();
-			java.util.Set<EclInstructionData> selectedInst = new HashSet<EclInstructionData>();
-			ASMTableModel model = (ASMTableModel) asmTable.getModel();
-			for (int row : selectedRows) {
-				EclInstructionData inst = model.getInst(row);
-				if (inst != null) {
-					selectedInst.add(inst);
-				}
-			}
+			final ASMTableModel model = (ASMTableModel) asmTable.getModel();
+			final Set<EclInstructionData> selectedInst = HashSet.ofAll(asmTable.getSelectedRows())
+				.map(model::getInst)
+				.filter(Objects::nonNull);
 			hexRenderer.setSelectedInst(selectedInst);
 			memoryTable.repaint();
 		});
@@ -223,15 +199,10 @@ public class EclCodeViewer {
 			if (e.getValueIsAdjusting()) {
 				return;
 			}
-			int[] selectedRows = codeTable.getSelectedRows();
-			java.util.Set<EclInstructionData> selectedInst = new HashSet<EclInstructionData>();
-			CodeTableModel model = (CodeTableModel) codeTable.getModel();
-			for (int row : selectedRows) {
-				EclInstructionData inst = model.getInst(row);
-				if (inst != null) {
-					selectedInst.add(inst);
-				}
-			}
+			final ASMTableModel model = (ASMTableModel) asmTable.getModel();
+			final Set<EclInstructionData> selectedInst = HashSet.ofAll(asmTable.getSelectedRows())
+				.map(model::getInst)
+				.filter(Objects::nonNull);
 			hexRenderer.setSelectedInst(selectedInst);
 			memoryTable.repaint();
 		});
@@ -272,6 +243,31 @@ public class EclCodeViewer {
 		this.frame.add(main, BorderLayout.CENTER);
 	}
 
+	private void createDisassembly(int blockid, EclProgram ecl) {
+		final MemoryTableModel model = (MemoryTableModel) memoryTable.getModel();
+		model.setCode(ecl.getCode());
+		memoryTable.invalidate();
+		final Map<CodeSection, EclDisassembly> code = Set(CodeSection.values()).toMap(Function.identity(),
+			section -> createDisassembly(blockid, ecl, section));
+		data = code;
+		hexRenderer.setCode(data);
+		updateCode();
+		sectionsCombo.setEnabled(true);
+	}
+
+	private EclDisassembly createDisassembly(int blockid, EclProgram ecl, CodeSection section) {
+		final EclDisassembly d = new EclDisassembly();
+		try {
+			d.addresses = disasm.parseJumpAdresses(ecl, section);
+			d.asmBlocks = disasm.parseCodeblocks(ecl, section, d.addresses);
+			addressNames = decom.updateKnownAddresses(addressNames, d.asmBlocks, blockid);
+			d.codeBlocks = decom.decompile(d.asmBlocks, addressNames);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return d;
+	}
+
 	public void show() {
 		this.frame.setVisible(true);
 		this.frame.pack();
@@ -282,12 +278,13 @@ public class EclCodeViewer {
 		int selIndex = sectionsCombo.getSelectedIndex();
 
 		ASMTableModel model = (ASMTableModel) asmTable.getModel();
-		model.setCode(selIndex != -1 ? data.get(sectionsCombo.getItemAt(selIndex)) : null);
+		model.setCode(selIndex != -1 ? data.get(sectionsCombo.getItemAt(selIndex)).get() : null);
 
 		CodeTableModel codeModel = (CodeTableModel) codeTable.getModel();
-		codeModel.setCode(selIndex != -1 ? data.get(sectionsCombo.getItemAt(selIndex)) : null);
+		codeModel.setCode(selIndex != -1 ? data.get(sectionsCombo.getItemAt(selIndex)).get() : null);
 
-		gotoMarkerRender.setAddresses(selIndex != -1 ? data.get(sectionsCombo.getItemAt(selIndex)).addresses : null);
+		gotoMarkerRender
+			.setAddresses(selIndex != -1 ? data.get(sectionsCombo.getItemAt(selIndex)).get().addresses : null);
 	}
 
 	private final class ASMMouseListener extends MouseAdapter {
@@ -312,9 +309,9 @@ public class EclCodeViewer {
 		}
 	}
 
-	static final class EclDisassembly {
+	final class EclDisassembly {
 		public JumpAddresses addresses;
-		public java.util.Set<CodeBlock> asmBlocks;
-		public java.util.Set<CodeBlock> codeBlocks;
+		public SortedSet<CodeBlock> asmBlocks;
+		public SortedSet<CodeBlock> codeBlocks;
 	}
 }

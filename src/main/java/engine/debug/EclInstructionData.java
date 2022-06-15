@@ -1,6 +1,6 @@
 package engine.debug;
 
-public interface EclInstructionData {
+public interface EclInstructionData extends Comparable<EclInstructionData> {
 
 	int getPosition();
 
@@ -9,4 +9,9 @@ public interface EclInstructionData {
 	boolean isConditional();
 
 	String getCodeline();
+
+	@Override
+	default int compareTo(EclInstructionData o) {
+		return getPosition() - o.getPosition();
+	}
 }

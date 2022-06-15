@@ -2,13 +2,14 @@ package ui.debug;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 
 import engine.debug.CodeBlock;
 import engine.debug.CodeSection;
@@ -35,7 +36,8 @@ public class HexValueTableCellRenderer extends DefaultTableCellRenderer {
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+		int row, int column) {
 		int address = codeBase + (row << 4) + (column - 1);
 
 		Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -57,7 +59,7 @@ public class HexValueTableCellRenderer extends DefaultTableCellRenderer {
 		if (!backgroundSet) {
 			data.ifPresent(d -> {
 				for (CodeSection section : CodeSection.values()) {
-					Set<CodeBlock> blocks = d.get(section).asmBlocks;
+					Set<CodeBlock> blocks = d.get(section).get().asmBlocks;
 					for (CodeBlock b : blocks) {
 						if (b.getStartAddress() <= address && address < b.getEndAddress()) {
 							c.setBackground(Color.green.darker().darker());

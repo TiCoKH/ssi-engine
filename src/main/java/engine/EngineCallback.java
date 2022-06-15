@@ -1,9 +1,9 @@
 package engine;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import io.vavr.collection.Seq;
 
 import shared.GoldboxString;
 import shared.InputAction;
@@ -16,9 +16,9 @@ public interface EngineCallback {
 
 	void setInputString(int maxLetters);
 
-	void setECLMenu(@Nonnull MenuType type, @Nonnull List<GoldboxString> menuItems, @Nullable GoldboxString description);
+	void setECLMenu(@Nonnull MenuType type, @Nonnull Seq<GoldboxString> menuItems, @Nullable GoldboxString description);
 
-	void setMenu(@Nonnull MenuType type, @Nonnull List<InputAction> menuItems, @Nullable GoldboxString description);
+	void setMenu(@Nonnull MenuType type, @Nonnull Seq<InputAction> menuItems, @Nullable GoldboxString description);
 
 	void advanceSprite();
 

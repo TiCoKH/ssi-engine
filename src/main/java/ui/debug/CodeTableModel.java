@@ -1,11 +1,12 @@
 package ui.debug;
 
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.table.AbstractTableModel;
+
+import io.vavr.collection.Set;
 
 import engine.debug.CodeBlock;
 import engine.debug.EclInstructionData;
@@ -65,7 +66,7 @@ class CodeTableModel extends AbstractTableModel {
 		int start = 0;
 		for (CodeBlock block : blocks) {
 			if (start <= row && (start + block.getCode().size()) > row) {
-				return block.getCode().get(row - start);
+				return block.getCode().drop(row - start).head();
 			}
 			start += block.getCode().size();
 			start++;

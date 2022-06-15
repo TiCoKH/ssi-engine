@@ -2,13 +2,9 @@ package engine;
 
 import static io.vavr.API.Seq;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import io.vavr.collection.Seq;
-
-import com.google.common.collect.ImmutableList;
 
 import engine.input.CharacterSheetEXITHandler;
 import engine.input.DialogBackHandler;
@@ -99,14 +95,14 @@ public class EngineInputAction implements InputAction {
 
 	public static final EngineInputAction EXIT_SHEET = new EngineInputAction(CHAR_SHEET_EXIT_HANDLER, "EXIT");
 
-	public static final List<InputAction> YES_NO_ACTIONS = ImmutableList.of(YES, NO);
+	public static final Seq<InputAction> YES_NO_ACTIONS = Seq(YES, NO);
 	public static final Seq<InputAction> MOVEMENT_ACTIONS = Seq(DO_SAVE, MOVE_FORWARD_UP, MOVE_TURN_LEFT,
 		MOVE_TURN_RIGHT, TURN_AROUND_DOWN, EXIT_MOVE);
 	public static final Seq<InputAction> GAME_MENU_ACTIONS = Seq(DO_SAVE, MOVE, AREA, SEARCH, LOOK);
-	public static final List<InputAction> CONTINUE_ACTION = ImmutableList.of(CONTINUE);
+	public static final Seq<InputAction> CONTINUE_ACTION = Seq(CONTINUE);
 	public static final Seq<InputAction> DIALOG_MENU_ACTIONS = Seq(SELECT, DIALOG_BACK);
 	public static final Seq<InputAction> CHAR_SHEET_ACTION = Seq(EXIT_SHEET);
-	public static final List<InputAction> SELECT_ACTION = ImmutableList.of(SELECT);
+	public static final Seq<InputAction> SELECT_ACTION = Seq(SELECT);
 
 	private final InputHandler handler;
 	private final GoldboxString name;

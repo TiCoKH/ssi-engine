@@ -9,18 +9,17 @@ import static engine.script.EclOpCode.IF_GREATER_EQUALS;
 import static engine.script.EclOpCode.IF_LESS;
 import static engine.script.EclOpCode.IF_LESS_EQUALS;
 import static engine.script.EclOpCode.OR;
-
-import java.util.List;
+import static io.vavr.API.Seq;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.ImmutableList;
+import io.vavr.collection.Seq;
 
 import engine.script.EclArgument;
 import engine.script.EclOpCode;
 
 public class EclInstructionCompareIf implements EclInstructionData {
-	private static final List<EclOpCode> OP_CODE_HEX_ARGS = ImmutableList.of(AND, OR);
+	private static final Seq<EclOpCode> OP_CODE_HEX_ARGS = Seq(AND, OR);
 
 	private EclinstructionWrapper compare;
 	private EclinstructionWrapper ifInst;

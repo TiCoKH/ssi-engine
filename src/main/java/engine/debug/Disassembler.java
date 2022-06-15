@@ -4,21 +4,21 @@ import static engine.script.EclOpCode.GOSUB;
 import static engine.script.EclOpCode.GOTO;
 import static engine.script.EclOpCode.ON_GOSUB;
 import static engine.script.EclOpCode.ON_GOTO;
+import static io.vavr.API.Map;
+import static io.vavr.API.SortedSet;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import io.vavr.collection.Map;
+import io.vavr.collection.SortedSet;
+import io.vavr.collection.TreeSet;
 
 import common.ByteBufferWrapper;
 import data.script.EclProgram;
+import engine.script.EclArgument;
 import engine.script.EclInstruction;
 import engine.script.EclOpCode;
 
 public class Disassembler {
-	private int codeBase;;
+	private int codeBase;
 
 	public Disassembler(int codeBase) {
 		this.codeBase = codeBase;
@@ -44,12 +44,12 @@ public class Disassembler {
 
 		addresses.clearMarks();
 
-		SortedSet<CodeBlock> result = new TreeSet<>();
-		result.add(disassembleBlock(eclCode, codeBase + section.getStartOffset(), addresses));
+		SortedSet<CodeBlock> result = TreeSet.empty();
+		result = result.add(disassembleBlock(eclCode, codeBase + section.getStartOffset(), addresses));
 
 		Integer a = addresses.getNextUnparsedAddress();
 		while (a != null) {
-			result.add(disassembleBlock(eclCode, a, addresses));
+			result = result.add(disassembleBlock(eclCode, a, addresses));
 			a = addresses.getNextUnparsedAddress();
 		}
 
@@ -57,7 +57,7 @@ public class Disassembler {
 	}
 
 	private CodeBlock disassembleBlock(ByteBufferWrapper eclCode, int address, JumpAddresses addresses) {
-		List<EclInstructionData> result = new ArrayList<>();
+		SortedSet<EclInstructionData> result = SortedSet();
 
 		EclinstructionWrapper inst = null;
 		boolean isOpCodeFinishingBlock = false;
@@ -69,7 +69,7 @@ public class Disassembler {
 			do {
 				inst = new EclinstructionWrapper(EclInstruction.parseNext(eclCode), isConditional);
 				addresses.addJumps(inst);
-				result.add(inst);
+				result = result.add(inst);
 
 				isOpCodeFinishingBlock = inst.isBlockFinisher() && !inst.isConditional();
 
@@ -84,14 +84,12 @@ public class Disassembler {
 
 		addresses.markAddressParsed(address);
 
-		int endAddress = inst != null ? codeBase + inst.getPosition() + inst.getSize() : address;
-
-		return new CodeBlock(result, address, endAddress);
+		return new CodeBlock(result, codeBase);
 	}
 
 	public class JumpAddresses {
-		private Map<Integer, Boolean> gotoAddresses = new HashMap<>();
-		private Map<Integer, Boolean> gosubAddresses = new HashMap<>();
+		private Map<Integer, Boolean> gotoAddresses = Map();
+		private Map<Integer, Boolean> gosubAddresses = Map();
 
 		JumpAddresses() {
 		}
@@ -99,35 +97,38 @@ public class Disassembler {
 		void addJumps(EclinstructionWrapper inst) {
 			EclOpCode opCode = inst.getOpCode();
 			if (opCode == ON_GOTO) {
-				inst.getDynArgs().stream().forEach(a -> gotoAddresses.putIfAbsent(a.valueAsInt(), Boolean.FALSE));
+				gotoAddresses = gotoAddresses
+					.merge(inst.getDynArgs().toMap(EclArgument::valueAsInt, x -> Boolean.FALSE));
 				// TODO implicit jump/continue for unmapped values
 				// gotoAddresses.putIfAbsent(config.getCodeBase() + inst.getPosition() + inst.getSize(), Boolean.FALSE);
 			} else if (opCode == ON_GOSUB) {
-				inst.getDynArgs().stream().forEach(a -> gosubAddresses.putIfAbsent(a.valueAsInt(), Boolean.FALSE));
+				gosubAddresses = gosubAddresses
+					.merge(inst.getDynArgs().toMap(EclArgument::valueAsInt, x -> Boolean.FALSE));
 			} else if (opCode == GOTO) {
-				gotoAddresses.putIfAbsent(inst.getArgument(0).valueAsInt(), Boolean.FALSE);
+				gotoAddresses = gotoAddresses.computeIfAbsent(inst.getArgument(0).valueAsInt(),
+					key -> Boolean.FALSE)._2;
 			} else if (opCode == GOSUB) {
-				gosubAddresses.putIfAbsent(inst.getArgument(0).valueAsInt(), Boolean.FALSE);
+				gosubAddresses = gosubAddresses.computeIfAbsent(inst.getArgument(0).valueAsInt(),
+					key -> Boolean.FALSE)._2;
 			}
 		}
 
 		boolean isAddressParsed(int address) {
-			return (gotoAddresses.containsKey(address) && Boolean.TRUE.equals(gotoAddresses.get(address)))
-				|| (gosubAddresses.containsKey(address) && Boolean.TRUE.equals(gosubAddresses.get(address)));
+			return gotoAddresses.get(address).getOrElse(false) || gosubAddresses.get(address).getOrElse(false);
 		}
 
 		void markAddressParsed(int address) {
-			gotoAddresses.replace(address, Boolean.TRUE);
-			gosubAddresses.replace(address, Boolean.TRUE);
+			gotoAddresses = gotoAddresses.replaceValue(address, Boolean.TRUE);
+			gosubAddresses = gosubAddresses.replaceValue(address, Boolean.TRUE);
 		}
 
 		void clearMarks() {
-			gotoAddresses.replaceAll((k, v) -> Boolean.FALSE);
-			gosubAddresses.replaceAll((k, v) -> Boolean.FALSE);
+			gotoAddresses = gotoAddresses.replaceAll((k, v) -> Boolean.FALSE);
+			gosubAddresses = gosubAddresses.replaceAll((k, v) -> Boolean.FALSE);
 		}
 
 		Integer getNextUnparsedAddress() {
-			return getAllAddresses().stream().filter(a -> !isAddressParsed(a)).findFirst().orElse(null);
+			return getAllAddresses().find(a -> !isAddressParsed(a)).getOrNull();
 
 		}
 
@@ -136,10 +137,7 @@ public class Disassembler {
 		}
 
 		public SortedSet<Integer> getAllAddresses() {
-			SortedSet<Integer> result = new TreeSet<>();
-			result.addAll(gotoAddresses.keySet());
-			result.addAll(gosubAddresses.keySet());
-			return result;
+			return TreeSet.ofAll(gotoAddresses.keySet()).addAll(gosubAddresses.keySet());
 		}
 	}
 }

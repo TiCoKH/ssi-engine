@@ -1,7 +1,8 @@
 package engine;
 
 import java.io.File;
-import java.util.List;
+
+import io.vavr.collection.Seq;
 
 import org.junit.Assume;
 import org.junit.Test;
@@ -40,11 +41,11 @@ public class VirtualMachineTest {
 			}
 
 			@Override
-			public void setECLMenu(MenuType type, List<GoldboxString> menuItems, GoldboxString description) {
+			public void setECLMenu(MenuType type, Seq<GoldboxString> menuItems, GoldboxString description) {
 			}
 
 			@Override
-			public void setMenu(MenuType type, List<InputAction> menuItems, GoldboxString description) {
+			public void setMenu(MenuType type, Seq<InputAction> menuItems, GoldboxString description) {
 			}
 
 			@Override

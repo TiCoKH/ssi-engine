@@ -1,10 +1,11 @@
 package engine.character;
 
+import static io.vavr.API.Seq;
+
+import java.util.Objects;
 import java.util.Optional;
 
 import io.vavr.collection.Seq;
-
-import com.google.common.base.Joiner;
 
 import data.character.AbstractCharacter;
 import engine.rulesystem.Flavor;
@@ -91,9 +92,10 @@ public class CharacterSheetImpl implements CharacterSheet {
 			.map(stat -> new CharacterValue() {
 				@Override
 				public GoldboxString getValue() {
-					return new CustomGoldboxString(Joiner.on('/').skipNulls() //
-						.join(character.getCurrentStatValue(stat),
-							character.getCurrentStatExcValue(stat) != 0 ? character.getCurrentStatExcValue(stat) : null));
+					return new CustomGoldboxString(Seq(character.getCurrentStatValue(stat),
+						character.getCurrentStatExcValue(stat) != 0 ? character.getCurrentStatExcValue(stat) : null)
+						.filter(Objects::nonNull)
+						.mkString("/"));
 				}
 
 				@Override
