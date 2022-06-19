@@ -1,10 +1,10 @@
 package ui.classic;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import static io.vavr.API.Map;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Map;
 
 import ui.UISettings;
 import ui.shared.UIState;
@@ -12,8 +12,8 @@ import ui.shared.resource.UIResourceConfiguration;
 import ui.shared.resource.UIResourceManager;
 
 public class RendererContainer {
-	private static final Map<UIState, AbstractStateRenderer> GAME_RENDERERS = new EnumMap<>(UIState.class);
-	private static final Map<Class<? extends AbstractDialogRenderer>, AbstractDialogRenderer> DIALOG_RENDERERS = new HashMap<>();
+	private Map<UIState, AbstractStateRenderer> GAME_RENDERERS = Map();
+	private Map<Class<? extends AbstractDialogRenderer>, AbstractDialogRenderer> DIALOG_RENDERERS = Map();
 
 	private final RendererState state;
 	private final UISettings settings;
@@ -23,8 +23,8 @@ public class RendererContainer {
 	private final AbstractFrameRenderer frameRenderer;
 	private final TextInputRenderer inputRenderer;
 
-	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull RendererState state,
-		@Nonnull UISettings settings) {
+	public RendererContainer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman,
+		@Nonnull RendererState state, @Nonnull UISettings settings) {
 
 		this.config = config;
 		this.resman = resman;
@@ -35,11 +35,16 @@ public class RendererContainer {
 	}
 
 	public AbstractStateRenderer rendererFor(@Nonnull UIState uiState) {
-		return GAME_RENDERERS.computeIfAbsent(uiState, this::createRenderer);
+		if (!GAME_RENDERERS.containsKey(uiState))
+			GAME_RENDERERS = GAME_RENDERERS.put(uiState, createRenderer(uiState));
+		return GAME_RENDERERS.get(uiState).get();
 	}
 
 	public AbstractDialogRenderer rendererFor(@Nonnull AbstractDialogState dialogState) {
-		return DIALOG_RENDERERS.computeIfAbsent(dialogState.getRendererClass(), this::createRenderer);
+		final Class<? extends AbstractDialogRenderer> rendererClass = dialogState.getRendererClass();
+		if (!DIALOG_RENDERERS.containsKey(rendererClass))
+			DIALOG_RENDERERS = DIALOG_RENDERERS.put(rendererClass, createRenderer(rendererClass));
+		return DIALOG_RENDERERS.get(rendererClass).get();
 	}
 
 	public AbstractFrameRenderer frameRenderer() {
@@ -79,8 +84,8 @@ public class RendererContainer {
 		throw new IllegalArgumentException("Unknown dialog renderer class: " + clazz.getName());
 	}
 
-	public static AbstractFrameRenderer createFrameRenderer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman,
-		@Nonnull UISettings settings) {
+	public static AbstractFrameRenderer createFrameRenderer(@Nonnull UIResourceConfiguration config,
+		@Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
 
 		switch (config.getFrameType()) {
 			case FRAME:

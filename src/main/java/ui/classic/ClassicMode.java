@@ -5,6 +5,7 @@ import static data.ContentType.BODY;
 import static data.ContentType.HEAD;
 import static data.ContentType.PIC;
 import static data.ContentType.TITLE;
+import static io.vavr.API.Map;
 import static java.awt.event.KeyEvent.VK_BACK_SPACE;
 import static java.awt.event.KeyEvent.VK_DOWN;
 import static java.awt.event.KeyEvent.VK_ENTER;
@@ -30,8 +31,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.Executors;
@@ -46,6 +45,7 @@ import javax.swing.InputMap;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 import io.vavr.collection.Stream;
 
@@ -86,16 +86,14 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private static final String INPUT_NUMBER = "INPUT NUMBER: ";
 	private static final String INPUT_STRING = "INPUT STRING: ";
 
-	private static final Map<GoldboxString, KeyStroke> KEY_MAPPING;
-	static {
-		KEY_MAPPING = new HashMap<>();
-		KEY_MAPPING.put(InputAction.LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
-		KEY_MAPPING.put(InputAction.SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-		KEY_MAPPING.put(InputAction.FORWARD_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
-		KEY_MAPPING.put(InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
-		KEY_MAPPING.put(InputAction.TURN_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
-		KEY_MAPPING.put(InputAction.UTURN_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
-	}
+	private static final Map<GoldboxString, KeyStroke> KEY_MAPPING = Map( //
+		InputAction.LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK), //
+		InputAction.SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), //
+		InputAction.FORWARD_UP, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0), //
+		InputAction.TURN_LEFT, KeyStroke.getKeyStroke(KeyEvent.VK_A, 0), //
+		InputAction.TURN_RIGHT, KeyStroke.getKeyStroke(KeyEvent.VK_D, 0), //
+		InputAction.UTURN_DOWN, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0) //
+	);
 
 	private transient EngineStub stub;
 
@@ -277,7 +275,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 	private void resetInput() {
 		getInputMap(WHEN_IN_FOCUSED_WINDOW).clear();
 		getActionMap().clear();
-		registerInput(LOAD, () -> stub.loadGame(), KEY_MAPPING.get(LOAD));
+		registerInput(LOAD, () -> stub.loadGame(), KEY_MAPPING.get(LOAD).get());
 		registerInput("__PARTY_UP", //
 			() -> state.getGlobalData().ifPresent(ViewGlobalData::moveSelectedPartyMemberUp), //
 			getKeyStroke(VK_PAGE_UP, 0));
@@ -322,7 +320,7 @@ public class ClassicMode extends JPanel implements UserInterface {
 			registerInput(a, () -> {
 				state.setMenu(null);
 				stub.handleInput(a);
-			}, KEY_MAPPING.get(a.getName()));
+			}, KEY_MAPPING.get(a.getName()).get());
 		});
 
 		registerInput(MENU_ACTION, () -> {

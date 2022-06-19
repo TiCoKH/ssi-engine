@@ -1,15 +1,16 @@
 package ui.shared.text;
 
-import java.util.ArrayList;
-import java.util.List;
+import static io.vavr.API.CharSeq;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.CharSeq;
 
 import shared.CustomGoldboxString;
 
 public class GoldboxStringInput extends CustomGoldboxString {
 
-	private List<Character> chars = new ArrayList<>();
+	private CharSeq chars = CharSeq("");
 
 	private int maxCount;
 
@@ -20,7 +21,7 @@ public class GoldboxStringInput extends CustomGoldboxString {
 
 	public void addChar(char c) {
 		if (getInputCount() < maxCount) {
-			chars.add(c);
+			chars = chars.append(c);
 			content = content.append(fromASCII(c));
 		}
 	}
@@ -31,15 +32,13 @@ public class GoldboxStringInput extends CustomGoldboxString {
 
 	public void removeLastChar() {
 		if (getInputCount() > 0) {
-			chars.remove(chars.size() - 1);
+			chars = chars.removeAt(chars.size() - 1);
 			content = content.removeAt(content.size() - 1);
 		}
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		chars.stream().forEachOrdered(c -> sb.append(c));
-		return sb.toString();
+		return chars.toString();
 	}
 }

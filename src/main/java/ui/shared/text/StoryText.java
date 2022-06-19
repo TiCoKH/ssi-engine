@@ -3,14 +3,11 @@ package ui.shared.text;
 import static io.vavr.API.Seq;
 import static shared.GoldboxStringPart.PartType.TEXT;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
 import io.vavr.collection.Seq;
-
-import com.google.common.collect.ImmutableList;
 
 import shared.FontColor;
 import shared.GoldboxStringPart;
@@ -52,8 +49,8 @@ public class StoryText {
 	}
 
 	@Nonnull
-	public Optional<List<GoldboxStringPart>> getTextList() {
-		return textList.isEmpty() ? Optional.empty() : Optional.of(ImmutableList.copyOf(textList));
+	public Optional<Seq<GoldboxStringPart>> getTextList() {
+		return textList.isEmpty() ? Optional.empty() : Optional.of(textList);
 	}
 
 	public int getCharStop() {

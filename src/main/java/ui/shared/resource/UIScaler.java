@@ -23,10 +23,11 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
 import java.util.Hashtable;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import io.vavr.collection.Seq;
 
 import common.scaler.xbrz.Scaler;
 import common.scaler.xbrz.Scaler2x;
@@ -83,7 +84,8 @@ public class UIScaler {
 	}
 
 	@Nonnull
-	public BufferedImage scaleComposite(@Nonnull ContentType type, @Nonnull List<BufferedImage> images, List<Point> offsets) {
+	public BufferedImage scaleComposite(@Nonnull ContentType type, @Nonnull Seq<BufferedImage> images,
+		Seq<Point> offsets) {
 		int width = 0, height = 0;
 		if (type == TITLE) {
 			width = 320;
@@ -97,7 +99,7 @@ public class UIScaler {
 		BufferedImage composite = createTarget(null, width, height);
 		Graphics2D g2d = composite.createGraphics();
 
-		boolean useExternalOffsets = images.size() == 1 || images.stream().noneMatch(UIScaler::isOffsetNotZero);
+		boolean useExternalOffsets = images.size() == 1 || images.forAll(UIScaler::isOffsetZero);
 		for (int i = 0; i < images.size(); i++) {
 			BufferedImage image = images.get(i);
 			if (useExternalOffsets) {
@@ -112,10 +114,10 @@ public class UIScaler {
 		return scale(composite);
 	}
 
-	private static boolean isOffsetNotZero(@Nonnull BufferedImage image) {
+	private static boolean isOffsetZero(@Nonnull BufferedImage image) {
 		int xStart = (int) image.getProperty(X_OFFSET.name());
 		int yStart = (int) image.getProperty(Y_OFFSET.name());
-		return xStart != 0 || yStart != 0;
+		return xStart == 0 && yStart == 0;
 	}
 
 	@Nonnull

@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.base.Strings;
-
 import ui.UISettings;
 import ui.shared.FrameType.BackgroundType;
 import ui.shared.UIFrame;
@@ -23,9 +21,10 @@ public abstract class AbstractFrameRenderer {
 	protected UIResourceManager resman;
 	protected UISettings settings;
 
-	private boolean portraitShown = true;;
+	private boolean portraitShown = true;
 
-	public AbstractFrameRenderer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman, @Nonnull UISettings settings) {
+	protected AbstractFrameRenderer(@Nonnull UIResourceConfiguration config, @Nonnull UIResourceManager resman,
+		@Nonnull UISettings settings) {
 		this.config = config;
 		this.resman = resman;
 		this.settings = settings;
@@ -84,7 +83,7 @@ public abstract class AbstractFrameRenderer {
 	}
 
 	protected int[] parseFrameIndexes(String indexes) {
-		if (Strings.isNullOrEmpty(indexes)) {
+		if (indexes == null || indexes.isBlank()) {
 			return new int[0];
 		}
 		return Stream.of(indexes.split(",")).mapToInt(Integer::parseInt).toArray();

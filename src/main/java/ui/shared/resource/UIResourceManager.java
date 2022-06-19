@@ -179,8 +179,7 @@ public class UIResourceManager {
 					.orElseGet(this::getBrokenList);
 				return new Tuple2<>(offset, img);
 			});
-			return Array.of(scaler.scaleComposite(cr.getType(), images.flatMap(Tuple2::_2).toJavaList(),
-				images.map(Tuple2::_1).toJavaList()));
+			return Array.of(scaler.scaleComposite(cr.getType(), images.flatMap(Tuple2::_2), images.map(Tuple2::_1)));
 		}
 		return loadImageResource(r).map(t -> toSeq(r, t).map(scaler::scale)).orElseGet(this::getBrokenList);
 	}

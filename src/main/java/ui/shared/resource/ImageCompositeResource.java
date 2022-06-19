@@ -1,18 +1,20 @@
 package ui.shared.resource;
 
+import static io.vavr.API.Map;
+
 import java.awt.Point;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Map;
 
 import data.ContentType;
 
 public class ImageCompositeResource extends ImageResource {
 	private ImageResource[] r;
-	private Map<ImageResource, Point> offsetMap = new HashMap<>();
+	private Map<ImageResource, Point> offsetMap = Map();
 
 	public ImageCompositeResource(@Nonnull ImageResource r) {
 		this(r, 0, 0);
@@ -24,18 +26,19 @@ public class ImageCompositeResource extends ImageResource {
 		this.r = new ImageResource[1];
 		this.r[0] = r;
 
-		offsetMap.put(r, new Point(x, y));
+		offsetMap = offsetMap.put(r, new Point(x, y));
 	}
 
-	public ImageCompositeResource(@Nonnull ImageResource r1, int x1, int y1, @Nonnull ImageResource r2, int x2, int y2) {
+	public ImageCompositeResource(@Nonnull ImageResource r1, int x1, int y1, @Nonnull ImageResource r2, int x2,
+		int y2) {
 		super(r1.getId(), r1.getType());
 
 		this.r = new ImageResource[2];
 		this.r[0] = r1;
 		this.r[1] = r2;
 
-		offsetMap.put(r1, new Point(x1, y1));
-		offsetMap.put(r2, new Point(x2, y2));
+		offsetMap = offsetMap.put(r1, new Point(x1, y1));
+		offsetMap = offsetMap.put(r2, new Point(x2, y2));
 	}
 
 	public int getLength() {
@@ -59,7 +62,7 @@ public class ImageCompositeResource extends ImageResource {
 	}
 
 	public Point getOffset(int index) {
-		return offsetMap.get(r[index]);
+		return offsetMap.get(r[index]).get();
 	}
 
 	@Override
@@ -89,5 +92,4 @@ public class ImageCompositeResource extends ImageResource {
 	public String toString() {
 		return "ImageCompositeResource [r=" + Arrays.toString(r) + "]";
 	}
-
 }

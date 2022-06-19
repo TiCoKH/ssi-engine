@@ -8,10 +8,11 @@ import static shared.GoldboxStringPart.PartType.LINE_BREAK;
 import static shared.GoldboxStringPart.PartType.SPACE;
 
 import java.awt.Graphics2D;
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Seq;
 
 import shared.FontColor;
 import shared.GoldboxStringPart;
@@ -25,8 +26,8 @@ public abstract class AbstractStateRenderer extends AbstractRenderer {
 
 	protected RendererState state;
 
-	protected AbstractStateRenderer(@Nonnull RendererState state, @Nonnull UISettings settings, @Nonnull UIResourceManager resman,
-		@Nonnull AbstractFrameRenderer frameRenderer) {
+	protected AbstractStateRenderer(@Nonnull RendererState state, @Nonnull UISettings settings,
+		@Nonnull UIResourceManager resman, @Nonnull AbstractFrameRenderer frameRenderer) {
 
 		super(settings, resman, frameRenderer);
 		this.state = state;
@@ -42,12 +43,13 @@ public abstract class AbstractStateRenderer extends AbstractRenderer {
 
 	protected void renderText(@Nonnull Graphics2D g2d) {
 		StoryText st = state.getStoryText();
-		st.getTextList().ifPresent(
-			text -> renderText(g2d, text, getTextStartX(), getTextStartY(), getLineWidth(), st.getCharStop(), st.getDefaultTextColor(), 0));
+		st.getTextList()
+			.ifPresent(text -> renderText(g2d, text, getTextStartX(), getTextStartY(), getLineWidth(), st.getCharStop(),
+				st.getDefaultTextColor(), 0));
 	}
 
-	protected int renderText(@Nonnull Graphics2D g2d, List<GoldboxStringPart> text, int startX, int StartY, int lineLength, int charStop,
-		Optional<FontColor> initialColor, int initialOffset) {
+	protected int renderText(@Nonnull Graphics2D g2d, Seq<GoldboxStringPart> text, int startX, int StartY,
+		int lineLength, int charStop, Optional<FontColor> initialColor, int initialOffset) {
 
 		int line = 0;
 		int pos = initialOffset;

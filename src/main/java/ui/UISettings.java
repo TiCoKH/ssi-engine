@@ -1,5 +1,6 @@
 package ui;
 
+import static io.vavr.API.Set;
 import static ui.UISettings.PropertyName.METHOD;
 import static ui.UISettings.PropertyName.TEXT_SPEED;
 import static ui.UISettings.PropertyName.ZOOM;
@@ -13,18 +14,18 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
+
+import io.vavr.collection.Set;
 
 public class UISettings {
 	private int zoom;
 	private ScaleMethod method;
 	private TextSpeed textSpeed;
 
-	private Set<PropertyChangeListener> listeners = new HashSet<>();
+	private Set<PropertyChangeListener> listeners = Set();
 
 	public UISettings() {
 		zoom = 4;
@@ -107,11 +108,11 @@ public class UISettings {
 	}
 
 	public void addPropertyChangeListener(@Nonnull PropertyChangeListener l) {
-		listeners.add(l);
+		listeners = listeners.add(l);
 	}
 
 	public void removePropertyChangeListener(@Nonnull PropertyChangeListener l) {
-		listeners.remove(l);
+		listeners = listeners.remove(l);
 	}
 
 	private void firePropertyChange(@Nonnull PropertyName n, Object oldValue, Object newValue) {

@@ -2,6 +2,7 @@ package ui.classic;
 
 import static data.ContentType.BACK;
 import static data.ContentType.SPRIT;
+import static io.vavr.API.Seq;
 import static ui.shared.resource.ImageResource.SKY_CLOUD;
 import static ui.shared.resource.ImageResource.SKY_STREET;
 import static ui.shared.resource.ImageResource.SKY_SUN;
@@ -9,17 +10,12 @@ import static ui.shared.resource.ImageResource.SPACE_BACKGROUND;
 import static ui.shared.resource.ImageResource.SPACE_SYMBOLS;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import io.vavr.collection.Seq;
-
-import com.google.common.collect.ImmutableList;
 
 import data.dungeon.DungeonMap.Direction;
 import data.dungeon.DungeonMap.VisibleWalls;
@@ -204,7 +200,7 @@ public class RendererState {
 		private Optional<DungeonMapResource> map;
 
 		private DungeonResource res;
-		private List<ImageResource> back;
+		private Seq<ImageResource> back;
 
 		private Optional<ImageResource> sprite = Optional.empty();
 		private int spriteIndex = 0;
@@ -212,7 +208,7 @@ public class RendererState {
 		private boolean showAreaMap;
 
 		// runic text in Pool of Radiance
-		private List<GoldboxStringPart> runicText = new ArrayList<>();
+		private Seq<GoldboxStringPart> runicText = Seq();
 
 		DungeonResources(@Nonnull ViewDungeonPosition position, @Nullable VisibleWalls visibleWalls,
 			@Nullable int[][] map, @Nonnull DungeonResource res) {
@@ -237,13 +233,13 @@ public class RendererState {
 					// no image resources
 					break;
 				case SKY:
-					this.back = Arrays.asList(SKY_CLOUD, SKY_SUN, SKY_STREET);
+					this.back = Seq(SKY_CLOUD, SKY_SUN, SKY_STREET);
 					break;
 				case SKYGRND:
 					// TODO
 					break;
 				case SPACE:
-					this.back = Arrays.asList( //
+					this.back = Seq( //
 						new ImageResource(128 + res.getIds()[0], BACK), //
 						new ImageResource(res.getIds()[0], BACK));
 					break;
@@ -254,7 +250,7 @@ public class RendererState {
 		}
 
 		public void addRunicText(GoldboxStringPart text) {
-			runicText.add(text);
+			runicText = runicText.append(text);
 		}
 
 		public boolean isShowRunicText() {
@@ -262,8 +258,8 @@ public class RendererState {
 		}
 
 		@Nonnull
-		public List<GoldboxStringPart> getRunicText() {
-			return ImmutableList.copyOf(runicText);
+		public Seq<GoldboxStringPart> getRunicText() {
+			return runicText;
 		}
 
 		public void advanceSprite() {
