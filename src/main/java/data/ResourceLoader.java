@@ -35,19 +35,17 @@ public class ResourceLoader {
 	@Nonnull
 	public SortedSet<Integer> idsFor(@Nonnull ContentType type) {
 		return filesFor(type).map(this::load)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.filter(Try::isSuccess)
-			.map(Try::get)
+			.filter(Resource::isPresentAndSuccess)
+			.map(Resource::get)
 			.flatMap(ContentFile::getIds)
 			.toSortedSet();
 	}
 
 	@Nonnull
-	public <T extends Content> Optional<Try<T>> find(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
+	public <T extends Content> Resource<T> find(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
 		return filesFor(type).map(filename -> load(filename, id, clazz, type))
-			.filter(Optional::isPresent)
-			.getOrElse(Optional::empty);
+			.filter(Resource::isPresent)
+			.getOrElse(Resource::empty);
 	}
 
 	@Nonnull
@@ -56,24 +54,23 @@ public class ResourceLoader {
 	}
 
 	@Nonnull
-	protected <T extends Content> Optional<Try<T>> load(@Nonnull String name, int blockId, @Nonnull Class<T> clazz,
+	protected <T extends Content> Resource<T> load(@Nonnull String name, int blockId, @Nonnull Class<T> clazz,
 		@Nonnull ContentType type) {
-		return load(name).flatMap(t -> {
-			return t.map(cf -> cf.getById(blockId, clazz, type)).getOrElse(Optional::empty);
-		});
+
+		return load(name).flatMap(cf -> cf.getById(blockId, clazz, type));
 	}
 
 	@Nonnull
-	protected Optional<Try<ContentFile>> load(@Nonnull String name) {
+	protected Resource<ContentFile> load(@Nonnull String name) {
 		final Map<String, Try<ContentFile>> cache = files.get();
 		if (cache.containsKey(name)) {
-			return cache.get(name).toJavaOptional();
+			return Resource.of(cache.get(name));
 		}
 		final Try<ContentFile> file = fileMap.toFile(name)
 			.map(ContentFile::create)
 			.orElseGet(() -> Try.failure(new FileNotFoundException(name)));
 		files.updateAndGet(f -> f.containsKey(name) ? f : f.put(name, file));
-		return Optional.of(file);
+		return Resource.of(file);
 	}
 
 	public Optional<File> toFile(String nameUC) {

@@ -16,7 +16,7 @@ import common.ByteBufferWrapper;
 
 public abstract class ContentFile {
 
-	public abstract <T extends Content> Optional<Try<T>> getById(int id, Class<T> clazz, ContentType type);
+	public abstract <T extends Content> Resource<T> getById(int id, Class<T> clazz, ContentType type);
 
 	public abstract Seq<ByteBufferWrapper> getById(int id);
 

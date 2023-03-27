@@ -3,14 +3,12 @@ package engine.character;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.Optional;
-
-import io.vavr.control.Try;
 
 import org.junit.Assume;
 import org.junit.Test;
 
 import common.FileMap;
+import data.Resource;
 import data.ResourceLoader;
 import data.character.AbstractCharacter;
 import engine.EngineConfiguration;
@@ -27,8 +25,8 @@ public class PlayerDataFactoryTest {
 		ResourceLoader res = new ResourceLoader(fm);
 		PlayerDataFactory fac = new PlayerDataFactory(res, cfg);
 		AbstractCharacter.configValues(cfg.getCharacterValues());
-		Optional<Try<AbstractCharacter>> character = fac.loadCharacter(60);
-		assertTrue(character.isPresent() && character.get().isSuccess());
+		Resource<? extends AbstractCharacter> character = fac.loadCharacter(60);
+		assertTrue(character.isPresentAndSuccess());
 	}
 
 }

@@ -9,14 +9,12 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
-import io.vavr.control.Try;
 
+import data.Resource;
 import data.image.ImageContent;
 import ui.shared.resource.UIResourceConfiguration;
 import ui.shared.resource.UIResourceLoader;
@@ -56,48 +54,41 @@ public class DungeonMapBuilder {
 	}
 
 	@Nonnull
-	public Optional<Try<BufferedImage>> build() {
-		int height = map.length << 3;
-		int width = map[0].length << 3;
-
-		return buildMapTiles().map(t -> t.flatMap(mapTiles -> Try.of(() -> {
-			final ColorModel cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, //
-				0xff0000, 0x00ff00, 0x0000ff, 0xff000000, true, DataBuffer.TYPE_INT);
-			final WritableRaster r = cm.createCompatibleWritableRaster(width, height);
-			final BufferedImage result = new BufferedImage(cm, r, true, null);
-
-			final Graphics2D g2d = result.createGraphics();
-			for (int y = 0; y < map.length; y++) {
-				int[] row = map[y];
-				for (int x = 0; x < row.length; x++) {
-					final BufferedImage s = mapTiles.get(row[x]);
-					g2d.drawImage(s, x << 3, y << 3, null);
-				}
-			}
-			return result;
-		})));
+	public Resource<BufferedImage> build() {
+		return buildMapTiles().map(this::buildMap);
 	}
 
-	private Optional<Try<Seq<BufferedImage>>> buildMapTiles() {
+	private Resource<Seq<BufferedImage>> buildMapTiles() {
 		if (isWithoutMapDecoIds()) {
 			return loader.getMisc()
-				.map(t -> t.map(misc -> Array
-					.ofAll(misc.subList(config.getMiscAreaMapIndex(), config.getMiscAreaMapIndex() + 16))));
+				.map(misc -> misc.subList(config.getMiscAreaMapIndex(), config.getMiscAreaMapIndex() + 16));
 		}
 
-		return loader.findImage(id1, _8X8D).map(t -> t.map(ImageContent::toSeq)).flatMap(t -> {
-			if (t.isFailure()) {
-				return Optional.of(t);
-			}
-			final Seq<BufferedImage> seq = t.get();
-			return loader.findImage(id2, _8X8D).map(t2 -> t2.map(ic -> seq.appendAll(ic.toSeq()))).flatMap(t2 -> {
-				if (t2.isFailure()) {
-					return Optional.of(t2);
-				}
-				final Seq<BufferedImage> seq2 = t2.get();
-				return loader.findImage(id3, _8X8D).map(t3 -> t3.map(ic -> seq2.appendAll(ic.toSeq())));
+		return loader.findImage(id1, _8X8D).map(ImageContent::toSeq).flatMap(seq -> {
+			return loader.findImage(id2, _8X8D).map(ic -> seq.appendAll(ic.toSeq())).flatMap(seq2 -> {
+				return loader.findImage(id3, _8X8D).map(ic -> seq2.appendAll(ic.toSeq()));
 			});
 		});
+	}
+
+	private BufferedImage buildMap(Seq<BufferedImage> mapTiles) {
+		final int height = map.length << 3;
+		final int width = map[0].length << 3;
+
+		final ColorModel cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, //
+			0xff0000, 0x00ff00, 0x0000ff, 0xff000000, true, DataBuffer.TYPE_INT);
+		final WritableRaster r = cm.createCompatibleWritableRaster(width, height);
+		final BufferedImage result = new BufferedImage(cm, r, true, null);
+
+		final Graphics2D g2d = result.createGraphics();
+		for (int y = 0; y < map.length; y++) {
+			int[] row = map[y];
+			for (int x = 0; x < row.length; x++) {
+				final BufferedImage s = mapTiles.get(row[x]);
+				g2d.drawImage(s, x << 3, y << 3, null);
+			}
+		}
+		return result;
 	}
 
 	private boolean isWithoutMapDecoIds() {

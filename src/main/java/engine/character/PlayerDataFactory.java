@@ -5,7 +5,6 @@ import static java.nio.file.StandardOpenOption.READ;
 
 import java.io.File;
 import java.nio.channels.FileChannel;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +16,7 @@ import character.CharacterRace;
 import character.ClassSelection;
 import common.ByteBufferWrapper;
 import data.ContentType;
+import data.Resource;
 import data.ResourceLoader;
 import data.character.AbstractCharacter;
 import data.character.CharacterBuckRogers;
@@ -74,25 +74,16 @@ public class PlayerDataFactory {
 			});
 	}
 
-	public Optional<Try<AbstractCharacter>> loadCharacter(int id) {
+	public Resource<? extends AbstractCharacter> loadCharacter(int id) {
 		switch (cfg.getCharacterFormat()) {
 			case BUCK_ROGERS:
-				return narrow(res.find(id, CharacterBuckRogers.class, MONCHA));
+				return res.find(id, CharacterBuckRogers.class, MONCHA);
 			case FORGOTTEN_REALMS:
-				return narrow(res.find(id, CharacterForgottenRealms.class, MONCHA));
+				return res.find(id, CharacterForgottenRealms.class, MONCHA);
 			case FORGOTTEN_REALMS_UNLIMITED:
-				return narrow(res.find(id, CharacterForgottenRealmsUnlimited.class, MONCHA));
+				return res.find(id, CharacterForgottenRealmsUnlimited.class, MONCHA);
 			default:
-				throw new IllegalArgumentException(UNKNOWN_CHARACTER_FORMAT + cfg.getCharacterFormat());
+				return Resource.of(new IllegalArgumentException(UNKNOWN_CHARACTER_FORMAT + cfg.getCharacterFormat()));
 		}
-	}
-
-	private <T extends AbstractCharacter> Optional<Try<AbstractCharacter>> narrow(Optional<Try<T>> value) {
-		return value.map(t -> {
-			if (t.isFailure()) {
-				return Try.failure(t.getCause());
-			}
-			return t.map(AbstractCharacter.class::cast);
-		});
 	}
 }

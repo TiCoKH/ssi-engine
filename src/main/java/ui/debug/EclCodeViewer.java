@@ -100,11 +100,8 @@ public class EclCodeViewer {
 				exec.execute(() -> {
 					sectionsCombo.setEnabled(false);
 					int blockid = blockCombo.getItemAt(selIndex);
-					res.find(blockid, EclProgram.class, ECL).ifPresentOrElse(t -> {
-						t.onFailure(throwable -> {
-						}).onSuccess(ecl -> createDisassembly(blockid, ecl));
-					}, () -> {
-					});
+					res.find(blockid, EclProgram.class, ECL)
+						.ifPresentAndSuccess(ecl -> createDisassembly(blockid, ecl));
 				});
 			}
 		});

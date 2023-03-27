@@ -1,7 +1,5 @@
 package data;
 
-import java.util.Optional;
-
 import javax.annotation.Nonnull;
 
 import io.vavr.collection.Array;
@@ -41,11 +39,10 @@ public class DAXFile extends ContentFile {
 	}
 
 	@Override
-	public <T extends Content> Optional<Try<T>> getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
-		return blocks.get(id)
+	public <T extends Content> Resource<T> getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
+		return Resource.of(blocks.get(id)
 			.map(b -> Try.of(() -> clazz.getConstructor(ByteBufferWrapper.class, ContentType.class)
-				.newInstance(b.rewind().slice(), type)))
-			.toJavaOptional();
+				.newInstance(b.rewind().slice(), type))));
 	}
 
 	@Override

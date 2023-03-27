@@ -57,6 +57,7 @@ import io.vavr.control.Try;
 
 import common.ByteBufferWrapper;
 import common.FileMap;
+import data.Resource;
 import data.ResourceLoader;
 import data.script.EclProgram;
 import engine.EngineConfiguration;
@@ -130,11 +131,13 @@ public class Decompiler {
 		final Set<Integer> ids = res.idsFor(ECL);
 		for (Integer id : ids) {
 			currentId = id;
-			res.find(id, EclProgram.class, ECL).ifPresentOrElse(t -> {
-				t.onFailure(throwable -> System.err.println("failure reading script " + id))
-					.onSuccess(e -> System.out.println(id))
-					.flatMap(eclCode -> Try.run(() -> start(gameDir, eclCode)));
-			}, () -> System.err.println("failure finding script " + id));
+			res.find(id, EclProgram.class, ECL)
+				.ifFailure(throwable -> System.err.println("failure reading script " + id))
+				.flatMap(eclCode -> {
+					System.out.println(id);
+					return Resource.of(Try.run(() -> start(gameDir, eclCode)));
+				})
+				.ifFailure(throwable -> System.err.println("failure decompiling script " + id));
 		}
 	}
 

@@ -27,7 +27,6 @@ import static shared.GameFeature.SPECIAL_CHARS_NOT_FROM_FONT;
 import static shared.MenuType.HORIZONTAL;
 
 import java.io.File;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,9 +35,9 @@ import javax.annotation.Nullable;
 
 import io.vavr.collection.Array;
 import io.vavr.collection.Seq;
-import io.vavr.control.Try;
 
 import common.FileMap;
+import data.Resource;
 import data.ResourceLoader;
 import data.character.AbstractCharacter;
 import data.dungeon.DungeonMap;
@@ -75,7 +74,7 @@ public class Engine implements EngineCallback, EngineStub {
 	private boolean showGameMenu = true;
 	private InputAction currentMenuItem;
 
-	private Optional<DungeonMap> currentMap = Optional.empty();
+	private Resource<? extends DungeonMap> currentMap = Resource.empty();
 	private VisibleWalls visibleWalls = new VisibleWalls();
 
 	private GoldboxStringPartFactory stringPartFactory;
@@ -170,9 +169,9 @@ public class Engine implements EngineCallback, EngineStub {
 	}
 
 	@Override
-	public Optional<Try<CharacterSheet>> readCharacter(int id) {
+	public Resource<CharacterSheet> readCharacter(int id) {
 		return getPlayerDataFactory().loadCharacter(id)
-			.map(t -> t.<CharacterSheet>map(ac -> new CharacterSheetImpl(cfg.getFlavor(), ac)));
+			.<CharacterSheet>map(ac -> new CharacterSheetImpl(cfg.getFlavor(), ac));
 	}
 
 	@Override
@@ -260,36 +259,33 @@ public class Engine implements EngineCallback, EngineStub {
 
 			delayCurrentThread();
 			final int currentECL = memory.getCurrentECL();
-			res.find(currentECL, EclProgram.class, ECL).ifPresent(t -> {
-				if (t.isFailure()) {
-					handleException(t.getCause());
-					return;
-				}
-				final EclProgram ecl = t.get();
-				vm.newEcl(ecl);
-				vm.startInit();
-				memory.setLastECL(currentECL);
-				if (abortCurrentThread) {
-					return;
-				}
-				updatePosition();
-				if (fromVM) {
-					vm.startMove();
+			res.find(currentECL, EclProgram.class, ECL) //
+				.ifFailure(this::handleException) //
+				.ifPresentAndSuccess(ecl -> {
+					vm.newEcl(ecl);
+					vm.startInit();
+					memory.setLastECL(currentECL);
 					if (abortCurrentThread) {
 						return;
 					}
 					updatePosition();
-					vm.startSearchLocation();
-					if (abortCurrentThread) {
-						return;
+					if (fromVM) {
+						vm.startMove();
+						if (abortCurrentThread) {
+							return;
+						}
+						updatePosition();
+						vm.startSearchLocation();
+						if (abortCurrentThread) {
+							return;
+						}
+						updatePosition();
 					}
-					updatePosition();
-				}
-				clearSprite();
-				this.currentMenuItem = null;
-				setShowGameMenu(true);
-				setInputStandard(null);
-			});
+					clearSprite();
+					this.currentMenuItem = null;
+					setShowGameMenu(true);
+					setInputStandard(null);
+				});
 		});
 	}
 
@@ -310,24 +306,14 @@ public class Engine implements EngineCallback, EngineStub {
 
 	private void loadDungeonMap(int id) {
 		if (cfg.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
-			currentMap = narrow(res.find(id, DungeonMap2.class, GEO));
+			currentMap = res.find(id, DungeonMap2.class, GEO);
 		} else {
-			currentMap = narrow(res.find(id, DungeonMap.class, GEO));
+			currentMap = res.find(id, DungeonMap.class, GEO);
 		}
 	}
 
-	private <T extends DungeonMap> Optional<DungeonMap> narrow(Optional<Try<T>> value) {
-		return value.flatMap(t -> {
-			if (t.isFailure()) {
-				handleException(t.getCause());
-				return Optional.empty();
-			}
-			return Optional.of(t.get());
-		});
-	}
-
 	public void cleaDungeonMap() {
-		currentMap = Optional.empty();
+		currentMap = Resource.empty();
 	}
 
 	@Override
@@ -374,12 +360,12 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void addNpc(int id) {
-		getPlayerDataFactory().loadCharacter(id)
-			.ifPresentOrElse(t -> t.map(npc -> new CharacterSheetImpl(cfg.getFlavor(), npc))
-				.onSuccess(memory::addPartyMember)
-				.onFailure(this::handleException), () -> {
-					System.err.println("Error: could not add NPC with id " + id + " to party");
-				});
+		getPlayerDataFactory().loadCharacter(id) //
+			.ifFailure(this::handleException) //
+			.ifPresentAndSuccess(npc -> {
+				CharacterSheetImpl cs = new CharacterSheetImpl(cfg.getFlavor(), npc);
+				memory.addPartyMember(cs);
+			});
 	}
 
 	@Override
@@ -487,7 +473,7 @@ public class Engine implements EngineCallback, EngineStub {
 
 	@Override
 	public void updatePosition() {
-		currentMap.ifPresent(m -> {
+		currentMap.ifPresentAndSuccess(m -> {
 			int x = memory.getDungeonX();
 			int y = memory.getDungeonY();
 			Direction d = memory.getDungeonDir();

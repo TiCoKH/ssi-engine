@@ -16,15 +16,14 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
 import io.vavr.collection.Array;
 import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
-import io.vavr.control.Try;
 
+import data.Resource;
 import data.dungeon.WallDef;
 import data.dungeon.WallDef.WallDistance;
 import data.dungeon.WallDef.WallPlacement;
@@ -51,7 +50,7 @@ public class DungeonWallSetBuilder {
 	}
 
 	@Nonnull
-	public Optional<Try<Seq<DungeonWall>>> build() {
+	public Resource<Seq<DungeonWall>> build() {
 		if (loader.idsFor(WALLDEF).isEmpty()) {
 			return buildWithoutWallDefs();
 		}
@@ -59,27 +58,21 @@ public class DungeonWallSetBuilder {
 	}
 
 	@Nonnull
-	public Optional<Try<Seq<DungeonWall>>> buildWithoutWallDefs() {
-		Optional<Try<Seq<DungeonWall>>> result = Optional.of(Try.of(Array::empty));
+	public Resource<Seq<DungeonWall>> buildWithoutWallDefs() {
+		Resource<Seq<DungeonWall>> result = Resource.of(Array.empty());
 		if (id1 != 127 && id1 != 255)
-			result = result.flatMap(t -> buildWithoutWallDefs(id1).map(t2 -> append(t, t2)));
+			result = result.flatMap(s -> buildWithoutWallDefs(id1).map(s::appendAll));
 		if (id2 != 127 && id2 != 255)
-			result = result.flatMap(t -> buildWithoutWallDefs(id2).map(t2 -> append(t, t2)));
+			result = result.flatMap(s -> buildWithoutWallDefs(id2).map(s::appendAll));
 		if (id3 != 127 && id3 != 255)
-			result = result.flatMap(t -> buildWithoutWallDefs(id3).map(t2 -> append(t, t2)));
+			result = result.flatMap(s -> buildWithoutWallDefs(id3).map(s::appendAll));
 
 		return result;
 	}
 
-	private Try<Seq<DungeonWall>> append(Try<Seq<DungeonWall>> t1, Try<Seq<DungeonWall>> t2) {
-		return t2.flatMap(seq2 -> {
-			return t1.map(seq1 -> seq1.appendAll(seq2));
-		});
-	}
-
 	@Nonnull
-	public Optional<Try<Seq<DungeonWall>>> buildWithoutWallDefs(int id) {
-		return loader.findImage(id, _8X8D).map(t -> t.map(ic -> {
+	public Resource<Seq<DungeonWall>> buildWithoutWallDefs(int id) {
+		return loader.findImage(id, _8X8D).map(ic -> {
 			final Seq<BufferedImage> wallParts = ic.toSeq();
 
 			final Seq<BufferedImage> wall1 = wallParts.subSequence(0, 10);
@@ -91,7 +84,7 @@ public class DungeonWallSetBuilder {
 
 			return Array.of(buildWall(wall1, null), buildWall(wall2, null), buildWall(wall1, decal1),
 				buildWall(wall1, decal2), buildWall(wall1, decal3));
-		}));
+		});
 	}
 
 	@Nonnull
@@ -136,39 +129,25 @@ public class DungeonWallSetBuilder {
 	}
 
 	@Nonnull
-	public Optional<Try<Seq<DungeonWall>>> buildUsingWallDefs() {
-		final int wallDefId1 = replaceId1() ? 0 : id1;
-		final int wallDefId2 = replaceId2() ? wallDefId1 : id2;
-		final int wallDefId3 = replaceId3() ? (id2 == 255 ? wallDefId1 : wallDefId2) : id3;
-		Optional<Try<Seq<DungeonWall>>> result = appendMoreWalls(wallDefId1, Array.empty(), 0);
+	public Resource<Seq<DungeonWall>> buildUsingWallDefs() {
+		final int wallDefId1 = wallDef1();
+		final int wallDefId2 = wallDef2();
+		final int wallDefId3 = wallDef3();
+		Resource<Seq<DungeonWall>> result = appendMoreWalls(wallDefId1, Array.empty(), wallStart1());
 		if (id2 != 255) {
-			result = result.flatMap(t -> {
-				if (t.isFailure()) {
-					return Optional.of(t);
-				}
-				return appendMoreWalls(wallDefId2, t.get(), replaceId2() ? 5 : 0);
-			});
+			result = result.flatMap(seq -> appendMoreWalls(wallDefId2, seq, wallStart2()));
 		}
 		if (id3 != 255) {
-			result = result.flatMap(t -> {
-				if (t.isFailure()) {
-					return Optional.of(t);
-				}
-				return appendMoreWalls(wallDefId3, t.get(), replaceId3() ? (id2 == 127 ? 10 : 5) : 0);
-			});
+			result = result.flatMap(seq -> appendMoreWalls(wallDefId3, seq, wallStart3()));
 		}
 		return result;
 	}
 
-	private Optional<Try<Seq<DungeonWall>>> appendMoreWalls(int id, Seq<DungeonWall> walls, int wallStart) {
-		return loader.find(id, WallDef.class, WALLDEF).flatMap(t -> {
-			if (t.isFailure()) {
-				return Optional.of(Try.failure(t.getCause()));
-			}
-			final WallDef wallDef = t.get();
-			return buildWallSymbolListFor(id, wallDef.getWallCount() > 5).map(t2 -> t2.map(wallSymbols -> {
+	private Resource<Seq<DungeonWall>> appendMoreWalls(int id, Seq<DungeonWall> walls, int wallStart) {
+		return loader.find(id, WallDef.class, WALLDEF).flatMap(wallDef -> {
+			return buildWallSymbolListFor(id, wallDef.getWallCount() > 5).map(wallSymbols -> {
 				return walls.appendAll(buildDungeonWallSetPart(wallDef, wallSymbols, wallStart));
-			}));
+			});
 		});
 	}
 
@@ -208,19 +187,18 @@ public class DungeonWallSetBuilder {
 		return result;
 	}
 
-	private Optional<Try<Seq<BufferedImage>>> buildWallSymbolListFor(int id, boolean additionalSymbols) {
-		final Optional<Try<ImageContent>> symbols = loader.find8x8d(id, id);
-		if (symbols.isPresent()) {
-			final Try<ImageContent> t = symbols.get();
-			if (t.isFailure()) {
-				return Optional.of(Try.failure(t.getCause()));
-			}
-			final ImageContent ic = t.get();
+	private Resource<Seq<BufferedImage>> buildWallSymbolListFor(int id, boolean additionalSymbols) {
+		final Resource<? extends ImageContent> symbols = loader.find8x8d(id, id);
+		if (symbols.isFailure()) {
+			return symbols.<Seq<BufferedImage>>map(Seq.class::cast);
+		}
+		if (symbols.isPresentAndSuccess()) {
+			final ImageContent ic = symbols.get();
 			if (ic.size() == 255) {
-				return Optional.of(Try.success(Array.of(createTransparentSymbol()).appendAll(ic.toSeq())));
+				return Resource.of(Array.of(createTransparentSymbol()).appendAll(ic.toSeq()));
 			}
 			if (ic.size() > 255) {
-				return Optional.of(Try.success(ic.toSeq()));
+				return Resource.of(ic.toSeq());
 			}
 			return buildWallSymbolListFor(id, ic.toSeq(), additionalSymbols);
 		} else {
@@ -228,43 +206,35 @@ public class DungeonWallSetBuilder {
 		}
 	}
 
-	private Optional<Try<Seq<BufferedImage>>> buildWallSymbolListFor(int id, Seq<BufferedImage> symbols,
+	private Resource<Seq<BufferedImage>> buildWallSymbolListFor(int id, Seq<BufferedImage> symbols,
 		boolean additionalSymbols) {
 
-		return loader.findImage(203, _8X8D).map(t -> {
-			return t.<Seq<BufferedImage>>map(sharedSymbols -> Array.of(createTransparentSymbol())
+		return loader.findImage(203, _8X8D)
+			.map(sharedSymbols -> Array.of(createTransparentSymbol())
 				.appendAll(sharedSymbols.toSeq())
-				.appendAll(symbols));
-		}).flatMap(t -> {
-			if (additionalSymbols && t.isSuccess()) {
-				return appendAdditionalWallSymbolList(id, t.get());
-			}
-			return Optional.of(t);
-		});
+				.appendAll(symbols))
+			.flatMap(seq -> {
+				if (additionalSymbols) {
+					return appendAdditionalWallSymbolList(id, seq);
+				}
+				return Resource.of(seq);
+			});
 	}
 
-	private Optional<Try<Seq<BufferedImage>>> appendAdditionalWallSymbolList(int id, Seq<BufferedImage> symbols) {
-
+	private Resource<Seq<BufferedImage>> appendAdditionalWallSymbolList(int id, Seq<BufferedImage> symbols) {
 		final int addSymbolsIdBase = 10 * (id == 0 ? 10 : id);
 
-		Optional<Try<Seq<BufferedImage>>> result = Optional.of(Try.success(symbols));
+		Resource<Seq<BufferedImage>> result = Resource.of(symbols);
 		result = appendAdditional(addSymbolsIdBase + 1, id, result);
 		result = appendAdditional(addSymbolsIdBase + 2, id, result);
 		result = appendAdditional(addSymbolsIdBase + 3, id, result);
 		return result;
 	}
 
-	private Optional<Try<Seq<BufferedImage>>> appendAdditional(int id, int wallDefId,
-		Optional<Try<Seq<BufferedImage>>> symbols) {
-
+	private Resource<Seq<BufferedImage>> appendAdditional(int id, int wallDefId, Resource<Seq<BufferedImage>> symbols) {
 		if (loader.idsFor(_8X8D).contains(id)) {
-			return symbols.flatMap(t -> {
-				if (t.isFailure()) {
-					return symbols;
-				}
-				return loader.find8x8d(id, wallDefId).map(t2 -> t2.map(ic -> {
-					return t.get().appendAll(ic.toSeq());
-				}));
+			return symbols.flatMap(seq -> {
+				return loader.find8x8d(id, wallDefId).map(ic -> seq.appendAll(ic.toSeq()));
 			});
 		}
 		return symbols;
@@ -290,5 +260,29 @@ public class DungeonWallSetBuilder {
 
 	private boolean replaceId3() {
 		return id3 == 127 || !loader.idsFor(WALLDEF).contains(id3);
+	}
+
+	private int wallDef1() {
+		return replaceId1() ? 0 : id1;
+	}
+
+	private int wallDef2() {
+		return replaceId2() ? wallDef1() : id2;
+	}
+
+	private int wallDef3() {
+		return replaceId3() ? (id2 == 255 ? wallDef1() : wallDef2()) : id3;
+	}
+
+	private int wallStart1() {
+		return 0;
+	}
+
+	private int wallStart2() {
+		return replaceId2() ? 5 : 0;
+	}
+
+	private int wallStart3() {
+		return replaceId3() ? (id2 == 127 ? 10 : 5) : 0;
 	}
 }

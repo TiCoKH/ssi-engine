@@ -26,8 +26,8 @@ import io.vavr.Tuple2;
 import io.vavr.collection.Array;
 import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
-import io.vavr.control.Try;
 
+import data.Resource;
 import data.dungeon.WallDef.WallDistance;
 import data.dungeon.WallDef.WallPlacement;
 import data.image.ImageContent;
@@ -75,18 +75,9 @@ public class UIResourceManager {
 		this.excHandler = excHandler;
 		this.scaler = new UIScaler(settings);
 
-		this.originalFont = loader.getFont()
-			.orElseThrow()
-			.onFailure(t -> excHandler.handleException("Loading font", t))
-			.get();
-		this.originalMisc = loader.getMisc()
-			.orElseThrow()
-			.onFailure(t -> excHandler.handleException("Loading misc", t))
-			.get();
-		this.originalFrames = loader.getFrames()
-			.orElseThrow()
-			.onFailure(t -> excHandler.handleException("Loading frames", t))
-			.get();
+		this.originalFont = loader.getFont().ifFailure(t -> excHandler.handleException("Loading font", t)).get();
+		this.originalMisc = loader.getMisc().ifFailure(t -> excHandler.handleException("Loading misc", t)).get();
+		this.originalFrames = loader.getFrames().ifFailure(t -> excHandler.handleException("Loading frames", t)).get();
 	}
 
 	@Nonnull
@@ -150,9 +141,10 @@ public class UIResourceManager {
 	}
 
 	private Seq<BufferedImage> createOverlandCursor() {
-		return loader.getOverlandCursor().map(t -> t.onFailure(throwable -> {
-			excHandler.handleException("Error reading the overland cursor", throwable);
-		}).map(this::scale).getOrElse(this::createDefaultOverlandCursor)).orElseGet(this::createDefaultOverlandCursor);
+		return loader.getOverlandCursor()
+			.ifFailure(t -> excHandler.handleException("Error reading the overland cursor", t))
+			.map(this::scale)
+			.getOrElse(this::createDefaultOverlandCursor);
 	}
 
 	private Seq<BufferedImage> createDefaultOverlandCursor() {
@@ -169,28 +161,24 @@ public class UIResourceManager {
 	}
 
 	private Seq<BufferedImage> createImageResource(ImageResource r) {
-		if (r instanceof ImageCompositeResource) {
-			ImageCompositeResource cr = (ImageCompositeResource) r;
-
+		if (r instanceof ImageCompositeResource cr) {
 			final Seq<Tuple2<Point, Seq<BufferedImage>>> images = range(0, cr.getLength()).map(i -> {
 				final Point offset = cr.getOffset(i);
-				final Seq<BufferedImage> img = loadImageResource(cr.get(i)) //
-					.map(t -> toSeq(r, t))
-					.orElseGet(this::getBrokenList);
+				final Seq<BufferedImage> img = loadImageResource(cr.get(i))
+					.ifFailure(t -> excHandler.handleException("could not load " + r, t))
+					.map(ImageContent::toSeq)
+					.getOrElse(this::getBrokenList);
 				return new Tuple2<>(offset, img);
 			});
 			return Array.of(scaler.scaleComposite(cr.getType(), images.flatMap(Tuple2::_2), images.map(Tuple2::_1)));
 		}
-		return loadImageResource(r).map(t -> toSeq(r, t).map(scaler::scale)).orElseGet(this::getBrokenList);
-	}
-
-	private Seq<BufferedImage> toSeq(ImageResource r, Try<ImageContent> t) {
-		return t.onFailure(throwable -> excHandler.handleException("could not load " + r, throwable)) //
+		return loadImageResource(r).ifFailure(t -> excHandler.handleException("could not load " + r, t))
 			.map(ImageContent::toSeq)
+			.map(seq -> seq.map(scaler::scale))
 			.getOrElse(this::getBrokenList);
 	}
 
-	private Optional<Try<ImageContent>> loadImageResource(ImageResource r) {
+	private Resource<? extends ImageContent> loadImageResource(ImageResource r) {
 		final Optional<String> fn = r.getFilename();
 		if (fn.isPresent()) {
 			return loader.load(fn.get(), r.getId(), r.getType());
@@ -230,10 +218,9 @@ public class UIResourceManager {
 			.ifPresentOrElse(res -> builder.withWMapDecoIds(res.getIds()[0], res.getIds()[1], res.getIds()[2]),
 				builder::withoutMapDecoIds);
 		return builder.build()
-			.map(t -> t.onFailure(throwable -> excHandler.handleException("could not create map image", throwable))
-				.map(scaler::scale)
-				.getOrElse(this::getBroken))
-			.orElseGet(this::getBroken);
+			.ifFailure(t -> excHandler.handleException("could not create map image", t))
+			.map(scaler::scale)
+			.getOrElse(this::getBroken);
 	}
 
 	@Nonnull
@@ -265,10 +252,8 @@ public class UIResourceManager {
 		final DungeonWallSetBuilder builder = new DungeonWallSetBuilder(loader);
 		return builder.withWallDecoIds(r.getIds()[0], r.getIds()[1], r.getIds()[2])
 			.build()
-			.map(t -> t.onFailure(
-				throwable -> excHandler.handleException("could not create original walls for " + r.getIds(), throwable))
-				.getOrElse(API::Seq))
-			.orElseGet(API::Seq);
+			.ifFailure(t -> excHandler.handleException("could not create original walls for " + r.getIds(), t))
+			.getOrElse(API::Seq);
 	}
 
 	private DungeonWall scale(DungeonWall originalWall) {

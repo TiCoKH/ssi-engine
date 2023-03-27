@@ -20,7 +20,6 @@ import static shared.GameFeature.OVERLAND_DUNGEON;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
@@ -34,11 +33,11 @@ import javax.swing.tree.TreeNode;
 import io.vavr.Tuple2;
 import io.vavr.collection.Set;
 import io.vavr.collection.SortedSet;
-import io.vavr.control.Try;
 
 import common.FileMap;
 import data.ContentFile;
 import data.ContentType;
+import data.Resource;
 import data.dungeon.DungeonMap;
 import data.dungeon.DungeonMap2;
 import shared.EngineStub;
@@ -205,16 +204,17 @@ public class ResourceViewer {
 	private void initGeoChildren(MutableTreeNode root) {
 		final MutableTreeNode parent = new DefaultMutableTreeNode(GEO.name());
 		loader.idsFor(GEO).toArray().map(id -> {
-			Optional<DungeonMap> dungeon;
+			Resource<? extends DungeonMap> dungeon;
 			if (config.isUsingFeature(FLEXIBLE_DUNGEON_SIZE)) {
-				dungeon = narrow(loader.find(id, DungeonMap2.class, GEO));
+				dungeon = loader.find(id, DungeonMap2.class, GEO);
 			} else {
-				dungeon = narrow(loader.find(id, DungeonMap.class, GEO));
+				dungeon = loader.find(id, DungeonMap.class, GEO);
 			}
+			dungeon.ifFailure(this::handleException);
 			return new Tuple2<>(id, dungeon);
-		}).filter(t2 -> t2._2.isPresent()).map(t2 -> new Tuple2<>(t2._1, t2._2.get())).map(t2 -> {
+		}).filter(t2 -> t2._2.isPresentAndSuccess()).map(t2 -> {
 			final int id = t2._1;
-			final DungeonMap dungeon = t2._2;
+			final DungeonMap dungeon = t2._2.get();
 			if (config.isUsingFeature(OVERLAND_DUNGEON) && id >= 21 && id <= 26)
 				return new DefaultMutableTreeNode( //
 					new DungeonMapResource(dungeon.generateOverlandMap(), //
@@ -224,16 +224,6 @@ public class ResourceViewer {
 					new DungeonResource(id), dungeon.getSquareInfos()));
 		}).forEach(node -> parent.insert(node, parent.getChildCount()));
 		root.insert(parent, root.getChildCount());
-	}
-
-	private <T extends DungeonMap> Optional<DungeonMap> narrow(Optional<Try<T>> value) {
-		return value.flatMap(t -> {
-			if (t.isFailure()) {
-				handleException(t.getCause());
-				return Optional.empty();
-			}
-			return Optional.of(t.get());
-		});
 	}
 
 	private void handleException(Throwable t) {

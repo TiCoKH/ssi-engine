@@ -1,9 +1,6 @@
 package shared;
 
-import java.util.Optional;
-
-import io.vavr.control.Try;
-
+import data.Resource;
 import shared.party.CharacterSheet;
 
 public interface EngineStub {
@@ -25,5 +22,5 @@ public interface EngineStub {
 
 	void handleInput(String input);
 
-	Optional<Try<CharacterSheet>> readCharacter(int id);
+	Resource<CharacterSheet> readCharacter(int id);
 }

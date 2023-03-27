@@ -19,7 +19,7 @@ public class MonocromeSymbolsTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/8X8D1.DAX");
 		Assume.assumeTrue(f.exists());
 		ContentFile symbols = ContentFile.create(f).get();
-		MonocromeSymbols ms = symbols.getById(201, MonocromeSymbols.class, ContentType._8X8D).get().get();
+		MonocromeSymbols ms = symbols.getById(201, MonocromeSymbols.class, ContentType._8X8D).get();
 		assertThat(ms.size(), is(256));
 	}
 

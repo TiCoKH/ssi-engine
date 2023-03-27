@@ -19,7 +19,7 @@ public class VGAImageTest {
 		File f = new File("/mnt/daten/SSI/BUCK11_0.EN/BIGPIC1.DAX");
 		Assume.assumeTrue(f.exists());
 		ContentFile bigpic1 = ContentFile.create(f).get();
-		VGAImage ramAttack = bigpic1.getById(120, VGAImage.class, ContentType.BIGPIC).get().get();
+		VGAImage ramAttack = bigpic1.getById(120, VGAImage.class, ContentType.BIGPIC).get();
 		assertThat(ramAttack.size(), is(1));
 	}
 }

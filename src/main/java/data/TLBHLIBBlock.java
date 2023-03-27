@@ -2,8 +2,6 @@ package data;
 
 import static data.TLBHLIBBlock.TLBBlockType.HLIB;
 
-import java.util.Optional;
-
 import javax.annotation.Nonnull;
 
 import io.vavr.Tuple2;
@@ -54,17 +52,17 @@ public class TLBHLIBBlock {
 		}).getOrElse(Array::empty);
 	}
 
-	public <T extends Content> Optional<Try<T>> getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
+	public <T extends Content> Resource<T> getById(int id, @Nonnull Class<T> clazz, @Nonnull ContentType type) {
 		if (!hasBlockIds()) {
-			return Optional.of(createInstance(clazz, LIST_ARGUMENT, blocks, type));
+			return Resource.of(createInstance(clazz, LIST_ARGUMENT, blocks, type));
 		}
-		return header.mapping.get(id).map(index -> {
+		return Resource.of(header.mapping.get(id).map(index -> {
 			final ByteBufferWrapper data = blocks.get(index).rewind().slice();
 			if (getContentType() == HLIB) {
 				return createInstance(clazz, LIST_ARGUMENT, TLBHLIBBlock.readFrom(data).blocks, type);
 			}
 			return createInstance(clazz, DATA_ARGUMENT, data, type);
-		}).toJavaOptional();
+		}));
 	}
 
 	private <T extends Content> Try<T> createInstance(Class<T> clazz, Class<?>[] argument, Object... value) {
