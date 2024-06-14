@@ -30,14 +30,31 @@ public class GameResourceConfiguration {
 	}
 
 	private void findConfig() throws Exception {
-		File cp = new File(ClassLoader.getSystemResource(".").toURI());
-		String[] propFiles = cp.list((dir, name) -> name.endsWith(".properties"));
+		String[] propFiles = {
+			"Pool of Radiance.properties",
+			"Curse of the Azure Bonds.properties",
+			"Treasures of the Savage Frontier.properties",
+			"Pools of Darkness.properties",
+			"Neverwinter Nights.properties",
+			"Gateway to the Savage Frontier.properties",
+			"Treasures of the Savage Frontier.properties",
+			"Champions of Krynn.properties",
+			"Death Knights of Krynn.properties",
+			"The Dark Queen of Krynn.properties",
+			"Buck Rogers - Countdown to Doomsday.properties",
+			"Buck Rogers - Matrix Cubed.properties",
+			"Forgotten Realm Unlimited Adventures.properties"
+			// Add other properties files here
+		};
 
 		for (String filename : propFiles) {
 			String game = filename.replace(".properties", "");
 
 			Properties props = new Properties();
 			try (InputStream in = ClassLoader.getSystemResourceAsStream(filename)) {
+				if (in == null) {
+					continue;  // Skip if the file is not found
+				}
 				props.load(in);
 			}
 
